@@ -16,6 +16,7 @@
     "@types/node": "^16.11.19",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
+    "axios": "^0.25.0",
     "jss-rtl": "^0.3.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -35,7 +36,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "openapi": "openapi-generator-cli generate -i ./src/Api/openapi.json -g typescript-axios -o ./Api/generated --skip-validate-spec --additional-properties=apiPackage=api,modelPackage=models,withSeparateModelsAndApi=true,supportsES6=true"
   },
   "eslintConfig": {
     "extends": [
@@ -56,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.4.25",
     "@types/jsonwebtoken": "^8.5.7",
     "@types/react-helmet": "^6.1.5",
     "@types/redux-logger": "^3.0.9"

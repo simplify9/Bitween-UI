@@ -12,6 +12,7 @@ import CookiesManager from "../../../Utils/CookiesManager";
 //import AuthClient from "../../../Api/AuthClient";
 import {useDispatch} from "react-redux";
 import {SetProfile} from "../../../State/Actions/ProfileActions";
+import  * as api from "../../../api/generated";
 
 const Component = () => {
     const classes = useStyles();
@@ -23,7 +24,8 @@ const Component = () => {
     //let client = new AuthClient();
     const dispatch = useDispatch();
     const onLogin = async () => {
-
+        let apiDoc = new api.DocumentsApi();
+//        const f = res.data.Result;
         // let res = await client.LoginAsync(username, password);
         // if (res.succeeded) {
         //     dispatch(SetProfile(res.data.jwt))
