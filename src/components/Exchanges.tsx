@@ -1,12 +1,18 @@
-
+import { useState } from "react";
+import { DateTimeRangeInput, DateTimeRange } from "./common/forms/DateTimeRangeInput";
+import FormField from "./common/forms/FormField";
+import Input from "./common/forms/Input";
+import InputBox from "./common/forms/InputBox";
 
 
 interface Props {
 
 }
 
-
 const Component = (props:Props) => {
+
+    const [dateRange, setDateRange] = useState<DateTimeRange>({ from: undefined, to: undefined })
+
     return (
         <div className="flex flex-col w-full px-8 py-4">
             <div className="justify-between w-full flex py-4">
@@ -23,49 +29,23 @@ const Component = (props:Props) => {
             <form className="flex w-full px-4 py-8">
                 <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4">
 
-                    
-                    
-                    <label className="mb-6 md:mb-0">
-                        <div className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                            Target Subscription
-                        </div>
-                        <div className="relative group py-2 px-4 focus-within:shadow-teal-100 focus-within:shadow-md flexborder border-gray-300 border rounded shadow-sm">
-                            <input className="appearance-none block grow text-gray-700 focus:outline-none" type="text" placeholder="Select Subscription" />
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                            </div>
-                        </div>
-                    </label>
+                    <FormField title="Target Subscription">
+                        <InputBox>
+                            <Input type="text" placeholder="Select Subscription" />
+                        </InputBox>
+                    </FormField>
 
-                    <label className="mb-6 md:mb-0">
-                        <div className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                            Delivery Status
-                        </div>
-                        <input className="appearance-none block w-full text-gray-700 border border-gray-300 rounded py-2 px-4 focus:outline-none focus:bg-white shadow-sm focus:shadow-teal-100 focus:shadow-md" type="text" placeholder="Select Status" />
-                    </label>
+                    <FormField title="Delivery Status">
+                         <InputBox>
+                            <Input type="text" placeholder="Select Status" />
+                        </InputBox>
+                    </FormField>
 
-                    <label className="mb-6 md:mb-0">
-                        <div className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                            Creation Time Window
-                        </div>
+                    <FormField title="Creation Time Window">
+                        <DateTimeRangeInput value={dateRange} onChange={setDateRange} />
+                    </FormField>
 
-                        <div className="relative group py-2 px-4 focus-within:shadow-teal-100 focus-within:shadow-md  border-gray-300 border rounded shadow-sm overflow-visible">
-                            <div className="flex flex-nowrap">
-                                <div className="text-gray-400 px-2">From</div>
-                                <input className="appearance-none block grow text-gray-700 focus:outline-none" type="text" placeholder="DD/MM/YYYY" />
-                                <div className="text-gray-400 px-2">To</div>
-                                <input className="appearance-none block grow text-gray-700 focus:outline-none" type="text" placeholder="DD/MM/YYYY" />
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                </div>
-                            </div>
-                            <div className="absolute top-full left-0 right-0" style={{ "minHeight": 80 }}>
-
-                            </div>
-                        </div>
-                    </label>
-
-                    <button type="submit" className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded shadow-md focus:outline-none">Find</button>
+                    <button type="submit" className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">Find</button>
                 </div>
             </form>
         </div>
