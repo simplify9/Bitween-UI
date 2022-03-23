@@ -4,13 +4,13 @@ import Calendar from "./calendar/Calendar";
 import Input from "./Input";
 import InputBox from "./InputBox";
 import InputPopOver from "./InputPopOver";
+import { noOp } from "./utils";
 
 
 export type DateTimeRange = {
     from?: string
     to?: string
 }
-
 
 interface CalendarState {
     month: number
@@ -44,8 +44,7 @@ const getCalendarValue = (rawValue:string | undefined, dateTimeFormat: string) =
     return undefined;
 }
 
-
-export const DateTimeRangeInput:React.FC<Props> = ({ value = {}, onChange, dateTimeFormat = "dd-MM-yyyy" }) => {
+export const DateTimeRangeEditor:React.FC<Props> = ({ value = {}, onChange = noOp, dateTimeFormat = "dd-MM-yyyy" }) => {
 
     const { from, to } = value;
     
@@ -83,19 +82,19 @@ export const DateTimeRangeInput:React.FC<Props> = ({ value = {}, onChange, dateT
     }
 
     const handleTextBoxFromChange = (e:any) => {
-        if (onChange) onChange({ from: e.target.value, to });
+        onChange({ from: e.target.value, to });
     }
 
     const handleTextBoxToChange = (e:any) => {
-        if (onChange) onChange({ from, to: e.target.value });
+        onChange({ from, to: e.target.value });
     }
 
     const handleCalendarFromChange = (date:Date) => {
-        if (onChange) onChange({ from: format(date, dateTimeFormat), to });
+        onChange({ from: format(date, dateTimeFormat), to });
     }
 
     const handleCalendarToChange = (date:Date) => {
-        if (onChange) onChange({ from, to: format(date, dateTimeFormat) });
+        onChange({ from, to: format(date, dateTimeFormat) });
     }
 
     return (

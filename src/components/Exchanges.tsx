@@ -1,8 +1,17 @@
 import { useState } from "react";
-import { DateTimeRangeInput, DateTimeRange } from "./common/forms/DateTimeRangeInput";
+import { DateTimeRangeEditor, DateTimeRange } from "./common/forms/DateTimeRangeEditor";
+import { ChoiceEditor } from "./common/forms/ChoiceEditor";
 import FormField from "./common/forms/FormField";
 import Input from "./common/forms/Input";
 import InputBox from "./common/forms/InputBox";
+import TabNavigator from "./common/forms/TabNavigator";
+import Tab from "./common/forms/Tab";
+
+
+type DeliveryStatus = {
+    id:string
+    title:string
+}
 
 
 interface Props {
@@ -11,7 +20,8 @@ interface Props {
 
 const Component = (props:Props) => {
 
-    const [dateRange, setDateRange] = useState<DateTimeRange>({ from: undefined, to: undefined })
+    const [deliveryStatus, setDeliveryStatus] = useState<string | undefined>();
+    const [dateRange, setDateRange] = useState<DateTimeRange>({ });
 
     return (
         <div className="flex flex-col w-full px-8 py-4">
@@ -21,11 +31,11 @@ const Component = (props:Props) => {
                     Create New Exchange
                 </button>
             </div>
-            <div className="flex w-full shadow-b-2 shadow-gray-200">
-                <label className="first:ml-0 ml-4 py-1 text-sm font-light text-gray-400 hover:text-gray-500  hover:shadow-b-2 hover:shadow-gray-400 cursor-pointer">Keyword Search</label>
-                <label className="first:ml-0 ml-4 py-1 text-sm font-medium shadow-b-2 shadow-teal-500 cursor-default">Find By</label>
-                <label className="first:ml-0 ml-4 py-1 text-sm font-light text-gray-400 hover:text-gray-500  hover:shadow-b-2 hover:shadow-gray-400 cursor-pointer">Advanced Search</label>
-            </div>
+            <TabNavigator>
+                <Tab>Keyword Search</Tab>
+                <Tab selected>Find By</Tab>
+                <Tab>Advanced Search</Tab>
+            </TabNavigator>
             <form className="flex w-full px-4 py-8">
                 <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4">
 
@@ -36,13 +46,23 @@ const Component = (props:Props) => {
                     </FormField>
 
                     <FormField title="Delivery Status">
-                         <InputBox>
-                            <Input type="text" placeholder="Select Status" />
-                        </InputBox>
+                        <ChoiceEditor 
+                            placeholder="Select Status" 
+                            value={deliveryStatus} 
+                            onChange={setDeliveryStatus}
+                            optionTitle={(item:DeliveryStatus) => item.title}
+                            optionValue={(item:DeliveryStatus) => item.id}
+                            options={[
+                                { id: "received", title: "Received" }, 
+                                { id: "mapped", title: "Mapped" },
+                                { id: "delivered", title: "Delivered"},
+                                { id: "failed", title: "Failed" } 
+                            ]} />
+                            
                     </FormField>
 
                     <FormField title="Creation Time Window">
-                        <DateTimeRangeInput value={dateRange} onChange={setDateRange} />
+                        <DateTimeRangeEditor value={dateRange} onChange={setDateRange} />
                     </FormField>
 
                     <button type="submit" className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">Find</button>

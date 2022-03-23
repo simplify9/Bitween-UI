@@ -4,10 +4,10 @@ type Props = JSX.IntrinsicElements['button'] & {
     
 }
 
-const Component:React.FC<Props> = ({ className, children, ...htmlProps }) => {
+const Component:React.FC<Props> = ({ className = "", children, ...htmlProps }) => {
 
     return (
-        <button {...htmlProps} className={classes("", className || "")}>
+        <button {...htmlProps} className={classes("", className)}>
             {children}
         </button>
     )
