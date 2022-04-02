@@ -6,7 +6,7 @@ type Props = JSX.IntrinsicElements['div'] & {
 }
 
 const ownCss = (withPopOver: boolean) => (
-    `flex flex-nowrap relative bg-white group py-2 px-4 focus-within:drop-shadow-lg border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && "focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
+    `flex flex-nowrap relative bg-white group py-2 px-4 focus-within:drop-shadow-lg border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && "z-20 focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
 );
 
 const Component:React.FC<Props> = ({ withPopOver, children, className, ...htmlProps }) => (

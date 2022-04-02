@@ -98,7 +98,7 @@ export const DateTimeRangeEditor:React.FC<Props> = ({ value = {}, onChange = noO
     }
 
     return (
-        <InputBox withPopOver onFocus={handleFocus}>
+        <InputBox className="hidden md:flex" withPopOver onFocus={handleFocus}>
                             
             <div className="text-gray-400 px-2">From</div>
             <Input type="text" placeholder="dd-mm-yyyy" value={from || ""} onChange={handleTextBoxFromChange} />

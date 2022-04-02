@@ -1,9 +1,0 @@
-
-interface Props {
-    
-}
-
-
-export default () => {
-
-}
