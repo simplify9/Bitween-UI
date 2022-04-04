@@ -202,8 +202,61 @@ function denormalizeArray<TModel extends EntityModel>(model: TModel, db:EntityDb
 
 type NormalizeResult<TModel extends EntityModel,T> = [MayBe<T>,EntityDb<TModel>];
 
-function merge<TModel extends EntityModel,TMergeName extends keyof TModel>(left:EntityDb<TModel>, right: EntityDb<TModel>):EntityDb<TModel> {
-    throw "not implemented";
+export const uniqueEntityRefs = <TModel extends EntityModel>(entities:EntityDb<TModel>) => {
+    let unique:EntityRefCollection = { }
+    for (const type in entities) {
+        unique[type] = unique[type] || { };
+        for (const key in entities[type]) {
+            unique[type][key] = true
+        }
+    }
+    return unique;
+}
+
+export const mergeEntityRefs = (...refs:EntityRefCollection[]) => {
+    let combined:EntityRefCollection = { }
+    for (const ref of refs) {
+        for (const toAdd in ref) {
+            combined[toAdd] = {
+                ...combined[toAdd],
+                ...ref[toAdd]
+            }
+        }
+    }
+    return combined;
+}
+
+export const removeEntities = <TModel extends EntityModel>(db:EntityDb<TModel>, refs:EntityRefCollection):EntityDb<TModel> => {
+    let dbNew:EntityDb<TModel> = { };
+    for (const type in db) {
+        dbNew[type] = { };
+        
+        for (const key in db[type]) {
+            if (!(type in refs) || !(key in refs[type])) {
+                dbNew[type]![key] = db![type]![key];
+            }
+        }
+    }
+    return dbNew;
+}
+
+export function mergeEntities<TModel extends EntityModel>(left:EntityDb<TModel>, right: EntityDb<TModel>):EntityDb<TModel> {
+    let dbNew:EntityDb<TModel> = { };
+    for (const type in left) {
+        dbNew[type] = dbNew[type] || { };
+        for (const key in left[type]) {
+            (dbNew[type] as any)[key] = { ...(left[type] as any)[key] };
+        }
+    }
+
+    for (const type in right) {
+        dbNew[type] = dbNew[type] || { };
+        for (const key in right[type]) {
+            (dbNew[type] as any)[key] = { ...(dbNew[type] as any)[key], ...(right[type]as any)[key] };
+        }
+    }
+
+    return dbNew;
 }
 
 const normalized = <TModel extends EntityModel,T>(model: TModel, value: T, db:EntityDb<TModel> = {}):NormalizeResult<TModel,T> => [value, db]
@@ -239,11 +292,14 @@ function normalizeRef<TModel extends EntityModel,TName extends keyof TModel>(mod
     if (Array.isArray(data)) throw "Expected instance of object";
     const def = model[schema.target];
     let db:EntityDb<TModel> = { };
+    let normalizedMap:Record<string,MayBe<AllData>> = {};
     for (const prop in def.props) {
-        const [_, dbFromProp] = normalize(model, data[prop], def.props[prop] as CqSchema<TModel>);
-        db = merge(db, dbFromProp);
+        const [nValue, dbFromProp] = normalize(model, data[prop], def.props[prop] as CqSchema<TModel>);
+        normalizedMap[prop] = nValue;
+        db = mergeEntities(db, dbFromProp);
     }
-    return normalized(model, data[def.keyProp], db);
+    
+    return normalized(model, data[def.keyProp], { ...db, [schema.target]: { [data[def.keyProp] as string]: normalizedMap } });
 }
 
 export function normalizeArray<TModel extends EntityModel>(model: TModel, data:MayBe<AllData>, schema:CqDataType<TModel>) {
@@ -253,7 +309,7 @@ export function normalizeArray<TModel extends EntityModel>(model: TModel, data:M
     let db = { }
     for (const item of data) {
         const [value, dbFromValue] = normalize(model, item, schema);
-        db = merge(db, dbFromValue);
+        db = mergeEntities(db, dbFromValue);
         if (value !== null && value !== undefined) values.push(value);
     }
     return normalized(model, values, db);

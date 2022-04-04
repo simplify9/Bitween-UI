@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useExchangeFinder } from "../domain/queries";
 import { DataListViewSettingsEditor, DataListViewSettings } from "./common/DataListViewSettingsEditor";
 import { ExchangeFinderPanel, ExchangeSpecs } from "./exchanges/ExchangeFinderPanel";
 import { ExchangeList } from "./exchanges/ExchangeList";
@@ -9,6 +10,9 @@ interface Props {
 }
 
 const Component = ({}:Props) => {
+
+    const [{ data, pending, lastError, lastErrorType }, fetchResults] = useExchangeFinder({ exchangeId: "123" }, 3);
+    
 
     const [findSpecs, setFindSpecs] = useState<ExchangeSpecs>({
         findMode: "keyword",
@@ -37,7 +41,7 @@ const Component = ({}:Props) => {
             <ExchangeFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={q => {}} />
             
             <DataListViewSettingsEditor 
-                sortByOptions={["subscription", "status", "doctype" ]}
+                sortByOptions={["subscription", "status", "doctype"]}
                 sortByTitles={{ 
                     "subscription": "Subscription",
                     "status": "Delivery Status",

@@ -1,13 +1,13 @@
 import { Dispatch, useEffect, useState } from "react"
 import { shallowEqual, useDispatch } from "react-redux"
 import { querySuccess, queryRun, viewUnmount, dataSync } from "./actions"
-import { QueryResponse, useCqSelector, EntityModel, Denormalized, jsString, jsRef, jsEntity, jsDateTime, ChangeReport, ErrorType } from "./core"
+import { QueryResponse, useCqSelector, EntityModel, Denormalized, ChangeReport, ErrorType } from "./core"
 
 
 type AsyncQueryHandler<TReq,TData> = (req:TReq) => Promise<QueryResponse<TData>>
 
 type SViewSummary<TModel extends EntityModel,TReq,TEntityName extends keyof TModel> = {
-    data: Denormalized<TModel,TModel[TEntityName]>[]
+    data: Denormalized<TModel,TModel[TEntityName]["props"]>[]
     total: number
     pending: boolean
     lastError: string | null
@@ -34,10 +34,7 @@ export const queryHook = <
                 dispatch(queryRun(req, viewSeq, entityName as string, maxDepth));
                 handler(req)
                     .then(res => {
-                        //const [entities, results] = normalize(entityModel, entityName, res.results);
-                        //const normalizedResponse = { ...res, results }
                         dispatch(querySuccess(viewSeq, req, entityName, maxDepth, res.results, res.total));
-                        
                     }); 
             }
     
@@ -49,13 +46,12 @@ export const queryHook = <
             total: 0,
             lastCreatedReq: req,
             lastHandledReq: {}
-        })
+        });
 
         return (initReq:TReq, maxDepth:number = 2):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
             const [viewSeq, _] = useState(nextId().toString());
             const sView = useCqSelector(s => s.views[viewSeq] as SViewSummary<TModel,TReq,TName> || initViewState(initReq), shallowEqual);
             const dispatch = useDispatch();
-
             // view mounting / unmounting
             const fetcher = createFetcher(viewSeq, dispatch, maxDepth);
             useEffect(() => {
@@ -64,7 +60,7 @@ export const queryHook = <
                     dispatch(viewUnmount(viewSeq));
                 }
             }, []);
-
+            // return view state and one-way fetcher method
             return [sView, fetcher];
         }
     
@@ -103,64 +99,3 @@ export const commandHook = <
             }
         }
 }
-
-
-
-
-
-// test
-
-type ExchangeFindQuery = {
-    exchangeId: string
-}
- 
-interface SubscriptionFindQuery {
-    subscriptionId: string
-
-}
-  
-const entities = {
-
-    exchange: jsEntity({
-            id: jsString(),
-            createdOn: jsDateTime(),
-            tags: [ jsString() ],
-            subscription: jsRef("subscription")
-        }, "id"),
-
-    subscription: jsEntity({
-            id: jsString(),
-            createdOn: jsDateTime(),
-            desc: jsString()
-        }, "id")
-        
-} 
-
-const useExchangeFinder = queryHook(entities, "exchange", (req:ExchangeFindQuery) => {
-    return Promise.resolve({
-        offset: 0,
-        total: 1,
-        results: [
-            {
-                id: "ex1",
-                createdOn: new Date(),
-                tags: ["parcelId:333", "fasdfa"],
-                subscription: { 
-                    id: "sub1",
-                    desc: "First Subscription",
-                    createdOn: new Date()
-                }
-            } 
-        ]
-    })
-})
-
-
-const [queryState, find] = useExchangeFinder({ exchangeId: "234" })
-
-useEffect(() => {
-    find({ exchangeId: "123" })
-})
-
-export { }
-
