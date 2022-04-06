@@ -23,7 +23,8 @@ interface Props {
 
 export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequested }) => {
 
-    const handleFind = () => {
+    const handleFind = (e:any) => {
+        e.preventDefault();
         onFindRequested(value);
     }
 

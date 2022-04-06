@@ -24,11 +24,11 @@ interface Props {
     offset: number
     sortByOptions: string[]
     sortByTitles?: { [k:string]: string }
-    sortBy?: SortBy
+    sortBy: SortBy
     onChange: (e: DataListViewSettingsChangeEvent) => void
 }
 
-export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, total, sortBy = {}, sortByOptions, sortByTitles = {}, onChange }) => {
+export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, total, sortBy, sortByOptions, sortByTitles = {}, onChange }) => {
 
     const pageIndex = Math.floor(offset / limit);
     let pages = [];
@@ -38,15 +38,26 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
     const handleSortByChange = (field:string) => {
         onChange({
             limit,
-            offset,
+            offset: 0,
             sortBy: { ...sortBy, field }
+        })
+    }
+
+    const handleSortDescendingChange = (descending:boolean) => {
+        onChange({
+            limit,
+            offset: 0,
+            sortBy: { ...sortBy, descending }
         })
     }
 
     return (
        
         <div className="w-full flex py-1 mb-3">
-            <div className="text-sm py-1">Total <strong>{total}</strong> records, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)</div>
+            <div className="text-sm py-1">Total&nbsp;
+                <strong>{total}</strong>&nbsp;
+                records, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)
+            </div>
             <Tab key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
             <Tab key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
             {pages.map(p => (<Tab key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
@@ -54,16 +65,16 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
             <Tab key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
             <div className="flex grow py-1" />
             <div className="text-sm py-1">Sort By</div>
-            <TabMenu title={sortByTitles[sortBy.field || ""] || sortBy.field}>{
+            <TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{
 
                 sortByOptions.map(opt => (
                     <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)} selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>
                 ))
             }
             </TabMenu>
-            <TabMenu title="Ascending">
-                <TabMenuItem key="asc">Ascending</TabMenuItem>
-                <TabMenuItem key="desc">Descending</TabMenuItem>
+            <TabMenu title={ sortBy.descending ? "Descending": "Ascending" }>
+                <TabMenuItem selected={!sortBy.descending} key="asc" onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>
+                <TabMenuItem selected={!!sortBy.descending} key="desc" onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>
             </TabMenu>
         </div>
         

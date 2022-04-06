@@ -1,68 +1,7 @@
 import { CqAction } from "./actions";
-import { EntityModel, denormalize, S, DependencyTable, EntityRefCollection, jsRef, normalizeArray, mergeEntities, mergeEntityRefs, uniqueEntityRefs, removeEntities } from "./core";
+import { EntityModel, denormalize, S, jsRef, normalizeArray, mergeEntities, mergeEntityRefs, uniqueEntityRefs, removeEntities, EntityDb, DependencyTable } from "./core";
+import { addDeps, orphanEntities, removeDepEntities, removeDepView, viewsByEntities } from "./dependency";
 
-
-const cloneDeps = (deps:DependencyTable) => {
-    let clone:DependencyTable = { }
-    for (const type in deps) {
-        clone[type] = { }
-        for (const key in deps[type]) {
-            clone[type][key] = {
-                ...deps[type][key]
-            }
-        }
-    }
-    return clone;
-}
-
-const addDeps = (deps:DependencyTable, viewSeq:string, entities:EntityRefCollection) => {
-    let moreDeps = cloneDeps(deps);
-    for (const type in entities) {
-        for (const key in entities[type]) {
-            moreDeps[type][key] = {
-                ...moreDeps[type][key],
-                [viewSeq]: true
-            }
-        }
-    }
-    return moreDeps;
-}
-
-const viewsByEntities = (deps: DependencyTable, entities:EntityRefCollection) => 
-    Object.fromEntries(
-        Object.keys(entities)
-            .flatMap((type) => 
-                Object.keys(entities[type])
-                    .filter(key => (deps[type] && deps[type][key]))
-                    .flatMap(key => Object.entries(deps[type][key]))));
-
-const orphanEntities = (deps: DependencyTable) => (
-    Object.fromEntries(
-        Object.entries(deps).map(([type, data]) => [
-            type, 
-            Object.fromEntries(
-                Object.entries(data)
-                    .filter(([_, viewSeqs]) => Object.keys(viewSeqs).length < 1)
-                    .map(([key, _]) => [key, true]))
-        ])));
-
-const removeDepEntities = (deps:DependencyTable, entities:EntityRefCollection) => {
-    const newEntries = Object.entries(deps)
-        .map(([type, keys]) => [
-            type, 
-            Object.fromEntries(Object.entries(keys).filter(([key, _]) => entities[type] && entities[type][key]))
-        ]);
-    return Object.fromEntries(newEntries);
-}
-
-const removeDepView = (deps:DependencyTable,  viewSeq:string):DependencyTable => {
-    const newEntries = Object.entries(deps)
-        .map(([type, keys]) => [
-            type, 
-            Object.fromEntries(Object.entries(keys).map(([key, { [viewSeq]:_, ...rest }]) => [key, rest]))
-        ]);
-    return Object.fromEntries(newEntries);
-}
 
 export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel) => {
 
@@ -70,6 +9,15 @@ export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel)
         entities: { },
         views: { },
         deps: { }
+    }
+
+    const purgeEntities = (s: S<TModel>, viewSeq:string):[EntityDb<TModel>, DependencyTable] => {
+        // cleanup entities referenced by existing view
+        let depsCleanup = removeDepView(s.deps, viewSeq);
+        const orphans = orphanEntities(depsCleanup);
+        const deps = removeDepEntities(depsCleanup, orphans);
+        const entities = removeEntities(s.entities, orphans);
+        return [entities, deps];
     }
 
     return (s:S<TModel> = sInit, action:CqAction<TModel>):S<TModel> => {
@@ -81,6 +29,8 @@ export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel)
                     ...s.views,
                     [action.viewSeq]: {
                         ...s.views[action.viewSeq],
+                        total: (s.views[action.viewSeq] ?? {}).total ?? 0,
+                        data: (s.views[action.viewSeq] ?? {}).data ?? [],
                         pending: true,
                         lastCreatedReq: action.request
                     }
@@ -88,16 +38,21 @@ export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel)
             }
         }
  
-        if (action.type === "CQ/QUERY-SUCCESS") {
-            if (action.viewSeq in s.views) { // only if the receiving view is mounted
+        else if (action.type === "CQ/QUERY-SUCCESS") {
+            // only if the receiving view is mounted and the response belongs to the last created request
+            if (action.viewSeq in s.views && action.request === s.views[action.viewSeq].lastCreatedReq) { 
+                // cleanup entities referenced by existing view
+                const [entities, deps] = purgeEntities(s, action.viewSeq);
                 // normalize payload
                 const [rootKeys, updates] = normalizeArray(entityModel, action.data, jsRef(action.rootEntity));
+                // merge entities
+                const updatedEntities = mergeEntities(entities, updates);
                 // denormalize data again to ensure consistency
-                const data = denormalize(entityModel, s.entities, rootKeys, [jsRef(action.rootEntity)], action.maxDepth) as any;
+                const data = denormalize(entityModel, updatedEntities, rootKeys, [jsRef(action.rootEntity)], action.maxDepth) as any;
                 return {
                     ...s,
-                    deps: addDeps(s.deps, action.viewSeq, uniqueEntityRefs(updates)),
-                    entities: mergeEntities(s.entities, updates),
+                    deps: addDeps(deps, action.viewSeq, uniqueEntityRefs(updates)),
+                    entities: updatedEntities,
                     views: {
                         ...s.views,
                         [action.viewSeq]: {
@@ -117,19 +72,15 @@ export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel)
             }
         }
 
-        if (action.type === "CQ/VIEW-UNMOUNT") {
+        else if (action.type === "CQ/VIEW-UNMOUNT") {
             const { [action.viewSeq]:_, ...views } = s.views;
             // remove view from dependency table
-            const depsWithOrphanEntities = removeDepView(s.deps, action.viewSeq);
-            // remove entities that aren't referenced by any view
-            const orphans = orphanEntities(depsWithOrphanEntities);
-            const entities = removeEntities(s.entities, orphans);
-            const deps = removeDepEntities(depsWithOrphanEntities, orphans);
+            const [entities, deps] = purgeEntities(s, action.viewSeq);
             // updated state
             return { ...s, views, deps, entities };
         }
 
-        if (action.type === "CQ/DATA-SYNC") {
+        else if (action.type === "CQ/DATA-SYNC") {
             const { created, modified, deleted } = action.changes;
             const entities = removeEntities(mergeEntities(mergeEntities(s.entities, created), modified), deleted);
             // determine dependent views
@@ -145,16 +96,13 @@ export const createCqReducer = <TModel extends EntityModel>(entityModel: TModel)
                 ? { }
                 : { ...view, data: denormalize(entityModel, entities, view.rootKeys, jsRef(view.rootEntity), view.maxDepth) });
             const views = Object.fromEntries(viewEntries);
-            return {
-                ...s,
-                deps,
-                views,
-                entities
-            };
+            // updated state
+            return { ...s, deps, views, entities };
         }
 
-        if (action.type === "CQ/QUERY-ERROR") {
-            if (action.viewSeq in s.views) {
+        else if (action.type === "CQ/QUERY-ERROR") {
+            // only if the receiving view is mounted and the response belongs to the last created request
+            if (action.viewSeq in s.views && action.request === s.views[action.viewSeq].lastCreatedReq) {
                 return {
                     ...s,
                     views: {

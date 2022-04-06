@@ -1,6 +1,6 @@
-import { jsEntity, jsString, jsDateTime, jsRef } from "../redux-cq";
+import { jsEntity, jsString, jsDateTime, jsRef, TypeOf } from "./redux-cq";
 
-export default {
+export const model = {
 
     exchange: jsEntity({
             id: jsString(),
@@ -16,3 +16,7 @@ export default {
         }, "id")
         
 } 
+
+export type Exchange = TypeOf<typeof model,"exchange">;
+
+export type Subscription = TypeOf<typeof model,"subscription">;

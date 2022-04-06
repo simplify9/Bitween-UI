@@ -1,7 +1,8 @@
 import { Dispatch, useEffect, useState } from "react"
 import { shallowEqual, useDispatch } from "react-redux"
-import { querySuccess, queryRun, viewUnmount, dataSync } from "./actions"
+import { querySuccess, queryRun, viewUnmount, dataSync, CqAction } from "./actions"
 import { QueryResponse, useCqSelector, EntityModel, Denormalized, ChangeReport, ErrorType } from "./core"
+import useQueryString, { QueryStringMapping } from "./useQueryString"
 
 
 type AsyncQueryHandler<TReq,TData> = (req:TReq) => Promise<QueryResponse<TData>>
@@ -29,9 +30,9 @@ export const queryHook = <
     entityName:TName, 
     handler:AsyncQueryHandler<TReq,TData>) => {
 
-        const createFetcher = (viewSeq:string, dispatch:Dispatch<any>, maxDepth:number) =>
+        const createFetcher = (viewSeq:string, dispatch:Dispatch<CqAction<TModel>>, maxDepth:number) =>
             (req:TReq) => {
-                dispatch(queryRun(req, viewSeq, entityName as string, maxDepth));
+                dispatch(queryRun(req, viewSeq, entityName, maxDepth));
                 handler(req)
                     .then(res => {
                         dispatch(querySuccess(viewSeq, req, entityName, maxDepth, res.results, res.total));
@@ -50,7 +51,7 @@ export const queryHook = <
 
         return (initReq:TReq, maxDepth:number = 2):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
             const [viewSeq, _] = useState(nextId().toString());
-            const sView = useCqSelector(s => s.views[viewSeq] as SViewSummary<TModel,TReq,TName> || initViewState(initReq), shallowEqual);
+            const sView = useCqSelector(s => s.views[viewSeq] as SViewSummary<TModel,TReq,TName> ?? initViewState(initReq), shallowEqual);
             const dispatch = useDispatch();
             // view mounting / unmounting
             const fetcher = createFetcher(viewSeq, dispatch, maxDepth);
@@ -59,12 +60,37 @@ export const queryHook = <
                 return () => {
                     dispatch(viewUnmount(viewSeq));
                 }
-            }, []);
+            }, [initReq]);
             // return view state and one-way fetcher method
             return [sView, fetcher];
         }
     
 }
+
+export type QueryHook<TModel extends EntityModel,TReq,TName extends keyof TModel> = (initReq:TReq, maxDepth:number) => [SViewSummary<TModel,TReq,TName>,(req:TReq) => void]
+
+export const withUrlSupport = <
+    TModel extends EntityModel,
+    TReq,
+    TName extends keyof TModel>(hook:QueryHook<TModel,TReq,TName>, mapping:QueryStringMapping<TReq>) => {
+
+    return (initReq:TReq, maxDepth:number = 2):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
+
+        const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
+
+        const [queryState, _] = hook(req, maxDepth);
+
+        return [queryState, newQuery];
+    }
+
+}
+
+
+
+
+
+
+
 
 type CommandResponse<TPayload> = TPayload
 

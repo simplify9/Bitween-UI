@@ -79,6 +79,8 @@ export type Denormalized<TModel extends EntityModel,TProps> = {
         : Process<TModel,TProps[prop]>
 }
 
+
+
 export interface SView<TModel extends EntityModel,TReq,TEntityName extends keyof TModel> {
     data: Denormalized<TModel,TModel[TEntityName]["props"]>[]
     rootKeys: string[]
