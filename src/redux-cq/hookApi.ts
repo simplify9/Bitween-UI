@@ -49,18 +49,21 @@ export const queryHook = <
             lastHandledReq: {}
         });
 
-        return (initReq:TReq, maxDepth:number = 2):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
+        return (req: TReq, maxDepth: number = 3): [SViewSummary<TModel,TReq,TName>, (req:TReq) => void] => {
             const [viewSeq, _] = useState(nextId().toString());
-            const sView = useCqSelector(s => s.views[viewSeq] as SViewSummary<TModel,TReq,TName> ?? initViewState(initReq), shallowEqual);
+            const sView = useCqSelector(s => s.views[viewSeq] as SViewSummary<TModel,TReq,TName> ?? initViewState(req), shallowEqual);
             const dispatch = useDispatch();
+
             // view mounting / unmounting
             const fetcher = createFetcher(viewSeq, dispatch, maxDepth);
+
             useEffect(() => {
-                fetcher(initReq);
+                fetcher(req);
                 return () => {
                     dispatch(viewUnmount(viewSeq));
                 }
-            }, [initReq]);
+            }, Object.values(req as any)); //[initReq]);
+
             // return view state and one-way fetcher method
             return [sView, fetcher];
         }
@@ -74,7 +77,7 @@ export const withUrlSupport = <
     TReq,
     TName extends keyof TModel>(hook:QueryHook<TModel,TReq,TName>, mapping:QueryStringMapping<TReq>) => {
 
-    return (initReq:TReq, maxDepth:number = 2):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
+    return (initReq:TReq, maxDepth:number = 3):[SViewSummary<TModel,TReq,TName>,(req:TReq) => void] => {
 
         const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
 

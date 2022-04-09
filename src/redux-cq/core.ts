@@ -16,7 +16,6 @@ export interface ChangeReport<TModel extends EntityModel> {
 }
 
 export type QueryResponse<TData> = {
-    offset: number
     total: number
     results: TData[]
 }
@@ -24,6 +23,10 @@ export type QueryResponse<TData> = {
 export interface CqRef<TModel extends EntityModel,TTarget extends keyof TModel> {
     type: "ref"
     target: TTarget
+}
+
+export interface CqObject {
+    type: "object"
 }
 
 export interface CqString {
@@ -48,15 +51,13 @@ export interface CqEntity<TProps> {
     props: TProps
 }
 
-type CqDataType<TModel extends EntityModel> = CqRef<TModel,keyof TModel> | CqString | CqNumber | CqDateTime | CqBoolean;
+type CqDataType<TModel extends EntityModel> = CqRef<TModel,keyof TModel> | CqString | CqNumber | CqDateTime | CqBoolean | CqObject;
 
 type CqSchema<TModel extends EntityModel> = CqDataType<TModel> | CqDataType<TModel>[];
 
 export interface EntityModel {
     [entityName:string]: CqEntity<Record<string,unknown>>
 }  
-
-export type Normalized<TModel extends EntityModel,TProps> = TProps
 
 type Array<T> = T[]
 
@@ -130,6 +131,8 @@ type CqSelector<TFrom,TTo> = (s:TFrom) => TTo
 export const useCqSelector = <TModel extends EntityModel,SGlobal extends SInstallation<TModel>,T>(selector:CqSelector<S<TModel>,T>, equalityFn:EqualityFn<T>=undefined) => 
     useSelector((s:SGlobal) => selector(s[CQ_REDUCER_KEY]), equalityFn);
 
+export const jsObject = (): CqObject => ({ type: "object" })
+
 export const jsString = (): CqString => ({ type: "string" })
 
 export const jsNumber = ():CqNumber => ({ type: "number" })
@@ -143,6 +146,12 @@ export const jsRef = <TModel extends EntityModel,TTarget extends keyof TModel>(t
 export const jsEntity = <TProps extends {[k:string]:unknown},TKey extends keyof TProps>(props:TProps, keyProp:TKey):CqEntity<TProps> => ({ keyProp:keyProp as string, props, type: "entity" })
 
 type AllData = boolean | string | number | Date | MayBe<AllData>[] | { [prop:string]: MayBe<AllData> };
+
+const denormalizeObject = <TModel>(model: TModel, data:MayBe<AllData>, schema:CqObject) => {
+    if (data === undefined || data === null) return data;
+    if (!(data instanceof Object)) throw "Expected object";
+    return data;
+}
 
 const denormalizeString = <TModel>(model: TModel, data:MayBe<AllData>, schema:CqString) => {
     if (data === undefined || data === null) return data;
@@ -193,6 +202,7 @@ export function denormalize<TModel extends EntityModel>(model: TModel, db:Entity
     else if (schema.type === "string") return denormalizeString(model, data, schema);
     else if (schema.type === "number") return denormalizeNumber(model, data, schema);
     else if (schema.type === "datetime") return denormalizeDate(model, data, schema);
+    else if (schema.type === "object") return denormalizeObject(model, data, schema);
     else throw "Unsupported schema type";
 }
 
@@ -263,6 +273,12 @@ export function mergeEntities<TModel extends EntityModel>(left:EntityDb<TModel>,
 
 const normalized = <TModel extends EntityModel,T>(model: TModel, value: T, db:EntityDb<TModel> = {}):NormalizeResult<TModel,T> => [value, db]
 
+const normalizeObject = <TModel extends EntityModel>(model: TModel, data:MayBe<AllData>, schema:CqObject) => {
+    if (data === undefined || data === null) return normalized(model, data);
+    if (!(data instanceof Object)) throw "Expected object";
+    return normalized(model, data);
+}
+
 const normalizeString = <TModel extends EntityModel>(model: TModel, data:MayBe<AllData>, schema:CqString) => {
     if (data === undefined || data === null) return normalized(model, data);
     if (typeof data !== "string") throw "Expected string";
@@ -324,5 +340,6 @@ export function normalize<TModel extends EntityModel>(model: TModel, data:MayBe<
     else if (schema.type === "string") return normalizeString(model, data, schema);
     else if (schema.type === "number") return normalizeNumber(model, data, schema);
     else if (schema.type === "datetime") return normalizeDate(model, data, schema);
+    else if (schema.type === "object") return normalizeObject(model, data, schema);
     else throw "Unsupported schema type";
 }

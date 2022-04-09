@@ -55,14 +55,21 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
        
         <div className="w-full flex py-1 mb-3">
             <div className="text-sm py-1">Total&nbsp;
-                <strong>{total}</strong>&nbsp;
-                records, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)
+                <strong>{total}</strong>
+                &nbsp;records
+                {totalPages > 1
+                ? <span>, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)</span>
+                : null}
             </div>
-            <Tab key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
-            <Tab key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
-            {pages.map(p => (<Tab key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
-            <Tab key="r"><Icon shape="chevronRight" className="h-2" /></Tab>
-            <Tab key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
+            {totalPages > 1
+            ? <>
+                <Tab key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
+                <Tab key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
+                {pages.map(p => (<Tab key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
+                <Tab key="r"><Icon shape="chevronRight" className="h-2" /></Tab>
+                <Tab key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
+            </>
+            : null}
             <div className="flex grow py-1" />
             <div className="text-sm py-1">Sort By</div>
             <TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{

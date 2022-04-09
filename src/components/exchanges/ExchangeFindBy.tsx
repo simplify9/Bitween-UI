@@ -2,6 +2,7 @@ import { ChoiceEditor } from "../common/forms/ChoiceEditor"
 import { DateTimeRange, DateTimeRangeEditor } from "../common/forms/DateTimeRangeEditor"
 import FormField from "../common/forms/FormField"
 import TextEditor from "../common/forms/TextEditor"
+import SubscriptionSelector from "../subscriptions/SubscriptionSelector"
 
 
 type DeliveryStatus = {
@@ -32,7 +33,9 @@ export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequeste
         <form noValidate className="flex w-full px-4 py-8" onSubmit={handleFind}>
             <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4">
                 <FormField title="Target Subscription">
-                    <TextEditor placeholder="Subscription" />
+                    <SubscriptionSelector 
+                        value={value.subscription} 
+                        onChange={subscription => onChange({ ...value, subscription })} />
                 </FormField>
 
                 <FormField title="Delivery Status">
