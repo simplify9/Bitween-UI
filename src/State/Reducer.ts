@@ -1,9 +1,9 @@
 import { combineReducers } from "redux";
 import { model } from "../entityModel";
-import { createCqReducer, CQ_REDUCER_KEY } from "../redux-cq";
+import { createEcqReducer, ECQ_REDUCER_KEY } from "redux-ecq";
 
 const appReducer = combineReducers({
-    [CQ_REDUCER_KEY]: createCqReducer(model)
+    [ECQ_REDUCER_KEY]: createEcqReducer(model)
 });
 
 export default appReducer;

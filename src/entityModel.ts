@@ -1,4 +1,5 @@
-import { jsEntity, jsString, jsDateTime, jsRef, TypeOf } from "./redux-cq";
+import { jsObject, jsEntity, jsString, jsDateTime, jsRef, DenormalizedType } from "redux-ecq";
+
 
 export const model = {
 
@@ -6,7 +7,9 @@ export const model = {
             id: jsString(),
             createdOn: jsDateTime(),
             tags: [ jsString() ],
+            status: jsString(),
             documentType: jsRef("documentType"),
+            promotedProps: jsObject(),
             documentUrl: jsString(),
             subscription: jsRef("subscription")
         }, "id"),
@@ -21,10 +24,10 @@ export const model = {
             id: jsString(),
             desc: jsString()
         }, "id")
-} 
+}
 
-export type Exchange = TypeOf<typeof model,"exchange">;
+export type Exchange = DenormalizedType<typeof model,"exchange">;
 
-export type Subscription = TypeOf<typeof model,"subscription">;
+export type Subscription = DenormalizedType<typeof model,"subscription">;
 
-export type DocumentType = TypeOf<typeof model, "documentType">;
+export type DocumentType = DenormalizedType<typeof model, "documentType">;

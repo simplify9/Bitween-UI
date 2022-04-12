@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useExchangeFinder } from "../hooks/queryHooks";
-import { jsBoolean, jsNumber, jsString, withUrlSupport } from "../redux-cq";
+import { withUrlSupport } from "../hooks/queryUrlHooks";
+import { jsBoolean, jsNumber, jsString } from "redux-ecq";
 import { DataListViewSettings, DataListViewSettingsEditor } from "./common/DataListViewSettingsEditor";
 import { ExchangeFinderPanel, ExchangeSpecs } from "./exchanges/ExchangeFinderPanel";
 import { ExchangeList } from "./exchanges/ExchangeList";

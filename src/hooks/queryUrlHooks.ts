@@ -1,7 +1,7 @@
 import { formatISO, isValid, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CqBoolean, CqDateTime, CqNumber, CqString } from "./core";
+import { CqBoolean, CqDateTime, CqNumber, CqString, EntityModel, SQuery } from "redux-ecq";
 
 
 type SelfOrArray<T> = T | T[]
@@ -72,7 +72,7 @@ const createEncoder = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
     }
 }
 
-export default <TQuery>(mapping:QueryStringMapping<TQuery>, defaultValue:TQuery):HookResult<TQuery> => {
+export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defaultValue:TQuery):HookResult<TQuery> => {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -97,4 +97,22 @@ export default <TQuery>(mapping:QueryStringMapping<TQuery>, defaultValue:TQuery)
     }
 
     return [query, setQueryString];
+}
+
+export type QueryHook<TModel extends EntityModel,TReq,TName extends keyof TModel> = (initReq:TReq, maxDepth:number) => [SQuery<TModel,TReq,TName>,(req:TReq) => void]
+
+export const withUrlSupport = <
+    TModel extends EntityModel,
+    TReq,
+    TName extends keyof TModel>(hook:QueryHook<TModel,TReq,TName>, mapping:QueryStringMapping<TReq>) => {
+
+    return (initReq:TReq, maxDepth:number = 3):[SQuery<TModel,TReq,TName>,(req:TReq) => void] => {
+
+        const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
+
+        const [queryState, _] = hook(req, maxDepth);
+
+        return [queryState, newQuery];
+    }
+
 }
