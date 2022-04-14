@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useSubscriptionFinder } from "../../hooks/queryHooks";
 import { ChoiceEditor } from "../common/forms/ChoiceEditor";
 
@@ -9,7 +8,7 @@ interface Props {
 }
 
 const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
-    //const req = useMemo(() => ({ id: value, offset: 0, limit: 20, sortBy: "desc" }), [value]);
+    
     const [queryState, find] = useSubscriptionFinder({ id: value, offset: 0, limit: 20, sortBy: "desc" });
 
     return (
@@ -17,7 +16,7 @@ const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
             placeholder="Select Subscription"
             value={value} 
             onChange={onChange}
-            options={queryState.data} 
+            options={queryState.results !== null ? queryState.results.data : []} 
             optionValue={i => i.id}
             optionTitle={i => i.desc} />
     );

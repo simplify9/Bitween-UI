@@ -7,6 +7,7 @@ interface Props {
 
 
 export default (props:Props) => {
+
     return (
         <table className="table-auto">
             <thead>

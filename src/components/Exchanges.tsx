@@ -58,6 +58,7 @@ const Component = ({}:Props) => {
 
     const handleFindRequested = (findSpecs:ExchangeSpecs) => {
         newQuery({
+            ...defaultQuery,
             ...queryState.lastCreatedReq,
             mode: findSpecs.findMode,
             keywords: findSpecs.keywords,
@@ -65,12 +66,13 @@ const Component = ({}:Props) => {
             creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
             creationDateTo: findSpecs.findBy.creationTimeWindow.to,
             status: findSpecs.findBy.status,
-            offset: 0
+            offset: 0,
         });
     }
 
     const handleViewOptionsChange = (viewOptions:DataListViewSettings) => {
         newQuery({
+            ...defaultQuery,
             ...queryState.lastCreatedReq,
             sortBy: viewOptions.sortBy.field,
             sortByDescending: !!viewOptions.sortBy.descending,
@@ -78,6 +80,8 @@ const Component = ({}:Props) => {
             limit: viewOptions.limit
         });
     }
+
+    
 
     return (
         <div className="flex flex-col w-full px-8 py-4">
@@ -88,21 +92,24 @@ const Component = ({}:Props) => {
                 </div>
             </div>
             <ExchangeFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested} />
+            {queryState.results !== null
+            ? <>
+                <DataListViewSettingsEditor 
+                    sortByOptions={["subscription", "status", "docType"]}
+                    sortByTitles={{ 
+                        subscription: "Subscription",
+                        status: "Delivery Status",
+                        docType: "Document Type"
+                    }}
+                    sortBy={{ field: queryState.lastCreatedReq.sortBy, descending: queryState.lastCreatedReq.sortByDescending }}
+                    total={queryState.results.total} 
+                    offset={queryState.lastCreatedReq.offset} 
+                    limit={queryState.lastCreatedReq.limit} 
+                    onChange={handleViewOptionsChange} />
+                <ExchangeList data={queryState.results.data} />
+            </>
+            : null}
             
-            <DataListViewSettingsEditor 
-                sortByOptions={["subscription", "status", "docType"]}
-                sortByTitles={{ 
-                    subscription: "Subscription",
-                    status: "Delivery Status",
-                    docType: "Document Type"
-                }}
-                sortBy={{ field: queryState.lastCreatedReq.sortBy, descending: queryState.lastCreatedReq.sortByDescending }}
-                total={queryState.total} 
-                offset={queryState.lastCreatedReq.offset} 
-                limit={queryState.lastCreatedReq.limit} 
-                onChange={handleViewOptionsChange} />
-            
-            <ExchangeList data={queryState.data} />
         </div>
     )
 }

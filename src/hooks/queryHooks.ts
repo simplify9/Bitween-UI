@@ -18,7 +18,7 @@ export type ExchangeFindQuery = {
 export const useExchangeFinder = queryHook(model, "exchange", (req:ExchangeFindQuery) => {
     return Promise.resolve({
         total: 3,
-        results: [
+        data: [
             {
                 id: "ex1",
                 createdOn: new Date(),
@@ -95,7 +95,7 @@ export const useSubscriptionFinder = queryHook(model, "subscription", (req:Subsc
 
     return Promise.resolve({
         total: 10,
-        results: [
+        data: [
             {
                 id: "sub1",
                 desc: "DHL Drop-in Folder",

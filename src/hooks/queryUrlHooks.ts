@@ -1,7 +1,7 @@
 import { formatISO, isValid, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CqBoolean, CqDateTime, CqNumber, CqString, EntityModel, SQuery } from "redux-ecq";
+import { CqBoolean, CqDateTime, CqNumber, CqString, DenormalizedType, EntityModel, QueryHook, QueryResults, SQuery } from "redux-ecq";
 
 
 type SelfOrArray<T> = T | T[]
@@ -82,7 +82,7 @@ export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defau
             if (value !== "") {
                 fromQueryString[key] = value;
             }
-        });
+        });  
         return {
             ...defaultValue,
             ...createMapper(mapping)(fromQueryString)
@@ -99,14 +99,13 @@ export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defau
     return [query, setQueryString];
 }
 
-export type QueryHook<TModel extends EntityModel,TReq,TName extends keyof TModel> = (initReq:TReq, maxDepth:number) => [SQuery<TModel,TReq,TName>,(req:TReq) => void]
-
 export const withUrlSupport = <
     TModel extends EntityModel,
     TReq,
-    TName extends keyof TModel>(hook:QueryHook<TModel,TReq,TName>, mapping:QueryStringMapping<TReq>) => {
+    TName extends keyof TModel,
+    TRes extends QueryResults<DenormalizedType<TModel,TName>>>(hook:QueryHook<TModel,TReq,TName,TRes>, mapping:QueryStringMapping<TReq>) => {
 
-    return (initReq:TReq, maxDepth:number = 3):[SQuery<TModel,TReq,TName>,(req:TReq) => void] => {
+    return (initReq:TReq, maxDepth:number = 3):[SQuery<TModel,TReq,TName,TRes>,(req:TReq) => void] => {
 
         const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
 

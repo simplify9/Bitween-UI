@@ -4,19 +4,17 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Exchanges from './components/Exchanges';
 import Subscriptions from './components/Subscriptions';
 import NavBar from './components/NavBar';
-
-
+ 
 
 function App() {
 
-  
   return (
       <>
         <Helmet>
           <title>Infolink</title>
         </Helmet>
         
-        <div className="App">
+        <div>
             
             <Router>
               <NavBar />
