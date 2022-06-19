@@ -1,6 +1,6 @@
 import axios, {Axios, AxiosInstance} from "axios";
 import { ExchangeFindQuery} from "../types/xchange";
-import {SubscriptionFindQuery} from "../types/subscriptions";
+import {ICreateSubscription, IUpdateSubscription, SubscriptionFindQuery} from "../types/subscriptions";
 import {LoginRequest, LoginResponse} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
@@ -80,7 +80,23 @@ export const apiClient = {
             data: res.data.result
         }
 
-    }
+    },
+    findSubscription: async (id: string) => {
+        let res:ApiResponse = await client.get(`subscriptions/${id}`)
+        return res
+    },
+    createSubscription: async (req: ICreateSubscription) => {
+        let res:ApiResponse = await client.post("subscriptions",req)
+        return res
+    },
+    updateSubscription: async (id:string,req: IUpdateSubscription) => {
+        let res:ApiResponse = await client.post(`subscriptions/${id}`,req)
+        return res
+    },
+    deleteSubscription: async (id:string) => {
+        let res:ApiResponse = await client.delete(`subscriptions/${id}`)
+        return res
+    },
 
 }
 

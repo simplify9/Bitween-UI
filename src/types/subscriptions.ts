@@ -1,4 +1,4 @@
-
+import {OptionType} from "./common";
 
 
 export type SubscriptionFindQuery = {
@@ -43,4 +43,21 @@ export interface ISubscription{
     pausedOn: string | null;
 }
 
+export interface ICreateSubscription{
+   type?:string;
+   name?:string;
+   documentId?:string;
+   partnerId?:string;
+   aggregationForId?:string;
+}
+
+export interface IUpdateSubscription{
+    name?:string
+}
+
+export const SubscriptionTypeOptions: OptionType[] = [{ id: "0", title: "Unknown" },
+    { id: "1", title: "Internal" },
+    { id: "2", title: "ApiCall"},
+    { id: "4", title: "Receiving" },
+    { id: "8", title: "Aggregation" }]
 

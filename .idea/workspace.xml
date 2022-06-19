@@ -2,60 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/authConfig.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/components.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/repos.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/client/types.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Document.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Documents.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Documents/CreateNewDocument.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Documents/DocumentFinderPanel.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Documents/DocumentList.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Login/index.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Partner.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Partners.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Partners/CreateNewPartner.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Partners/PartnerFinderPanel.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Partners/PartnerList.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionList.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/common/Modal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/common/forms/CheckBoxEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeProperty.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hooks/queryHookUtil.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/accounts.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/document.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/partners.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/xchange.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Documents/DocumentSelector.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Partners/PartnerSelector.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Subscriptions/CreateNewSubscription.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/State/Index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/State/Index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/State/Reducer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/State/Reducer.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Exchanges.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Exchanges.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/NavBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Subscriptions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/forms/TextEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/TextEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeDocument.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeDocument.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeFinderPanel.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeStatus.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeStatus.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/subscriptions/SubscriptionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/subscriptions/SubscriptionFinder.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionFinder.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/subscriptions/SubscriptionSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/subscriptions/SubscriptionSummary.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSummary.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entityModel.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/queryHooks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/queryHooks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/queryUrlHooks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/queryUrlHooks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/Modal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/InputPopOver.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/InputPopOver.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/common.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,8 +66,16 @@
       <option name="presentableId" value="Default" />
       <updated>1642078693258</updated>
       <workItem from="1642078694896" duration="161000" />
-      <workItem from="1655309036956" duration="41986000" />
+      <workItem from="1655309036956" duration="46396000" />
     </task>
+    <task id="LOCAL-00001" summary="updates">
+      <created>1655632268732</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1655632268733</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -125,5 +91,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="updates" />
   </component>
 </project>

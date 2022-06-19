@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { useSubscriptionFinder } from "../hooks/queryHooks";
-import { withUrlSupport } from "../hooks/queryUrlHooks";
-import { jsBoolean, jsNumber, jsString } from "redux-ecq";
-import { DataListViewSettings, DataListViewSettingsEditor } from "./common/DataListViewSettingsEditor";
-import { SubscriptionFinderPanel } from "./Subscriptions/SubscriptionFinder";
-import { SubscriptionList } from "./Subscriptions/SubscriptionList";
+import {useState} from "react";
+import {useSubscriptionFinder} from "../hooks/queryHooks";
+import {withUrlSupport} from "../hooks/queryUrlHooks";
+import {jsBoolean, jsNumber, jsString} from "redux-ecq";
+import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
+import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
+import {SubscriptionList} from "./Subscriptions/SubscriptionList";
 import {DateTimeRange} from "./common/forms/DateTimeRangeEditor";
+import {apiClient} from "../client";
+import {ICreateSubscription} from "../types/subscriptions";
+import Button from "./common/forms/Button";
+import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
 
 
 const defaultQuery = {
@@ -39,14 +43,15 @@ export type SubscriptionFindBySpecs = {
     creationTimeWindow: DateTimeRange
 }
 
-const useQuery = withUrlSupport(useSubscriptionFinder, queryStringMapping);
+const useQuery = useSubscriptionFinder;
 
 interface Props {
 
 }
 
-const Component = ({}:Props) => {
+const Component = ({}: Props) => {
 
+    const [creatingOn, setCreatingOn] = useState(false);
     const [queryState, newQuery] = useQuery(defaultQuery);
 
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
@@ -60,7 +65,7 @@ const Component = ({}:Props) => {
         }
     });
 
-    const handleFindRequested = (findSpecs:SubscriptionSpecs) => {
+    const handleFindRequested = (findSpecs: SubscriptionSpecs) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
@@ -72,7 +77,7 @@ const Component = ({}:Props) => {
         });
     }
 
-    const handleViewOptionsChange = (viewOptions:DataListViewSettings) => {
+    const handleViewOptionsChange = (viewOptions: DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
@@ -83,36 +88,51 @@ const Component = ({}:Props) => {
         });
     }
 
+    const createSubscription = async (subscription: ICreateSubscription) => {
+        let res = await apiClient.createSubscription(subscription);
+        if (res.succeeded) {
+            setCreatingOn(false);
+            newQuery(queryState.lastSent)
+        }
+    }
 
 
     return (
-        <div className="flex flex-col w-full px-8 py-4">
-            <div className="justify-between w-full flex py-4">
-                <div className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions</div>
-                <div className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
-                    Create New Subscription
+        <>
+            <div className="flex flex-col w-full px-8 py-4">
+                <div className="justify-between w-full flex py-4">
+                    <div className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions</div>
+                    <Button onClick={() => setCreatingOn(true)}
+                            className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                        Create New Subscription
+                    </Button>
                 </div>
-            </div>
-            <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested} />
-            {queryState.response !== null
-                ? <>
-                    <DataListViewSettingsEditor
-                        sortByOptions={["subscription", "status", "docType"]}
-                        sortByTitles={{
-                            subscription: "Subscription",
-                            status: "Delivery Status",
-                            docType: "Document Type"
-                        }}
-                        sortBy={{ field: queryState.lastSent.sortBy, descending: queryState.lastSent.sortByDescending }}
-                        total={queryState.response.total}
-                        offset={queryState.lastSent.offset}
-                        limit={queryState.lastSent.limit}
-                        onChange={handleViewOptionsChange} />
-                    <SubscriptionList data={queryState.response.data} />
-                </>
-                : null}
+                <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
+                                         onFindRequested={handleFindRequested}/>
+                {queryState.response !== null
+                    ? <>
+                        <DataListViewSettingsEditor
+                            sortByOptions={["subscription", "status", "docType"]}
+                            sortByTitles={{
+                                subscription: "Subscription",
+                                status: "Delivery Status",
+                                docType: "Document Type"
+                            }}
+                            sortBy={{
+                                field: queryState.lastSent.sortBy,
+                                descending: queryState.lastSent.sortByDescending
+                            }}
+                            total={queryState.response.total}
+                            offset={queryState.lastSent.offset}
+                            limit={queryState.lastSent.limit}
+                            onChange={handleViewOptionsChange}/>
+                        <SubscriptionList data={queryState.response.data}/>
+                    </>
+                    : null}
 
-        </div>
+            </div>
+            {creatingOn && <CreateNewSubscription onAdd={createSubscription} onClose={() => setCreatingOn(false)}/>}
+        </>
     )
 }
 

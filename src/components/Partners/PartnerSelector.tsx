@@ -1,4 +1,4 @@
-import { useSubscriptionFinder} from "../../hooks/queryHooks";
+import { usePartnerFinder} from "../../hooks/queryHooks";
 import { ChoiceEditor } from "../common/forms/ChoiceEditor";
 
 
@@ -8,22 +8,19 @@ interface Props {
 }
 
 const defaultQuery = {
-    mode: "keyword",
-    creationDateFrom: undefined,
-    creationDateTo: undefined,
-    keywords: "",
+    nameContains: "",
     offset: 0,
-    limit: 20,
+    limit: 50,
     sortBy: "docType",
     sortByDescending: false
 }
 
-const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
+const PartnerSelector:React.FC<Props> = ({ value, onChange }) => {
 
-    const [queryState, newQuery] = useSubscriptionFinder(defaultQuery);
+    const [queryState, newQuery] = usePartnerFinder(defaultQuery);
     return (
         <ChoiceEditor
-            placeholder="Select Subscription"
+            placeholder="Select Partner"
             value={value}
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
@@ -32,4 +29,4 @@ const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
     );
 }
 
-export default SubscriptionSelector;
+export default PartnerSelector;

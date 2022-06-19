@@ -1,4 +1,4 @@
-import { useSubscriptionFinder} from "../../hooks/queryHooks";
+import { useDocumentFinder } from "../../hooks/queryHooks";
 import { ChoiceEditor } from "../common/forms/ChoiceEditor";
 
 
@@ -13,17 +13,17 @@ const defaultQuery = {
     creationDateTo: undefined,
     keywords: "",
     offset: 0,
-    limit: 20,
+    limit: 50,
     sortBy: "docType",
     sortByDescending: false
 }
 
-const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
+const DocumentSelector:React.FC<Props> = ({ value, onChange }) => {
 
-    const [queryState, newQuery] = useSubscriptionFinder(defaultQuery);
+    const [queryState, newQuery] = useDocumentFinder(defaultQuery);
     return (
         <ChoiceEditor
-            placeholder="Select Subscription"
+            placeholder="Select Document"
             value={value}
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
@@ -32,4 +32,4 @@ const SubscriptionSelector:React.FC<Props> = ({ value, onChange }) => {
     );
 }
 
-export default SubscriptionSelector;
+export default DocumentSelector;

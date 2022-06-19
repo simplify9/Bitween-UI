@@ -1,8 +1,9 @@
 import {PartnerSpecs} from "../Partners";
 import Button from "./forms/Button";
+import {classes} from "./forms/utils";
 
 
-interface Props {
+type Props = JSX.IntrinsicElements['div'] & {
     onClose: () => void
     onSubmit?: () => void
     submitLabel?:string
@@ -10,10 +11,10 @@ interface Props {
 }
 
 
-const Component :React.FC<Props> = ({onClose,onSubmit,submitLabel, submitDisabled,children }) => {
+const Component :React.FC<Props> = ({onClose,onSubmit,submitLabel, submitDisabled,className,children }) => {
 
     return (
-        <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div className={classes("relative z-10", className || "")}   aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
             <div className="fixed z-10 inset-0 overflow-y-auto">
