@@ -1,3 +1,4 @@
+import {CommonFindQuery} from "./common";
 
 
 export interface IXchange {
@@ -36,16 +37,9 @@ export interface IXchange {
     partnerId: number | null;
 }
 
-export type ExchangeFindQuery = {
+export type ExchangeFindQuery = CommonFindQuery & {
     mode: string
     subscription?: string
     status?: string
-    keywords?: string
-    creationDateFrom?: string
-    creationDateTo?: string
-    offset: number
-    limit: number
-    sortBy: string
-    sortByDescending: boolean
 }
 

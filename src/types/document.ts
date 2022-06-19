@@ -1,4 +1,4 @@
-import {KeyValuePair} from "./common";
+import {CommonFindQuery, KeyValuePair} from "./common";
 
 
 export interface IDocument{
@@ -9,15 +9,9 @@ export interface IDocument{
     duplicateInterval?:any
     promotedProperties?:any
 }
-export type DocumentFindQuery = {
+export type DocumentFindQuery = CommonFindQuery &  {
     mode: string
-    keywords?: string
-    creationDateFrom?: string
-    creationDateTo?: string
-    offset: number
-    limit: number
-    sortBy: string
-    sortByDescending: boolean
+
 }
 
 

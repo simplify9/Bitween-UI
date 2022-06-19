@@ -16,16 +16,16 @@ export const apiClient = {
     },
 
     findExchanges: async (req: ExchangeFindQuery) => {
-        let res = await client.get("xchanges")
+        let res = await client.get(`xchanges${formulateQueryString(req)}`)
         return {
-            total: res.data.total,
+            total: res.data.totalCount,
             data: res.data.result
         }
     },
     findDocuments: async (req: DocumentFindQuery) => {
-        let res = await client.get("documents")
+        let res = await client.get(`documents${formulateQueryString(req)}`)
         return {
-            total: res.data.total,
+            total: res.data.totalCount,
             data: res.data.result
         }
     },
@@ -46,9 +46,9 @@ export const apiClient = {
         return res
     },
     findPartners: async (req: PartnerFindQuery) => {
-        let res = await client.get("partners")
+        let res = await client.get(`partners${formulateQueryString(req)}`)
         return {
-            total: res.data.total,
+            total: res.data.totalCount,
             data: res.data.result
         }
     },
@@ -74,9 +74,9 @@ export const apiClient = {
     },
     findSubscriptions: async (req: SubscriptionFindQuery) => {
 
-        let res = await client.get("subscriptions")
+        let res = await client.get(`subscriptions${formulateQueryString(req)}`)
         return {
-            total: res.data.total,
+            total: res.data.totalCount,
             data: res.data.result
         }
 
@@ -99,5 +99,12 @@ export const apiClient = {
     },
 
 }
+
+const formulateQueryString = (req:any) => {
+    return `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`
+}
+
+
+
 
 

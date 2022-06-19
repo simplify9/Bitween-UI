@@ -1,4 +1,4 @@
-import {KeyValuePair} from "./common";
+import {CommonFindQuery, KeyValuePair} from "./common";
 
 
 export interface IPartner{
@@ -10,12 +10,9 @@ export interface IPartner{
     subscriptions?:any[]
 
 }
-export type PartnerFindQuery = {
+export type PartnerFindQuery = CommonFindQuery &  {
     nameContains: string
-    offset: number
-    limit: number
-    sortBy: string
-    sortByDescending: boolean
+
 }
 
 export type UpdatePartner = {

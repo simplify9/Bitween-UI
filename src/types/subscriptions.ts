@@ -1,15 +1,8 @@
-import {OptionType} from "./common";
+import {CommonFindQuery, OptionType} from "./common";
 
 
-export type SubscriptionFindQuery = {
+export type SubscriptionFindQuery = CommonFindQuery &  {
     mode: string
-    keywords?: string
-    creationDateFrom?: string
-    creationDateTo?: string
-    offset: number
-    limit: number
-    sortBy: string
-    sortByDescending: boolean
 }
 
 export interface ISubscription{

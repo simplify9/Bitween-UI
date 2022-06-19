@@ -15,7 +15,7 @@ const defaultQuery = {
     creationDateTo: undefined,
     keywords: "",
     offset: 0,
-    limit: 20,
+    limit: 5,
     sortBy: "docType",
     sortByDescending: false
 }
@@ -33,7 +33,7 @@ const queryStringMapping = {
     limit: jsNumber()
 }
 
-const useQuery = withUrlSupport(useExchangeFinder, queryStringMapping);
+const useQuery = useExchangeFinder;
 
 interface Props {
 

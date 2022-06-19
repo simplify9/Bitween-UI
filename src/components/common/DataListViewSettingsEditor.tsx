@@ -50,9 +50,16 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
             sortBy: { ...sortBy, descending }
         })
     }
+    const handlePageChange = (newOffset:number) => {
+        onChange({
+            limit,
+            offset: newOffset,
+            sortBy: sortBy
+        })
+    }
 
     return (
-       
+
         <div className="w-full flex py-1 mb-3">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
@@ -63,11 +70,11 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
             </div>
             {totalPages > 1
             ? <>
-                <Tab key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
-                <Tab key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
-                {pages.map(p => (<Tab key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
+                <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
+                <Tab  key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
+                {pages.map(p => (<Tab onClick={() => handlePageChange(p * limit)} key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
                 <Tab key="r"><Icon shape="chevronRight" className="h-2" /></Tab>
-                <Tab key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
+                <Tab onClick={() => handlePageChange(total - limit)} key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
             </>
             : null}
             <div className="flex grow py-1" />
@@ -84,6 +91,6 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
                 <TabMenuItem selected={!!sortBy.descending} key="desc" onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>
             </TabMenu>
         </div>
-        
+
     );
 }
