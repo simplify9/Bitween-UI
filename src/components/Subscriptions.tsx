@@ -1,42 +1,122 @@
+import { useState } from "react";
+import { useSubscriptionFinder } from "../hooks/queryHooks";
+import { withUrlSupport } from "../hooks/queryUrlHooks";
+import { jsBoolean, jsNumber, jsString } from "redux-ecq";
+import { DataListViewSettings, DataListViewSettingsEditor } from "./common/DataListViewSettingsEditor";
+import { SubscriptionFinderPanel } from "./Subscriptions/SubscriptionFinder";
+import { SubscriptionList } from "./Subscriptions/SubscriptionList";
+import {DateTimeRange} from "./common/forms/DateTimeRangeEditor";
 
 
+const defaultQuery = {
+    mode: "keyword",
+    creationDateFrom: undefined,
+    creationDateTo: undefined,
+    keywords: "",
+    offset: 0,
+    limit: 20,
+    sortBy: "docType",
+    sortByDescending: false
+}
+
+const queryStringMapping = {
+    keywords: jsString(),
+    creationDateFrom: jsString(),
+    creationDateTo: jsString(),
+    mode: jsString(),
+    sortBy: jsString(),
+    sortByDescending: jsBoolean(),
+    offset: jsNumber(),
+    limit: jsNumber()
+}
+
+export type SubscriptionSpecs = {
+    findMode: string
+    keywords: string
+    findBy: SubscriptionFindBySpecs
+}
+export type SubscriptionFindBySpecs = {
+    creationTimeWindow: DateTimeRange
+}
+
+const useQuery = withUrlSupport(useSubscriptionFinder, queryStringMapping);
 
 interface Props {
 
 }
 
+const Component = ({}:Props) => {
 
-export default (props:Props) => {
+    const [queryState, newQuery] = useQuery(defaultQuery);
+
+    const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
+        findMode: queryState.lastSent.mode,
+        keywords: queryState.lastSent.keywords ?? "",
+        findBy: {
+            creationTimeWindow: {
+                from: queryState.lastSent.creationDateFrom,
+                to: queryState.lastSent.creationDateTo
+            },
+        }
+    });
+
+    const handleFindRequested = (findSpecs:SubscriptionSpecs) => {
+        newQuery({
+            ...defaultQuery,
+            ...queryState.lastSent,
+            mode: findSpecs.findMode,
+            keywords: findSpecs.keywords,
+            creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
+            creationDateTo: findSpecs.findBy.creationTimeWindow.to,
+            offset: 0,
+        });
+    }
+
+    const handleViewOptionsChange = (viewOptions:DataListViewSettings) => {
+        newQuery({
+            ...defaultQuery,
+            ...queryState.lastSent,
+            sortBy: viewOptions.sortBy.field,
+            sortByDescending: !!viewOptions.sortBy.descending,
+            offset: viewOptions.offset,
+            limit: viewOptions.limit
+        });
+    }
+
+
 
     return (
-        <table className="table-auto">
-            <thead>
-                <tr>
-                    <th>Song</th>
-                    <th>Artist</th>
-                    <th>Year</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>The Sliding Mr. Bones (Next Stop, Pottersville)</td>
-                    <td>Malcolm Lockyer</td>
-                    <td>1961</td>
-                </tr>
-                <tr>
-                    <td>Witchy Woman</td>
-                    <td>The Eagles</td>
-                    <td>1972</td>
-                </tr>
-                <tr>
-                    <td>Shining Star</td>
-                    <td>Earth, Wind, and Fire</td>
-                    <td>1975</td>
-                </tr>
-            </tbody>
-        </table>
+        <div className="flex flex-col w-full px-8 py-4">
+            <div className="justify-between w-full flex py-4">
+                <div className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions</div>
+                <div className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                    Create New Subscription
+                </div>
+            </div>
+            <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested} />
+            {queryState.response !== null
+                ? <>
+                    <DataListViewSettingsEditor
+                        sortByOptions={["subscription", "status", "docType"]}
+                        sortByTitles={{
+                            subscription: "Subscription",
+                            status: "Delivery Status",
+                            docType: "Document Type"
+                        }}
+                        sortBy={{ field: queryState.lastSent.sortBy, descending: queryState.lastSent.sortByDescending }}
+                        total={queryState.response.total}
+                        offset={queryState.lastSent.offset}
+                        limit={queryState.lastSent.limit}
+                        onChange={handleViewOptionsChange} />
+                    <SubscriptionList data={queryState.response.data} />
+                </>
+                : null}
+
+        </div>
     )
 }
+
+export default Component;
 
 
 

@@ -16,9 +16,10 @@ const Component:React.FC<Props> = ({ className = "", placeholder, disabled, valu
 
     return (
         <InputBox className={classes("", className)}>
-            <Input 
-                type="text" 
+            <Input
+                type="text"
                 value={value}
+                disabled={disabled}
                 placeholder={placeholder}
                 onFocus={onFocus}
                 onBlur={onBlur}

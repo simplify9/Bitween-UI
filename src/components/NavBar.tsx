@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default ({}:Props) => {
-    
+
     return (
         <nav className="flex items-stretch justify-between flex-wrap bg-teal-500 py-0 pl-2 shadow-b-4 shadow-teal-300">
             <div className="flex items-center flex-shrink-0 text-white mr-6">
@@ -30,9 +30,12 @@ export default ({}:Props) => {
                     <NavLink to="/" className={resolveClassName}>Dashboard</NavLink>
                     <NavLink to="/exchanges" className={resolveClassName}>Exchanges</NavLink>
                     <NavLink to="/subscriptions" className={resolveClassName}>Subscriptions</NavLink>
+                    <NavLink to="/documents" className={resolveClassName}>Documents</NavLink>
+                    <NavLink to="/partners" className={resolveClassName}>Partners</NavLink>
+
                 </div>
                 <div>
-                    
+
                 </div>
             </div>
         </nav>

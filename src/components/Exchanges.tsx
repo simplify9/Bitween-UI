@@ -7,12 +7,12 @@ import { ExchangeFinderPanel, ExchangeSpecs } from "./exchanges/ExchangeFinderPa
 import { ExchangeList } from "./exchanges/ExchangeList";
 
 
-const defaultQuery = { 
-    mode: "keyword", 
-    subscription: undefined, 
-    status: undefined, 
-    creationDateFrom: undefined, 
-    creationDateTo: undefined, 
+const defaultQuery = {
+    mode: "keyword",
+    subscription: undefined,
+    status: undefined,
+    creationDateFrom: undefined,
+    creationDateTo: undefined,
     keywords: "",
     offset: 0,
     limit: 20,
@@ -44,22 +44,22 @@ const Component = ({}:Props) => {
     const [queryState, newQuery] = useQuery(defaultQuery);
 
     const [findSpecs, setFindSpecs] = useState<ExchangeSpecs>({
-        findMode: queryState.lastCreatedReq.mode as any,
-        keywords: queryState.lastCreatedReq.keywords ?? "",
+        findMode: queryState.lastSent.mode,
+        keywords: queryState.lastSent.keywords ?? "",
         findBy: {
-            subscription: queryState.lastCreatedReq.subscription ?? "",
+            subscription: queryState.lastSent.subscription ?? "",
             creationTimeWindow: {
-                from: queryState.lastCreatedReq.creationDateFrom,
-                to: queryState.lastCreatedReq.creationDateTo
+                from: queryState.lastSent.creationDateFrom,
+                to: queryState.lastSent.creationDateTo
             },
-            status: queryState.lastCreatedReq.status ?? ""
+            status: queryState.lastSent.status ?? ""
         }
     });
 
     const handleFindRequested = (findSpecs:ExchangeSpecs) => {
         newQuery({
             ...defaultQuery,
-            ...queryState.lastCreatedReq,
+            ...queryState.lastSent,
             mode: findSpecs.findMode,
             keywords: findSpecs.keywords,
             subscription: findSpecs.findBy.subscription,
@@ -73,7 +73,7 @@ const Component = ({}:Props) => {
     const handleViewOptionsChange = (viewOptions:DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
-            ...queryState.lastCreatedReq,
+            ...queryState.lastSent,
             sortBy: viewOptions.sortBy.field,
             sortByDescending: !!viewOptions.sortBy.descending,
             offset: viewOptions.offset,
@@ -81,7 +81,7 @@ const Component = ({}:Props) => {
         });
     }
 
-    
+
 
     return (
         <div className="flex flex-col w-full px-8 py-4">
@@ -92,24 +92,24 @@ const Component = ({}:Props) => {
                 </div>
             </div>
             <ExchangeFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested} />
-            {queryState.results !== null
+            {queryState.response !== null
             ? <>
-                <DataListViewSettingsEditor 
+                <DataListViewSettingsEditor
                     sortByOptions={["subscription", "status", "docType"]}
-                    sortByTitles={{ 
+                    sortByTitles={{
                         subscription: "Subscription",
                         status: "Delivery Status",
                         docType: "Document Type"
                     }}
-                    sortBy={{ field: queryState.lastCreatedReq.sortBy, descending: queryState.lastCreatedReq.sortByDescending }}
-                    total={queryState.results.total} 
-                    offset={queryState.lastCreatedReq.offset} 
-                    limit={queryState.lastCreatedReq.limit} 
+                    sortBy={{ field: queryState.lastSent.sortBy, descending: queryState.lastSent.sortByDescending }}
+                    total={queryState.response.total}
+                    offset={queryState.lastSent.offset}
+                    limit={queryState.lastSent.limit}
                     onChange={handleViewOptionsChange} />
-                <ExchangeList data={queryState.results.data} />
+                <ExchangeList data={queryState.response.data} />
             </>
             : null}
-            
+
         </div>
     )
 }

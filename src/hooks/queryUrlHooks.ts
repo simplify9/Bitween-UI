@@ -1,17 +1,17 @@
 import { formatISO, isValid, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CqBoolean, CqDateTime, CqNumber, CqString, DenormalizedType, EntityModel, QueryHook, QueryResults, SQuery } from "redux-ecq";
-
+import { CqBoolean, CqDateTime, CqNumber, CqString, } from "redux-ecq";
+import {QueryHook, QueryState} from "./queryHookUtil"
 
 type SelfOrArray<T> = T | T[]
 
-type Scalar = CqString | CqBoolean | CqDateTime | CqNumber 
+type Scalar = CqString | CqBoolean | CqDateTime | CqNumber
 
 type QuerySchema = SelfOrArray<Scalar>
 
 export type QueryStringMapping<TQuery> = {
-    [param in keyof TQuery]: QuerySchema 
+    [param in keyof TQuery]: QuerySchema
 }
 
 type HookResult<TQuery> = [TQuery,(params:Partial<TQuery>) => void]
@@ -54,7 +54,7 @@ const encode = (node:QuerySchema, value:any):any => {
 }
 
 const createMapper = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
-    return (queryString:Record<string,string>) => 
+    return (queryString:Record<string,string>) =>
         Object.fromEntries(
             Object.entries(mapping)
                 .map(([key, value]) => [key, parse(value as any, queryString[key])])
@@ -82,34 +82,30 @@ export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defau
             if (value !== "") {
                 fromQueryString[key] = value;
             }
-        });  
+        });
         return {
             ...defaultValue,
             ...createMapper(mapping)(fromQueryString)
         }
     }, [searchParams.toString()]);
-    
+
     const encoder =  createEncoder(mapping);
 
     const setQueryString = (change:Partial<TQuery>) => {
-        
+
         setSearchParams(encoder({ ...query, ...change }));
     }
 
     return [query, setQueryString];
 }
 
-export const withUrlSupport = <
-    TModel extends EntityModel,
-    TReq,
-    TName extends keyof TModel,
-    TRes extends QueryResults<DenormalizedType<TModel,TName>>>(hook:QueryHook<TModel,TReq,TName,TRes>, mapping:QueryStringMapping<TReq>) => {
+export const withUrlSupport = <TReq, TRes>(hook:QueryHook<TReq,TRes>, mapping:QueryStringMapping<TReq>) => {
 
-    return (initReq:TReq, maxDepth:number = 3):[SQuery<TModel,TReq,TName,TRes>,(req:TReq) => void] => {
+    return (initReq:TReq, maxDepth:number = 3):[QueryState<TReq,TRes>,(req:TReq) => void] => {
 
         const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
 
-        const [queryState, _] = hook(req, maxDepth);
+        const [queryState, _] = hook(req);
 
         return [queryState, newQuery];
     }

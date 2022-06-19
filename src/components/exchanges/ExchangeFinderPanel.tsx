@@ -4,7 +4,7 @@ import { ExchangeFindBy, ExchangeFindBySpecs } from "./ExchangeFindBy";
 import { ExchangeKeywordSearch } from "./ExchangeKeywordSearch";
 
 
-type ExchangeFindMode = "keyword" | "findby" | "advanced";
+type ExchangeFindMode = string;
 
 export type ExchangeSpecs = {
     findMode: ExchangeFindMode
@@ -37,7 +37,7 @@ export const ExchangeFinderPanel:React.FC<Props> = ({
                 <Tab key="findby" selected={findMode==='findby'} onClick={() => handleModeChange("findby")}>Find By</Tab>
                 <Tab key="advanced" selected={findMode==='advanced'} onClick={() => handleModeChange("advanced")}>Advanced Search</Tab>
             </TabNavigator>
-            
+
             {(findMode==='keyword') &&
                 <ExchangeKeywordSearch
                     value={value.keywords}
@@ -45,9 +45,9 @@ export const ExchangeFinderPanel:React.FC<Props> = ({
                     onFindRequested={keywords => onFindRequested({ ...value, keywords })} />
             }
 
-            {(findMode==='findby') && 
-                <ExchangeFindBy 
-                    value={value.findBy} 
+            {(findMode==='findby') &&
+                <ExchangeFindBy
+                    value={value.findBy}
                     onChange={findBy => onChange({ ...value, findBy })}
                     onFindRequested={findBy => onFindRequested({ ...value, findBy })} />}
 
