@@ -17,7 +17,7 @@ interface Props {
 }
 
 const defaultQuery = {
-    mode: "keyword",
+    nameContains:'',
     creationDateFrom: undefined,
     creationDateTo: undefined,
     keywords: "",
@@ -41,36 +41,32 @@ const queryStringMapping = {
 const useQuery = useDocumentFinder;
 
 export type DocumentSpecs = {
-    findMode: string
+    nameContains:string
     keywords: string
-    findBy: DocumentFindBySpecs
-}
-export type DocumentFindBySpecs = {
     creationTimeWindow: DateTimeRange
 }
+
 
 export default (props: Props) => {
     const [queryState, newQuery] = useQuery(defaultQuery);
     const [creatingOn, setCreatingOn] = useState(false);
     const [findSpecs, setFindSpecs] = useState<DocumentSpecs>({
-        findMode: queryState.lastSent.mode,
+        nameContains: queryState.lastSent.nameContains,
         keywords: queryState.lastSent.keywords ?? "",
-        findBy: {
-            creationTimeWindow: {
-                from: queryState.lastSent.creationDateFrom,
-                to: queryState.lastSent.creationDateTo
-            },
-        }
+        creationTimeWindow: {
+            from: queryState.lastSent.creationDateFrom,
+            to: queryState.lastSent.creationDateTo
+        },
+
     });
 
-    const handleFindRequested = (findSpecs: DocumentSpecs) => {
+    const handleFindRequested = () => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            mode: findSpecs.findMode,
             keywords: findSpecs.keywords,
-            creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
-            creationDateTo: findSpecs.findBy.creationTimeWindow.to,
+            creationDateFrom: findSpecs.creationTimeWindow.from,
+            creationDateTo: findSpecs.creationTimeWindow.to,
             offset: 0,
         });
     }

@@ -2,15 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/components/Subscriptions/AdapterEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Subscriptions/AdapterSelector.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Exchanges.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Exchanges.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/DataListViewSettingsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/DataListViewSettingsEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/common.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Documents.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Documents.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Documents/DocumentFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Documents/DocumentFinderPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Documents/DocumentSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Documents/DocumentSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Partners.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partners.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Partners/PartnerFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partners/PartnerFinderPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Partners/PartnerSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partners/PartnerSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/Modal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/InputBox.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/InputBox.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/InputPopOver.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/InputPopOver.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/queryHookUtil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/queryHookUtil.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/queryHooks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/queryHooks.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/types/document.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/document.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/partners.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/partners.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/xchange.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/xchange.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +76,8 @@
       <option name="presentableId" value="Default" />
       <updated>1642078693258</updated>
       <workItem from="1642078694896" duration="161000" />
-      <workItem from="1655309036956" duration="48617000" />
+      <workItem from="1655309036956" duration="58730000" />
+      <workItem from="1655750059745" duration="3029000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -79,7 +93,14 @@
       <option name="project" value="LOCAL" />
       <updated>1655637811136</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Pagination">
+      <created>1655640253239</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1655640253239</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -95,10 +116,12 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="updates" />
     <MESSAGE value="selectors" />
-    <option name="LAST_COMMIT_MESSAGE" value="selectors" />
+    <MESSAGE value="Pagination" />
+    <option name="LAST_COMMIT_MESSAGE" value="Pagination" />
   </component>
 </project>

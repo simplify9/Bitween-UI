@@ -10,7 +10,7 @@ export interface IDocument{
     promotedProperties?:any
 }
 export type DocumentFindQuery = CommonFindQuery &  {
-    mode: string
+    nameContains: string
 
 }
 

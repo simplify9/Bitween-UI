@@ -9,7 +9,7 @@ import TextEditor from "../common/forms/TextEditor";
 interface Props {
     value: PartnerSpecs
     onChange: (value:PartnerSpecs) => void
-    onFindRequested: (specs:PartnerSpecs) => void
+    onFindRequested: () => void
 }
 
 export const PartnerFinderPanel:React.FC<Props> = ({
@@ -25,7 +25,7 @@ export const PartnerFinderPanel:React.FC<Props> = ({
                 <Tab key="Search" selected={true} onClick={() => {}}>Keyword Search</Tab>
 
             </TabNavigator>
-            <form noValidate className="flex w-full px-4 py-8" onSubmit={()=>onFindRequested(value)}>
+            <form noValidate className="flex w-full px-4 py-8" onSubmit={onFindRequested}>
                 <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4 w-full">
                     <FormField title="Name" className="grow">
                         <TextEditor placeholder="Type in the name..." value={value.nameContains} onChange={(t) => onChange({...value,nameContains:t})} />

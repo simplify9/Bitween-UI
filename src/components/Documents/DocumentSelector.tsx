@@ -5,9 +5,11 @@ import { ChoiceEditor } from "../common/forms/ChoiceEditor";
 interface Props {
     value?: string
     onChange: (value:string) => void
+    disabled?: boolean
 }
 
 const defaultQuery = {
+    nameContains:'',
     mode: "keyword",
     creationDateFrom: undefined,
     creationDateTo: undefined,
@@ -18,12 +20,13 @@ const defaultQuery = {
     sortByDescending: false
 }
 
-const DocumentSelector:React.FC<Props> = ({ value, onChange }) => {
+const DocumentSelector:React.FC<Props> = ({ value, onChange, disabled }) => {
 
     const [queryState, newQuery] = useDocumentFinder(defaultQuery);
     return (
         <ChoiceEditor
             placeholder="Select Document"
+            disabled={disabled}
             value={value}
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}

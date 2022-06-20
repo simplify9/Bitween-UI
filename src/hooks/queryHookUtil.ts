@@ -31,6 +31,8 @@ export const queryHook = <TReq, TRes>({
         });
 
         const send = (req: TReq) => {
+
+
             setState(s => ({
                 ...s,
                 isFetching: true,

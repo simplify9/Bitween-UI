@@ -21,9 +21,9 @@ const Component :React.FC<Props> = ({onClose,onSubmit,submitLabel, submitDisable
                 <div className="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
 
                     <div
-                        className="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
+                        className="relative bg-white rounded-lg text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
                         <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                            <div className="sm:flex sm:items-start">
+                            <div className="sm:flex sm:items-start overflow-visible">
                                 {children}
                             </div>
                         </div>

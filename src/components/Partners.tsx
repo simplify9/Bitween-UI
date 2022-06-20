@@ -46,7 +46,8 @@ export default (props:Props) => {
         nameContains: queryState.lastSent.nameContains ?? "",
     });
 
-    const handleFindRequested = (findSpecs:PartnerSpecs) => {
+    const handleFindRequested = () => {
+        console.log("findspecs",findSpecs)
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,

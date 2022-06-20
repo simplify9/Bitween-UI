@@ -40,26 +40,26 @@ const createSelector = (changeHandler:(value:string) => void, value: string) => 
 
 const defaultRenderOption = (props:OptionRenderProps<any>):JSX.Element => {
     return (
-        <div 
-            key={props.value} 
-            className={"px-4 py-2 " + (props.selected ? "bg-teal-500 text-white cursor-default": "hover:bg-gray-100 cursor-pointer")} 
-            title={props.title} 
+        <div
+            key={props.value}
+            className={"px-4 py-2 " + (props.selected ? "bg-teal-500 text-white cursor-default": "hover:bg-gray-100 cursor-pointer")}
+            title={props.title}
             onClick={props.select}>
             {props.title}
         </div>
     );
 }
 
-export const ChoiceEditor = <TOption extends {} = any>({ 
-    placeholder, 
-    children, 
-    onChange = noOp, 
-    value = "", 
-    options, 
+export const ChoiceEditor = <TOption extends {} = any>({
+    placeholder,
+    children,
+    onChange = noOp,
+    value = "",
+    options,
     optionTitle,
     optionValue,
     renderOption = defaultRenderOption,
-    ...htmlProps 
+    ...htmlProps
 }:Props<TOption>):JSX.Element => {
 
     const [state, setState] = useState<State<TOption>>({ partialInput: "", optionList: [] });
@@ -88,28 +88,29 @@ export const ChoiceEditor = <TOption extends {} = any>({
     }
 
     const handleBlur = () => {
-        
+
         setState(s => {
             const selectedOption = s.optionList.filter(opt => optionValue(opt) === value)[0];
             return {
                 ...s,
                 partialInput: selectedOption ? optionTitle(selectedOption) : ""
-            }; 
+            };
         });
     }
 
     return (
         <InputBox {...htmlProps} withPopOver>
-            <Input 
-                type="text" 
-                placeholder={placeholder} 
-                value={state.partialInput} 
+            <Input
+                type="text"
+                disabled={htmlProps.disabled}
+                placeholder={placeholder}
+                value={state.partialInput}
                 onChange={handleChange}
                 onBlur={handleBlur} />
             <InputPopOver className="flex flex-col divide-y">
-                {state.optionList.map(opt => renderOption({ 
-                    option: opt, 
-                    title: optionTitle(opt), 
+                {state.optionList.map(opt => renderOption({
+                    option: opt,
+                    title: optionTitle(opt),
                     value: optionValue(opt),
                     selected: optionValue(opt) === value,
                     select: createSelector(onChange, optionValue(opt))

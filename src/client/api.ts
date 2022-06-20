@@ -86,11 +86,11 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
         // drop from cache
         await config.accessTokenCache.drop();
 
-        // const refreshToken = config.refreshTokenCache
-        //     ? await config.refreshTokenCache.read()
-        //     : null;
+        const refreshToken = config.refreshTokenCache
+            ? await config.refreshTokenCache.read()
+            : null;
 
-        let refreshToken = "removeme";
+        
         // create new access / refresh token if possible
         if (refreshToken !== null && config.accessTokenGenerator) {
             try {
@@ -114,10 +114,10 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
     // INTERCEPTORS
 
     let accessToken:string | null = null;
+    config.accessTokenCache.read().then(a => accessToken = a);
 
     axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
         // append access token if available
-        console.log("accessToken",accessToken)
         return accessToken !== null
             ? { ...req, headers: { ...req.headers, "Authorization": `Bearer ${accessToken}` }}
             : req;

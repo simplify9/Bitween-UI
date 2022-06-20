@@ -1,10 +1,15 @@
 import axios, {Axios, AxiosInstance} from "axios";
 import { ExchangeFindQuery} from "../types/xchange";
-import {ICreateSubscription, IUpdateSubscription, SubscriptionFindQuery} from "../types/subscriptions";
+import {
+    AdapterFindQuery,
+    ICreateSubscription, ISubscription,
+    SubscriptionFindQuery
+} from "../types/subscriptions";
 import {LoginRequest, LoginResponse} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
 import {CreateDocument, DocumentFindQuery, UpdateDocument} from "../types/document";
+import {OptionType} from "../types/common";
 
 export const client = axios.create();
 
@@ -72,6 +77,33 @@ export const apiClient = {
         let res:ApiResponse = await client.get(`partners/generatekey`)
         return res
     },
+    findAdapters: async (req: AdapterFindQuery) => {
+
+        let res = await client.get(`adapters?prefix=${req.prefix}`)
+        let arr:OptionType[] = [];
+       if (!res.data) return [];
+        Object.keys(res.data).forEach(k => {
+            arr.push({
+                id:k,
+                title:k
+            })
+        })
+        return arr;
+
+    },
+    findAdapterProperties: async (id: string) => {
+        let res = await client.get(`adapters/${id}/properties`)
+        let arr:OptionType[] = [];
+        if (!res.data) return [];
+        Object.keys(res.data).forEach(k => {
+            arr.push({
+                id:k,
+                title:k
+            })
+        })
+        return arr;
+
+    },
     findSubscriptions: async (req: SubscriptionFindQuery) => {
 
         let res = await client.get(`subscriptions${formulateQueryString(req)}`)
@@ -89,7 +121,7 @@ export const apiClient = {
         let res:ApiResponse = await client.post("subscriptions",req)
         return res
     },
-    updateSubscription: async (id:string,req: IUpdateSubscription) => {
+    updateSubscription: async (id:string,req: ISubscription) => {
         let res:ApiResponse = await client.post(`subscriptions/${id}`,req)
         return res
     },
@@ -101,7 +133,11 @@ export const apiClient = {
 }
 
 const formulateQueryString = (req:any) => {
-    return `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`
+    let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
+    if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
+
+
+    return query;
 }
 
 
