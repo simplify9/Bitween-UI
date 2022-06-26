@@ -64,6 +64,7 @@ export default (props: Props) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
+            nameContains: findSpecs.nameContains,
             keywords: findSpecs.keywords,
             creationDateFrom: findSpecs.creationTimeWindow.from,
             creationDateTo: findSpecs.creationTimeWindow.to,

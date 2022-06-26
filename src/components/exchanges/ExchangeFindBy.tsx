@@ -19,18 +19,18 @@ export type ExchangeFindBySpecs = {
 interface Props {
     value: ExchangeFindBySpecs
     onChange: (value: ExchangeFindBySpecs) => void
-    onFindRequested: (value: ExchangeFindBySpecs) => void
+    onFindRequested: () => void
 }
 
 export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequested }) => {
 
     const handleFind = (e:any) => {
         e.preventDefault();
-        onFindRequested(value);
+        onFindRequested();
     }
 
     return (
-        <form noValidate className="flex w-full px-4 py-8" onSubmit={handleFind}>
+        <div className="flex w-full px-4 py-8" >
             <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4">
                 <FormField title="Target Subscription">
                     <SubscriptionSelector
@@ -46,10 +46,10 @@ export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequeste
                         optionTitle={(item:DeliveryStatus) => item.title}
                         optionValue={(item:DeliveryStatus) => item.id}
                         options={[
-                            { id: "received", title: "Received" },
-                            { id: "mapped", title: "Mapped" },
-                            { id: "delivered", title: "Delivered"},
-                            { id: "failed", title: "Failed" }
+                            { id: "0", title: "Running" },
+                            { id: "1", title: "Success" },
+                            { id: "2", title: "Bad response"},
+                            { id: "3", title: "Failed" }
                         ]} />
                 </FormField>
 
@@ -61,12 +61,12 @@ export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequeste
                 </FormField>
 
                 <button
-                    type="submit"
+                    onClick={handleFind}
                     className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
                     Find
                 </button>
             </div>
-        </form>
+        </div>
     )
 }
 

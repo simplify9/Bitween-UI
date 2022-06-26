@@ -2,7 +2,7 @@ import {CommonFindQuery, OptionType} from "./common";
 
 
 export type SubscriptionFindQuery = CommonFindQuery &  {
-    mode: string
+    nameContains: string
 }
 
 export interface ISubscription{

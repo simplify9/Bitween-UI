@@ -8,9 +8,7 @@ interface Props {
 }
 
 const defaultQuery = {
-    mode: "keyword",
-    creationDateFrom: undefined,
-    creationDateTo: undefined,
+    nameContains: '',
     keywords: "",
     offset: 0,
     limit: 20,

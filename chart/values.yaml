@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repo: registry.digitalocean.com/sf9cr
+  pullSecret: sf9cr
+
+probes:
+  enabled: false
+
+ingress:
+  enabled: true
+  annotations:
+    # nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # kubernetes.io/tls-acme: "true"
+  tlsSecret: ""

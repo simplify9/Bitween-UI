@@ -1,0 +1,66 @@
+name: $(version)
+
+trigger:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: infolinkui
+  version: $[format('1.0.{0}', counter('1.0', 0))]
+
+stages:
+  - stage: Build
+    displayName: Build and push image
+
+    jobs:
+      - job: build
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+        displayName: Build, push image and chart and deploy
+        steps:
+
+          - task: Docker@2
+            displayName: Build and push an image to container registry
+            inputs:
+              command: buildAndPush
+              repository: sf9cr/$(imageName)
+              dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              containerRegistry: sf9cr
+              tags: |
+                $(version)
+                latest
+
+          - task: HelmInstaller@0
+            displayName: 'Install Helm 3.2.4'
+            inputs:
+              helmVersion: '3.2.4'
+              checkLatestHelmVersion: false
+              installKubectl: false
+
+          - task: HelmDeploy@0
+            displayName: Helm package
+            inputs:
+              command: package
+              chartPath: chart
+              arguments: --version $(version) --app-version $(version)
+              updatedependency: true
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+              artifactName: HelmChart
+
+          - task: HelmDeploy@0
+            displayName: 'helm upgrade'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: 'k8s-s9'
+              namespace: playground
+              command: upgrade
+              releaseName: '$(imageName)'
+              chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+              arguments: >
+                --set ingress.host="infolink-ui.sf9.io"
+
+

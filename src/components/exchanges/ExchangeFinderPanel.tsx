@@ -15,7 +15,7 @@ export type ExchangeSpecs = {
 interface Props {
     value: ExchangeSpecs
     onChange: (value:ExchangeSpecs) => void
-    onFindRequested: (specs:ExchangeSpecs) => void
+    onFindRequested: () => void
 }
 
 export const ExchangeFinderPanel:React.FC<Props> = ({
@@ -33,23 +33,16 @@ export const ExchangeFinderPanel:React.FC<Props> = ({
     return (
         <>
             <TabNavigator className="w-full">
-                <Tab key="keyword" selected={findMode==='keyword'} onClick={() => handleModeChange("keyword")}>Keyword Search</Tab>
                 <Tab key="findby" selected={findMode==='findby'} onClick={() => handleModeChange("findby")}>Find By</Tab>
                 <Tab key="advanced" selected={findMode==='advanced'} onClick={() => handleModeChange("advanced")}>Advanced Search</Tab>
             </TabNavigator>
 
-            {(findMode==='keyword') &&
-                <ExchangeKeywordSearch
-                    value={value.keywords}
-                    onChange={keywords => onChange({ ...value, keywords })}
-                    onFindRequested={keywords => onFindRequested({ ...value, keywords })} />
-            }
 
             {(findMode==='findby') &&
                 <ExchangeFindBy
                     value={value.findBy}
                     onChange={findBy => onChange({ ...value, findBy })}
-                    onFindRequested={findBy => onFindRequested({ ...value, findBy })} />}
+                    onFindRequested={onFindRequested} />}
 
         </>
     )

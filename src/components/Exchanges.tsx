@@ -8,14 +8,14 @@ import { ExchangeList } from "./exchanges/ExchangeList";
 
 
 const defaultQuery = {
-    mode: "keyword",
+    mode: "findby",
     subscription: undefined,
     status: undefined,
     creationDateFrom: undefined,
     creationDateTo: undefined,
     keywords: "",
     offset: 0,
-    limit: 5,
+    limit: 20,
     sortBy: "docType",
     sortByDescending: false
 }
@@ -56,7 +56,7 @@ const Component = ({}:Props) => {
         }
     });
 
-    const handleFindRequested = (findSpecs:ExchangeSpecs) => {
+    const handleFindRequested = () => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,

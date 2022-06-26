@@ -1,4 +1,4 @@
-import {ISubscription} from "../../types/subscriptions";
+import {ISubscription, SubscriptionTypeOptions} from "../../types/subscriptions";
 import {useNavigate} from "react-router-dom";
 
 interface Props {
@@ -43,7 +43,7 @@ export const SubscriptionList:React.FC<Props> = ({ data }) => {
                             {i.name}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                            {i.type}
+                            {SubscriptionTypeOptions.find(s => s.id == i.type)?.title}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                             {i.isRunning? "Running" : "Idle"}

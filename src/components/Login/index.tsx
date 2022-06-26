@@ -13,7 +13,6 @@ const Login = () => {
     const onSubmit = async () => {
 
         let res = await apiClient.login({username, password});
-
         if (res.succeeded) {
 
             login({

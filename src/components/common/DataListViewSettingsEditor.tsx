@@ -72,7 +72,7 @@ export const DataListViewSettingsEditor:React.FC<Props> = ({ offset, limit, tota
             ? <>
                 <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2" /></Tab>
                 <Tab  key="l"><Icon shape="chevronLeft" className="h-2" /></Tab>
-                {pages.map(p => (<Tab onClick={() => handlePageChange(p * limit)} key={p} selected={p === pageIndex}>{p + 1}</Tab>))}
+                {pages.map(p => { return p >= (pageIndex - 2) && p <= (pageIndex + 2) ?  (<Tab onClick={() => handlePageChange(p * limit)} key={p} selected={p === pageIndex}>{p + 1}</Tab>) : <></>})}
                 <Tab key="r"><Icon shape="chevronRight" className="h-2" /></Tab>
                 <Tab onClick={() => handlePageChange(total - limit)} key="rr"><Icon shape="chevronDoubleRight" className="h-2" /></Tab>
             </>

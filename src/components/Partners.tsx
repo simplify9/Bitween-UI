@@ -1,7 +1,6 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {useState} from "react";
 import {jsBoolean, jsNumber, jsString} from "redux-ecq";
-import {withUrlSupport} from "../hooks/queryUrlHooks";
 import {usePartnerFinder} from "../hooks/queryHooks";
 import {DateTimeRange} from "./common/forms/DateTimeRangeEditor";
 import {PartnerList} from "./Partners/PartnerList";

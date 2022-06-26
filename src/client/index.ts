@@ -16,7 +16,8 @@ export const client = axios.create();
 export const apiClient = {
 
     login: async (req: LoginRequest) => {
-        let res:ApiResponse = await client.post("accounts/login", req)
+        let res:ApiResponse = await client.post("accounts/login", req);
+        console.log("token",res.data.refreshToken)
         return res
     },
 
@@ -134,7 +135,9 @@ export const apiClient = {
 
 const formulateQueryString = (req:any) => {
     let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
-    if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
+    // if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
+
+    //if ('status' in req && req.status && req.status != '') query += `&filter=statusFilter:1:${req.status}`;
 
 
     return query;

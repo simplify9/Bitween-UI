@@ -13,10 +13,9 @@ import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
 
 
 const defaultQuery = {
-    mode: "keyword",
+    nameContains: "",
     creationDateFrom: undefined,
     creationDateTo: undefined,
-    keywords: "",
     offset: 0,
     limit: 20,
     sortBy: "docType",
@@ -35,11 +34,8 @@ const queryStringMapping = {
 }
 
 export type SubscriptionSpecs = {
-    findMode: string
+    nameContains:string
     keywords: string
-    findBy: SubscriptionFindBySpecs
-}
-export type SubscriptionFindBySpecs = {
     creationTimeWindow: DateTimeRange
 }
 
@@ -55,24 +51,22 @@ const Component = ({}: Props) => {
     const [queryState, newQuery] = useQuery(defaultQuery);
 
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
-        findMode: queryState.lastSent.mode,
+        nameContains:'',
         keywords: queryState.lastSent.keywords ?? "",
-        findBy: {
-            creationTimeWindow: {
-                from: queryState.lastSent.creationDateFrom,
-                to: queryState.lastSent.creationDateTo
-            },
+        creationTimeWindow: {
+            from: queryState.lastSent.creationDateFrom,
+            to: queryState.lastSent.creationDateTo
         }
+
     });
 
-    const handleFindRequested = (findSpecs: SubscriptionSpecs) => {
+    const handleFindRequested = () => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            mode: findSpecs.findMode,
-            keywords: findSpecs.keywords,
-            creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
-            creationDateTo: findSpecs.findBy.creationTimeWindow.to,
+            nameContains: findSpecs.nameContains,
+            creationDateFrom: findSpecs.creationTimeWindow.from,
+            creationDateTo: findSpecs.creationTimeWindow.to,
             offset: 0,
         });
     }
