@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json /app/
 RUN yarn
 COPY . /app
-RUN yarn build:stg
+RUN yarn build
 
 # production environment
 FROM nginx:stable-alpine
