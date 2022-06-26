@@ -16,7 +16,7 @@ stages:
 
     jobs:
       - job: build
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
         displayName: Build, push image and chart and deploy
         steps:
 
