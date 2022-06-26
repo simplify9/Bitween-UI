@@ -24,9 +24,9 @@ stages:
             displayName: Build and push an image to container registry
             inputs:
               command: buildAndPush
-              repository: sf9cr/$(imageName)
+              repository: simplify9/$(imageName)
               dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-              containerRegistry: sf9cr
+              containerRegistry: simplify9cr
               tags: |
                 $(version)
                 latest
@@ -46,21 +46,28 @@ stages:
               arguments: --version $(version) --app-version $(version)
               updatedependency: true
 
-          - task: PublishBuildArtifacts@1
+          - task: Bash@3
+            displayName: 'Upload to chart museum'
             inputs:
-              pathToPublish: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
-              artifactName: HelmChart
+              targetType: 'inline'
+              script: |
+                for f in $(Build.ArtifactStagingDirectory)/*.tgz
+                do
+                  echo "Uploading @$f"
+                  curl --data-binary "@$f" https://charts.sf9.io/api/charts --user $(CmUser):$(CmPassword)
+                done
 
           - task: HelmDeploy@0
-            displayName: 'helm upgrade'
+            displayName: 'Deploy to playground'
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: 'k8s-s9'
-              namespace: playground
-              command: upgrade
+              namespace: 'playground'
+              command: 'upgrade'
+              chartName: '$(imageName)'
+              chartVersion: $(version)
               releaseName: '$(imageName)'
-              chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
-              arguments: >
-                --set ingress.host="infolink-ui.sf9.io"
+              overrideValues: 'ingress.enabled=true,ingress.hosts={infolink-ui.sf9.io}'
+              arguments: --repo https://charts.sf9.io
 
 
