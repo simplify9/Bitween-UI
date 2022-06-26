@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/authConfig.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/authConfig.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Documents.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Documents.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Documents/DocumentFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Documents/DocumentFinderPanel.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Exchanges.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Exchanges.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Login/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Login/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Partners.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partners.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Partners/PartnerFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partners/PartnerFinderPanel.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionFinder.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionFinder.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/DataListViewSettingsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/DataListViewSettingsEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeDocument.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeDocument.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeFinderPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeFinderPanel.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/azure-pipelines.yml" beforeDir="false" afterPath="$PROJECT_DIR$/azure-pipelines.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +59,7 @@
       <workItem from="1655750059745" duration="3095000" />
       <workItem from="1655812756507" duration="3800000" />
       <workItem from="1655898838711" duration="2572000" />
-      <workItem from="1656238626020" duration="155000" />
+      <workItem from="1656238626020" duration="245000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -107,7 +89,14 @@
       <option name="project" value="LOCAL" />
       <updated>1655754288523</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="pipeline">
+      <created>1656238827425</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1656238827425</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -139,6 +128,7 @@
     <MESSAGE value="selectors" />
     <MESSAGE value="Pagination" />
     <MESSAGE value="updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="updates" />
+    <MESSAGE value="pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="pipeline" />
   </component>
 </project>
