@@ -135,9 +135,13 @@ export const apiClient = {
 
 const formulateQueryString = (req:any) => {
     let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
-    // if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
+    if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
 
-    //if ('status' in req && req.status && req.status != '') query += `&filter=statusFilter:1:${req.status}`;
+    if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;
+    if ('subscription' in req && req.subscription && req.subscription != '') query += `&filter=SubscriptionId:1:${req.subscription}`;
+    if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${req.creationDateFrom}`;
+    if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${req.creationDateTo}`;
+
 
 
     return query;
