@@ -7,8 +7,12 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  imageName: infolinkui
-  version: $[format('1.0.{0}', counter('1.0', 0))]
+  - group: Chartmuseum
+  - group: S3Bucket
+  - name: imageName
+    value: 'infolinkui'
+  - name: version
+    value: $[format('6.0.{0}', counter('6.0', 0))]
 
 stages:
   - stage: Build

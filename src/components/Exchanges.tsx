@@ -52,7 +52,10 @@ const Component = ({}:Props) => {
                 from: queryState.lastSent.creationDateFrom,
                 to: queryState.lastSent.creationDateTo
             },
-            status: queryState.lastSent.status ?? ""
+            status: queryState.lastSent.status ?? "",
+            id: queryState.lastSent.id ?? "",
+            correlationId: queryState.lastSent.correlationId ?? "",
+            promotedProperties: queryState.lastSent.promotedProperties ?? ""
         }
     });
 
@@ -63,6 +66,9 @@ const Component = ({}:Props) => {
             mode: findSpecs.findMode,
             keywords: findSpecs.keywords,
             subscription: findSpecs.findBy.subscription,
+            id: findSpecs.findBy.id ?? "",
+            correlationId: findSpecs.findBy.correlationId ?? "",
+            promotedProperties: findSpecs.findBy.promotedProperties ?? "",
             creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
             creationDateTo: findSpecs.findBy.creationTimeWindow.to,
             status: findSpecs.findBy.status,

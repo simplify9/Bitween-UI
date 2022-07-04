@@ -41,5 +41,8 @@ export type ExchangeFindQuery = CommonFindQuery & {
     mode: string
     subscription?: string
     status?: string
+    id?:string
+    correlationId?:string
+    promotedProperties?:string
 }
 

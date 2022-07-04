@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
+    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="pipeline">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/forms/DateTimeRangeEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/DateTimeRangeEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Exchanges.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Exchanges.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeFindBy.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/xchange.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/xchange.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,14 +33,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/components/common/forms" />
-    <property name="nodejs_package_manager_path" value="npm" />
-    <property name="vue.rearranger.settings.migration" value="true" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "nodejs_package_manager_path": "yarn",
+    "ts.external.directory.path": "/Users/samerz/dev/simplify9/InfolinkUi/node_modules/typescript/lib"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/components/common/forms" />
@@ -154,7 +153,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="selectors" />

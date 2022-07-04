@@ -11,9 +11,12 @@ type DeliveryStatus = {
 }
 
 export type ExchangeFindBySpecs = {
-    subscription: string
-    status: string
+    subscription?: string
+    status?: string
     creationTimeWindow: DateTimeRange
+    id?:string
+    correlationId?:string
+    promotedProperties?:string
 }
 
 interface Props {
@@ -31,7 +34,7 @@ export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequeste
 
     return (
         <div className="flex w-full px-4 py-8" >
-            <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4">
+            <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4 space-y-4">
                 <FormField title="Target Subscription">
                     <SubscriptionSelector
                         value={value.subscription}
@@ -53,9 +56,20 @@ export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequeste
                         ]} />
                 </FormField>
 
+                <FormField title="ID" >
+                    <TextEditor placeholder="ID" value={value.id} onChange={(t) => onChange({...value,id:t})} />
+                </FormField>
+                <FormField title="Correlation ID">
+                    <TextEditor placeholder="Correlation ID" value={value.correlationId} onChange={(t) => onChange({...value,correlationId:t})} />
+                </FormField>
+                <FormField title="Promoted Properties" className={"grow"}>
+                    <TextEditor placeholder="Promoted Properties" value={value.promotedProperties} onChange={(t) => onChange({...value,promotedProperties:t})} />
+                </FormField>
+
+
+
                 <FormField title="Creation Time Window">
                     <DateTimeRangeEditor
-
                         value={value.creationTimeWindow}
                         onChange={creationTimeWindow => onChange({ ...value, creationTimeWindow })} />
                 </FormField>
