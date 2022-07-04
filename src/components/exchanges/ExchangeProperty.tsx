@@ -6,9 +6,9 @@ interface Props {
 }
 
 const ExchangeProperty:React.FC<Props> = ({ label,value }) => {
-
+    if (!value) return<></>;
     return (
-        <div>{label}: {value}</div>
+        <div><strong>{label}</strong>: {value}</div>
     )
 }
 

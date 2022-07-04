@@ -10,7 +10,7 @@ export interface ISubscription{
     name?:string;
     documentId?:string;
     partnerId?:string;
-    aggregationForId?:number;
+    aggregationForId?:string;
     type?: string
     documentName?:string;
     isRunning?:boolean;
@@ -32,7 +32,7 @@ export interface ISubscription{
     aggregateOn?: string | null;
     consecutiveFailures?: number;
     lastException?: string;
-    aggregationTarget?: 'Input' | 'Output' | 'Response';
+    aggregationTarget?: string;
     pausedOn?: string | null;
 }
 

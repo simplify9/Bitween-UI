@@ -16,7 +16,7 @@ export const ExchangeList:React.FC<Props> = ({ data }) => {
 
     return (
         <>
-        <table className="appearance-none min-w-full">
+        <table className="appearance-none min-w-full max-w-100">
           <thead className="border-y bg-gray-50">
             <tr>
                 <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
@@ -43,20 +43,20 @@ export const ExchangeList:React.FC<Props> = ({ data }) => {
 
             </tr>
           </thead>
-          <tbody>
+          <tbody className={"max-w-full"}>
             {
               data.map((i) => (
                 <tr key={i.id} className="bg-white border-b">
                     <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
                         <div className={"flex flex-col gap-2"}>
                             <div className={"flex gap-1"}>
-                                ID: {i.id}</div>
+                                <strong> ID:</strong> {i.id}</div>
                             <div  className={"flex gap-1"}>
-                                CID:
+                                <strong> CID:</strong>
                                 {i.correlationId}</div>
-                            <div  className={"flex gap-1"}>
-                                RID:
-                                {i.retryFor}</div>
+                            {i.retryFor && <div className={"flex gap-1"}>
+                                <strong>Retry For:</strong>
+                                {i.retryFor}</div>}
                         </div>
                     </td>
                     <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
@@ -91,9 +91,9 @@ export const ExchangeList:React.FC<Props> = ({ data }) => {
                       </div>
                   </td>
 
-                    <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
-                        <div className={"flex gap-2"}>
-                            {/*{Object.keys(i.promotedProperties).map((k:string) => <ExchangeProperty label={k} value={i.promotedProperties[k]} />)}*/}
+                    <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap ">
+                        <div className={"flex gap-2 flex flex-wrap max-w-sm"}>
+                            {Object.keys(i.promotedProperties).map((k:string) => <ExchangeProperty label={k} value={i.promotedProperties[k]} />)}
                         </div>
                     </td>
 
@@ -107,7 +107,7 @@ export const ExchangeList:React.FC<Props> = ({ data }) => {
           </tbody>
         </table>
             {showExceptionFor && <Modal onClose={() => setShowExceptionFor(null)} >
-                <div className="flex gap-2 py-1 border bg-gray-50 px-2 align-center rounded shadow-sm">
+                <div className="flex gap-2 py-1 border bg-gray-50 px-2 align-center rounded shadow-sm ">
                     {data.find(d => d.id == showExceptionFor)?.exception}
                 </div>
             </Modal>}

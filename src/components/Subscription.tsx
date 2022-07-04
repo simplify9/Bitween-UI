@@ -13,6 +13,7 @@ import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
 import AdapterEditor from "./Subscriptions/AdapterEditor";
+import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 
 
 const Component = () => {
@@ -109,67 +110,90 @@ const Component = () => {
 
 
             <div className="grid grid-cols-6 gap-6 rounded mb-6">
-                {updateSubscriptionData?.type == "1" && <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
+                {updateSubscriptionData?.type == "1" &&
+                    <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
 
-                    <FormField title="Filter" className="grow">
-                    </FormField>
-
-
-                </div>}
-                {updateSubscriptionData?.type == "8" && <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
-
-                    <FormField title="Aggregation" className="grow">
-                    </FormField>
+                        <FormField title="Filter" className="grow">
+                        </FormField>
 
 
-                </div>}
-                {updateSubscriptionData?.type == "2" && <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
+                    </div>}
+                {updateSubscriptionData?.type == "8" &&
+                    <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
 
-                    <AdapterEditor title={"Validator"} type={"validators"} value={updateSubscriptionData?.validatorId}
-                                   onChange={(t) => setUpdateSubscriptionData({
-                                       ...updateSubscriptionData,
-                                       validatorId: t
-                                   })}
-                                   props={updateSubscriptionData?.validatorProperties}
-                    />
+                        <FormField title="Aggregation" className="grow">
+                        </FormField>
+                        <FormField title="Subscription">
+                            <SubscriptionSelector
+                                value={updateSubscriptionData.aggregationForId}
+                                onChange={subscription => {
+                                }}
+                                disabled={true}
+                            />
+                        </FormField>
+                        <FormField title="Target" >
+                            <ChoiceEditor
+                                value={updateSubscriptionData?.aggregationTarget?.toString()}
+                                onChange={val => setUpdateSubscriptionData({...updateSubscriptionData, aggregationTarget: val})}
+                                optionTitle={(item: OptionType) => item.title}
+                                optionValue={(item: OptionType) => item.id}
+                                options={[{id:'0',title:'Input'},
+                                    {id:'1',title:'Output'},
+                                    {id:'2',title:'Response'}]}/>
+                        </FormField>
 
 
-                </div>}
-                {updateSubscriptionData?.type == "4" && <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
+                    </div>}
+                {updateSubscriptionData?.type == "2" &&
+                    <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
 
-                    <AdapterEditor title={"Receiver"} type={"receivers"} value={updateSubscriptionData?.receiverId}
-                                   onChange={(t) => setUpdateSubscriptionData({
-                                       ...updateSubscriptionData,
-                                       receiverId: t
-                                   })}
-                                   props={updateSubscriptionData?.receiverProperties}
-                    />
+                        <AdapterEditor title={"Validator"} type={"validators"}
+                                       value={updateSubscriptionData?.validatorId}
+                                       onChange={(t) => setUpdateSubscriptionData({
+                                           ...updateSubscriptionData,
+                                           validatorId: t
+                                       })}
+                                       props={updateSubscriptionData?.validatorProperties}
+                        />
 
 
-                </div>}
+                    </div>}
+                {updateSubscriptionData?.type == "4" &&
+                    <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
+
+                        <AdapterEditor title={"Receiver"} type={"receivers"} value={updateSubscriptionData?.receiverId}
+                                       onChange={(t) => setUpdateSubscriptionData({
+                                           ...updateSubscriptionData,
+                                           receiverId: t
+                                       })}
+                                       props={updateSubscriptionData?.receiverProperties}
+                        />
+
+
+                    </div>}
 
                 <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
 
-                        <AdapterEditor title={"Mapper"} type={"mappers"} value={updateSubscriptionData?.mapperId}
-                                         onChange={(t) => setUpdateSubscriptionData({
-                                             ...updateSubscriptionData,
-                                             mapperId: t
-                                         })}
-                                       props={updateSubscriptionData?.mapperProperties}
-                        />
+                    <AdapterEditor title={"Mapper"} type={"mappers"} value={updateSubscriptionData?.mapperId}
+                                   onChange={(t) => setUpdateSubscriptionData({
+                                       ...updateSubscriptionData,
+                                       mapperId: t
+                                   })}
+                                   props={updateSubscriptionData?.mapperProperties}
+                    />
 
 
                 </div>
 
                 <div className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
 
-                        <AdapterEditor title={"Handler"} type={"handlers"} value={updateSubscriptionData?.handlerId}
-                                         onChange={(t) => setUpdateSubscriptionData({
-                                             ...updateSubscriptionData,
-                                             handlerId: t
-                                         })}
-                                       props={updateSubscriptionData?.handlerProperties}
-                        />
+                    <AdapterEditor title={"Handler"} type={"handlers"} value={updateSubscriptionData?.handlerId}
+                                   onChange={(t) => setUpdateSubscriptionData({
+                                       ...updateSubscriptionData,
+                                       handlerId: t
+                                   })}
+                                   props={updateSubscriptionData?.handlerProperties}
+                    />
 
 
                 </div>

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="pipeline update">
+    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chart/templates/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/chart/templates/deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chart/values.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/chart/values.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeProperty.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeProperty.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,14 +36,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "WebServerToolWindowFactoryState": "false",
-    "nodejs_package_manager_path": "yarn",
-    "ts.external.directory.path": "/Users/samerz/dev/simplify9/InfolinkUi/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/samerz/dev/simplify9/InfolinkUi/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/components/common/forms" />
@@ -65,7 +68,8 @@
       <workItem from="1655812756507" duration="3800000" />
       <workItem from="1655898838711" duration="2572000" />
       <workItem from="1656238626020" duration="3693000" />
-      <workItem from="1656928340941" duration="958000" />
+      <workItem from="1656928340941" duration="1916000" />
+      <workItem from="1656947361183" duration="1693000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -137,7 +141,21 @@
       <option name="project" value="LOCAL" />
       <updated>1656928567781</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="chart update">
+      <created>1656929313869</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1656929313869</updated>
+    </task>
+    <task id="LOCAL-00012" summary="chart update">
+      <created>1656929657816</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1656929657816</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,10 +185,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="selectors" />
     <MESSAGE value="Pagination" />
-    <MESSAGE value="updates" />
     <MESSAGE value="pipeline" />
     <MESSAGE value="settings update" />
     <MESSAGE value="pipeline update" />
-    <option name="LAST_COMMIT_MESSAGE" value="pipeline update" />
+    <MESSAGE value="chart update" />
+    <MESSAGE value="updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="updates" />
   </component>
 </project>
