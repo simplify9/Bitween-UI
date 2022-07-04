@@ -1,8 +1,5 @@
 replicaCount: 1
 
-image:
-  repo: registry.digitalocean.com/sf9cr
-  pullSecret: sf9cr
 
 probes:
   enabled: false
