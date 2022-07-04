@@ -42,7 +42,4 @@ spec:
           {{- end }}
 
 
-      imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
-
 
