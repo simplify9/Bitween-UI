@@ -5,15 +5,14 @@ import FormField from "./common/forms/FormField";
 import TextEditor from "./common/forms/TextEditor";
 import {useEffect, useState} from "react";
 import {apiClient} from "../client";
-import {KeyValuePair, OptionType} from "../types/common";
-import KeyValueEditor from "./common/forms/KeyValueEditor";
+import {OptionType} from "../types/common";
 import {ISubscription, SubscriptionTypeOptions} from "../types/subscriptions";
-import AdapterSelector from "./Subscriptions/AdapterSelector";
 import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
 import AdapterEditor from "./Subscriptions/AdapterEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
+import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 
 
 const Component = () => {
@@ -142,6 +141,9 @@ const Component = () => {
                                     {id:'2',title:'Response'}]}/>
                         </FormField>
 
+                        <ScheduleEditor title={"Schedule"} schedule={updateSubscriptionData.schedules}/>
+
+
 
                     </div>}
                 {updateSubscriptionData?.type == "2" &&
@@ -169,6 +171,7 @@ const Component = () => {
                                        props={updateSubscriptionData?.receiverProperties}
                         />
 
+                        <ScheduleEditor title={"Schedule"} schedule={updateSubscriptionData.schedules}/>
 
                     </div>}
 
@@ -203,7 +206,7 @@ const Component = () => {
 
             <div className={"flex w-full gap-2"}>
                 <Button
-                    onClick={() => navigate('/partners')}
+                    onClick={() => navigate('/subscriptions')}
                     className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">Cancel
                 </Button>
                 <Button

@@ -93,7 +93,7 @@ export const ExchangeList:React.FC<Props> = ({ data }) => {
 
                     <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap ">
                         <div className={"flex gap-2 flex flex-wrap max-w-sm"}>
-                            {Object.keys(i.promotedProperties).map((k:string) => <ExchangeProperty label={k} value={i.promotedProperties[k]} />)}
+                            {i.promotedProperties && Object.keys(i.promotedProperties)?.map((k:string) => <ExchangeProperty label={k} value={i.promotedProperties[k]} />)}
                         </div>
                     </td>
 

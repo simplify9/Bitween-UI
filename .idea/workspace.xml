@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="updates">
+      <change afterPath="$PROJECT_DIR$/src/components/Subscriptions/ScheduleEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/SubscriptionSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/exchanges/ExchangeProperty.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/exchanges/ExchangeProperty.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +69,9 @@
       <workItem from="1655898838711" duration="2572000" />
       <workItem from="1656238626020" duration="3693000" />
       <workItem from="1656928340941" duration="1916000" />
-      <workItem from="1656947361183" duration="1693000" />
+      <workItem from="1656947361183" duration="1711000" />
+      <workItem from="1657534866726" duration="312000" />
+      <workItem from="1657699828815" duration="2097000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -155,7 +157,14 @@
       <option name="project" value="LOCAL" />
       <updated>1656929657816</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="updates">
+      <created>1656949067471</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1656949067471</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
