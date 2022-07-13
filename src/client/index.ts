@@ -28,6 +28,13 @@ export const apiClient = {
             data: res.data.result
         }
     },
+    retryExchanges: async (id:string,reset:boolean) => {
+        let res:ApiResponse = await client.post(`xchanges/${id}/retry`,{
+            reason: null,
+            reset: reset
+        })
+        return res;
+    },
     findDocuments: async (req: DocumentFindQuery) => {
         let res = await client.get(`documents${formulateQueryString(req)}`)
         return {

@@ -112,7 +112,7 @@ const Component = ({}:Props) => {
                     offset={queryState.lastSent.offset}
                     limit={queryState.lastSent.limit}
                     onChange={handleViewOptionsChange} />
-                <ExchangeList data={queryState.response.data} />
+                <ExchangeList data={queryState.response.data} refresh={handleFindRequested} />
             </>
             : null}
 
