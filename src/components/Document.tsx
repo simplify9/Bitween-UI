@@ -19,7 +19,7 @@ const Component = () => {
 
     useEffect(() => {
         if (id) {
-            refreshDocument(id);
+            refreshDocument(id).then();
         }
 
     }, [id]);
@@ -32,7 +32,7 @@ const Component = () => {
             busMessageTypeName: document?.busMessageTypeName,
             promotedProperties: document?.promotedProperties
         })
-    }, [document])
+    }, [document, id])
 
     const refreshDocument = async (id: string) => {
         let res = await apiClient.findDocument(id);
