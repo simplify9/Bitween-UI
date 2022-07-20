@@ -103,7 +103,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
   let accessToken: string | null = null;
   config.accessTokenCache.read().then(a => accessToken = a);
-  console.info("accessToken",accessToken)
+  console.info("accessToken", accessToken)
   axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
     // append access token if available
     return accessToken !== null
@@ -140,7 +140,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
       }
 
 
-      return Promise.reject(error);
     });
 }
 

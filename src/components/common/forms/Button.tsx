@@ -1,16 +1,20 @@
-import { classes } from "./utils";
+import {classes} from "./utils";
+import React from "react";
 
-type Props = JSX.IntrinsicElements['button'] & {
-    
-}
+type Props = JSX.IntrinsicElements['button'] & { onClick: () => void }
 
-const Component:React.FC<Props> = ({ className = "", children, ...htmlProps }) => {
+const Component: React.FC<Props> = ({
+                                      className = "",
+                                      children,
+                                      onClick,
+                                      ...htmlProps
+                                    }) => {
 
-    return (
-        <button {...htmlProps} className={classes("", className)}>
-            {children}
-        </button>
-    )
+  return (
+    <button {...htmlProps} onClick={onClick} className={classes("", className)}>
+      {children}
+    </button>
+  )
 
 }
 
