@@ -38,7 +38,13 @@ const Component = () => {
 
   const refreshSubscription = async (id: string) => {
     let res = await apiClient.findSubscription(id);
-    if (res.succeeded) setSubscription(res.data);
+    if (res.succeeded) setSubscription({
+      ...res.data,
+      schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
+        ...s,
+        id: index
+      }))
+    });
   }
 
   const updateSubscription = async () => {
@@ -63,7 +69,7 @@ const Component = () => {
   // }, [setSubscription])
 
   if (subscription == null) return <></>
-  console.log({ updateSubscriptionData })
+  console.log({ x: updateSubscriptionData })
   return (
     <div className="flex flex-col w-full px-8 py-10">
       <div className="justify-between w-full flex py-4">
@@ -203,7 +209,7 @@ const Component = () => {
                            props={updateSubscriptionData?.receiverProperties}
             />
             <ScheduleEditor title={"Schedule"}
-                            onChangeSchedules={onChangeSubscriptionData.bind(null, "schedules")}
+                            onChangeSchedules={onChangeSubscriptionData.bind(this, "schedules")}
                             schedule={updateSubscriptionData.schedules}/>
 
           </div>}
@@ -217,6 +223,7 @@ const Component = () => {
                            ...updateSubscriptionData,
                            mapperId: t
                          })}
+                         onPropsChange={onChangeSubscriptionData.bind(this, "mapperProperties")}
                          props={updateSubscriptionData?.mapperProperties}
           />
 

@@ -1,6 +1,6 @@
 import FormField from "../common/forms/FormField";
 import {ScheduleView, SubscriptionTypeOptions} from "../../types/subscriptions";
-import React, {useId, useState} from "react";
+import React, {useCallback, useId, useState} from "react";
 import Button from "src/components/common/forms/Button";
 import AddEditScheduleModal
   from "src/components/Subscriptions/AddScheduleModal";
@@ -18,23 +18,47 @@ const ScheduleEditor: React.FC<Props> = ({
                                            schedule,
                                            onChangeSchedules
                                          }) => {
-
-  const [visibleModal, setVisibleModal] = useState<"NONE" | "ADD">("NONE")
+  const [scheduleFrom, setScheduleForm] = useState<Partial<ScheduleView>>({
+    hours: 0,
+    days: 0,
+    minutes: 0
+  })
+  const onChangeScheduleFrom = useCallback((key: keyof ScheduleView, value: any) => {
+    setScheduleForm((s) => ({
+      ...s,
+      [key]: value
+    }))
+  }, [setScheduleForm])
+  const [visibleModal, setVisibleModal] = useState<"NONE" | "ADD_EDIT">("NONE")
   // const [scheduleToEdit,scheduleToEditId]
-  const onEdit = (i: ScheduleView) => {
+  const onEdit = (i: number) => {
+    setScheduleForm(schedule?.find(x => x.id == i)!)
+    setVisibleModal("ADD_EDIT")
 
   }
-  const onRemove = (i: ScheduleView) => {
-    // const data = schedule?.filter(i=>x.)
+  const onRemove = (i: number) => {
+    const data = schedule?.filter(x => x.id != i) ?? []
+    onChangeSchedules(data)
+
   }
   const onAdd = (i: ScheduleView) => {
 
-    const data = [...(schedule ?? []), i]
-    onChangeSchedules(data)
+    console.log("xx",i)
+    const old = schedule?.find(x => x.id == i.id)
+    if (old) {
+      let data = schedule?.filter(x => x.id != i.id) ?? []
+      data.push(i)
+      onChangeSchedules(data)
+    } else {
+      const maxId = (schedule?.length ?? 0) > 0 ? Math.max(...(schedule?.map(o => o.id) ?? [])) + 1 : 1
+      const data = [...(schedule ?? []), { ...i, id: maxId }]
+      onChangeSchedules(data)
+    }
   }
 
+
   const resolveRecurrence = (r: string) => {
-   
+
     switch (r) {
       case "0":
         return "Hourly"
@@ -45,18 +69,20 @@ const ScheduleEditor: React.FC<Props> = ({
       case "3":
         return "Monthly"
     }
-  
+
   }
   return (
     <div className={"mt-3"}>
 
-      {visibleModal === "ADD" &&
-        <AddEditScheduleModal onAdd={onAdd}
+      {visibleModal === "ADD_EDIT" &&
+        <AddEditScheduleModal scheduleFrom={scheduleFrom}
+                              onChangeScheduleFrom={onChangeScheduleFrom}
+                              onAdd={onAdd}
                               onClose={setVisibleModal.bind(this, "NONE")}
-                              visible={visibleModal === "ADD"}/>
+                              visible={visibleModal === "ADD_EDIT"}/>
       }
       <FormField title={title} className="grow" actionTitle={"+"}
-                 onClickAction={setVisibleModal.bind(this, "ADD")}>
+                 onClickAction={setVisibleModal.bind(this, "ADD_EDIT")}>
         <div className={"flex flex-col gap-2"}>
 
 
@@ -85,8 +111,8 @@ const ScheduleEditor: React.FC<Props> = ({
             </thead>
             <tbody>
             {
-              schedule?.map((i, index) => (
-                <tr key={index} className="bg-white border-b">
+              schedule?.map((i) => (
+                <tr key={i.id} className="bg-white border-b">
                   <td
                     className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                     {resolveRecurrence(i.recurrence)}
@@ -102,8 +128,8 @@ const ScheduleEditor: React.FC<Props> = ({
 
                   <td>
                     <Button className={"bg-teal-500 rounded w-5 h-5 mr-1"}
-                            onClick={() => onRemove(i)}>-</Button>
-                    <Button onClick={() => onEdit(i)}
+                            onClick={() => onRemove(i.id)}>-</Button>
+                    <Button onClick={() => onEdit(i.id)}
                             className={"bg-teal-500 rounded w-5 h-5"}>!</Button>
                   </td>
 

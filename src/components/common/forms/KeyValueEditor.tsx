@@ -38,21 +38,22 @@ const Component: React.FC<Props> = ({
                                       ...htmlProps
                                     }) => {
 
-  const [addOn, setAddOn] = useState(false);
-  const onCloseModal = useCallback(() => {
+  const [addOn, setAddOn] = useState<boolean>(false);
+  const onCloseModal = () => {
     console.log("onClose")
     setAddOn(false)
-  }, [])
-  const onOpenModal = useCallback(() => {
+  }
+  const onOpenModal = () => {
     console.log("onOpen")
 
     setAddOn(true)
 
-  }, [])
+  }
   const [newKeyValue, setNewKeyValue] = useState<KeyValuePair>({
     key: '',
     value: ''
   });
+
   const onAddSubmit = () => {
     if (newKeyValue) {
       onAdd!(newKeyValue)
@@ -66,7 +67,7 @@ const Component: React.FC<Props> = ({
   return (
     <Fragment>
       {addOn &&
-        <Modal  key={`${addOn}_`} onClose={onCloseModal} submitLabel={"Add"}
+        <Modal key={`${addOn}_`} onClose={onCloseModal} submitLabel={"Add"}
                onSubmit={onAddSubmit}>
           <div
             className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left grow pr-5">
@@ -168,4 +169,4 @@ const Component: React.FC<Props> = ({
   );
 };
 
-export default React.memo(Component);
+export default Component;

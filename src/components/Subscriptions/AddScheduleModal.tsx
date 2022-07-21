@@ -12,6 +12,8 @@ type Props = {
   visible: boolean
   onClose: () => void,
   onAdd: (i: ScheduleView) => void
+  scheduleFrom: Partial<ScheduleView>
+  onChangeScheduleFrom: (key: keyof ScheduleView, value: any) => void
 
 }
 const recurrenceOptions: OptionType[] = [
@@ -32,30 +34,27 @@ const recurrenceOptions: OptionType[] = [
     title: "Monthly"
   },
 ]
-const AddEditScheduleModal: React.FC<Props> = ({ visible, onClose, onAdd }) => {
+const AddEditScheduleModal: React.FC<Props> = ({
+                                                 visible,
+                                                 onClose,
+                                                 onAdd,
+                                                 scheduleFrom,
+                                                 onChangeScheduleFrom
+                                               }) => {
 
-  const [schedule, setSchedule] = useState<Partial<ScheduleView>>({
-    hours: 0,
-    days: 0,
-    minutes: 0
-  })
+
   const onSubmit = () => {
-    onAdd(schedule as ScheduleView)
+    onAdd(scheduleFrom as ScheduleView)
     onClose()
   }
-  const onChangeSubscriptionData = useCallback((key: keyof ScheduleView, value: any) => {
-    setSchedule((s) => ({
-      ...s,
-      [key]: value
-    }))
-  }, [setSchedule])
+
   return <Modal key={`${visible}_`} onClose={onClose} submitLabel={"Add"}
                 onSubmit={onSubmit}>
     <div>
       <FormField title="Type" className="grow">
         <ChoiceEditor
-          value={schedule.recurrence}
-          onChange={onChangeSubscriptionData.bind(this, "recurrence")}
+          value={scheduleFrom.recurrence}
+          onChange={onChangeScheduleFrom.bind(this, "recurrence")}
           optionTitle={(item: OptionType) => item.title}
           optionValue={(item: OptionType) => item.id}
           options={recurrenceOptions}/>
@@ -63,21 +62,21 @@ const AddEditScheduleModal: React.FC<Props> = ({ visible, onClose, onAdd }) => {
     </div>
     <div className={"flex flex-row mt-10 gap-5"}>
       <FormField title="Days" className="grow">
-        <TextEditor type={"number"} value={schedule.days}
-                    onChange={onChangeSubscriptionData.bind(this, "days")}/>
+        <TextEditor type={"number"} value={scheduleFrom.days}
+                    onChange={onChangeScheduleFrom.bind(this, "days")}/>
       </FormField>
       <FormField title="Hours" className="grow">
-        <TextEditor type={"number"} value={schedule.hours}
-                    onChange={onChangeSubscriptionData.bind(this, "hours")}/>
+        <TextEditor type={"number"} value={scheduleFrom.hours}
+                    onChange={onChangeScheduleFrom.bind(this, "hours")}/>
       </FormField>
       <FormField title="Minutes" className="grow">
-        <TextEditor type={"number"} value={schedule.minutes}
-                    onChange={onChangeSubscriptionData.bind(this, "minutes")}/>
+        <TextEditor type={"number"} value={scheduleFrom.minutes}
+                    onChange={onChangeScheduleFrom.bind(this, "minutes")}/>
       </FormField>
     </div>
     <div className={"mt-10"}>
-      <CheckBoxEditor label={"Backwards"} checked={schedule.backwards}
-                      onChange={onChangeSubscriptionData.bind(this, "backwards")}/>
+      <CheckBoxEditor label={"Backwards"} checked={scheduleFrom.backwards}
+                      onChange={onChangeScheduleFrom.bind(this, "backwards")}/>
     </div>
   </Modal>
 }

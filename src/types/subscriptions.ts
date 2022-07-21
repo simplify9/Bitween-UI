@@ -42,6 +42,7 @@ export interface ScheduleView {
   hours: number;
   minutes: number;
   backwards: boolean;
+  id: number
 }
 
 export interface ICreateSubscription {

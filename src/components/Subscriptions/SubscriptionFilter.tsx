@@ -13,7 +13,6 @@ const SubscriptionFilter: React.FC<Props> = ({
                                                promotedProperties
                                              }) => {
 
-  console.log(documentFilter)
 
   const keyOptions = useMemo(() => {
 
