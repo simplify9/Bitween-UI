@@ -2,7 +2,6 @@ import React from 'react';
 import "./index.css";
 import App from './App';
 import {Provider} from "react-redux";
-//import store from "./State/Index";
 import {client} from './client'
 import {addAxiosInterceptors} from "./client/api";
 import {API_BASE_URL} from "./env";
@@ -16,10 +15,8 @@ client.defaults.baseURL = API_BASE_URL;
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(<React.StrictMode>
-  {/*<Provider store={store}>*/}
-    <AuthApiProvider authApp={AuthConfig}>
-      <App/>
-    </AuthApiProvider>
-  {/*</Provider>*/}
+  <AuthApiProvider authApp={AuthConfig}>
+    <App/>
+  </AuthApiProvider>
 </React.StrictMode>);
 

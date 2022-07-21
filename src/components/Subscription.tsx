@@ -6,7 +6,11 @@ import TextEditor from "./common/forms/TextEditor";
 import {useCallback, useEffect, useState} from "react";
 import {apiClient} from "../client";
 import {OptionType} from "../types/common";
-import {ISubscription, SubscriptionTypeOptions} from "../types/subscriptions";
+import {
+  ISubscription,
+  ScheduleView,
+  SubscriptionTypeOptions
+} from "../types/subscriptions";
 import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
@@ -34,17 +38,7 @@ const Component = () => {
 
   const refreshSubscription = async (id: string) => {
     let res = await apiClient.findSubscription(id);
-    if (res.succeeded) setSubscription({
-      ...res.data,
-      receiverProperties: [{ key: "test", value: "testVAALUE" }, {
-        key: "ehllo",
-        value: "adele"
-      }, { key: "mason", value: "teeeeeee" }],
-      documentFilter: [{ key: "test", value: "testVAALUE" }, {
-        key: "ehllo",
-        value: "adele"
-      }, { key: "mason", value: "teeeeeee" }]
-    });
+    if (res.succeeded) setSubscription(res.data);
   }
 
   const updateSubscription = async () => {
@@ -61,6 +55,13 @@ const Component = () => {
       [key]: value
     }))
   }, [setSubscription])
+  // const onAddSchedule = useCallback((newS: ScheduleView) => {
+  //   setSubscription((s) => ({
+  //     ...s,
+  //     schedules: [...(s?.schedules ?? []), newS]
+  //   }))
+  // }, [setSubscription])
+
   if (subscription == null) return <></>
   console.log({ updateSubscriptionData })
   return (
@@ -151,7 +152,7 @@ const Component = () => {
                 disabled={true}
               />
             </FormField>
-            <FormField title="Target" >
+            <FormField title="Target">
               <ChoiceEditor
                 value={updateSubscriptionData?.aggregationTarget?.toString()}
                 onChange={val => setUpdateSubscriptionData({
@@ -166,8 +167,9 @@ const Component = () => {
             </FormField>
 
             <div className={"mt-5"}>
-              
+
               <ScheduleEditor title={"Schedule"}
+                              onChangeSchedules={onChangeSubscriptionData.bind(null, "schedules")}
                               schedule={updateSubscriptionData.schedules}/>
             </div>
 
@@ -200,8 +202,8 @@ const Component = () => {
                            })}
                            props={updateSubscriptionData?.receiverProperties}
             />
-
             <ScheduleEditor title={"Schedule"}
+                            onChangeSchedules={onChangeSubscriptionData.bind(null, "schedules")}
                             schedule={updateSubscriptionData.schedules}/>
 
           </div>}

@@ -6,7 +6,7 @@ import {classes, noOp} from "./utils"
 
 type Props = Omit<JSX.IntrinsicElements['input'], "onChange"> & {
   onChange?: (value: string) => void
-  
+
 }
 
 const Component: React.FC<Props> = ({
@@ -33,7 +33,9 @@ const Component: React.FC<Props> = ({
         placeholder={placeholder}
         onFocus={onFocus}
         onBlur={onBlur}
-        onChange={handleChange}/>
+        onChange={handleChange}
+        {...htmlProps}
+      />
     </InputBox>
   );
 };

@@ -121,6 +121,9 @@ export const ChoiceEditor = <TOption extends {} = any>({
   }, [onChange, optionTitle, optionValue, renderOption, state.optionList, value])
 
   return (
+    <span>
+      
+   
     <InputBox {...htmlProps} withPopOver>
       <Input
         type="text"
@@ -133,5 +136,6 @@ export const ChoiceEditor = <TOption extends {} = any>({
         {optionList}
       </InputPopOver>
     </InputBox>
+       </span>
   )
 }
