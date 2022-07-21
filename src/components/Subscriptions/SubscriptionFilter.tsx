@@ -1,27 +1,43 @@
-import React, {useCallback, useMemo} from "react";
-import {KeyValuePair} from "src/types/common";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
+import {KeyValuePair, OptionType} from "src/types/common";
 import KeyValueEditor from "src/components/common/forms/KeyValueEditor";
+import {apiClient} from "src/client";
 
 type Props = {
-  documentFilter?: Array<KeyValuePair>
+  documentFilter?: Array<KeyValuePair> | undefined
   promotedProperties?: Array<KeyValuePair>
   onChange: (arr: Array<KeyValuePair>) => void
+  documentId: string | undefined
 }
 const SubscriptionFilter: React.FC<Props> = ({
+                                               documentId,
                                                onChange,
                                                documentFilter,
                                                promotedProperties
                                              }) => {
 
 
-  const keyOptions = useMemo(() => {
+  const [keyOptions, setKeyOptions] = useState<Array<OptionType>>([])
+  useEffect(() => {
 
-    return promotedProperties?.map((p) => ({
-      title: p.key,
-      id: p.value
-    }))
+    (async () => {
+      if (!documentId)
+        return;
 
-  }, [promotedProperties])
+
+      const data = await apiClient.findDocument(documentId);
+      if (data.succeeded) {
+        const k = ((data?.data?.promotedProperties as Array<KeyValuePair>).map((i) => ({
+          id: i.key,
+          title: i.value
+        }))) as OptionType[]
+        setKeyOptions(k)
+      }
+
+
+    })()
+
+  }, [documentId, promotedProperties])
 
   const onAddFilter = useCallback((newVal: KeyValuePair) => {
 
@@ -45,4 +61,4 @@ const SubscriptionFilter: React.FC<Props> = ({
     />
   </div>)
 }
-export default React.memo(SubscriptionFilter)
+export default SubscriptionFilter

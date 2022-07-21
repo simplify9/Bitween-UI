@@ -25,6 +25,7 @@ const Component = () => {
   let navigate = useNavigate();
   let { id } = useParams();
   const [subscription, setSubscription] = useState<ISubscription>();
+
   const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
 
   useEffect(() => {
@@ -69,7 +70,6 @@ const Component = () => {
   // }, [setSubscription])
 
   if (subscription == null) return <></>
-  console.log({ x: updateSubscriptionData })
   return (
     <div className="flex flex-col w-full px-8 py-10">
       <div className="justify-between w-full flex py-4">
@@ -139,6 +139,7 @@ const Component = () => {
             className="col-span-6 sm:col-span-3 lg:col-span-2 border-2 px-2 py-2">
             <FormField title="Filters" className="grow">
               <SubscriptionFilter
+                documentId={subscription.documentId}
                 onChange={onChangeSubscriptionData.bind(null, "documentFilter")}
                 promotedProperties={updateSubscriptionData.receiverProperties}
                 documentFilter={updateSubscriptionData?.documentFilter}/>
