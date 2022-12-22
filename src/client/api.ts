@@ -115,7 +115,8 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
   });
 
   axiosInstance.interceptors.response.use(
-    (response: AxiosResponse) => {
+      // @ts-ignore
+      (response: AxiosResponse) => {
       return {
         status: response.status,
         succeeded: response.status >= 200 && response.status < 300,
@@ -128,6 +129,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
         return getAccessToken(accessToken)
           .then(newValue => {
             accessToken = newValue;
+            // @ts-ignore
             return axiosInstance(error.config);
           });
       }

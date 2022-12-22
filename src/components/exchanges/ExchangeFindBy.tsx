@@ -1,22 +1,22 @@
-import { ChoiceEditor } from "../common/forms/ChoiceEditor"
-import { DateTimeRange, DateTimeRangeEditor } from "../common/forms/DateTimeRangeEditor"
+import {ChoiceEditor} from "../common/forms/ChoiceEditor"
+import {DateTimeRange, DateTimeRangeEditor} from "../common/forms/DateTimeRangeEditor"
 import FormField from "../common/forms/FormField"
 import TextEditor from "../common/forms/TextEditor"
 import SubscriptionSelector from "../Subscriptions/SubscriptionSelector"
 
 
 type DeliveryStatus = {
-    id:string
-    title:string
+    id: string
+    title: string
 }
 
 export type ExchangeFindBySpecs = {
     subscription?: string
     status?: string
     creationTimeWindow: DateTimeRange
-    id?:string
-    correlationId?:string
-    promotedProperties?:string
+    id?: string
+    correlationId?: string
+    promotedProperties?: string
 }
 
 interface Props {
@@ -25,53 +25,54 @@ interface Props {
     onFindRequested: () => void
 }
 
-export const ExchangeFindBy:React.FC<Props> = ({ value, onChange, onFindRequested }) => {
+export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequested}) => {
 
-    const handleFind = (e:any) => {
+    const handleFind = (e: any) => {
         e.preventDefault();
         onFindRequested();
     }
 
     return (
-        <div className="flex w-full px-4 py-8" >
+        <div className="flex w-full px-4 py-8">
             <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4 space-y-4">
                 <FormField title="Target Subscription">
                     <SubscriptionSelector
                         value={value.subscription}
-                        onChange={subscription => onChange({ ...value, subscription })} />
+                        onChange={subscription => onChange({...value, subscription})}/>
                 </FormField>
 
                 <FormField title="Delivery Status">
                     <ChoiceEditor
                         placeholder="Select Status"
                         value={value.status}
-                        onChange={status => onChange({ ...value, status })}
-                        optionTitle={(item:DeliveryStatus) => item.title}
-                        optionValue={(item:DeliveryStatus) => item.id}
+                        onChange={status => onChange({...value, status})}
+                        optionTitle={(item: DeliveryStatus) => item.title}
+                        optionValue={(item: DeliveryStatus) => item.id}
                         options={[
-                            { id: "0", title: "Running" },
-                            { id: "1", title: "Success" },
-                            { id: "2", title: "Bad response"},
-                            { id: "3", title: "Failed" }
-                        ]} />
+                            {id: "0", title: "Running"},
+                            {id: "1", title: "Success"},
+                            {id: "2", title: "Bad response"},
+                            {id: "3", title: "Failed"}
+                        ]}/>
                 </FormField>
 
-                <FormField title="ID" >
-                    <TextEditor placeholder="ID" value={value.id} onChange={(t) => onChange({...value,id:t})} />
+                <FormField title="ID">
+                    <TextEditor placeholder="ID" value={value.id} onChange={(t) => onChange({...value, id: t})}/>
                 </FormField>
                 <FormField title="Correlation ID">
-                    <TextEditor placeholder="Correlation ID" value={value.correlationId} onChange={(t) => onChange({...value,correlationId:t})} />
+                    <TextEditor placeholder="Correlation ID" value={value.correlationId}
+                                onChange={(t) => onChange({...value, correlationId: t})}/>
                 </FormField>
                 <FormField title="Promoted Properties" className={"grow"}>
-                    <TextEditor placeholder="Promoted Properties" value={value.promotedProperties} onChange={(t) => onChange({...value,promotedProperties:t})} />
+                    <TextEditor placeholder="Promoted Properties" value={value.promotedProperties}
+                                onChange={(t) => onChange({...value, promotedProperties: t})}/>
                 </FormField>
-
 
 
                 <FormField title="Creation Time Window">
                     <DateTimeRangeEditor
                         value={value.creationTimeWindow}
-                        onChange={creationTimeWindow => onChange({ ...value, creationTimeWindow })} />
+                        onChange={creationTimeWindow => onChange({...value, creationTimeWindow})}/>
                 </FormField>
 
                 <button

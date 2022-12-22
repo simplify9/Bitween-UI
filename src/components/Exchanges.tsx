@@ -42,7 +42,6 @@ interface Props {
 const Component = ({}:Props) => {
 
     const [queryState, newQuery] = useQuery(defaultQuery);
-
     const [findSpecs, setFindSpecs] = useState<ExchangeSpecs>({
         findMode: queryState.lastSent.mode,
         keywords: queryState.lastSent.keywords ?? "",

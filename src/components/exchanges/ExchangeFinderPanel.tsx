@@ -1,7 +1,7 @@
 import Tab from "../common/forms/Tab";
 import TabNavigator from "../common/forms/TabNavigator";
-import { ExchangeFindBy, ExchangeFindBySpecs } from "./ExchangeFindBy";
-import { ExchangeKeywordSearch } from "./ExchangeKeywordSearch";
+import {ExchangeFindBy, ExchangeFindBySpecs} from "./ExchangeFindBy";
+import {ExchangeKeywordSearch} from "./ExchangeKeywordSearch";
 
 
 type ExchangeFindMode = string;
@@ -14,35 +14,37 @@ export type ExchangeSpecs = {
 
 interface Props {
     value: ExchangeSpecs
-    onChange: (value:ExchangeSpecs) => void
+    onChange: (value: ExchangeSpecs) => void
     onFindRequested: () => void
 }
 
-export const ExchangeFinderPanel:React.FC<Props> = ({
-    value,
-    onChange,
-    onFindRequested
-}) => {
+export const ExchangeFinderPanel: React.FC<Props> = ({
+                                                         value,
+                                                         onChange,
+                                                         onFindRequested
+                                                     }) => {
 
-    const { findMode } = value;
+    const {findMode} = value;
 
     const handleModeChange = (findMode: ExchangeFindMode) => {
-        onChange({ ...value, findMode });
+        onChange({...value, findMode});
     }
 
     return (
         <>
             <TabNavigator className="w-full">
-                <Tab key="findby" selected={findMode==='findby'} onClick={() => handleModeChange("findby")}>Find By</Tab>
-                <Tab key="advanced" selected={findMode==='advanced'} onClick={() => handleModeChange("advanced")}>Advanced Search</Tab>
+                <Tab key="findby" selected={findMode === 'findby'} onClick={() => handleModeChange("findby")}>Find
+                    By</Tab>
+                <Tab key="advanced" selected={findMode === 'advanced'} onClick={() => handleModeChange("advanced")}>Advanced
+                    Search</Tab>
             </TabNavigator>
 
 
-            {(findMode==='findby') &&
+            {(findMode === 'findby') &&
                 <ExchangeFindBy
                     value={value.findBy}
-                    onChange={findBy => onChange({ ...value, findBy })}
-                    onFindRequested={onFindRequested} />}
+                    onChange={findBy => onChange({...value, findBy})}
+                    onFindRequested={onFindRequested}/>}
 
         </>
     )
