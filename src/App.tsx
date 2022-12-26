@@ -11,7 +11,8 @@ import Partners from "./components/Partners";
 import Partner from "./components/Partner";
 import Subscription from "./components/Subscription";
 import Document from "./components/Document";
-
+import {ToastContainer} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
             <Helmet>
                 <title>Infolink</title>
             </Helmet>
+            <ToastContainer/>
 
             <div>
 

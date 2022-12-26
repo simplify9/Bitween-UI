@@ -1,5 +1,5 @@
 import {classes, noOp} from "./utils"
-import {KeyValuePair, OptionType} from "../../../types/common";
+import {KeyValuePair, OptionType} from "src/types/common";
 import Button from "./Button";
 import React, {Fragment, useCallback, useState} from "react";
 import Modal from "../Modal";
@@ -44,8 +44,7 @@ const Component: React.FC<Props> = ({
     setAddOn(false)
   }
   const onOpenModal = () => {
-    console.log("onOpen")
-
+    console.log("onOpen LEH")
     setAddOn(true)
 
   }
@@ -62,7 +61,6 @@ const Component: React.FC<Props> = ({
     }
 
   }
-  console.log(addOn)
 
   return (
     <Fragment>

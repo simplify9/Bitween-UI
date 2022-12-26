@@ -8,7 +8,7 @@ interface Props {
 
 export default (props:Props) => {
     return (
-        <div>Welcome to InfoLink</div>
+        <div className={"p-5"}>Welcome to InfoLink</div>
     ) 
 }
 

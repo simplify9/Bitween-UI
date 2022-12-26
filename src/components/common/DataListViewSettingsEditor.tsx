@@ -43,21 +43,21 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
     const totalPages = Math.ceil(total / limit);
     for (let i = 0; i < totalPages; ++i) pages.push(i);
 
-    const handleSortByChange = (field: string) => {
-        onChange({
-            limit,
-            offset: 0,
-            sortBy: {...sortBy, field}
-        })
-    }
-
-    const handleSortDescendingChange = (descending: boolean) => {
-        onChange({
-            limit,
-            offset: 0,
-            sortBy: {...sortBy, descending}
-        })
-    }
+    // const handleSortByChange = (field: string) => {
+    //     onChange({
+    //         limit,
+    //         offset: 0,
+    //         sortBy: {...sortBy, field}
+    //     })
+    // }
+    //
+    // const handleSortDescendingChange = (descending: boolean) => {
+    //     onChange({
+    //         limit,
+    //         offset: 0,
+    //         sortBy: {...sortBy, descending}
+    //     })
+    // }
     const handlePageChange = (newOffset: number) => {
         onChange({
             limit,
@@ -92,21 +92,21 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                 </>
                 : null}
             <div className="flex grow py-1"/>
-            <div className="text-sm py-1">Sort By</div>
-            <TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{
-
-                sortByOptions.map(opt => (
-                    <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}
-                                 selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>
-                ))
-            }
-            </TabMenu>
-            <TabMenu title={sortBy.descending ? "Descending" : "Ascending"}>
-                <TabMenuItem selected={!sortBy.descending} key="asc"
-                             onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>
-                <TabMenuItem selected={!!sortBy.descending} key="desc"
-                             onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>
-            </TabMenu>
+            {/*<div className="text-sm py-1">Sort By</div>*/}
+            {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
+            
+            {/*    sortByOptions.map(opt => (*/}
+            {/*        <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}*/}
+            {/*                     selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>*/}
+            {/*    ))*/}
+            {/*}*/}
+            {/*</TabMenu>*/}
+            {/*<TabMenu title={sortBy.descending ? "Descending" : "Ascending"}>*/}
+            {/*    <TabMenuItem selected={!sortBy.descending} key="asc"*/}
+            {/*                 onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>*/}
+            {/*    <TabMenuItem selected={!!sortBy.descending} key="desc"*/}
+            {/*                 onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>*/}
+            {/*</TabMenu>*/}
         </div>
 
     );

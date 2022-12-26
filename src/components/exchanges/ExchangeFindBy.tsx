@@ -1,8 +1,9 @@
 import {ChoiceEditor} from "../common/forms/ChoiceEditor"
-import {DateTimeRange, DateTimeRangeEditor} from "../common/forms/DateTimeRangeEditor"
+import {DateTimeRange} from "../common/forms/DateTimeRangeEditor"
 import FormField from "../common/forms/FormField"
 import TextEditor from "../common/forms/TextEditor"
 import SubscriptionSelector from "../Subscriptions/SubscriptionSelector"
+import DateEditor from "src/components/common/forms/DateEditor";
 
 
 type DeliveryStatus = {
@@ -69,12 +70,22 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                 </FormField>
 
 
-                <FormField title="Creation Time Window">
-                    <DateTimeRangeEditor
-                        value={value.creationTimeWindow}
-                        onChange={creationTimeWindow => onChange({...value, creationTimeWindow})}/>
+                <FormField title="Creation Time From">
+                    <DateEditor onChange={(t) => onChange({
+                        ...value, creationTimeWindow: {
+                            ...value.creationTimeWindow,
+                            from: t
+                        }
+                    })} value={value.creationTimeWindow.from}/>
                 </FormField>
-
+                <FormField title="Creation Time To">
+                    <DateEditor onChange={(t) => onChange({
+                        ...value, creationTimeWindow: {
+                            ...value.creationTimeWindow,
+                            to: t
+                        }
+                    })} value={value.creationTimeWindow.to}/>
+                </FormField>
                 <button
                     onClick={handleFind}
                     className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">

@@ -12,85 +12,93 @@ export const client = axios.create();
 export const apiClient = {
 
     login: async (req: LoginRequest) => {
-        let res: ApiResponse = await client.post("accounts/login", req);
+        const res: ApiResponse = await client.post("accounts/login", req);
         console.log("token", res.data.refreshToken)
         return res
     },
 
     findExchanges: async (req: ExchangeFindQuery) => {
-        let res = await client.get(`xchanges${formulateQueryString(req)}`)
+        const res = await client.get(`xchanges${formulateQueryString(req)}`)
         return {
             total: res.data.totalCount,
             data: res.data.result
         }
     },
     getExchangeDocument: async (req: { documentKey: string }) => {
-        let res = await client.get(`InfolinkDocs?documentKey=${req.documentKey}`)
+        const res = await client.get(`InfolinkDocs?documentKey=${req.documentKey}`)
         return {
             data: res.data
         }
     },
     retryExchanges: async (id: string, reset: boolean) => {
-        let res: ApiResponse = await client.post(`xchanges/${id}/retry`, {
+        const res: ApiResponse = await client.post(`xchanges/${id}/retry`, {
             reason: null,
             reset: reset
         })
         return res;
     },
+    bulkRetryExchanges: async (ids: string[], reset: boolean) => {
+        const res: ApiResponse = await client.post(`xchanges/bulkretry`, {
+            reason: null,
+            reset: reset,
+            ids
+        })
+        return res;
+    },
     findDocuments: async (req: DocumentFindQuery) => {
-        let res = await client.get(`documents${formulateQueryString(req)}`)
+        const res = await client.get(`documents${formulateQueryString(req)}`)
         return {
             total: res.data.totalCount,
             data: res.data.result
         }
     },
     findDocument: async (id: string) => {
-        let res: ApiResponse = await client.get(`documents/${id}`)
+        const res: ApiResponse = await client.get(`documents/${id}`)
         return res
     },
     createDocument: async (req: CreateDocument) => {
-        let res: ApiResponse = await client.post("documents", req)
+        const res: ApiResponse = await client.post("documents", req)
         return res
     },
     updateDocument: async (id: string, req: UpdateDocument) => {
-        let res: ApiResponse = await client.post(`documents/${id}`, req)
+        const res: ApiResponse = await client.post(`documents/${id}`, req)
         return res
     },
     deleteDocument: async (id: string) => {
-        let res: ApiResponse = await client.delete(`documents/${id}`)
+        const res: ApiResponse = await client.delete(`documents/${id}`)
         return res
     },
     findPartners: async (req: PartnerFindQuery) => {
-        let res = await client.get(`partners${formulateQueryString(req)}`)
+        const res = await client.get(`partners${formulateQueryString(req)}`)
         return {
             total: res.data.totalCount,
             data: res.data.result
         }
     },
     findPartner: async (id: string) => {
-        let res: ApiResponse = await client.get(`partners/${id}`)
+        const res: ApiResponse = await client.get(`partners/${id}`)
         return res
     },
     createPartner: async (name: string) => {
-        let res: ApiResponse = await client.post("partners", {name})
+        const res: ApiResponse = await client.post("partners", {name})
         return res
     },
     updatePartner: async (id: string, req: UpdatePartner) => {
-        let res: ApiResponse = await client.post(`partners/${id}`, req)
+        const res: ApiResponse = await client.post(`partners/${id}`, req)
         return res
     },
     deletePartner: async (id: string) => {
-        let res: ApiResponse = await client.delete(`partners/${id}`)
+        const res: ApiResponse = await client.delete(`partners/${id}`)
         return res
     },
     generatePartnerKey: async () => {
-        let res: ApiResponse = await client.get(`partners/generatekey`)
+        const res: ApiResponse = await client.get(`partners/generatekey`)
         return res
     },
     findAdapters: async (req: AdapterFindQuery) => {
 
-        let res = await client.get(`adapters?prefix=${req.prefix}`)
-        let arr: OptionType[] = [];
+        const res = await client.get(`adapters?prefix=${req.prefix}`)
+        const arr: OptionType[] = [];
         if (!res.data) return [];
         Object.keys(res.data).forEach(k => {
             arr.push({
@@ -102,8 +110,8 @@ export const apiClient = {
 
     },
     findAdapterProperties: async (id: string) => {
-        let res = await client.get(`adapters/${id}/properties`)
-        let arr: OptionType[] = [];
+        const res = await client.get(`adapters/${id}/properties`)
+        const arr: OptionType[] = [];
         if (!res.data) return [];
         Object.keys(res.data).forEach(k => {
             arr.push({
@@ -116,7 +124,7 @@ export const apiClient = {
     },
     findSubscriptions: async (req: SubscriptionFindQuery) => {
 
-        let res = await client.get(`subscriptions${formulateQueryString(req)}`)
+        const res = await client.get(`subscriptions${formulateQueryString(req)}`)
         return {
             total: res.data.totalCount,
             data: res.data.result
@@ -124,19 +132,19 @@ export const apiClient = {
 
     },
     findSubscription: async (id: string) => {
-        let res: ApiResponse = await client.get(`subscriptions/${id}`)
+        const res: ApiResponse = await client.get(`subscriptions/${id}`)
         return res
     },
     createSubscription: async (req: ICreateSubscription) => {
-        let res: ApiResponse = await client.post("subscriptions", req)
+        const res: ApiResponse = await client.post("subscriptions", req)
         return res
     },
     updateSubscription: async (id: string, req: ISubscription) => {
-        let res: ApiResponse = await client.post(`subscriptions/${id}`, req)
+        const res: ApiResponse = await client.post(`subscriptions/${id}`, req)
         return res
     },
     deleteSubscription: async (id: string) => {
-        let res: ApiResponse = await client.delete(`subscriptions/${id}`)
+        const res: ApiResponse = await client.delete(`subscriptions/${id}`)
         return res
     },
 

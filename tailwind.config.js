@@ -5,6 +5,7 @@ module.exports = {
     './public/index.html'
   ],
   presets: [],
+  mode:"jit",
   darkMode: 'media', // or 'class'
   theme: {
     screens: {
@@ -955,6 +956,9 @@ module.exports = {
     'focus-visible',
     'active',
     'disabled',
+  ],
+  safelist: [
+    {pattern: /(bg|text|border)-./}
   ],
   plugins: [],
 }

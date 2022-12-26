@@ -24,9 +24,9 @@ const Component: React.FC<Props> = ({
                                     }) => {
 
   return (
-    <div className="absolute " >
+    <div className="absolute  z-50" >
 
-    <div className={classes("relative z-10 overflow-scroll", className || "")}
+    <div className={classes("relative z-50 overflow-scroll", className || "")}
          aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
