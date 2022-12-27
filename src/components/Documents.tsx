@@ -96,7 +96,7 @@ export default (props: Props) => {
             <div className="flex flex-col w-full px-8 py-4">
                 <div className="justify-between w-full flex py-4">
                     <div className="text-2xl font-bold tracking-wide text-gray-700">Documents</div>
-                    <Button onClick={() => setCreatingOn(true)} className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                    <Button onClick={() => setCreatingOn(true)} className="bg-blue-600 hover:bg-blue-600 text-white py-2 px-4 rounded">
                         Create New Document
                     </Button>
                 </div>

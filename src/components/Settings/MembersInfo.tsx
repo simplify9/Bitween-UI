@@ -27,7 +27,7 @@ const MembersInfo: React.FC = () => {
                         Members Info
             </span>
             <button onClick={() => setOpenModal("ADD")}
-                    className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                    className="bg-blue-600 hover:bg-blue-600 text-white py-2 px-4 rounded">
                 Add
             </button>
 

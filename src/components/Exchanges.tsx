@@ -108,7 +108,7 @@ const Component = ({}: Props) => {
             <div className={"flex flex-row-reverse"}>
                 <button
                     onClick={() => setShowBulkRetryModal(true)}
-                    className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                    className="block appearance-none border bg-blue-600 hover:bg-blue-600 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
                     Bulk retry
                 </button>
             </div>

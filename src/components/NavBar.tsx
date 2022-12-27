@@ -14,7 +14,7 @@ const NavBar = () => {
 
     return (
         <nav
-            className="flex flex-col bg-teal-500  w-full h-full shadow-l-lg">
+            className="flex flex-col bg-blue-600  w-full h-full shadow-l-lg">
 
             <div className="flex flex-col justify-center items-center  text-white pt-5">
                 <span

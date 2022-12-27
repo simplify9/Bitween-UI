@@ -28,16 +28,11 @@ const Login = () => {
 
   return (
     <div
-      className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto">
-      <div className="p-10 pt-12 pb-16 shadow-lg bg-sky-100 rounded-xl ">
+      className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto ">
+      <div className="p-10 pt-12 pb-16 shadow-lg backdrop-blur-2xl rounded-xl ">
         <div
           className="flex items-center justify-center text-4xl font-black text-sky-900 m-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="mr-3 w-10 h-10"
-               viewBox="0 0 20 20"
-               fill="currentColor">
-            <path
-              d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/>
-          </svg>
+          
           <h1 className="tracking-wide" onClick={() => {
             setUsername("admin@infolink.systems")
             setPassword("Mtm@dmin!2")

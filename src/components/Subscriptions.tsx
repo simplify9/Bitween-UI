@@ -102,7 +102,7 @@ const Component = ({}: Props) => {
             className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions
           </div>
           <Button onClick={() => setCreatingOn(true)}
-                  className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                  className="bg-blue-600 hover:bg-blue-600 text-white py-2 px-4 rounded">
             Create New Subscription
           </Button>
         </div>

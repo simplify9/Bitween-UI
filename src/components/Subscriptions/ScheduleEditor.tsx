@@ -127,10 +127,10 @@ const ScheduleEditor: React.FC<Props> = ({
                   </td>
 
                   <td>
-                    <Button className={"bg-teal-500 rounded w-5 h-5 mr-1"}
+                    <Button className={"bg-blue-600 rounded w-5 h-5 mr-1"}
                             onClick={() => onRemove(i.id)}>-</Button>
                     <Button onClick={() => onEdit(i.id)}
-                            className={"bg-teal-500 rounded w-5 h-5"}>!</Button>
+                            className={"bg-blue-600 rounded w-5 h-5"}>!</Button>
                   </td>
 
                 </tr>

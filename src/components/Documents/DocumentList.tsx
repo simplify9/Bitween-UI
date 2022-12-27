@@ -48,7 +48,7 @@ export const DocumentList: React.FC<Props> = ({data}) => {
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                             <button onClick={() => navigate(`${i.id}`)} type="button"
-                                    className="text-white bg-teal-600 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm  px-4 py-2 text-center inline-flex items-center  mr-2 mb-2">
+                                    className="text-white bg-blue-600 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm  px-4 py-2 text-center inline-flex items-center  mr-2 mb-2">
                                 <BsFillEyeFill size={21}/>
                             </button>
 
