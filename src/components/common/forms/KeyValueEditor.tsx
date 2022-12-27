@@ -119,7 +119,7 @@ const Component: React.FC<Props> = ({
           <th scope="col"
               className="text-sm font-medium text-gray-900 px-6 py-2 text-right">
             <Button onClick={onOpenModal}
-                    className={"bg-teal-500 rounded w-5 h-5"}>+</Button>
+                    className={"bg-blue-900 rounded w-5 h-5"}>+</Button>
           </th>
         </tr>
         <tr>
@@ -152,10 +152,10 @@ const Component: React.FC<Props> = ({
                 </td>
                 <td
                   className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  <Button className={"bg-teal-500 rounded w-5 h-5 mr-1"}
+                  <Button className={"bg-blue-900 rounded w-5 h-5 mr-1"}
                           onClick={() => onRemove!(i)}>-</Button>
                   <Button onClick={() => {
-                  }} className={"bg-teal-500 rounded w-5 h-5"}>!</Button>
+                  }} className={"bg-blue-900 rounded w-5 h-5"}>!</Button>
                 </td>
 
               </tr>

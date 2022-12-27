@@ -82,7 +82,7 @@ export default (props: Props) => {
             className="text-2xl font-bold tracking-wide text-gray-700">Partners
           </div>
           <button onClick={() => setCreatingOn(true)}
-                  className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
+                  className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
             Create New Partner
           </button>
         </div>

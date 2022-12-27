@@ -59,7 +59,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                 {
                     data.map((i) => (
                         <tr key={i.id}
-                            className={`${selectedRowsIds.includes(i.id) ? 'bg-teal-50' : "bg-white"} border-b cursor-pointer`}
+                            className={`${selectedRowsIds.includes(i.id) ? 'bg-blue-50' : "bg-white"} border-b cursor-pointer`}
                             onClick={() => onClickRow(i.id)}
                         >
                             <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">

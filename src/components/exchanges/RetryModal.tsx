@@ -30,7 +30,7 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid}) => {
             <div className={"flex align-middle justify-between items-center gap-5"}>
 
                 <button onClick={() => onRetry()}
-                        className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                        className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
 
                     Retry
                 </button>

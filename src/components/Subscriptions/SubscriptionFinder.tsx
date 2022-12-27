@@ -32,7 +32,7 @@ export const SubscriptionFinderPanel:React.FC<Props> = ({
                     </FormField>
                     <button
                         onClick={onFindRequested}
-                        className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                        className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
                         Find
                     </button>
                 </div>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import {ExchangeFindQuery} from "../types/xchange";
 import {AdapterFindQuery, ICreateSubscription, ISubscription, SubscriptionFindQuery} from "../types/subscriptions";
-import {LoginRequest} from "../types/accounts";
+import {CreateAccountModel, LoginRequest} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
 import {CreateDocument, DocumentFindQuery, UpdateDocument} from "../types/document";
@@ -13,10 +13,20 @@ export const apiClient = {
 
     login: async (req: LoginRequest) => {
         const res: ApiResponse = await client.post("accounts/login", req);
-        console.log("token", res.data.refreshToken)
         return res
     },
-
+    findAppVersion: async () => {
+        const res: ApiResponse = await client.get("Settings/myversion");
+        return res
+    },
+    findMembers: async () => {
+        const res: ApiResponse = await client.get("Accounts/");
+        return res
+    },
+    createMember: async (data:CreateAccountModel) => {
+        const res: ApiResponse = await client.post("Accounts/",data);
+        return res
+    },
     findExchanges: async (req: ExchangeFindQuery) => {
         const res = await client.get(`xchanges${formulateQueryString(req)}`)
         return {

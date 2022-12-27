@@ -13,7 +13,7 @@ const Component = ({ date, selected, onSelect }:Props) => {
     }
 
     return (
-        <div className={"text-xs p-1" + (selected ? " bg-teal-500 text-white cursor-default": " cursor-pointer hover:bg-gray-100")} onClick={handleClick}>{getDate(date)}</div>
+        <div className={"text-xs p-1" + (selected ? " bg-blue-900 text-white cursor-default": " cursor-pointer hover:bg-gray-100")} onClick={handleClick}>{getDate(date)}</div>
     );
 }
 
