@@ -14,7 +14,11 @@ const authConfig:AuthConfig = {
             // }
         );
     },
-    logOutHandler: () => window.location.reload(),
+    logOutHandler: () => {
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("refresh_token");
+        window.location.reload()
+    },
     refreshTokenExpiry: null
 }
 

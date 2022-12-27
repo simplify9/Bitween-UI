@@ -1,6 +1,3 @@
-
-
-
 export const initialState: UserState = {
     name: "",
     isLoading: false,
@@ -15,6 +12,7 @@ export interface UserState {
     refreshToken?: string;
     isLoggedIn: boolean;
 }
+
 export type Tokens = {
     accessToken?: string;
     refreshToken?: string;
@@ -28,5 +26,17 @@ export interface LoginResponse {
 export interface LoginRequest {
     username: string;
     password: string;
-    refreshToken?:string;
+    refreshToken?: string;
+}
+
+export interface AccountModel {
+    name: string
+    email: string
+    createdOn: string
+}
+
+export interface CreateAccountModel {
+    name: string
+    email: string
+    password: string
 }

@@ -1,5 +1,6 @@
 import {NavLink} from "react-router-dom";
 import React from "react";
+import AuthConfig from "src/authConfig";
 
 
 const resolveClassName = ({isActive}: any) => {
@@ -31,18 +32,29 @@ const NavBar = () => {
             {/*</div>*/}
 
 
-            <div className="text-sm  flex flex-col">
-                <NavLink to="/" className={resolveClassName}>Dashboard</NavLink>
-                <NavLink to="/exchanges"
-                         className={resolveClassName}>Exchanges</NavLink>
-                <NavLink to="/subscriptions"
-                         className={resolveClassName}>Subscriptions</NavLink>
-                <NavLink to="/documents"
-                         className={resolveClassName}>Documents</NavLink>
-                <NavLink to="/partners"
-                         className={resolveClassName}>Partners</NavLink>
-                <NavLink to="/settings"
-                         className={resolveClassName}>Settings</NavLink>
+            <div className="text-sm h-full flex flex-col items-stretch justify-between">
+                <div>
+
+
+                    <NavLink to="/" className={resolveClassName}>Dashboard</NavLink>
+                    <NavLink to="/exchanges"
+                             className={resolveClassName}>Exchanges</NavLink>
+                    <NavLink to="/subscriptions"
+                             className={resolveClassName}>Subscriptions</NavLink>
+                    <NavLink to="/documents"
+                             className={resolveClassName}>Documents</NavLink>
+                    <NavLink to="/partners"
+                             className={resolveClassName}>Partners</NavLink>
+                    <NavLink to="/settings"
+                             className={resolveClassName}>Settings</NavLink>
+                </div>
+                <div className={"p-3 flex items-center justify-center"}>
+                    <span onClick={() => AuthConfig.logOutHandler()}
+                          className={"text-md bg-gray-300 px-3 py-2 rounded-xl shadow-lg  cursor-pointer"}>
+                         Logout
+                    </span>
+
+                </div>
 
             </div>
         </nav>
