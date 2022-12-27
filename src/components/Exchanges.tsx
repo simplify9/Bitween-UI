@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { useExchangeFinder } from "../hooks/queryHooks";
-import { withUrlSupport } from "../hooks/queryUrlHooks";
-import { jsBoolean, jsNumber, jsString } from "redux-ecq";
-import { DataListViewSettings, DataListViewSettingsEditor } from "./common/DataListViewSettingsEditor";
-import { ExchangeFinderPanel, ExchangeSpecs } from "./exchanges/ExchangeFinderPanel";
-import { ExchangeList } from "./exchanges/ExchangeList";
+import React, {useState} from "react";
+import {useExchangeFinder} from "../hooks/queryHooks";
+import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
+import {ExchangeFinderPanel, ExchangeSpecs} from "./exchanges/ExchangeFinderPanel";
+import {ExchangeList} from "./exchanges/ExchangeList";
+import BulkRetryModal from "src/components/exchanges/BulkRetryModal";
 
 
 const defaultQuery = {
@@ -20,18 +19,18 @@ const defaultQuery = {
     sortByDescending: false
 }
 
-const queryStringMapping = {
-    subscription: jsString(),
-    status: jsString(),
-    keywords: jsString(),
-    creationDateFrom: jsString(),
-    creationDateTo: jsString(),
-    mode: jsString(),
-    sortBy: jsString(),
-    sortByDescending: jsBoolean(),
-    offset: jsNumber(),
-    limit: jsNumber()
-}
+// const queryStringMapping = {
+//     subscription: jsString(),
+//     status: jsString(),
+//     keywords: jsString(),
+//     creationDateFrom: jsString(),
+//     creationDateTo: jsString(),
+//     mode: jsString(),
+//     sortBy: jsString(),
+//     sortByDescending: jsBoolean(),
+//     offset: jsNumber(),
+//     limit: jsNumber()
+// }
 
 const useQuery = useExchangeFinder;
 
@@ -39,10 +38,11 @@ interface Props {
 
 }
 
-const Component = ({}:Props) => {
+const Component = ({}: Props) => {
 
     const [queryState, newQuery] = useQuery(defaultQuery);
-
+    const [selectedRowsIds, setSelectedRowsIds] = useState<Array<string>>([]);
+    const [showBulkRetryModal, setShowBulkRetryModal] = useState(false)
     const [findSpecs, setFindSpecs] = useState<ExchangeSpecs>({
         findMode: queryState.lastSent.mode,
         keywords: queryState.lastSent.keywords ?? "",
@@ -76,7 +76,7 @@ const Component = ({}:Props) => {
         });
     }
 
-    const handleViewOptionsChange = (viewOptions:DataListViewSettings) => {
+    const handleViewOptionsChange = (viewOptions: DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
@@ -87,34 +87,56 @@ const Component = ({}:Props) => {
         });
     }
 
-
-
     return (
         <div className="flex flex-col w-full px-8 py-4">
+
+            {showBulkRetryModal && <BulkRetryModal
+                xids={selectedRowsIds}
+                onRefresh={handleFindRequested}
+                onClose={() => setShowBulkRetryModal(false)}
+            />}
             <div className="justify-between w-full flex py-4">
                 <div className="text-2xl font-bold tracking-wide text-gray-700">Exchanges</div>
-                <div className="bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded">
-                    Create New Exchange
-                </div>
             </div>
-            <ExchangeFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested} />
+
+            <ExchangeFinderPanel
+                value={findSpecs}
+                onChange={setFindSpecs}
+                onFindRequested={handleFindRequested}
+            />
+
+            <div className={"flex flex-row-reverse"}>
+                <button
+                    onClick={() => setShowBulkRetryModal(true)}
+                    className="block appearance-none border bg-teal-600 hover:bg-teal-500 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                    Bulk retry
+                </button>
+            </div>
             {queryState.response !== null
-            ? <>
-                <DataListViewSettingsEditor
-                    sortByOptions={["subscription", "status", "docType"]}
-                    sortByTitles={{
-                        subscription: "Subscription",
-                        status: "Delivery Status",
-                        docType: "Document Type"
-                    }}
-                    sortBy={{ field: queryState.lastSent.sortBy, descending: queryState.lastSent.sortByDescending }}
-                    total={queryState.response.total}
-                    offset={queryState.lastSent.offset}
-                    limit={queryState.lastSent.limit}
-                    onChange={handleViewOptionsChange} />
-                <ExchangeList data={queryState.response.data} refresh={handleFindRequested} />
-            </>
-            : null}
+                ? <>
+                    <DataListViewSettingsEditor
+                        sortByOptions={["subscription", "status", "docType"]}
+                        sortByTitles={{
+                            subscription: "Subscription",
+                            status: "Delivery Status",
+                            docType: "Document Type"
+                        }}
+                        sortBy={{field: queryState.lastSent.sortBy, descending: queryState.lastSent.sortByDescending}}
+                        total={queryState.response.total}
+                        offset={queryState.lastSent.offset}
+                        limit={queryState.lastSent.limit}
+                        onChange={handleViewOptionsChange}
+                    />
+
+                    <ExchangeList
+                        selectedRowsIds={selectedRowsIds}
+                        setSelectedRowsIds={setSelectedRowsIds}
+                        data={queryState.response.data}
+                        refresh={handleFindRequested
+                        }
+                    />
+                </>
+                : null}
 
         </div>
     )

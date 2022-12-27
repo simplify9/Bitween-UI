@@ -26,6 +26,9 @@ export interface IXchange {
     inputUrl: string;
     outputUrl: string;
     responseUrl: string;
+    inputKey: string;
+    outputKey: string;
+    responseKey: string;
     duration: string;
     promotedProperties: any;
     promotedPropertiesRaw: string;
@@ -46,3 +49,5 @@ export type ExchangeFindQuery = CommonFindQuery & {
     promotedProperties?:string
 }
 
+export type ExchangeDisplayStatus = "good" | "pending" | "bad"
+export type ExchangeDisplayType = "receiver" | "mapper" | "handler" | "skipped"
