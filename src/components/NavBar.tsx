@@ -46,11 +46,11 @@ const NavBar = () => {
                     <NavLink to="/settings"
                              className={resolveClassName}>Settings</NavLink>
                 </div>
-                <div className={"p-3 flex items-center justify-center"}>
-                    <span onClick={() => AuthConfig.logOutHandler()}
-                          className={"text-md bg-gray-300 px-3 py-2 rounded-xl shadow-lg  cursor-pointer"}>
+                <div className={"p-3 flex   items-center justify-center"}>
+                    <div onClick={() => AuthConfig.logOutHandler()}
+                          className={"text-md text-gray-700 w-full  text-center bg-gray-300 px-3 py-2 w-100 rounded-lg shadow-lg  cursor-pointer"}>
                          Logout
-                    </span>
+                    </div>
 
                 </div>
 
