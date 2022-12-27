@@ -1,4 +1,4 @@
-import { ValueCache } from "./types";
+import {ValueCache} from "./types";
 
 export class MemoryRepo implements ValueCache {
 

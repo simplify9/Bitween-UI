@@ -63,6 +63,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
     const getAccessToken = oneCallAtATime(async (triedButFailed: string | null): Promise<string> => {
 
+        console.log("test")
         const cachedValue = await config.accessTokenCache.read();
         if (cachedValue !== null && cachedValue !== triedButFailed) {
             return cachedValue;
@@ -70,11 +71,12 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
         // drop from cache
         await config.accessTokenCache.drop();
+        console.log("iiiii")
 
         const refreshToken = config.refreshTokenCache
             ? await config.refreshTokenCache.read()
             : null;
-
+        console.log("ref",refreshToken)
 
         // create new access / refresh token if possible
         if (refreshToken !== null && config.accessTokenGenerator) {
@@ -98,8 +100,10 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
     // INTERCEPTORS
 
     let accessToken: string | null = null;
-    config.accessTokenCache.read().then(a => accessToken = a);
-    console.info("accessToken", accessToken)
+    config.accessTokenCache.read().then(a => {
+        console.log(a,"aa")
+        accessToken = a
+    });
     axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
         // append access token if available
         return accessToken !== null
@@ -113,11 +117,11 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
     axiosInstance.interceptors.response.use(
         // @ts-ignore
         (response: AxiosResponse) => {
-            
-            console.log("xx",response)
-        
 
-            if([204].includes(response.status)){
+            console.log("xx", response)
+
+
+            if ([204].includes(response.status)) {
                 toast("Action successful", {type: "success"})
             }
             return {
@@ -127,8 +131,10 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                 error: response.data,
             };
         },
-        (error: AxiosError) => {
+        async (error: AxiosError) => {
             if (error.response && error.response.status === 401) {
+
+
                 return getAccessToken(accessToken)
                     .then(newValue => {
                         accessToken = newValue;
@@ -137,7 +143,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                     });
             }
 
-            
+
             toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
             return {
                 status: error.response?.status,
