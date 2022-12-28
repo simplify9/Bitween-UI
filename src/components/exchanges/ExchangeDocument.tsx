@@ -14,7 +14,7 @@ const ExchangeDocument: React.FC<Props> = ({type, status}) => {
 
     const getIconClasses = () => {
         if (status == "good") {
-            return "text-blue-600"
+            return "text-teal-600"
         }
         if (status == "bad") {
             return "text-rose-600"
@@ -25,7 +25,7 @@ const ExchangeDocument: React.FC<Props> = ({type, status}) => {
     }
     const getContainerClasses = () => {
         if (status == "good") {
-            return "bg-blue-100"
+            return "bg-teal-100"
         }
         if (status == "bad") {
             return "bg-rose-100"

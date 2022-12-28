@@ -9,6 +9,7 @@ export const useMembersFinder = queryHook({fetcher: apiClient.findMembers});
 export const useAppVersionFinder = queryHook({fetcher: apiClient.findAppVersion});
 export const useSubscriptionFinder = queryHook({fetcher: apiClient.findSubscriptions});
 export const useAdapterFinder = queryHook({fetcher: apiClient.findAdapters});
+export const useMyProfile = queryHook({fetcher: apiClient.getProfile});
 
 
 

@@ -63,7 +63,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
     const getAccessToken = oneCallAtATime(async (triedButFailed: string | null): Promise<string> => {
 
-        console.log("test")
+
         const cachedValue = await config.accessTokenCache.read();
         if (cachedValue !== null && cachedValue !== triedButFailed) {
             return cachedValue;
@@ -71,13 +71,13 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
         // drop from cache
         await config.accessTokenCache.drop();
-        console.log("iiiii")
+
 
         const refreshToken = config.refreshTokenCache
             ? await config.refreshTokenCache.read()
             : null;
-        console.log("ref",refreshToken)
 
+        console.log("REFREF", refreshToken)
         // create new access / refresh token if possible
         if (refreshToken !== null && config.accessTokenGenerator) {
             try {
@@ -101,10 +101,12 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
     let accessToken: string | null = null;
     config.accessTokenCache.read().then(a => {
-        console.log(a,"aa")
+
         accessToken = a
     });
     axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
+//        toast(`${req.url}`, {type: `success`, toastId: req.url, transition: Zoom})
+
         // append access token if available
         return accessToken !== null
             ? {
@@ -118,11 +120,11 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
         // @ts-ignore
         (response: AxiosResponse) => {
 
-            console.log("xx", response)
 
-
+            //  toast.dismiss(response.config.url)
             if ([204].includes(response.status)) {
-                toast("Action successful", {type: "success"})
+                toast("Action successful", {type: "success",})
+
             }
             return {
                 status: response.status,

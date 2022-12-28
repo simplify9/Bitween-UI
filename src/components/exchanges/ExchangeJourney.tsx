@@ -18,10 +18,10 @@ type Props = {
 type PipeProps = { completed: boolean, error?: boolean, bad?: boolean, onClick?: () => void, fileKey: string | undefined }
 const Pipe: React.FC<PipeProps> = ({completed, error, onClick, bad, fileKey}) => {
 
-    const color = `${bad ? "bg-yellow-500" : error ? " bg-red-400 " : completed ? " bg-blue-600 " : " bg-gray-400 "}`
+    const color = `${bad ? "bg-yellow-500" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
     return <div
         onClick={onClick}
-        className={`h-2 relative flex items-center justify-center ${color}  w-full rounded-full -mx-2 -z-5 ${onClick ? "cursor-pointer" : ""}`}>
+        className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 -z-5 ${onClick ? "cursor-pointer" : ""}`}>
 
         {
             fileKey &&

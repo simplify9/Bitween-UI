@@ -1,7 +1,7 @@
 import axios from "axios";
 import {ExchangeFindQuery} from "../types/xchange";
 import {AdapterFindQuery, ICreateSubscription, ISubscription, SubscriptionFindQuery} from "../types/subscriptions";
-import {CreateAccountModel, LoginRequest} from "../types/accounts";
+import {ChangePasswordModel, CreateAccountModel, LoginRequest} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
 import {CreateDocument, DocumentFindQuery, UpdateDocument} from "../types/document";
@@ -15,6 +15,10 @@ export const apiClient = {
         const res: ApiResponse = await client.post("accounts/login", req);
         return res
     },
+    getProfile: async () => {
+        const res: ApiResponse = await client.get("accounts/profile");
+        return res
+    },
     findAppVersion: async () => {
         const res: ApiResponse = await client.get("Settings/myversion");
         return res
@@ -23,8 +27,12 @@ export const apiClient = {
         const res: ApiResponse = await client.get("Accounts/");
         return res
     },
-    createMember: async (data:CreateAccountModel) => {
-        const res: ApiResponse = await client.post("Accounts/",data);
+    createMember: async (data: CreateAccountModel) => {
+        const res: ApiResponse = await client.post("Accounts/", data);
+        return res
+    },
+    changePassword: async (data: ChangePasswordModel) => {
+        const res: ApiResponse = await client.post("Accounts/changePassword", data);
         return res
     },
     findExchanges: async (req: ExchangeFindQuery) => {
