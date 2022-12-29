@@ -27,6 +27,10 @@ export const apiClient = {
         const res: ApiResponse = await client.get("Accounts/");
         return res
     },
+    removeMember: async (id: number) => {
+        const res: ApiResponse = await client.post(`Accounts/${id}/remove`, {});
+        return res
+    },
     createMember: async (data: CreateAccountModel) => {
         const res: ApiResponse = await client.post("Accounts/", data);
         return res

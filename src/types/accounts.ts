@@ -33,6 +33,7 @@ export interface AccountModel {
     name: string
     email: string
     createdOn: string
+    id: number
 }
 
 export interface CreateAccountModel {
