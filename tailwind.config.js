@@ -33,7 +33,7 @@ module.exports = {
       lime: colors.lime,
       green: colors.green,
       emerald: colors.emerald,
-      blue: colors.blue,
+      teal: colors.teal,
       cyan: colors.cyan,
       sky: colors.sky,
       blue: colors.blue,
@@ -958,7 +958,7 @@ module.exports = {
     'disabled',
   ],
   safelist: [
-    {pattern: /(bg|text|border)-./}
+    {pattern: /(bg|text|border)-*./}
   ],
   plugins: [],
 }

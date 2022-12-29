@@ -40,3 +40,9 @@ export interface CreateAccountModel {
     email: string
     password: string
 }
+
+export interface ChangePasswordModel {
+    oldPassword: string
+    newPassword: string
+   
+}
