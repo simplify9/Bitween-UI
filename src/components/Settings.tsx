@@ -16,9 +16,9 @@ const Settings: React.FC = () => {
 
 
         <div className={"flex flex-row"}>
-            <div className={"shadow-lg rounded-2xl w-1/4 p-5 min-h-[200px] mt-10"}>
+            <div className={"shadow-lg rounded-2xl w-1/4 p-5 min-h-[100px] mt-10"}>
                 <div className={"pb-3"}>
-                    <h3 className={"text-lg"}>Deplymenyt Info</h3>
+                    <h3 className={"text-lg"}>Deployment Info</h3>
                 </div>
                 <div>
                     Infolink Version : {versionQueryState.response?.data?.infolinkApiVersion}

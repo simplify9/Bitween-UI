@@ -1,12 +1,11 @@
-import {format} from "date-fns"
 import ExchangeStatus from "./ExchangeStatus"
 import {IXchange} from "src/types/xchange";
 import ExchangeProperty from "./ExchangeProperty";
 import React, {useState} from "react";
-import {getDateDifference} from "src/utils/DateUtils";
+import {getDateDifferenceHumanized} from "src/utils/DateUtils";
 import ExchangeJourney from "src/components/exchanges/ExchangeJourney";
 import RetryModal from "src/components/exchanges/RetryModal";
-import BulkRetryModal from "src/components/exchanges/BulkRetryModal";
+import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 
 interface Props {
     data: IXchange[]
@@ -31,7 +30,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
     }
     return (
         <>
-            <table className="appearance-none min-w-full max-w-100">
+            <table className="appearance-none min-w-full max-w-100 my-3">
                 <thead className="border-y bg-gray-50">
                 <tr>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
@@ -59,20 +58,29 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                 {
                     data.map((i) => (
                         <tr key={i.id}
-                            className={`${selectedRowsIds.includes(i.id) ? 'bg-blue-50' : "bg-white"} border-b cursor-pointer`}
-                            onClick={() => onClickRow(i.id)}
+                            className={`${selectedRowsIds.includes(i.id) ? 'bg-blue-50' : "bg-white"} border-b`}
+                            
                         >
                             <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
-                                <div className={"flex flex-col gap-2 text-xs    "}>
-                                    <div className={"flex gap-1"}>
-                                        <span> ID:</span> {i.id}</div>
-                                    <div className={"flex gap-1"}>
-                                        <span> CID:</span>
-                                        {i.correlationId}</div>
-                                    {i.retryFor && <div className={"flex gap-1"}>
-                                        <span>Retry For:</span>
-                                        {i.retryFor}</div>}
+                                <div className={"flex flex-row items-center "}>
+                                    <div className={"mr-3"}>
+                                        <CheckBoxEditor onChange={() => onClickRow(i.id)}
+                                                        checked={selectedRowsIds.includes(i.id)}/>
+                                    </div>
+                                    <div>
+                                        <div className={"flex flex-col gap-2 text-xs    "}>
+                                            <div className={"flex gap-1"}>
+                                                <span> ID:</span> {i.id}</div>
+                                            <div className={"flex gap-1"}>
+                                                <span> CID:</span>
+                                                {i.correlationId}</div>
+                                            {i.retryFor && <div className={"flex gap-1"}>
+                                                <span>Retry For:</span>
+                                                {i.retryFor}</div>}
+                                        </div>
+                                    </div>
                                 </div>
+
                             </td>
                             <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
                                 <div className={"flex flex-col gap-2"}>
@@ -115,8 +123,8 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                                  responseBad={i.responseBad} outputKey={i.outputKey}
                                                  inputKey={i.inputKey} responseKey={i.outputKey}/>
                                 <div className={"flex flex-row justify-between gap-5 mt-1 pt-1 border-0 border-t"}>
-                                    <div>  {i.finishedOn ? `Took ${getDateDifference(i.finishedOn, i.startedOn, "ms")}` : "Running"}</div>
-                                    <div>{format(Date.parse(i.startedOn), "'On' Pp")}</div>
+                                    <div>  {i.finishedOn ? `Took ${getDateDifferenceHumanized(i.finishedOn, i.startedOn)}` : "Running"}</div>
+                                    <div>  {`Started ${getDateDifferenceHumanized(new Date(), i.startedOn)} ago`}</div>
                                 </div>
                             </td>
 
@@ -142,7 +150,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                 exception={data.find(i => i.id == showExceptionFor)?.exception}
                 onClose={() => setShowExceptionFor(null)}
             />}
-         
+
 
         </>
     )

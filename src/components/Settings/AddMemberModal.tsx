@@ -40,6 +40,7 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
             onClose()
         }
     }
+    
     return <Modal onClose={onClose} onSubmit={onSubmit}>
         <div className="relative z-0 w-full mb-6 group">
             <FormField title="Name" className="grow">

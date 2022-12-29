@@ -44,5 +44,6 @@ export interface CreateAccountModel {
 export interface ChangePasswordModel {
     oldPassword: string
     newPassword: string
-   
+    newPasswordConfirmation: string
+
 }

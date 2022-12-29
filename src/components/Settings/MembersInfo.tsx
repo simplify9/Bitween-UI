@@ -42,9 +42,6 @@ const MembersInfo: React.FC = () => {
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
                         Email
                     </th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
-                        CreatedOn
-                    </th>
                 </tr>
                 </thead>
                 <tbody>

@@ -29,14 +29,7 @@ const Profile: React.FC = () => {
               {versionQueryState.response?.data?.email}
             </span>
             </div>
-            <div>
-            <span className={"font-light text-gray-700"}>
-                Created On: 
-            </span>
-                <span className={"mx-1"}>
-              {toLocalDateTimeString(versionQueryState.response?.data?.createdOn)}
-            </span>
-            </div>
+         
         </div>
         <div>
             <span onClick={() => setOpenModal("CHANGE_PASSWORD")} className={"text-gray-700 underline cursor-pointer"}>

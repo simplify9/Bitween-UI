@@ -68,7 +68,7 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
 
     return (
 
-        <div className="w-full flex py-1 mb-3">
+        <div className="w-full flex py-1 my-3">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
                 &nbsp;records
