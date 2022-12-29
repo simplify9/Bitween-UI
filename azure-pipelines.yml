@@ -71,7 +71,7 @@ stages:
               chartName: '$(imageName)'
               chartVersion: $(version)
               releaseName: '$(imageName)'
-              overrideValues: 'ingress.enabled=true,ingress.hosts={infolink-ui.sf9.io}'
+              overrideValues: 'ingress.enabled=true,ingress.host=infolink.sf9.io'
               arguments: --repo https://charts.sf9.io
 
 
