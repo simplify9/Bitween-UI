@@ -2,7 +2,7 @@ name: $(version)
 
 trigger:
 - releases/*
-- master
+- main
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -61,7 +61,7 @@ jobs:
      
 - job: buildProd
   displayName: Build, push image and chart and deploy to prod
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/master')
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
   steps:
 
   - task: Docker@2
