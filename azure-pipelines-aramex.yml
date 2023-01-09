@@ -1,77 +1,104 @@
 name: $(version)
 
 trigger:
-  - main
+- releases/*
+- master
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: Chartmuseum
-  - group: S3Bucket
-  - name: imageName
-    value: 'infolinkui'
-  - name: version
-    value: $[format('6.0.{0}', counter('6.0', 0))]
+- name: imageName
+  value: 'infolinkui'
+- name: version
+  value: $[format('6.0.{0}', counter('6.0', 0))]
 
-stages:
-  - stage: Build
-    displayName: Build and push image
+jobs:
 
-    jobs:
-      - job: build
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-        displayName: Build, push image and chart and deploy
-        steps:
-
-          - task: Docker@2
-            displayName: Build and push an image to container registry
-            inputs:
-              command: buildAndPush
-              repository: simplify9/$(imageName)
-              dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-              containerRegistry: simplify9cr
-              tags: |
-                $(version)
-                latest
-
-          - task: HelmInstaller@0
-            displayName: 'Install Helm 3.2.4'
-            inputs:
-              helmVersion: '3.2.4'
-              checkLatestHelmVersion: false
-              installKubectl: false
-
-          - task: HelmDeploy@0
-            displayName: Helm package
-            inputs:
-              command: package
-              chartPath: chart
-              arguments: --version $(version) --app-version $(version)
-              updatedependency: true
-
-          - task: Bash@3
-            displayName: 'Upload to chart museum'
-            inputs:
-              targetType: 'inline'
-              script: |
-                for f in $(Build.ArtifactStagingDirectory)/*.tgz
-                do
-                  echo "Uploading @$f"
-                  curl --data-binary "@$f" https://charts.sf9.io/api/charts --user $(CmUser):$(CmPassword)
-                done
-
-          - task: HelmDeploy@0
-            displayName: 'Deploy to playground'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: 'k8s-s9'
-              namespace: 'playground'
-              command: 'upgrade'
-              chartName: '$(imageName)'
-              chartVersion: $(version)
-              releaseName: '$(imageName)'
-              overrideValues: 'ingress.enabled=true,ingress.host=infolink.sf9.io'
-              arguments: --repo https://charts.sf9.io
+- job: buildStg
+  displayName: Build, push image and chart and deploy to stg
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/releases/')
+  steps:
 
 
+  - task: Docker@2
+    displayName: Build and push an image to container registry
+    inputs:
+      command: buildAndPush
+      repository: $(imageName)
+      dockerfile: $(Build.SourcesDirectory)/Dockerfile
+      containerRegistry: infoaxsstgcr
+      tags: |
+        $(version)
+        latest
+
+  - task: HelmInstaller@0
+    displayName: 'Install Helm 3.2.4'
+    inputs:
+      helmVersion: '3.2.4'
+      checkLatestHelmVersion: false
+      installKubectl: false
+
+  - task: HelmDeploy@0
+    displayName: Helm package
+    inputs:
+      command: package
+      chartPath: charts/default
+      arguments: --version $(version) --app-version $(version)
+      updatedependency: true
+
+
+  - task: HelmDeploy@0
+    displayName: 'Deploy to stg'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceConnection: 'k8s-stg'
+      namespace: 'infolink'
+      command: 'upgrade'
+      chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+      chartVersion: $(version)
+      releaseName: '$(imageName)'
+     
+- job: buildProd
+  displayName: Build, push image and chart and deploy to prod
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/master')
+  steps:
+
+  - task: Docker@2
+    displayName: Build and push an image to container registry
+    inputs:
+      command: buildAndPush
+      repository: $(imageName)
+      dockerfile: $(Build.SourcesDirectory)/Dockerfile
+      containerRegistry: infoaxsprodcr
+      tags: |
+        $(version)
+        latest
+
+  - task: HelmInstaller@0
+    displayName: 'Install Helm 3.2.4'
+    inputs:
+      helmVersion: '3.2.4'
+      checkLatestHelmVersion: false
+      installKubectl: false
+
+  - task: HelmDeploy@0
+    displayName: Helm package
+    inputs:
+      command: package
+      chartPath: charts/default
+      arguments: --version $(version) --app-version $(version)
+      updatedependency: true
+
+
+  - task: HelmDeploy@0
+    displayName: 'Deploy to prod'
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      kubernetesServiceConnection: 'k8s-prod'
+      namespace: 'infolink'
+      command: 'upgrade'
+      chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+      chartVersion: $(version)
+      releaseName: '$(imageName)'
+      
