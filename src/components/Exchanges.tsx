@@ -114,13 +114,6 @@ const Component = ({}: Props) => {
             </div>
             {queryState.response !== null
                 ? <>
-                    <ExchangeList
-                        selectedRowsIds={selectedRowsIds}
-                        setSelectedRowsIds={setSelectedRowsIds}
-                        data={queryState.response.data}
-                        refresh={handleFindRequested
-                        }
-                    />
                     <DataListViewSettingsEditor
                         sortByOptions={["subscription", "status", "docType"]}
                         sortByTitles={{
@@ -134,6 +127,14 @@ const Component = ({}: Props) => {
                         limit={queryState.lastSent.limit}
                         onChange={handleViewOptionsChange}
                     />
+                    <ExchangeList
+                        selectedRowsIds={selectedRowsIds}
+                        setSelectedRowsIds={setSelectedRowsIds}
+                        data={queryState.response.data}
+                        refresh={handleFindRequested
+                        }
+                    />
+                   
 
                 </>
                 : null}

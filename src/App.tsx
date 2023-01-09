@@ -20,7 +20,8 @@ function App() {
 
     const {isLoggedIn} = useAuthApi();
 
-    if (!isLoggedIn) return <Login/>
+    if (!isLoggedIn) return <Login/>;
+    
     return (
         <>
             <Helmet>
