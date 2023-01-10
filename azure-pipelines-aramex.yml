@@ -101,4 +101,7 @@ jobs:
       chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
       chartVersion: $(version)
       releaseName: '$(imageName)'
+            arguments: >
+        --set ingress.hosts={infolinkcloud.aramex.com}
+        --set image.repo="azrinfoaxscrprod.azurecr.io"
       
