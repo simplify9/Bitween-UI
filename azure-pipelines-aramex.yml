@@ -18,7 +18,7 @@ jobs:
 
 - job: buildStg
   displayName: Build, push image and chart and deploy to stg
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main/')
   steps:
 
 
