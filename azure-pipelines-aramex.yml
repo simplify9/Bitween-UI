@@ -3,6 +3,7 @@ name: $(version)
 trigger:
 - releases/*
 - main
+- dev
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -17,7 +18,7 @@ jobs:
 
 - job: buildStg
   displayName: Build, push image and chart and deploy to stg
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/releases/')
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')
   steps:
 
 
