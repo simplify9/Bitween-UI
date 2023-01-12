@@ -61,6 +61,7 @@ jobs:
       releaseName: '$(imageName)'
      
 - job: buildProd
+  dependsOn: buildStg
   displayName: Build, push image and chart and deploy to prod
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
   steps:
