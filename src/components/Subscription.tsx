@@ -13,7 +13,6 @@ import AdapterEditor from "./Subscriptions/AdapterEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
-import {toast} from "react-toastify";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -47,7 +46,7 @@ const Component = () => {
         if (res.succeeded) {
             await refreshSubscription(id!);
         } else {
-           
+
         }
     }
     const deleteSubscription = async () => {
@@ -81,7 +80,7 @@ const Component = () => {
                     </Button>
                 </div>
             </div>
-            <div className="grid grid-cols-6 gap-6 rounded mb-6 border-2 px-2 py-2">
+            <div className="grid grid-cols-6 gap-5 rounded mb-6 border px-2 py-2 shadow">
                 <div className="col-span-6 sm:col-span-3 lg:col-span-1 ">
                     <FormField title="ID" className="grow">
                         <TextEditor disabled={true} value={id}/>
@@ -131,11 +130,11 @@ const Component = () => {
             </div>
 
 
-            <div className="flex flex-col gap-6 rounded mb-6">
+            <div className="flex flex-col gap-6 rounded mb-6 ">
 
                 {updateSubscriptionData?.type == "1" &&
                     <div
-                        className=" border-2 px-2 py-2">
+                        className=" border shadow px-2 py-2">
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
                                 documentId={subscription.documentId}
@@ -146,7 +145,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "8" &&
                     <div
-                        className=" border-2 px-2 py-2">
+                        className=" border shadow px-2 py-2">
 
                         <FormField title="Aggregation" className="grow">
                         </FormField>
@@ -172,7 +171,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "2" &&
                     <div
-                        className=" border-2 px-2 py-2">
+                        className=" border shadow px-2 py-2">
 
                         <AdapterEditor title={"Validator"} type={"validators"}
                                        value={updateSubscriptionData?.validatorId}
@@ -187,7 +186,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "4" &&
                     <div
-                        className=" border-2 px-2 py-2">
+                        className=" border shadow px-2 py-2">
 
                         <AdapterEditor title={"Receiver"} type={"receivers"}
                                        value={updateSubscriptionData?.receiverId}
@@ -206,7 +205,7 @@ const Component = () => {
 
                 <div className={"flex flex-row gap-3"}>
                     <div
-                        className=" border-2 px-2 py-2 w-1/2">
+                        className=" border shadow px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Mapper"} type={"mappers"}
                                        value={updateSubscriptionData?.mapperId}
@@ -222,7 +221,7 @@ const Component = () => {
                     </div>
 
                     <div
-                        className=" border-2 px-2 py-2 w-1/2">
+                        className=" border shadow px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Handler"} type={"handlers"}
                                        value={updateSubscriptionData?.handlerId}
@@ -245,11 +244,11 @@ const Component = () => {
             <div className={"flex w-full gap-2"}>
                 <Button
                     onClick={() => navigate('/subscriptions')}
-                    className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">Cancel
+                    className="text-white bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Cancel
                 </Button>
                 <Button
                     onClick={updateSubscription}
-                    className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">Save
+                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center" >Save
                 </Button>
             </div>
 

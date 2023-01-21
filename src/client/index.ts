@@ -135,10 +135,10 @@ export const apiClient = {
         const res = await client.get(`adapters/${id}/properties`)
         const arr: OptionType[] = [];
         if (!res.data) return [];
-        Object.keys(res.data).forEach(k => {
+        Object.entries(res.data).forEach(([k, v]: any) => {
             arr.push({
                 id: k,
-                title: k
+                title: v
             })
         })
         return arr;

@@ -45,7 +45,7 @@ export const PartnerList: React.FC<Props> = ({data}) => {
                             {i.keys ?? "0"}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                            {i.subscriptionCount ?? "0"}
+                            {i.subscriptionsCount ?? "0"}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                             <button onClick={() => navigate(`${i.id}`)} type="button" className="text-white bg-blue-900 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-3 py-2.5 text-center inline-flex items-center  mr-2 mb-2">
