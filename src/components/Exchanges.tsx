@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useExchangeFinder} from "../hooks/queryHooks";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {ExchangeFinderPanel, ExchangeSpecs} from "./exchanges/ExchangeFinderPanel";
@@ -86,6 +86,15 @@ const Component = ({}: Props) => {
             limit: viewOptions.limit
         });
     }
+    useEffect(() => {
+        console.log("breofre xxx")
+
+        const iId = setInterval(() => {
+            console.log("xxx")
+            handleFindRequested()
+        }, 6000)
+        return () => clearInterval(iId)
+    },[])
 
     return (
         <div className="flex flex-col w-full px-8 py-4">
@@ -134,7 +143,7 @@ const Component = ({}: Props) => {
                         refresh={handleFindRequested
                         }
                     />
-                   
+
 
                 </>
                 : null}
