@@ -158,8 +158,8 @@ const Component: React.FC<Props> = ({
                                 </td>
                                 <td
                                     className="text-sm text-gray-900 felx items-center font-light px-6 py-4 whitespace-nowrap">
-                                    <div className={" text-red-600   w-8 h-8 mx-1"}
-                                            onClick={() => onRemove!(i)}><MdOutlineRemoveCircle size={21}/></div>
+                                    <Button className={" text-red-600   w-8 h-8 mx-1"}
+                                            onClick={() => onRemove!(i)}><MdOutlineRemoveCircle size={21}/></Button>
                                 </td>
 
                             </tr>
