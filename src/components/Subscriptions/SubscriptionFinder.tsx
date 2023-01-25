@@ -25,7 +25,7 @@ export const SubscriptionFinderPanel:React.FC<Props> = ({
                 <Tab key="Search" selected={true} onClick={() => {}}>Find by</Tab>
 
             </TabNavigator>
-            <div  className="flex w-full px-4 py-8" >
+            <div  className="flex w-1/2 px-4 py-8" >
                 <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4 w-full">
                     <FormField title="Name" className="grow">
                         <TextEditor placeholder="Type in the name..." value={value.nameContains} onChange={(t) => onChange({...value,nameContains:t})} />

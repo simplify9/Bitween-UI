@@ -1,6 +1,6 @@
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import Modal from "src/components/common/Modal";
-import React, {useState} from "react";
+import React, {Fragment, useState} from "react";
 import {apiClient} from "src/client";
 
 type Props = {
@@ -49,7 +49,7 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid}) => {
         <div className="flex gap-2 flex-col py-1 border bg-gray-50 px-2 align-center rounded shadow-sm  ">
 
             <div className={"min-h-[50px]"}>
-                {exception}
+                {exception?.split("{{newline}}").map((d, i) => <p key={i}>{d}</p>)}
             </div>
 
         </div>

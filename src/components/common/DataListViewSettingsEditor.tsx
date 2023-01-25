@@ -1,7 +1,4 @@
 import Tab from "./forms/Tab"
-import TabMenu from "./forms/TabMenu"
-import TabMenuItem from "./forms/TabMenuItem"
-import TabNavigator from "./forms/TabNavigator"
 import {Icon} from "./icons"
 
 
@@ -91,10 +88,10 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                                         className="h-2"/></Tab>
                 </>
                 : null}
-            <div className="flex grow py-1"/>
+          
             {/*<div className="text-sm py-1">Sort By</div>*/}
             {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
-            
+
             {/*    sortByOptions.map(opt => (*/}
             {/*        <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}*/}
             {/*                     selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>*/}
