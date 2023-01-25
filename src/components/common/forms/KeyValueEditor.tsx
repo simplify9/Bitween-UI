@@ -56,14 +56,11 @@ const Component: React.FC<Props> = ({
     });
 
     const onAddSubmit = () => {
-        
         if (newKeyValue) {
-            console.log("inside",newKeyValue)
             onAdd!(newKeyValue)
-            onCloseModal()
             setNewKeyValue({key: '', value: ''})
+            onCloseModal()
         }
-
     }
 
     return (
@@ -150,7 +147,7 @@ const Component: React.FC<Props> = ({
                 {
                     values && values.length > 0 ?
                         values?.map((i) => (
-                            <tr key={i.key} className="bg-white border-b">
+                            <tr key={`${i.key}_${i.value}`} className="bg-white border-b">
                                 <td
                                     className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                     {i.key}
@@ -161,13 +158,14 @@ const Component: React.FC<Props> = ({
                                 </td>
                                 <td
                                     className="text-sm text-gray-900 felx items-center font-light px-6 py-4 whitespace-nowrap">
-                                    <Button className={" text-red-600   w-8 h-8 mx-1"}
-                                            onClick={() => onRemove!(i)}><MdOutlineRemoveCircle size={21}/></Button>
+                                    <div className={" text-red-600   w-8 h-8 mx-1"}
+                                            onClick={() => onRemove!(i)}><MdOutlineRemoveCircle size={21}/></div>
                                 </td>
 
                             </tr>
-                        )) : <>{((!hideEmptyLabel) &&
-                            <div className={"px-4 py-3"}>No {title}</div>)}</>
+                        )) : <tr>{((!hideEmptyLabel) &&
+                            <td colSpan={3} className={"px-4 py-3"}>No {title}</td>)}
+                        </tr>
                 }
                 </tbody>
             </table>

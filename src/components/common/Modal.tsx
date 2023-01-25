@@ -44,7 +44,10 @@ const Component: React.FC<Props> = ({
                             <div
                                 className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
 
-                                {onSubmit && <Button disabled={submitDisabled} onClick={onSubmit}
+                                {onSubmit && <Button disabled={submitDisabled} onClick={() => {
+                                    console.log("button pressed")
+                                    onSubmit()
+                                }}
                                                      type="button"
                                                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">{submitLabel ?? "Save"}
                                 </Button>}

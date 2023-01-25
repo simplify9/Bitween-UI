@@ -11,7 +11,10 @@ const Component: React.FC<Props> = ({
                                     }) => {
 
   return (
-    <button {...htmlProps} onClick={onClick} className={classes("", className)}>
+    <button {...htmlProps} onClick={(event)=> {
+        event.stopPropagation();
+        onClick()
+    }} className={classes("", className)}>
       {children}
     </button>
   )

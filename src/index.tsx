@@ -11,11 +11,7 @@ import {createRoot} from 'react-dom/client';
 addAxiosInterceptors(client, AuthConfig);
 client.defaults.baseURL = API_BASE_URL;
 
-const container = document.getElementById('root');
-const root = createRoot(container!);
-root.render(<React.StrictMode>
-    <AuthApiProvider authApp={AuthConfig}>
-        <App/>
-    </AuthApiProvider>
-</React.StrictMode>);
 
+const container = document.getElementById("root") as Element;
+const root = createRoot(container!);
+root.render(<AuthApiProvider authApp={AuthConfig}><App/></AuthApiProvider>);

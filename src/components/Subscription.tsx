@@ -13,6 +13,7 @@ import AdapterEditor from "./Subscriptions/AdapterEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
+import StackTrace from "stacktrace-js";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -26,39 +27,44 @@ const Component = () => {
             refreshSubscription(id).then();
         }
     }, [id]);
-    useEffect(() => {
-        setUpdateSubscriptionData(subscription!)
-    }, [subscription])
+
+    // useEffect(() => {
+    //     console.log("useEffect")
+    //     setUpdateSubscriptionData(subscription!)
+    // }, [subscription])
 
     const refreshSubscription = async (id: string) => {
         let res = await apiClient.findSubscription(id);
-        if (res.succeeded) setSubscription({
-            ...res.data,
-            schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
-                ...s,
-                id: index
-            }))
-        });
+        if (res.succeeded) {
+            const data = {
+                ...res.data,
+                schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
+                    ...s,
+                    id: index
+                }))
+            }
+            setSubscription(data);
+            setUpdateSubscriptionData(data)
+        }
     }
 
     const updateSubscription = async () => {
         let res = await apiClient.updateSubscription(id!, updateSubscriptionData!);
         if (res.succeeded) {
             await refreshSubscription(id!);
-        } else {
-
         }
     }
     const deleteSubscription = async () => {
         let res = await apiClient.deleteSubscription(id!);
         if (res.succeeded) navigate('/subscriptions')
     }
-    const onChangeSubscriptionData = useCallback((key: any, value: any) => {
-        setSubscription((s) => ({
+    const onChangeSubscriptionData =useCallback ((key: keyof ISubscription, value: any, test?: any) => {
+        console.log(new Date().getMilliseconds(), "onChangeSubscriptionData", key, value, {test},StackTrace.getSync())
+        setUpdateSubscriptionData((s) => ({
             ...s,
             [key]: value
         }))
-    }, [setSubscription])
+    },[])
     // const onAddSchedule = useCallback((newS: ScheduleView) => {
     //   setSubscription((s) => ({
     //     ...s,
@@ -91,7 +97,7 @@ const Component = () => {
                         <ChoiceEditor
                             disabled={true}
                             value={updateSubscriptionData?.type?.toString()}
-                            onChange={onChangeSubscriptionData.bind(null, "type")}
+                            onChange={(e) => onChangeSubscriptionData("type", e)}
                             optionTitle={(item: OptionType) => item.title}
                             optionValue={(item: OptionType) => item.id}
                             options={SubscriptionTypeOptions}/>
@@ -102,8 +108,7 @@ const Component = () => {
                     <FormField title="Document" className="grow">
                         <DocumentSelector disabled={true}
                                           value={updateSubscriptionData?.documentId}
-                                          onChange={onChangeSubscriptionData.bind(null, "documentId")}
-
+                                          onChange={(e) => onChangeSubscriptionData("documentId", e)}
                         />
                     </FormField>
                 </div>
@@ -112,7 +117,8 @@ const Component = () => {
                     <FormField title="Partner" className="grow">
                         <PartnerSelector disabled={true}
                                          value={updateSubscriptionData?.partnerId}
-                                         onChange={onChangeSubscriptionData.bind(null, "partnerId")}
+                                         onChange={(e) => onChangeSubscriptionData("partnerId", e)}
+
 
                         />
                     </FormField>
@@ -121,7 +127,7 @@ const Component = () => {
                 <div className=" ">
                     <FormField title="Name" className="grow">
                         <TextEditor value={updateSubscriptionData?.name}
-                                    onChange={onChangeSubscriptionData.bind(null, "name")}
+                                    onChange={(e) => onChangeSubscriptionData("name", e)}
                         />
                     </FormField>
                 </div>
@@ -138,7 +144,7 @@ const Component = () => {
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
                                 documentId={subscription.documentId}
-                                onChange={(e) => onChangeSubscriptionData("documentFilter", e)}
+                                onChange={(e) => onChangeSubscriptionData("documentFilter", e, "test")}
                                 promotedProperties={updateSubscriptionData?.documentFilter}
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>

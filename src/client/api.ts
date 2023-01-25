@@ -104,7 +104,8 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
         accessToken = a
     });
-    axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
+    //todo check types
+    axiosInstance.interceptors.request.use((req: any) => {
 //        toast(`${req.url}`, {type: `success`, toastId: req.url, transition: Zoom})
 
         // append access token if available

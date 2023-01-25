@@ -13,7 +13,7 @@ const SubscriptionFilter: React.FC<Props> = ({
                                                  documentId,
                                                  onChange,
                                                  documentFilter,
-                                                 promotedProperties
+                                                 //   promotedProperties
                                              }) => {
 
 
@@ -21,39 +21,42 @@ const SubscriptionFilter: React.FC<Props> = ({
 
 
     const onAddFilter = (newVal: KeyValuePair) => {
-
+        console.log(new Date().getMilliseconds(),"onAddFilter")
         const data = [...(documentFilter ?? []), newVal]
-        console.log(data, newVal)
         onChange(data)
     }
 
 
     const onRemoveFilter = (newVal: KeyValuePair) => {
-        const data = documentFilter?.filter(x => x.key != newVal.key) ?? []
+        console.log(new Date().getMilliseconds(),"onRemoveFilter")
+        const data = documentFilter?.filter(x => !(x.key == newVal.key && x.value == newVal.value)) ?? []
         onChange(data)
     }
 
-    useEffect(() => {
-
-        (async () => {
-            if (!documentId)
-                return;
-            const data = await apiClient.findDocument(documentId);
-            if (data.succeeded) {
-                const k = ((data?.data?.promotedProperties as Array<KeyValuePair>).map((i) => ({
+    const loadData = async () => {
+        if (!documentId)
+            return;
+        const data = await apiClient.findDocument(documentId);
+        if (data.succeeded) {
+            const k = ((data?.data?.promotedProperties as Array<KeyValuePair>)
+                //?.filter(i => documentFilter?.some(i => i.key != i.key))
+                .map((i) => ({
                     id: i.key,
                     title: i.value
                 }))) as OptionType[]
-                setKeyOptions(k)
-            }
+            setKeyOptions(k)
+        }
 
 
-        })()
+    }
+    useEffect(() => {
 
-    }, [documentId, promotedProperties])
+        loadData()
+
+    }, [documentId])
 
 
-    console.log("documentFilter", documentFilter)
+    //console.log("documentFilter", documentFilter)
     return (
         <KeyValueEditor values={documentFilter} title={'Properties'}
                         keyLabel={"Name"} valueLabel={"Value"}
@@ -63,4 +66,4 @@ const SubscriptionFilter: React.FC<Props> = ({
         />
     )
 }
-export default SubscriptionFilter
+export default React.memo(SubscriptionFilter)
