@@ -139,7 +139,7 @@ const Component = () => {
                             <SubscriptionFilter
                                 documentId={subscription.documentId}
                                 onChange={(e) => onChangeSubscriptionData("documentFilter", e)}
-                                promotedProperties={updateSubscriptionData.receiverProperties}
+                                promotedProperties={updateSubscriptionData?.documentFilter}
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>
                     </div>}
@@ -248,7 +248,7 @@ const Component = () => {
                 </Button>
                 <Button
                     onClick={updateSubscription}
-                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center" >Save
+                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
                 </Button>
             </div>
 

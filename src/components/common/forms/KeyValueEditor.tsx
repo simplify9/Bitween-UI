@@ -1,6 +1,6 @@
 import {KeyValuePair, OptionType} from "src/types/common";
 import Button from "./Button";
-import React, {Fragment, useState} from "react";
+import React, {useState} from "react";
 import Modal from "../Modal";
 import FormField from "./FormField";
 import TextEditor from "./TextEditor";
@@ -41,9 +41,13 @@ const Component: React.FC<Props> = ({
                                     }) => {
 
     const [addOn, setAddOn] = useState<boolean>(false);
-    const onCloseModal = () => setAddOn(false)
+    const onCloseModal = () => {
+        setAddOn(false)
+    }
 
-    const onOpenModal = () => setAddOn(true)
+    const onOpenModal = (e?: any) => {
+        setAddOn(true)
+    }
 
 
     const [newKeyValue, setNewKeyValue] = useState<KeyValuePair>({
@@ -52,7 +56,9 @@ const Component: React.FC<Props> = ({
     });
 
     const onAddSubmit = () => {
+        
         if (newKeyValue) {
+            console.log("inside",newKeyValue)
             onAdd!(newKeyValue)
             onCloseModal()
             setNewKeyValue({key: '', value: ''})
@@ -61,9 +67,9 @@ const Component: React.FC<Props> = ({
     }
 
     return (
-        <Fragment>
+        <div key={`${addOn}_`}>
             {addOn &&
-                <Modal key={`${addOn}_`} onClose={onCloseModal} submitLabel={"Add"}
+                <Modal onClose={onCloseModal} submitLabel={"Add"}
                        onSubmit={onAddSubmit}>
                     <div
                         className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left grow pr-5">
@@ -117,9 +123,10 @@ const Component: React.FC<Props> = ({
                     <th scope="col"
                         className="text-sm font-medium text-gray-900 px-6 py-2 text-right">
                         {
-                            keyOptions?.length != 0 && <Button onClick={onOpenModal}
-                                                               className={"text-green-600 rounded w-5 h-5"}><HiPlusCircle
-                                size={25}/></Button>
+                            keyOptions?.length != 0 &&
+                            <div onClick={onOpenModal}
+                                 className={"text-green-600 rounded w-5 h-5"}><HiPlusCircle
+                                size={25}/></div>
                         }
 
                     </th>
@@ -164,7 +171,7 @@ const Component: React.FC<Props> = ({
                 }
                 </tbody>
             </table>
-        </Fragment>
+        </div>
     );
 };
 

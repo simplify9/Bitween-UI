@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {KeyValuePair, OptionType} from "src/types/common";
 import KeyValueEditor from "src/components/common/forms/KeyValueEditor";
 import {apiClient} from "src/client";
@@ -18,13 +18,26 @@ const SubscriptionFilter: React.FC<Props> = ({
 
 
     const [keyOptions, setKeyOptions] = useState<Array<OptionType>>([])
+
+
+    const onAddFilter = (newVal: KeyValuePair) => {
+
+        const data = [...(documentFilter ?? []), newVal]
+        console.log(data, newVal)
+        onChange(data)
+    }
+
+
+    const onRemoveFilter = (newVal: KeyValuePair) => {
+        const data = documentFilter?.filter(x => x.key != newVal.key) ?? []
+        onChange(data)
+    }
+
     useEffect(() => {
 
         (async () => {
             if (!documentId)
                 return;
-
-
             const data = await apiClient.findDocument(documentId);
             if (data.succeeded) {
                 const k = ((data?.data?.promotedProperties as Array<KeyValuePair>).map((i) => ({
@@ -39,26 +52,15 @@ const SubscriptionFilter: React.FC<Props> = ({
 
     }, [documentId, promotedProperties])
 
-    const onAddFilter = useCallback((newVal: KeyValuePair) => {
 
-        const data = [...(promotedProperties ?? []), newVal]
-        onChange(data)
-    }, [onChange, promotedProperties])
-
-
-    const onRemoveFilter = useCallback((newVal: KeyValuePair) => {
-        const data = promotedProperties?.filter(x => x.key != newVal.key) ?? []
-        onChange(data)
-    }, [onChange, promotedProperties])
-
-
-    return (<div>
+    console.log("documentFilter", documentFilter)
+    return (
         <KeyValueEditor values={documentFilter} title={'Properties'}
                         keyLabel={"Name"} valueLabel={"Value"}
                         onAdd={onAddFilter} onRemove={onRemoveFilter}
                         addLabel={"Add or edit"}
                         keyOptions={keyOptions}
         />
-    </div>)
+    )
 }
 export default SubscriptionFilter
