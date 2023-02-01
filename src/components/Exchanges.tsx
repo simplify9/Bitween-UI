@@ -4,6 +4,7 @@ import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataLis
 import {ExchangeFinderPanel, ExchangeSpecs} from "./exchanges/ExchangeFinderPanel";
 import {ExchangeList} from "./exchanges/ExchangeList";
 import BulkRetryModal from "src/components/exchanges/BulkRetryModal";
+import CreateExchange from "src/components/exchanges/CreateExchange";
 
 
 const defaultQuery = {
@@ -42,7 +43,8 @@ const Component = ({}: Props) => {
 
     const [queryState, newQuery] = useQuery(defaultQuery);
     const [selectedRowsIds, setSelectedRowsIds] = useState<Array<string>>([]);
-    const [showBulkRetryModal, setShowBulkRetryModal] = useState(false)
+
+    const [openModal, setOpenModal] = useState<"CREATE_XCHANGE" | "BULK_RETRY" | "NONE">("NONE");
     const [findSpecs, setFindSpecs] = useState<ExchangeSpecs>({
         findMode: queryState.lastSent.mode,
         keywords: queryState.lastSent.keywords ?? "",
@@ -109,30 +111,53 @@ const Component = ({}: Props) => {
     return (
         <div className="flex flex-col w-full px-8 py-4">
 
-            {showBulkRetryModal && <BulkRetryModal
+            {openModal === "BULK_RETRY" && <BulkRetryModal
                 xids={selectedRowsIds}
                 onRefresh={handleFindRequested}
-                onClose={() => setShowBulkRetryModal(false)}
+                onClose={() => {
+                    handleFindRequested()
+                    setOpenModal("NONE")
+                }}
             />}
-            <div className="justify-between w-full flex py-4">
-                <div className="text-2xl font-bold tracking-wide text-gray-700">Exchanges</div>
+
+            {openModal === "CREATE_XCHANGE" && <CreateExchange
+                onClose={() => {
+                    handleFindRequested()
+                    setOpenModal("NONE")
+                }}
+            />}
+
+            <div className="justify-between w-full flex pt-3">
+                <div className="text-2xl font-bold tracking-wide text-gray-700">Xchanges</div>
             </div>
 
+
+            <div className={"flex flex-row-reverse"}>
+                <button
+                    onClick={() => setOpenModal("BULK_RETRY")}
+                    className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                    Bulk retry
+                </button>
+                <button
+                    onClick={() => setOpenModal("CREATE_XCHANGE")}
+                    className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                    Create Xchange
+                </button>
+            </div>
             <ExchangeFinderPanel
                 value={findSpecs}
                 onChange={setFindSpecs}
                 onFindRequested={handleFindRequested}
             />
-
-            <div className={"flex flex-row-reverse"}>
-                <button
-                    onClick={() => setShowBulkRetryModal(true)}
-                    className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-                    Bulk retry
-                </button>
-            </div>
             {queryState.response !== null
                 ? <>
+                    <ExchangeList
+                        selectedRowsIds={selectedRowsIds}
+                        setSelectedRowsIds={setSelectedRowsIds}
+                        data={queryState.response.data}
+                        refresh={handleFindRequested
+                        }
+                    />
                     <DataListViewSettingsEditor
                         sortByOptions={["subscription", "status", "docType"]}
                         sortByTitles={{
@@ -145,13 +170,6 @@ const Component = ({}: Props) => {
                         offset={queryState.lastSent.offset}
                         limit={queryState.lastSent.limit}
                         onChange={handleViewOptionsChange}
-                    />
-                    <ExchangeList
-                        selectedRowsIds={selectedRowsIds}
-                        setSelectedRowsIds={setSelectedRowsIds}
-                        data={queryState.response.data}
-                        refresh={handleFindRequested
-                        }
                     />
 
 

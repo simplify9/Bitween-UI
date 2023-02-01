@@ -1,15 +1,16 @@
-import { useDocumentFinder } from "../../hooks/queryHooks";
-import { ChoiceEditor } from "../common/forms/ChoiceEditor";
+import {useDocumentFinder} from "../../hooks/queryHooks";
+import {ChoiceEditor} from "../common/forms/ChoiceEditor";
+import React from "react";
 
 
 interface Props {
     value?: string
-    onChange: (value:string) => void
+    onChange: (value: string) => void
     disabled?: boolean
 }
 
 const defaultQuery = {
-    nameContains:'',
+    nameContains: '',
     mode: "keyword",
     creationDateFrom: undefined,
     creationDateTo: undefined,
@@ -20,7 +21,7 @@ const defaultQuery = {
     sortByDescending: false
 }
 
-const DocumentSelector:React.FC<Props> = ({ value, onChange, disabled }) => {
+const DocumentSelector: React.FC<Props> = ({value, onChange, disabled}) => {
 
     const [queryState, newQuery] = useDocumentFinder(defaultQuery);
     return (
@@ -31,7 +32,7 @@ const DocumentSelector:React.FC<Props> = ({ value, onChange, disabled }) => {
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
             optionValue={i => i.id}
-            optionTitle={i => i.name} />
+            optionTitle={i => i.name}/>
     );
 }
 
