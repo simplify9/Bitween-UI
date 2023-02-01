@@ -13,7 +13,6 @@ import AdapterEditor from "./Subscriptions/AdapterEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
-import StackTrace from "stacktrace-js";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -53,20 +52,15 @@ const Component = () => {
         let res = await apiClient.deleteSubscription(id!);
         if (res.succeeded) navigate('/subscriptions')
     }
-    const onChangeSubscriptionData = useCallback((key: keyof ISubscription, value: any, test?: any) => {
+    const onChangeSubscriptionData = useCallback((key: keyof ISubscription, value: any) => {
         setUpdateSubscriptionData((s) => ({
             ...s,
             [key]: value
         }))
     }, [])
-    // const onAddSchedule = useCallback((newS: ScheduleView) => {
-    //   setSubscription((s) => ({
-    //     ...s,
-    //     schedules: [...(s?.schedules ?? []), newS]
-    //   }))
-    // }, [setSubscription])
 
-    if (subscription == null) return <></>
+    if (!subscription) return <></>
+
     return (
         <div className="flex flex-col w-full px-8 py-10">
             <div className="justify-between w-full flex py-4">
@@ -138,8 +132,7 @@ const Component = () => {
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
                                 documentId={subscription.documentId}
-                                onChange={(e) => onChangeSubscriptionData("documentFilter", e, "test")}
-                                promotedProperties={updateSubscriptionData?.documentFilter}
+                                onChange={(e) => onChangeSubscriptionData("documentFilter", e)}
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>
                     </div>}

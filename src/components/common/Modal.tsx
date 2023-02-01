@@ -36,7 +36,7 @@ const Component: React.FC<Props> = ({
 
                         <div
                             className="relative  bg-white rounded-lg text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:max-w-screen-lg sm:w-full">
-                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-3 sm:pb-4">
                                 <div className="sm:items-start overflow-visible">
                                     {children}
                                 </div>

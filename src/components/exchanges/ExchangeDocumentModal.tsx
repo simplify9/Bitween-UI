@@ -22,6 +22,7 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
         const res = await apiClient.getExchangeDocument({documentKey: downloadUrl})
         if (res.data?.data) {
             const resp = res.data.data
+
             try {
                 setData({data: JSON.parse(resp), type: "json"})
             } catch {
@@ -39,11 +40,12 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
     useEffect(() => {
         fetchData()
     }, []);
-    return <Modal onClose={onClose} title={name}>
-        <div className={"px-1"}>
+    return <Modal onClose={onClose} className={" min-w-[2000px] "} title={name}>
+        <div className={"px-1 min-w-[2000px]"}>
             <p style={{whiteSpace: "break-spaces"}} className={"flex break-all  "}>
                 {
-                    data.type === "xml" && <SyntaxHighlighter language="xml" showLineNumbers style={xcode}>
+                    data.type === "xml" &&
+                    <SyntaxHighlighter wrapLines={true} language="xml" showLineNumbers style={xcode}>
                         {data.data as string}
                     </SyntaxHighlighter>
                 }

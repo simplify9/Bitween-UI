@@ -46,6 +46,13 @@ const AdapterEditor: React.FC<Props> = ({
         onPropsChange!(pparr)
 
     }
+
+    const onEdit = (v: KeyValuePair) => {
+        let pparr = props.filter(i => i.key != v.key) ?? [];
+        pparr?.push(v);
+        onPropsChange!(pparr)
+
+    }
     const onRemove = (v: KeyValuePair) => {
         let pparr: KeyValuePair[] = [];
         props?.forEach(pp => {
@@ -65,6 +72,7 @@ const AdapterEditor: React.FC<Props> = ({
                                 keyLabel={"Name"} valueLabel={"Value"}
                                 onAdd={onAdd} onRemove={onRemove}
                                 addLabel={"Add or edit"}
+                                onEdit={onEdit}
                                 keyOptions={availableOptions()}
                 />
             </div>
