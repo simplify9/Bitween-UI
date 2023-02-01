@@ -40,13 +40,21 @@ export interface IXchange {
     partnerId: number | null;
 }
 
+
+export type CreateXchangeModel = {
+    option: string
+    documentId: string
+    subscriberId: string
+    data: string
+}
+
 export type ExchangeFindQuery = CommonFindQuery & {
     mode: string
     subscription?: string
     status?: string
-    id?:string
-    correlationId?:string
-    promotedProperties?:string
+    id?: string
+    correlationId?: string
+    promotedProperties?: string
 }
 
 export type ExchangeDisplayStatus = "good" | "pending" | "bad"

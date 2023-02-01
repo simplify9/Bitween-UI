@@ -36,7 +36,7 @@ const NavBar = () => {
                 <div>
                     <NavLink to="/" className={resolveClassName}>Dashboard</NavLink>
                     <NavLink to="/exchanges"
-                             className={resolveClassName}>Exchanges</NavLink>
+                             className={resolveClassName}>Xchanges</NavLink>
                     <NavLink to="/subscriptions"
                              className={resolveClassName}>Subscriptions</NavLink>
                     <NavLink to="/documents"
