@@ -34,19 +34,19 @@ export const DocumentList: React.FC<Props> = ({data}) => {
             {
                 data.map((i) => (
                     <tr key={i.id} className="bg-white border-b">
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                        <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             {i.id}
                         </td>
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                        <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             {i.name}
                         </td>
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                        <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             {i.busEnabled ? "True" : "False"}
                         </td>
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                        <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             {i.busMessageTypeName}
                         </td>
-                        <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                        <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             <button onClick={() => navigate(`${i.id}`)} type="button"
                                     className="text-white bg-blue-900 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm  px-4 py-2 text-center inline-flex items-center  mr-2 mb-2">
                                 <BsFillEyeFill size={21}/>

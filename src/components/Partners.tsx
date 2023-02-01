@@ -45,7 +45,6 @@ export default (props: Props) => {
     });
 
     const handleFindRequested = () => {
-        console.log("findspecs", findSpecs)
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useExchangeFinder} from "../hooks/queryHooks";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {ExchangeFinderPanel, ExchangeSpecs} from "./exchanges/ExchangeFinderPanel";
@@ -86,15 +86,25 @@ const Component = ({}: Props) => {
             limit: viewOptions.limit
         });
     }
-    useEffect(() => {
-        console.log("breofre xxx")
-
-        const iId = setInterval(() => {
-            console.log("xxx")
-            handleFindRequested()
-        }, 6000)
-        return () => clearInterval(iId)
-    },[])
+    // useEffect(() => {
+    //     const iId = setInterval(() => {
+    //         newQuery({
+    //             ...defaultQuery,
+    //             ...queryState.lastSent,
+    //             mode: findSpecs.findMode,
+    //             keywords: findSpecs.keywords,
+    //             subscription: findSpecs.findBy.subscription,
+    //             id: findSpecs.findBy.id ?? "",
+    //             correlationId: findSpecs.findBy.correlationId ?? "",
+    //             promotedProperties: findSpecs.findBy.promotedProperties ?? "",
+    //             creationDateFrom: findSpecs.findBy.creationTimeWindow.from,
+    //             creationDateTo: findSpecs.findBy.creationTimeWindow.to,
+    //             status: findSpecs.findBy.status,
+    //             offset: 0,
+    //         });
+    //     }, 6000)
+    //     return () => clearInterval(iId)
+    // }, [findSpecs])
 
     return (
         <div className="flex flex-col w-full px-8 py-4">

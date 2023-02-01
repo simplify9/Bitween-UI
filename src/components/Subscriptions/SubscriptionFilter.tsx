@@ -21,14 +21,12 @@ const SubscriptionFilter: React.FC<Props> = ({
 
 
     const onAddFilter = (newVal: KeyValuePair) => {
-        console.log(new Date().getMilliseconds(),"onAddFilter")
         const data = [...(documentFilter ?? []), newVal]
         onChange(data)
     }
 
 
     const onRemoveFilter = (newVal: KeyValuePair) => {
-        console.log(new Date().getMilliseconds(),"onRemoveFilter")
         const data = documentFilter?.filter(x => !(x.key == newVal.key && x.value == newVal.value)) ?? []
         onChange(data)
     }
@@ -56,7 +54,6 @@ const SubscriptionFilter: React.FC<Props> = ({
     }, [documentId])
 
 
-    //console.log("documentFilter", documentFilter)
     return (
         <KeyValueEditor values={documentFilter} title={'Properties'}
                         keyLabel={"Name"} valueLabel={"Value"}

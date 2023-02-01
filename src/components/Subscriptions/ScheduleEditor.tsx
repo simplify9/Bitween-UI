@@ -43,7 +43,6 @@ const ScheduleEditor: React.FC<Props> = ({
   }
   const onAdd = (i: ScheduleView) => {
 
-    console.log("xx",i)
     const old = schedule?.find(x => x.id == i.id)
     if (old) {
       let data = schedule?.filter(x => x.id != i.id) ?? []

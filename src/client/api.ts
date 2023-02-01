@@ -77,7 +77,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             ? await config.refreshTokenCache.read()
             : null;
 
-        console.log("REFREF", refreshToken)
         // create new access / refresh token if possible
         if (refreshToken !== null && config.accessTokenGenerator) {
             try {

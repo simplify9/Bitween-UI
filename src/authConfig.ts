@@ -8,10 +8,7 @@ const authConfig: AuthConfig = {
     refreshTokenCache: new SessionStorage("refresh_token"),
     accessTokenGenerator: async (axios, refreshToken) => {
 
-        console.log("ref ref", refreshToken, "xx", new SessionStorage("refresh_token"))
-        //const refreshToken = sessionStorage.getItem("refresh_token")
         const res = await apiClient.login({refreshToken})
-        console.log(res)
         if (res.succeeded) {
             return Promise.resolve(
                 {

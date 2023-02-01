@@ -28,11 +28,6 @@ const Component = () => {
         }
     }, [id]);
 
-    // useEffect(() => {
-    //     console.log("useEffect")
-    //     setUpdateSubscriptionData(subscription!)
-    // }, [subscription])
-
     const refreshSubscription = async (id: string) => {
         let res = await apiClient.findSubscription(id);
         if (res.succeeded) {
@@ -58,13 +53,12 @@ const Component = () => {
         let res = await apiClient.deleteSubscription(id!);
         if (res.succeeded) navigate('/subscriptions')
     }
-    const onChangeSubscriptionData =useCallback ((key: keyof ISubscription, value: any, test?: any) => {
-        console.log(new Date().getMilliseconds(), "onChangeSubscriptionData", key, value, {test},StackTrace.getSync())
+    const onChangeSubscriptionData = useCallback((key: keyof ISubscription, value: any, test?: any) => {
         setUpdateSubscriptionData((s) => ({
             ...s,
             [key]: value
         }))
-    },[])
+    }, [])
     // const onAddSchedule = useCallback((newS: ScheduleView) => {
     //   setSubscription((s) => ({
     //     ...s,

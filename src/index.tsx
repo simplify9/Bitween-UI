@@ -1,5 +1,6 @@
 import React from 'react';
 import "./index.css";
+
 import App from './App';
 import {client} from './client'
 import {addAxiosInterceptors} from "./client/api";
