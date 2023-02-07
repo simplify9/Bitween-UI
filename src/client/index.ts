@@ -23,8 +23,8 @@ export const apiClient = {
         const res: ApiResponse = await client.get("Settings/myversion");
         return res
     },
-    findMembers: async () => {
-        const res: ApiResponse = await client.get("Accounts/");
+    findMembers: async (data?: { lookup?: boolean, limit?: number, offset?: number }) => {
+        const res: ApiResponse = await client.get(`Accounts?lookup=${Boolean(data?.lookup)}`);
         return res
     },
     removeMember: async (id: number) => {
@@ -40,7 +40,7 @@ export const apiClient = {
         return res
     },
     createExchange: async (body: CreateXchangeModel) => {
-        return await client.post(`xchanges/`,body)
+        return await client.post(`xchanges/`, body)
     },
     findExchanges: async (req: ExchangeFindQuery) => {
         const res = await client.get(`xchanges${formulateQueryString(req)}`)
@@ -79,6 +79,10 @@ export const apiClient = {
     },
     findDocument: async (id: string) => {
         const res: ApiResponse = await client.get(`documents/${id}`)
+        return res
+    },
+    findDocumentTrail: async (id: string) => {
+        const res: ApiResponse = await client.get(`documents/trail?documentId=${id}&limit=1000`)
         return res
     },
     createDocument: async (req: CreateDocument) => {
@@ -155,6 +159,10 @@ export const apiClient = {
             data: res.data.result
         }
 
+    },
+    findSubscriptionTrail: async (id: string) => {
+        const res: ApiResponse = await client.get(`subscriptions/trail?SubscriptionId=${id}&limit=1000`)
+        return res
     },
     findSubscription: async (id: string) => {
         const res: ApiResponse = await client.get(`subscriptions/${id}`)

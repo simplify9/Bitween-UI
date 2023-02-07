@@ -9,6 +9,8 @@ import {KeyValuePair, OptionType} from "../types/common";
 import CheckBoxEditor from "./common/forms/CheckBoxEditor";
 import KeyValueEditor from "./common/forms/KeyValueEditor";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
+import {TrailBaseModel} from "src/types/trail";
+import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 
 
 const Component = () => {
@@ -16,6 +18,8 @@ const Component = () => {
     let {id} = useParams();
     const [document, setDocument] = useState<IDocument>();
     const [updateDocumentData, setUpdateDocumentData] = useState<UpdateDocument>({id: id});
+    const [documentTrail, setDocumentTrail] = useState<TrailBaseModel[]>([]);
+    const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
 
     useEffect(() => {
         if (id) {
@@ -23,6 +27,7 @@ const Component = () => {
         }
 
     }, [id]);
+
     useEffect(() => {
         setUpdateDocumentData({
             id: id,
@@ -39,6 +44,7 @@ const Component = () => {
     const refreshDocument = async (id: string) => {
         let res = await apiClient.findDocument(id);
         if (res.succeeded) setDocument(res.data);
+        await getTrails()
     }
 
     const updateDocument = async () => {
@@ -49,7 +55,10 @@ const Component = () => {
         let res = await apiClient.deleteDocument(id!);
         if (res.succeeded) navigate('/documents')
     }
-
+    const getTrails = async () => {
+        let res = await apiClient.findDocumentTrail(id!);
+        if (res.succeeded) setDocumentTrail(res.data.result)
+    }
     const addPromotedProperty = (kv: KeyValuePair) => {
         let pparr = updateDocumentData.promotedProperties;
         pparr?.push(kv);
@@ -65,10 +74,20 @@ const Component = () => {
 
     return (
         <div className="flex flex-col w-full px-8 py-10 max-w-3xl">
+            {
+                openModal === "TRAIL" &&
+                <TrialsViewModal data={documentTrail} onClose={() => setOpenModal("NONE")}/>
+            }
             <div className="justify-between w-full flex py-4">
                 <div className="text-2xl font-bold tracking-wide text-gray-700">Documents</div>
                 <div className={"flex gap-2"}>
-
+                    <Button onClick={() => {
+                        getTrails()
+                        setOpenModal("TRAIL")
+                    }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
+                        Trail
+                    </Button>
                     <Button onClick={deleteDocument}
                             className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
                         Delete

@@ -13,11 +13,15 @@ import AdapterEditor from "./Subscriptions/AdapterEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
+import {TrailBaseModel} from "src/types/trail";
+import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 
 const Component = () => {
     let navigate = useNavigate();
     let {id} = useParams();
-    const [subscription, setSubscription] = useState<ISubscription>();
+    const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
+    const [subscription, setSubscription] = useState<ISubscription>({});
+    const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
 
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
 
@@ -46,11 +50,16 @@ const Component = () => {
         let res = await apiClient.updateSubscription(id!, updateSubscriptionData!);
         if (res.succeeded) {
             await refreshSubscription(id!);
+            await getTrails();
         }
     }
     const deleteSubscription = async () => {
         let res = await apiClient.deleteSubscription(id!);
         if (res.succeeded) navigate('/subscriptions')
+    }
+    const getTrails = async () => {
+        let res = await apiClient.findSubscriptionTrail(id!);
+        if (res.succeeded) setSubscriptionTrail(res.data.result)
     }
     const onChangeSubscriptionData = useCallback((key: keyof ISubscription, value: any) => {
         setUpdateSubscriptionData((s) => ({
@@ -63,11 +72,24 @@ const Component = () => {
 
     return (
         <div className="flex flex-col w-full px-8 py-10">
+            {
+                openModal === "TRAIL" &&
+                <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
+            }
             <div className="justify-between w-full flex py-4">
                 <div
-                    className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions
+                    className="text-2xl font-bold tracking-wide text-gray-700">
+                    Subscriptions
                 </div>
                 <div className={"flex gap-2"}>
+
+                    <Button onClick={() => {
+                        getTrails()
+                        setOpenModal("TRAIL")
+                    }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
+                        Trail
+                    </Button>
                     <Button onClick={deleteSubscription}
                             className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
                         Delete
