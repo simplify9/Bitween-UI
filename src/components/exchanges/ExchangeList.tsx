@@ -33,22 +33,17 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
             <table className="appearance-none min-w-full max-w-100 my-3">
                 <thead className="border-y bg-gray-50">
                 <tr>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
-                        Identification
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-2 py-2 text-left">
                     </th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-2 py-2 text-left">
                         Subscription
                     </th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-2 py-2 text-left">
                         Status
                     </th>
-                    <th scope="col" colSpan={2} className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
-
-
+                    <th scope="col" colSpan={3} className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
                     </th>
-
-
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
+                    <th scope="col" colSpan={2} className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
                         Properties
                     </th>
 
@@ -60,28 +55,16 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                         <tr key={i.id}
                             className={`${selectedRowsIds.includes(i.id) ? 'bg-blue-50' : "bg-white"} border-b`}
                         >
-                            <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
+                            <td className="text-sm text-gray-900 font-light px-2 py-4 whitespace-nowrap">
                                 <div className={"flex flex-row items-center "}>
                                     <div className={"mr-3"}>
                                         <CheckBoxEditor onChange={() => onClickRow(i.id)}
                                                         checked={selectedRowsIds.includes(i.id)}/>
                                     </div>
-                                    <div>
-                                        <div className={"flex flex-col gap-2 text-xs    "}>
-                                            <div className={"flex gap-1"}>
-                                                <span> ID:</span> {i.id}</div>
-                                            <div className={"flex gap-1"}>
-                                                <span> CID:</span>
-                                                {i.correlationId}</div>
-                                            {i.retryFor && <div className={"flex gap-1"}>
-                                                <span>Retry For:</span>
-                                                {i.retryFor}</div>}
-                                        </div>
-                                    </div>
                                 </div>
 
                             </td>
-                            <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap">
+                            <td className="text-sm text-gray-900 font-light px-2 py-4 whitespace-nowrap">
                                 <div className={"flex flex-col gap-2"}>
                                     <div className={"flex gap-1"}>
                                         <svg className="w-5 h-90" xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +87,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                         {i.subscriptionName}</div>
                                 </div>
                             </td>
-                            <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap z-10">
+                            <td className="text-sm text-gray-900 font-light px-2 py-4 whitespace-nowrap z-10">
                                 <ExchangeStatus
                                     status={i.status!} responseBad={i.responseBad}
                                     onClick={() => {
@@ -112,25 +95,38 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                     }}
                                 />
 
-
                             </td>
 
 
                             <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap" colSpan={2}>
                                 <ExchangeJourney status={i.status} failed={Boolean(i.exception)} outputBad={i.outputBad}
                                                  mapperId={i.mapperId}
-                                                 responseBad={i.responseBad} outputKey={i.outputKey}
-                                                 inputKey={i.inputKey} responseKey={i.outputKey}/>
+                                                 responseBad={i.responseBad}
+                                                 outputKey={i.outputKey}
+                                                 inputKey={i.inputKey} 
+                                                 responseKey={i.responseKey}/>
                                 <div className={"flex flex-row justify-between gap-5 mt-1 pt-1 border-0 border-t"}>
                                     <div>  {i.finishedOn ? `Took ${getDateDifferenceHumanized(i.finishedOn, i.startedOn)}` : "Running"}</div>
                                     <div>  {`Started ${getDateDifferenceHumanized(new Date(), i.startedOn)} ago`}</div>
                                 </div>
                             </td>
 
-                            <td className="text-sm text-gray-900 font-light px-4 py-4 whitespace-nowrap ">
-                                <div className={"flex gap-2 flex flex-wrap max-w-sm"}>
+                            <td className="  ">
+                                <div
+                                    className={"flex gap-2 px-4 py-4 flex   flex-wrap "}>
+                                    <ExchangeProperty className={"text-xs bg-blue-100"} label={"Id"} value={i.id}/>
+                                    <ExchangeProperty className={"text-xs bg-blue-100"} label={"Correlation Id"}
+                                                      value={i.correlationId}/>
+                                    {
+                                        i.retryFor &&
+                                        <ExchangeProperty className={"text-xs bg-yellow-100"} label={"Retry for"}
+                                                          value={i.retryFor}/>
+
+                                    }
+
                                     {i.promotedProperties && Object.keys(i.promotedProperties)?.map((k: string) =>
-                                        <ExchangeProperty label={k} value={i.promotedProperties[k]}/>)}
+                                        <ExchangeProperty className={"text-xs bg-green-100"} key={k} label={k}
+                                                          value={i.promotedProperties[k]}/>)}
                                 </div>
                             </td>
 

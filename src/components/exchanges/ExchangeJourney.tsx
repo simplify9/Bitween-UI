@@ -20,13 +20,16 @@ const Pipe: React.FC<PipeProps> = ({completed, error, onClick, bad, fileKey}) =>
 
     const color = `${bad ? "bg-yellow-500" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
     return <div
-        onClick={onClick}
-        className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 -z-5 ${onClick ? "cursor-pointer" : ""}`}>
+        title={"HEllox"}
+        key={"HEllox"}
+        className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 -z-5 `}>
 
         {
             fileKey &&
-            <div className={`absolute left-1/3 flex items-center justify-center rounded-full p-1  w-7 h-7 ${color}`}>
-                <AiFillFile size={16} className={"text-white "}/></div>
+            <div onClick={onClick}
+                 className={`absolute left-1/3 flex items-center justify-center rounded-full p-1 ${onClick ? "cursor-pointer" : ""} w-7 h-7 ${color}`}>
+                <AiFillFile size={16} className={"text-white "}/>
+            </div>
         }
 
     </div>
@@ -81,7 +84,7 @@ const ExchangeJourney: React.FC<Props> = (
     return <Fragment>
         {
             Boolean(downloadUrl) &&
-            <ExchangeDocumentModal downloadUrl={downloadUrl!} name={"File"} onClose={() => setDownloadUrl(null)}/>
+            <ExchangeDocumentModal downloadUrl={downloadUrl!} name={downloadUrl} onClose={() => setDownloadUrl(null)}/>
         }
         <div className={"flex flex row justify-between items-center "}>
 
@@ -100,6 +103,7 @@ const ExchangeJourney: React.FC<Props> = (
             <Pipe fileKey={responseKey} onClick={() => setDownloadUrl(responseKey)}
                   completed={status || Boolean(responseKey)}
                   bad={Boolean(responseBad)}
+
                   error={failed}/>
 
 

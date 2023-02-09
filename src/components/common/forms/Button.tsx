@@ -14,7 +14,7 @@ const Component: React.FC<Props> = ({
         <div {...htmlProps} onClick={(event) => {
             event.stopPropagation();
             onClick()
-        }} className={classes("", className)}>
+        }} className={classes("cursor-pointer", className)}>
             {children}
         </div>
     )

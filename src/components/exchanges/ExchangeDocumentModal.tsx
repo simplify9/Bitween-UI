@@ -12,9 +12,10 @@ type Props = {
 }
 const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) => {
 
-    const [data, setData] = useState<{ data: string | null, type: "json" | "xml" | "text" }>({
+    const [data, setData] = useState<{ raw: string, data: string | null, type: "json" | "xml" | "text" }>({
         data: null,
-        type: "text"
+        type: "text",
+        raw: ""
     });
 
 
@@ -24,24 +25,42 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
             const resp = res.data.data
 
             try {
-                setData({data: JSON.parse(resp), type: "json"})
+                setData({data: JSON.parse(resp), type: "json", raw: resp})
             } catch {
                 try {
                     new DOMParser().parseFromString(resp, 'text/xml');
-                    setData({data: resp, type: "xml"})
+                    setData({data: resp, type: "xml", raw: resp})
 
 
                 } catch {
-                    setData({data: resp, type: "text"})
+                    setData({data: resp, type: "text", raw: resp})
                 }
             }
         }
     }
+
+    const download = () => {
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data.raw));
+        element.setAttribute('download', name);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
     useEffect(() => {
         fetchData()
     }, []);
-    return <Modal onClose={onClose} className={" min-w-[2000px] "} title={name}>
+    return <Modal onClose={onClose} className={" min-w-[2000px] "} submitLabel={"Download"} onSubmit={download}
+                  title={name}>
         <div className={"px-1 min-w-[2000px]"}>
+            <h5 className={"font-semibold underline mb-5 text-lg"}>
+                {name}
+            </h5>
             <p style={{whiteSpace: "break-spaces"}} className={"flex break-all  "}>
                 {
                     data.type === "xml" &&

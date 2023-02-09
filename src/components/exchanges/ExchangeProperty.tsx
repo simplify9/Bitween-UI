@@ -1,14 +1,13 @@
-
-
 interface Props {
     label: string
-    value:string
+    value: string
+    className?: string
 }
 
-const ExchangeProperty:React.FC<Props> = ({ label,value }) => {
-    if (!value) return<></>;
+const ExchangeProperty: React.FC<Props> = ({label, value, className}) => {
+    if (!value) return <></>;
     return (
-        <div><strong>{label}</strong>: {value}</div>
+        <div className={"px-1 rounded-full " + className ?? ''}><strong>{label}</strong>: {value}</div>
     )
 }
 
