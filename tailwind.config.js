@@ -5,7 +5,7 @@ module.exports = {
     './src/**/*.{html,js,ts,tsx}',
   ],
   safelist: [
-    {pattern: /(bg|text|border)-*./}
+    {pattern: /(bg|text|border|h)-*./}
   ],
   mode: "jit",
   theme: {

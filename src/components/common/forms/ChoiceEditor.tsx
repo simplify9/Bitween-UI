@@ -44,7 +44,7 @@ const defaultRenderOption = (props: OptionRenderProps<any>): JSX.Element => {
     return (
         <div
             key={props.value}
-            className={"px-4 py-2 " + (props.selected ? "bg-blue-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
+            className={"px-4 py-2 break-all " + (props.selected ? "bg-blue-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
             title={props.title}
             onClick={props.select}>
             {props.title}
