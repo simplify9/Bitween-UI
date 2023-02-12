@@ -1,7 +1,6 @@
 import Tab from "../common/forms/Tab";
 import TabNavigator from "../common/forms/TabNavigator";
 import {ExchangeFindBy, ExchangeFindBySpecs} from "./ExchangeFindBy";
-import {ExchangeKeywordSearch} from "./ExchangeKeywordSearch";
 
 
 type ExchangeFindMode = string;
@@ -35,8 +34,6 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
             <TabNavigator className="w-full">
                 <Tab key="findby" selected={findMode === 'findby'} onClick={() => handleModeChange("findby")}>Find
                     By</Tab>
-                {/*<Tab key="advanced" selected={findMode === 'advanced'} onClick={() => handleModeChange("advanced")}>Advanced*/}
-                {/*    Search</Tab>*/}
             </TabNavigator>
 
 

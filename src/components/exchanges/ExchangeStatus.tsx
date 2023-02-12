@@ -20,7 +20,7 @@ const ExchangeStatus: React.FC<Props> = ({status, onClick, responseBad}) => {
                     status != null ?
                         status ?
                             <button type="button"
-                                    className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-3 py-1.5 text-center mr-2 mb-2 ">Success</button>
+                                    className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-3 py-1.5 text-center mr-2 mb-2 ">OK</button>
                             : <button type="button"
                                       className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-4 py-1.5 text-center mr-2 mb-2 ">Failed</button>
                         : <button type="button"

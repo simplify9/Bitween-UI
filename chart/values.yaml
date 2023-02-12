@@ -1,6 +1,6 @@
 replicaCount: 1
 
-
+  
 probes:
   enabled: false
 
