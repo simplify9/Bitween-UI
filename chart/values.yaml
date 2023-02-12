@@ -1,6 +1,8 @@
 replicaCount: 1
 
-  
+image:
+  repo: 'simplify9'
+
 probes:
   enabled: false
 

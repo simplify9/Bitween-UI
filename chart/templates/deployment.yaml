@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "simplify9/{{ .Chart.Name }}:{{ .Chart.Version }}"
+          image: "{{ .Values.image.repo }}/{{ .Chart.Name }}:{{ .Chart.Version }}"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
