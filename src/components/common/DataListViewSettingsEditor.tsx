@@ -62,7 +62,9 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             sortBy: sortBy
         })
     }
+    console.log("pages", pages)
 
+    console.log(total - limit)
     return (
 
         <div className="w-full flex py-1 my-3">
@@ -77,18 +79,23 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             {totalPages > 1
                 ? <>
                     <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
-                    <Tab key="l"><Icon shape="chevronLeft" className="h-2"/></Tab>
+                    <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}><Icon shape="chevronLeft"
+                                                                                                 className="h-2"/></Tab>
                     {pages.map(p => {
                         return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
                             <Tab onClick={() => handlePageChange(p * limit)} key={p}
                                  selected={p === pageIndex}>{p + 1}</Tab>) : <></>
                     })}
-                    <Tab key="r"><Icon shape="chevronRight" className="h-2"/></Tab>
-                    <Tab onClick={() => handlePageChange(total - limit)} key="rr"><Icon shape="chevronDoubleRight"
-                                                                                        className="h-2"/></Tab>
+                    <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"
+                                                                                                 className="h-2"/></Tab>
+                    <Tab onClick={() => {
+                        console.log(total - limit)
+                        handlePageChange(pages.slice(-1)[0] * limit)
+                    }} key="rr"><Icon shape="chevronDoubleRight"
+                                      className="h-2"/></Tab>
                 </>
                 : null}
-          
+
             {/*<div className="text-sm py-1">Sort By</div>*/}
             {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
 

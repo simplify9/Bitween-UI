@@ -124,7 +124,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
           value={state.partialInput}
           onChange={handleChange}
           onBlur={handleBlur}/>
-      <InputPopOver className="flex flex-col divide-y">
+      <InputPopOver className="flex flex-col divide-y overflow-scroll max-h-[400px]">
         {optionList}
       </InputPopOver>
     </InputBox>

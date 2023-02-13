@@ -2,7 +2,7 @@ import React, {Fragment, useState} from "react";
 import ExchangeDocument from "src/components/exchanges/ExchangeDocument";
 import ExchangeDocumentModal from "src/components/exchanges/ExchangeDocumentModal";
 import {ExchangeDisplayStatus} from "src/types/xchange";
-import {AiFillFile} from 'react-icons/ai'
+import Pipe from "src/components/exchanges/ExchangeDataPipe";
 
 type Props = {
     inputKey: string
@@ -15,25 +15,7 @@ type Props = {
     status: boolean | null
 }
 
-type PipeProps = { completed: boolean, error?: boolean, bad?: boolean, onClick?: () => void, fileKey: string | undefined }
-const Pipe: React.FC<PipeProps> = ({completed, error, onClick, bad, fileKey}) => {
 
-    const color = `${bad ? "bg-yellow-500" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
-    return <div
-        title={"HEllox"}
-        key={"HEllox"}
-        className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 -z-5 `}>
-
-        {
-            fileKey &&
-            <div onClick={onClick}
-                 className={`absolute left-1/3 flex items-center justify-center rounded-full p-1 ${onClick ? "cursor-pointer" : ""} w-7 h-7 ${color}`}>
-                <AiFillFile size={16} className={"text-white "}/>
-            </div>
-        }
-
-    </div>
-}
 const ExchangeJourney: React.FC<Props> = (
     {
         inputKey,
@@ -90,17 +72,17 @@ const ExchangeJourney: React.FC<Props> = (
 
 
             <ExchangeDocument status={"good"} type={"receiver"}/>
-            <Pipe onClick={() => setDownloadUrl(inputKey)} fileKey={inputKey} completed={true}/>
+            <Pipe type={"Input"} onClick={() => setDownloadUrl(inputKey)} fileKey={inputKey} completed={true}/>
 
 
             <ExchangeDocument status={getMapperStatus()} type={mapperId ? "mapper" : "skipped"}/>
-            <Pipe fileKey={outputKey} onClick={() => setDownloadUrl(outputKey)}
+            <Pipe type={"Mapper output"} fileKey={outputKey} onClick={() => setDownloadUrl(outputKey)}
                   error={Boolean(mapperId) && Boolean(failed) && !outputKey}
                   completed={!mapperId || Boolean(outputKey)}/>
 
 
             <ExchangeDocument status={getHandlerStatus()} type={"handler"}/>
-            <Pipe fileKey={responseKey} onClick={() => setDownloadUrl(responseKey)}
+            <Pipe type={"Response"} fileKey={responseKey} onClick={() => setDownloadUrl(responseKey)}
                   completed={status || Boolean(responseKey)}
                   bad={Boolean(responseBad)}
 
@@ -110,4 +92,4 @@ const ExchangeJourney: React.FC<Props> = (
         </div>
     </Fragment>
 }
-export default ExchangeJourney
+export default React.memo(ExchangeJourney)
