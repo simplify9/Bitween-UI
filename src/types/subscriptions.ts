@@ -1,4 +1,5 @@
 import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
+import {AnymatchPattern} from "vite";
 
 
 export type SubscriptionFindQuery = CommonFindQuery & {
@@ -34,6 +35,8 @@ export interface ISubscription {
     aggregationTarget?: string;
     pausedOn?: string | null;
     documentFilter?: Array<KeyValuePair>
+    matchExpressionAsString?: string
+    matchExpression?: MatchExpression
 }
 
 export interface ScheduleView {
@@ -53,6 +56,47 @@ export interface ICreateSubscription {
     aggregationForId?: string;
 }
 
+export type AndMatchExpression = {
+    type: "and"
+    
+    left: MatchExpression
+    
+    right: MatchExpression
+}
+
+export type OrMatchExpression = {
+    type: "or"
+
+    left: MatchExpression
+
+    right: MatchExpression
+}
+
+export type OneOfMatchExpression = {
+    type: "one_of"
+    path: string
+    values: Array<string>
+}
+
+export type NotOneOfMatchExpression = {
+    type: "not_one_of"
+    path: string
+    values: Array<string>
+}
+
+// export type MatchExpressionValue = {
+//     type: "one_of" | "not_one_of"
+//     path: string
+//     values: Array<string>
+// }
+
+// export type MatchExpressionBranch = {
+//     type: "and" | "or"
+//     left: MatchExpression | MatchExpressionValue,
+//     right: MatchExpression | MatchExpressionValue
+// }
+
+export type MatchExpression = AndMatchExpression | OrMatchExpression | OneOfMatchExpression | NotOneOfMatchExpression
 
 export const SubscriptionTypeOptions: OptionType[] = [{
     id: "0",
