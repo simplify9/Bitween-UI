@@ -41,7 +41,6 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
     const [documentName, setDocumentName] = useState<string>("DOCUMENT")
 
     const onChangeExpression = useCallback((e: MatchExpression) => {
-        console.log("mama")
         onChange(e)
     }, [])
 

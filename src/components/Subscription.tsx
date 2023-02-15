@@ -61,7 +61,6 @@ const Component = () => {
         if (res.succeeded) setSubscriptionTrail(res.data.result)
     }
     const onChangeSubscriptionData = useCallback((key: keyof ISubscription, value: any) => {
-        console.log("hei", key, value)
         setUpdateSubscriptionData((s) => ({
             ...s,
             [key]: value
