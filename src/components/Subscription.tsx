@@ -15,6 +15,7 @@ import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
+import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -148,6 +149,11 @@ const Component = () => {
 
             <div className="flex flex-col gap-6 rounded mb-6 ">
 
+                {/*{*/}
+                {/*    updateSubscriptionData?.type == "1" &&*/}
+                {/*    <MatchExpressionEditor documentId={subscription.documentId} expression={subscription.matchExpression}*/}
+                {/*                           expressionString={subscription.matchExpressionAsString}/>*/}
+                {/*}*/}
                 {updateSubscriptionData?.type == "1" &&
                     <div
                         className=" border shadow px-2 py-2">

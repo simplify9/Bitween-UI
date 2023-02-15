@@ -16,6 +16,7 @@
     "react-i18next": "^12.1.4",
     "react-icons": "^4.7.1",
     "react-json-view": "^1.21.3",
+    "react-querybuilder": "^5.4.1",
     "react-redux": "^8.0.2",
     "react-router-dom": "^6.8.0",
     "react-syntax-highlighter": "^15.5.0",
