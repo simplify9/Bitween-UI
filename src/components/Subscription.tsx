@@ -151,8 +151,9 @@ const Component = () => {
 
                 {/*{*/}
                 {/*    updateSubscriptionData?.type == "1" &&*/}
-                {/*    <MatchExpressionEditor documentId={subscription.documentId} expression={subscription.matchExpression}*/}
-                {/*                           expressionString={subscription.matchExpressionAsString}/>*/}
+                {/*    <MatchExpressionEditor documentId={subscription.documentId}*/}
+                {/*                           expression={subscription.matchExpression}*/}
+                {/*    />*/}
                 {/*}*/}
                 {updateSubscriptionData?.type == "1" &&
                     <div

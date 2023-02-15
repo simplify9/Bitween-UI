@@ -1,24 +1,45 @@
 import {MatchExpression} from "src/types/subscriptions";
 import React, {useCallback, useEffect, useState} from "react";
-import {KeyValuePair} from "src/types/common";
+import {KeyValuePair, OptionType} from "src/types/common";
 import {apiClient} from "src/client";
-import FormEditor from "src/components/Subscriptions/MatchExpressionEditor/FromEditor";
 import ExpressionBranch from "src/components/Subscriptions/MatchExpressionEditor/ExpressionBranchView";
+import {getDescription} from "src/components/Subscriptions/MatchExpressionEditor/util";
+
+const writeTerm = (expression: MatchExpression, operator: 'and' | 'or') => {
+
+    return expression.type === operator
+        ? `(${Description(expression)})`
+        : `${Description(expression)}`
+}
+
+const Description = (expression: MatchExpression) => {
+    if (expression.type === 'and') {
+
+        return `${writeTerm(expression.left, 'or')} AND ${writeTerm(expression.right, 'or')}`
+
+    } else if (expression.type === 'or') {
+        return `${writeTerm(expression.left, 'and')} OR ${writeTerm(expression.right, 'and')}`
+    } else if (expression.type === 'one_of') {
+        return `${expression.path} IN (${expression.values.join(', ')})`;
+    } else {
+        return `${expression.path} NOT IN (${expression.values.join(', ')})`;
+    }
+}
 
 
 type Props = {
     expression: MatchExpression
-    expressionString: string
     documentId: string
 
 }
 
-const MatchExpressionEditor: React.FC<Props> = ({expressionString, expression, documentId}) => {
+const MatchExpressionEditor: React.FC<Props> = ({expression, documentId}) => {
 
     const [state, setState] = useState(expression);
 
-    const onChangeExpression = useCallback(() => {
-        //  setState
+    const onChangeExpression = useCallback((e: MatchExpression) => {
+        console.log("e")
+        setState(e)
     }, [])
     const [promotedProperties, setPromotedProperties] = useState<Array<any>>([])
 
@@ -31,29 +52,25 @@ const MatchExpressionEditor: React.FC<Props> = ({expressionString, expression, d
             const k = ((data?.data?.promotedProperties as Array<KeyValuePair>)
                 //?.filter(i => documentFilter?.some(i => i.key != i.key))
                 .map((i) => ({
-                    name: i.key,
-                    label: i.value
-                })))
+                    id: i.key,
+                    title: i.value
+                }))) as OptionType[]
             setPromotedProperties(k)
         }
-
-
     }
     useEffect(() => {
         loadData()
 
     }, [documentId])
-    console.log(promotedProperties)
-    return <div className={"p-1 shadow rounded"}>
-        {
-            promotedProperties && <FormEditor fields={promotedProperties}/>
 
-        }
+    // console.log(matchExpressionNormalizer(expression, [], null))
+    return <div className={"p-1 shadow rounded"}>
+
         <div>
-           %%%%%%%% {expressionString} %%%%%%%%
+            {getDescription(expression)}
         </div>
         <div>
-            <ExpressionBranch onChange={onChangeExpression} value={state}/>
+            <ExpressionBranch promotedProperties={promotedProperties} onChange={onChangeExpression} value={state}/>
         </div>
     </div>
 }
