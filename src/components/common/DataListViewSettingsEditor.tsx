@@ -62,9 +62,7 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             sortBy: sortBy
         })
     }
-    console.log("pages", pages)
 
-    console.log(total - limit)
     return (
 
         <div className="w-full flex py-1 my-3">
@@ -89,7 +87,6 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                     <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"
                                                                                                  className="h-2"/></Tab>
                     <Tab onClick={() => {
-                        console.log(total - limit)
                         handlePageChange(pages.slice(-1)[0] * limit)
                     }} key="rr"><Icon shape="chevronDoubleRight"
                                       className="h-2"/></Tab>

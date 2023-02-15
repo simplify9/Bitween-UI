@@ -82,8 +82,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
         const refreshToken = config.refreshTokenCache
             ? await config.refreshTokenCache.read()
             : null;
-
-        console.log("hi", refreshToken, refreshToken && config.accessTokenGenerator ? "true" : false)
         // create new access / refresh token if possible
         if (refreshToken && config.accessTokenGenerator) {
             try {
@@ -98,7 +96,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             }
         }
 
-        console.log("lggging out", refreshToken)
 
         await logOut();
 
