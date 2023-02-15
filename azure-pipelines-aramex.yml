@@ -1,0 +1,109 @@
+name: $(version)
+
+trigger:
+  - releases/*
+  - main
+  - dev
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: imageName
+    value: 'infolinkui'
+  - name: version
+    value: $[format('6.0.{0}', counter('6.0', 0))]
+
+jobs:
+
+  - job: buildStg
+    displayName: Build, push image and chart and deploy to stg
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main/')
+    steps:
+
+
+      - task: Docker@2
+        displayName: Build and push an image to container registry
+        inputs:
+          command: buildAndPush
+          repository: $(imageName)
+          dockerfile: $(Build.SourcesDirectory)/Dockerfile
+          containerRegistry: infoaxsstgcr
+          tags: |
+            $(version)
+            latest
+
+      - task: HelmInstaller@0
+        displayName: 'Install Helm 3.2.4'
+        inputs:
+          helmVersion: '3.2.4'
+          checkLatestHelmVersion: false
+          installKubectl: false
+
+      - task: HelmDeploy@0
+        displayName: Helm package
+        inputs:
+          command: package
+          chartPath: charts/default
+          arguments: --version $(version) --app-version $(version)
+          updatedependency: true
+
+
+      - task: HelmDeploy@0
+        displayName: 'Deploy to stg'
+        inputs:
+          connectionType: 'Kubernetes Service Connection'
+          kubernetesServiceConnection: 'k8s-stg'
+          namespace: 'infolink'
+          command: 'upgrade'
+          chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+          chartVersion: $(version)
+          releaseName: '$(imageName)'
+
+  - job: buildProd
+    dependsOn: buildStg
+    displayName: Build, push image and chart and deploy to prod
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+    steps:
+
+      - task: Docker@2
+        displayName: Build and push an image to container registry
+        inputs:
+          command: buildAndPush
+          repository: $(imageName)
+          dockerfile: $(Build.SourcesDirectory)/Dockerfile
+          containerRegistry: infoaxsprodcr
+          tags: |
+            $(version)
+            latest
+
+      - task: HelmInstaller@0
+        displayName: 'Install Helm 3.2.4'
+        inputs:
+          helmVersion: '3.2.4'
+          checkLatestHelmVersion: false
+          installKubectl: false
+
+      - task: HelmDeploy@0
+        displayName: Helm package
+        inputs:
+          command: package
+          chartPath: chart
+          arguments: --version $(version) --app-version $(version)
+          updatedependency: true
+
+
+      - task: HelmDeploy@0
+        displayName: 'Deploy to prod'
+        inputs:
+          connectionType: 'Kubernetes Service Connection'
+          kubernetesServiceConnection: 'k8s-prod'
+          namespace: 'infolink'
+          command: 'upgrade'
+          chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
+          chartVersion: $(version)
+          releaseName: '$(imageName)'
+          arguments: >
+            --set ingress.host=infolinkcloud.aramex.com
+            --set image.repo="azrinfoaxscrprod.azurecr.io"
+      
