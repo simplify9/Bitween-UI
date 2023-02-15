@@ -2,8 +2,10 @@ import {MatchExpression} from "src/types/subscriptions";
 import React, {useCallback, useEffect, useState} from "react";
 import {KeyValuePair, OptionType} from "src/types/common";
 import {apiClient} from "src/client";
-import ExpressionBranch from "src/components/Subscriptions/MatchExpressionEditor/ExpressionBranchView";
+import ExpressionBranch from "src/components/Subscriptions/MatchExpressionEditor/ExpressionBranch";
 import {getDescription} from "src/components/Subscriptions/MatchExpressionEditor/util";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import {xcode} from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 const writeTerm = (expression: MatchExpression, operator: 'and' | 'or') => {
 
@@ -30,18 +32,18 @@ const Description = (expression: MatchExpression) => {
 type Props = {
     expression: MatchExpression
     documentId: string
-
+    onChange: (expression: MatchExpression) => void
 }
 
-const MatchExpressionEditor: React.FC<Props> = ({expression, documentId}) => {
+const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChange}) => {
 
-    const [state, setState] = useState(expression);
+    const [promotedProperties, setPromotedProperties] = useState<Array<any>>([])
+    const [documentName, setDocumentName] = useState<string>("DOCUMENT")
 
     const onChangeExpression = useCallback((e: MatchExpression) => {
-        console.log("e")
-        setState(e)
+        console.log("mama")
+        onChange(e)
     }, [])
-    const [promotedProperties, setPromotedProperties] = useState<Array<any>>([])
 
 
     const loadData = async () => {
@@ -49,8 +51,8 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId}) => {
             return;
         const data = await apiClient.findDocument(documentId);
         if (data.succeeded) {
+            setDocumentName(data.data.name)
             const k = ((data?.data?.promotedProperties as Array<KeyValuePair>)
-                //?.filter(i => documentFilter?.some(i => i.key != i.key))
                 .map((i) => ({
                     id: i.key,
                     title: i.value
@@ -63,14 +65,16 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId}) => {
 
     }, [documentId])
 
-    // console.log(matchExpressionNormalizer(expression, [], null))
-    return <div className={"p-1 shadow rounded"}>
+    return <div className={"p-1 shadow-md rounded border"}>
 
-        <div>
-            {getDescription(expression)}
+        <div className={"text-center pt-2 pb-1"}>
+            <SyntaxHighlighter wrapLines={true} language="sql" style={xcode}>
+                {`SELECT * FROM "${documentName}" WHERE ${getDescription(expression) || "TRUE"} `}
+            </SyntaxHighlighter>
         </div>
-        <div>
-            <ExpressionBranch promotedProperties={promotedProperties} onChange={onChangeExpression} value={state}/>
+
+        <div className={"pr-8"}>
+            <ExpressionBranch promotedProperties={promotedProperties} onChange={onChangeExpression} value={expression}/>
         </div>
     </div>
 }
