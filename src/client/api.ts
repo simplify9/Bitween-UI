@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
+import axios, {AxiosError, AxiosInstance, AxiosResponse} from "axios";
 import {AccessTokenResponse, AuthConfig} from "./types";
 import {toast} from "react-toastify";
 
@@ -26,9 +26,15 @@ export const loginCallback = ({
                                   refreshTokenExpiry
                               }: AuthConfig) => {
     return async (tokens: AccessTokenResponse) => {
-        await accessTokenCache.write(tokens.accessToken, tokens.accessTokenExpiry);
-        if (refreshTokenCache) {
-            await refreshTokenCache?.write(tokens.refreshToken, refreshTokenExpiry);
+        if (tokens.accessToken && tokens.refreshToken) {
+            await accessTokenCache.write(tokens.accessToken, tokens.accessTokenExpiry);
+            if (refreshTokenCache) {
+                await refreshTokenCache?.write(tokens.refreshToken, refreshTokenExpiry);
+            }
+        } else {
+            sessionStorage.removeItem("access_token");
+            sessionStorage.removeItem("refresh_token");
+            window.location.reload()
         }
     }
 }
@@ -78,7 +84,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             : null;
 
         // create new access / refresh token if possible
-        if (refreshToken !== null && config.accessTokenGenerator) {
+        if (refreshToken && config.accessTokenGenerator) {
             try {
                 const newTokens = await config.accessTokenGenerator(authAxiosInstance, refreshToken);
                 if (newTokens !== null) {
@@ -90,6 +96,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                 // ...
             }
         }
+
 
         await logOut();
 
@@ -108,7 +115,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 //        toast(`${req.url}`, {type: `success`, toastId: req.url, transition: Zoom})
 
         // append access token if available
-        return accessToken !== null
+        return accessToken
             ? {
                 ...req,
                 headers: {...req.headers, "Authorization": `Bearer ${accessToken}`}
@@ -134,7 +141,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             };
         },
         async (error: AxiosError) => {
-            if (error.response && error.response.status === 401) {
+            if (error.response.status === 401) {
 
 
                 return getAccessToken(accessToken)

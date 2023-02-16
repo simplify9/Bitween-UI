@@ -15,12 +15,12 @@ import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
+import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 
 const Component = () => {
     let navigate = useNavigate();
     let {id} = useParams();
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
-    const [subscription, setSubscription] = useState<ISubscription>({});
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
 
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
@@ -41,7 +41,6 @@ const Component = () => {
                     id: index
                 }))
             }
-            setSubscription(data);
             setUpdateSubscriptionData(data)
         }
     }
@@ -68,10 +67,12 @@ const Component = () => {
         }))
     }, [])
 
-    if (!subscription) return <></>
+
+
+    if (!updateSubscriptionData) return <></>
 
     return (
-        <div className="flex flex-col w-full px-8 py-10">
+        <div className="flex flex-col w-full px-3 py-10">
             {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
@@ -148,12 +149,20 @@ const Component = () => {
 
             <div className="flex flex-col gap-6 rounded mb-6 ">
 
-                {updateSubscriptionData?.type == "1" &&
+                {
+                    updateSubscriptionData?.type == "1" &&
+                    <MatchExpressionEditor
+                        onChange={(e) => onChangeSubscriptionData("matchExpression", e)}
+                        documentId={updateSubscriptionData.documentId}
+                        expression={updateSubscriptionData.matchExpression}
+                    />
+                }
+                {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1")&&
                     <div
                         className=" border shadow px-2 py-2">
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
-                                documentId={subscription.documentId}
+                                documentId={updateSubscriptionData.documentId}
                                 onChange={(e) => onChangeSubscriptionData("documentFilter", e)}
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>
