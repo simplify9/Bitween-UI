@@ -34,7 +34,7 @@ function App() {
     }
     useEffect(() => {
         setUserInfo()
-    }, [])
+    }, [isLoggedIn])
     if (!isLoggedIn) return <Login/>;
 
     return (
