@@ -34,10 +34,10 @@ function App() {
                 <Router>
 
                     <div className={"flex flex-col md:flex-row "}>
-                        <div className={"md:w-[13%] "}>
+                        <div className={"md:w-[11%] "}>
                             <NavBar/>
                         </div>
-                        <div className={"md:w-[85%] overflow-scroll  md:rounded-xl md:h-[98vh] md:shadow-lg m-3  "}>
+                        <div className={"md:w-[88%] overflow-scroll  md:rounded-xl md:h-[98vh] md:shadow-lg m-2  "}>
                             {/*<div className={"mx-5 my-3 shadow-lg border rounded-xl"}>*/}
                             <Routes>
                                 <Route path="/" element={<Dashboard/>}/>

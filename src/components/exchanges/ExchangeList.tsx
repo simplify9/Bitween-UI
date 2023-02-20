@@ -30,7 +30,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
     }
     return (
         <>
-            <table className="appearance-none min-w-full max-w-100 my-3">
+            <table className="appearance-none min-w-full max-w-100 ">
                 <thead className="border-y bg-gray-50">
                 <tr>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-2 py-2 text-left">
@@ -98,7 +98,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                             </td>
 
 
-                            <td className="text-sm text-gray-900 font-light px-4 py-2 whitespace-nowrap" colSpan={4}>
+                            <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap" colSpan={4}>
                                 <ExchangeJourney status={i.status} failed={Boolean(i.exception)} outputBad={i.outputBad}
                                                  mapperId={i.mapperId}
                                                  responseBad={i.responseBad}
