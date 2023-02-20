@@ -16,6 +16,7 @@ import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter"
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
+import Authorize from "src/components/common/authorize/authorize";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -90,10 +91,12 @@ const Component = () => {
                             className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
                         Trail
                     </Button>
+                    <Authorize roles={["Admin", "Editor"]}>
                     <Button onClick={deleteSubscription}
                             className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
                         Delete
                     </Button>
+                    </Authorize>
                 </div>
             </div>
             <div className="grid grid-cols-6 gap-5 rounded mb-6 border px-2 py-2 shadow">
@@ -269,10 +272,12 @@ const Component = () => {
                     onClick={() => navigate('/subscriptions')}
                     className="text-white bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Cancel
                 </Button>
-                <Button
-                    onClick={updateSubscription}
-                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
-                </Button>
+                <Authorize roles={["Admin", "Editor"]}>
+                    <Button
+                        onClick={updateSubscription}
+                        className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
+                    </Button>
+                </Authorize>
             </div>
 
 

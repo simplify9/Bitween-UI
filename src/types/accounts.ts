@@ -1,17 +1,4 @@
-export const initialState: UserState = {
-    name: "",
-    isLoading: false,
-    isLoggedIn: false
-};
-
-
-export interface UserState {
-    name: string;
-    isLoading: boolean;
-    accessToken?: string;
-    refreshToken?: string;
-    isLoggedIn: boolean;
-}
+import {OptionType} from "src/types/common";
 
 export type Tokens = {
     accessToken?: string;
@@ -29,17 +16,36 @@ export interface LoginRequest {
     refreshToken?: string;
 }
 
+export type Role = "Admin" | "Editor" | "Viewer"
+export const RolesSelection: OptionType[] = [
+    {
+        id: "0",
+        title: "Admin"
+    },
+    {
+        id: "10",
+        title: "Editor"
+    },
+    {
+        id: "20",
+        title: "Viewer"
+    }
+]
+
+
 export interface AccountModel {
     name: string
     email: string
     createdOn: string
     id: number
+    role: Role
 }
 
 export interface CreateAccountModel {
     name: string
     email: string
     password: string
+    role: number
 }
 
 export interface ChangePasswordModel {

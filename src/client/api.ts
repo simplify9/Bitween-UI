@@ -143,8 +143,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
         },
         async (error: AxiosError) => {
             if (error.response.status === 401) {
-
-
                 return getAccessToken(accessToken)
                     .then(newValue => {
                         accessToken = newValue;

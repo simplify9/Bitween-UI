@@ -9,6 +9,7 @@ import {apiClient} from "../client";
 import {ICreateSubscription} from "../types/subscriptions";
 import Button from "./common/forms/Button";
 import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
+import Authorize from "src/components/common/authorize/authorize";
 
 
 const defaultQuery = {
@@ -98,10 +99,13 @@ const Component = ({}: Props) => {
                     <div
                         className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions
                     </div>
+                    <Authorize roles={["Admin","Editor"]}>
+
                     <Button onClick={() => setCreatingOn(true)}
                             className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
                         Create New Subscription
                     </Button>
+                    </Authorize>
                 </div>
                 <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
                                          onFindRequested={handleFindRequested}/>

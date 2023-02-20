@@ -5,6 +5,7 @@ import AddMemberModal from "src/components/Settings/AddMemberModal";
 import {AccountModel} from "src/types/accounts";
 import {apiClient} from "src/client";
 import {MdOutlineRemoveCircle} from "react-icons/md";
+import Authorize from "src/components/common/authorize/authorize";
 
 const useQuery = useMembersFinder;
 
@@ -32,16 +33,23 @@ const MembersInfo: React.FC = () => {
             <span className={"text-lg"}>
                         Members Info
             </span>
-            <button onClick={() => setOpenModal("ADD")}
-                    className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                Add
-            </button>
+            <Authorize roles={["Admin"]}>
+                <button onClick={() => setOpenModal("ADD")}
+                        className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
+                    Add
+                </button>
+
+            </Authorize>
+
 
         </div>
         <div className="pt-3 w">
             <table className="appearance-none min-w-full">
                 <thead className="border-y bg-gray-50">
                 <tr>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        Role
+                    </th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
                         Name
                     </th>
@@ -61,6 +69,9 @@ const MembersInfo: React.FC = () => {
                     queryState.response?.data?.result?.filter((i: AccountModel) => i.id != 9999)?.map((i: AccountModel) => (
                         <tr key={i.email} className="bg-white border-b">
                             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                                {i.role}
+                            </td>
+                            <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                 {i.name}
                             </td>
                             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
@@ -70,8 +81,11 @@ const MembersInfo: React.FC = () => {
                                 {toLocalDateTimeString(i.createdOn)}
                             </td>
                             <td className="text-sm  font-light px-6 py-4 whitespace-nowrap">
-                                <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
-                                                       className={"text-yellow-600 cursor-pointer"}/>
+                                <Authorize roles={["Admin"]}>
+                                    <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
+                                                           className={"text-yellow-600 cursor-pointer"}/>
+                                </Authorize>
+                     
                             </td>
                         </tr>
                     ))
