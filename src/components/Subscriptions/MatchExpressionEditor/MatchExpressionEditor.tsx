@@ -1,5 +1,5 @@
 import {MatchExpression} from "src/types/subscriptions";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {Fragment, useCallback, useEffect, useState} from "react";
 import {KeyValuePair, OptionType} from "src/types/common";
 import {apiClient} from "src/client";
 import ExpressionBranch from "src/components/Subscriptions/MatchExpressionEditor/ExpressionBranch";
@@ -37,6 +37,7 @@ type Props = {
 const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChange}) => {
 
     const [promotedProperties, setPromotedProperties] = useState<Array<any>>([])
+    const [matchFeature, setMatchFeature] = useState(Boolean(expression) ?? false)
     const [documentName, setDocumentName] = useState<string>("DOCUMENT")
 
     const onChangeExpression = useCallback((e: MatchExpression) => {
@@ -65,17 +66,32 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
 
     return <div className={"p-1 shadow-md rounded border"}>
 
-        <div className={"text-center pt-2 pb-1"}>
-            <SyntaxHighlighter wrapLines={true} language="sql" style={xcode}>
-                {`SELECT *
-                  FROM "${documentName}"
-                  WHERE ${getDescription(expression) || "TRUE"} `}
-            </SyntaxHighlighter>
-        </div>
+        {
+            !matchFeature && <div className={"text-center bg-blue-50 py-3"}>
+                <p>
+                    <span className={"font-semibold"}>Expression matching</span> is the new way to filter documents for
+                    internal type subscibtions Please <span
+                    onClick={() => setMatchFeature(true)}
+                    className={"font-semibold underline cursor-pointer text-blue-800"}>Click</span> to enable it
+                </p>
+            </div>
+        }
 
-        <div className={"pr-8"}>
-            <ExpressionBranch promotedProperties={promotedProperties} onChange={onChangeExpression} value={expression}/>
-        </div>
+        {
+            matchFeature && <Fragment>
+                <div className={"text-center pt-2 pb-1"}>
+                    <SyntaxHighlighter wrapLines={true} language="sql" style={xcode}>
+                        {`SELECT * FROM "${documentName}" WHERE ${getDescription(expression) || "TRUE"} `}
+                    </SyntaxHighlighter>
+                </div>
+
+                <div className={"pr-8"}>
+                    <ExpressionBranch promotedProperties={promotedProperties} onChange={onChangeExpression}
+                                      value={expression}/>
+                </div>
+            </Fragment>
+        }
+
     </div>
 }
 export default MatchExpressionEditor
