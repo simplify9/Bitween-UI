@@ -1,5 +1,6 @@
 import Tab from "./forms/Tab"
 import {Icon} from "./icons"
+import {useMemo} from "react";
 
 
 export type SortBy = {
@@ -35,27 +36,21 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                 onChange
                                                             }) => {
 
-    const pageIndex = Math.floor(offset / limit);
-    let pages = [];
-    const totalPages = Math.ceil(total / limit);
-    for (let i = 0; i < totalPages; ++i) pages.push(i);
 
-    // const handleSortByChange = (field: string) => {
-    //     onChange({
-    //         limit,
-    //         offset: 0,
-    //         sortBy: {...sortBy, field}
-    //     })
-    // }
-    //
-    // const handleSortDescendingChange = (descending: boolean) => {
-    //     onChange({
-    //         limit,
-    //         offset: 0,
-    //         sortBy: {...sortBy, descending}
-    //     })
-    // }
+    const {pages, totalPages, pageIndex} = useMemo(() => {
+        const _pageIndex = Math.floor(offset / limit);
+        const _totalPages = Math.ceil(total / limit);
+        const _pages = []
+        for (let i = 0; i < _totalPages; ++i) _pages.push(i);
+
+        return {pages: _pages, pageIndex: _pageIndex, totalPages: _totalPages}
+    }, [offset, limit]);
+
     const handlePageChange = (newOffset: number) => {
+        console.log(newOffset,"newOffset",newOffset<0 || newOffset > total)
+        if(newOffset<0 || newOffset > total)
+            return
+        
         onChange({
             limit,
             offset: newOffset,
@@ -76,13 +71,13 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             </div>
             {totalPages > 1
                 ? <>
-                    <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
+                    <Tab  onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
                     <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}><Icon shape="chevronLeft"
                                                                                                  className="h-2"/></Tab>
                     {pages.map(p => {
                         return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
-                            <Tab onClick={() => handlePageChange(p * limit)} key={p}
-                                 selected={p === pageIndex}>{p + 1}</Tab>) : <></>
+                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)} 
+                                 selected={p === pageIndex}>{p + 1}</Tab>) : null
                     })}
                     <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"
                                                                                                  className="h-2"/></Tab>

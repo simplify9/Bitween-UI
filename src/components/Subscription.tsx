@@ -68,7 +68,6 @@ const Component = () => {
     }, [])
 
 
-
     if (!updateSubscriptionData) return <></>
 
     return (
@@ -157,7 +156,7 @@ const Component = () => {
                         expression={updateSubscriptionData.matchExpression}
                     />
                 }
-                {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1")&&
+                {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1") &&
                     <div
                         className=" border shadow px-2 py-2">
                         <FormField title="Filters" className="grow">

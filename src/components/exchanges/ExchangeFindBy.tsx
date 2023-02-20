@@ -34,7 +34,7 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
     }
 
     return (
-        <div className="flex w-100   py-8">
+        <div className="flex w-100 pb-5  pt-8">
             <div className={"flex flex-col w-full  "}>
                 <div className="flex w-full gap-3 flex-wrap items-end  mb-2 ">
                     <FormField title="Target Subscription" className={"min-w-[350px]"}>
@@ -65,15 +65,16 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                         <TextEditor placeholder="Correlation ID" value={value.correlationId}
                                     onChange={(t) => onChange({...value, correlationId: t})}/>
                     </FormField>
-                    <FormField title="Promoted Properties" className={"grow"}>
-                        <TextEditor placeholder="Promoted Properties" value={value.promotedProperties}
-                                    onChange={(t) => onChange({...value, promotedProperties: t})}/>
-                    </FormField>
+                  
 
 
                 </div>
                 <div className={"flex flex-row justify-between items-end p-1"}>
                     <div className={"flex gap-3"}>
+                        <FormField title="Promoted Properties" className={"min-w-[350px]"}>
+                            <TextEditor placeholder="Promoted Properties" value={value.promotedProperties}
+                                        onChange={(t) => onChange({...value, promotedProperties: t})}/>
+                        </FormField>
                         <FormField title="Creation Time From">
                             <DateEditor onChange={(t) => onChange({
                                 ...value, creationTimeWindow: {

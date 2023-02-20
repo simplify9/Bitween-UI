@@ -13,7 +13,7 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
 
     const onChangeDate = (date: Date | null) => {
         if (date) {
-            onChange(date?.toString())
+            onChange(date?.toISOString())
         }
     }
     return (

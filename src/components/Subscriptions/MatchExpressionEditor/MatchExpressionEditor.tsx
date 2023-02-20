@@ -15,16 +15,15 @@ const writeTerm = (expression: MatchExpression, operator: 'and' | 'or') => {
 }
 
 const Description = (expression: MatchExpression) => {
-    if (expression.type === 'and') {
-
-        return `${writeTerm(expression.left, 'or')} AND ${writeTerm(expression.right, 'or')}`
-
-    } else if (expression.type === 'or') {
-        return `${writeTerm(expression.left, 'and')} OR ${writeTerm(expression.right, 'and')}`
-    } else if (expression.type === 'one_of') {
-        return `${expression.path} IN (${expression.values.join(', ')})`;
-    } else {
-        return `${expression.path} NOT IN (${expression.values.join(', ')})`;
+    switch (expression.type) {
+        case 'and':
+            return `${writeTerm(expression.left, 'or')} AND ${writeTerm(expression.right, 'or')}`
+        case 'or':
+            return `${writeTerm(expression.left, 'and')} OR ${writeTerm(expression.right, 'and')}`
+        case 'one_of':
+            return `${expression.path} IN (${expression.values.join(', ')})`;
+        default:
+            return `${expression.path} NOT IN (${expression.values.join(', ')})`;
     }
 }
 
@@ -68,7 +67,9 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
 
         <div className={"text-center pt-2 pb-1"}>
             <SyntaxHighlighter wrapLines={true} language="sql" style={xcode}>
-                {`SELECT * FROM "${documentName}" WHERE ${getDescription(expression) || "TRUE"} `}
+                {`SELECT *
+                  FROM "${documentName}"
+                  WHERE ${getDescription(expression) || "TRUE"} `}
             </SyntaxHighlighter>
         </div>
 

@@ -97,6 +97,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             }
         }
 
+        console.log("lggging out", refreshToken)
 
         await logOut();
 

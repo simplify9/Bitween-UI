@@ -86,6 +86,7 @@ export default (props: Props) => {
                                     onFindRequested={handleFindRequested}/>
                 {queryState.response !== null
                     ? <>
+                        <PartnerList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
                             sortByOptions={["name"]}
                             sortByTitles={{
@@ -99,7 +100,6 @@ export default (props: Props) => {
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                        <PartnerList data={queryState.response.data}/>
                     </>
                     : null}
 

@@ -103,6 +103,8 @@ export default (props: Props) => {
                 <DocumentFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested}/>
                 {queryState.response !== null
                     ? <>
+                        
+                        <DocumentList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
                             sortByOptions={["name"]}
                             sortByTitles={{
@@ -116,7 +118,6 @@ export default (props: Props) => {
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                        <DocumentList data={queryState.response.data}/>
                     </>
                     : null}
 

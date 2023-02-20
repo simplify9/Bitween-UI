@@ -109,7 +109,7 @@ const Component = ({}: Props) => {
     // }, [findSpecs])
 
     return (
-        <div className="flex flex-col w-full px-8 py-4">
+        <div className="flex flex-col w-full px-3 py-4">
 
             {openModal === "BULK_RETRY" && <BulkRetryModal
                 xids={selectedRowsIds}
