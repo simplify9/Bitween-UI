@@ -13,15 +13,30 @@ import Subscription from "./components/Subscription";
 import Document from "./components/Document";
 import {ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import React from "react";
+import React, {useEffect} from "react";
 import Settings from "src/components/Settings";
+import {useAppDispatch} from "src/state/ReduxSotre";
+import {apiClient} from "src/client";
+import {setAccountInfo} from "src/state/stateSlices/user";
 
 function App() {
 
+    const dispatch = useAppDispatch()
     const {isLoggedIn} = useAuthApi();
 
+    const setUserInfo = async () => {
+        if (isLoggedIn) {
+            const info = await apiClient.getProfile()
+            if (info.succeeded) {
+                dispatch(setAccountInfo(info.data))
+            }
+        }
+    }
+    useEffect(() => {
+        setUserInfo()
+    }, [])
     if (!isLoggedIn) return <Login/>;
-    
+
     return (
         <>
             <Helmet>

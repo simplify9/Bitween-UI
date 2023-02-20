@@ -26,6 +26,7 @@ export const AuthApiProvider: React.FC<{ authApp: AuthConfig, children?: React.R
 
   const api = useMemo(() => ({
     login: (response: AccessTokenResponse) => {
+      console.log(response)
       loginCallback(authApp)(response).then(_ => setLoggedIn(true))
       addAxiosInterceptors(client, Ac);
 
