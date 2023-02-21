@@ -111,6 +111,7 @@ const Component = ({}: Props) => {
                                          onFindRequested={handleFindRequested}/>
                 {queryState.response !== null
                     ? <>
+                        <SubscriptionList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
                             sortByOptions={["subscription", "status", "docType"]}
                             sortByTitles={{
@@ -126,7 +127,6 @@ const Component = ({}: Props) => {
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                        <SubscriptionList data={queryState.response.data}/>
                     </>
                     : null}
 

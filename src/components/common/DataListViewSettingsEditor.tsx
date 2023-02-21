@@ -47,8 +47,7 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
     }, [offset, limit]);
 
     const handlePageChange = (newOffset: number) => {
-        console.log(newOffset,"newOffset",newOffset<0 || newOffset > total)
-        if(newOffset<0 || newOffset > total)
+        if(newOffset<0 || newOffset >= total)
             return
         
         onChange({
