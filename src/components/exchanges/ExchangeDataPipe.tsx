@@ -11,7 +11,7 @@ type Props = {
 }
 const Pipe: React.FC<Props> = ({completed, error, onClick, bad, fileKey, type}) => {
 
-    const color = `${bad ? "bg-yellow-500" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
+    const color = `${bad ? "bg-yellow-400" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
     return <div
 
         className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 -z-5 `}>

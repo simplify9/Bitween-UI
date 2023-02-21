@@ -83,7 +83,7 @@ const MembersInfo: React.FC = () => {
                             <td className="text-sm  font-light px-6 py-4 whitespace-nowrap">
                                 <Authorize roles={["Admin"]}>
                                     <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
-                                                           className={"text-yellow-600 cursor-pointer"}/>
+                                                           className={"text-yellow-400 cursor-pointer"}/>
                                 </Authorize>
                      
                             </td>

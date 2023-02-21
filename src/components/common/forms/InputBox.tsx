@@ -17,7 +17,7 @@ const Component: React.FC<Props> = ({
                                         ...htmlProps
                                     }) => (
     <div {...htmlProps}
-         className={classes(ownCss(!!withPopOver), className || "")}>
+         className={classes(ownCss(!!withPopOver), className || " z-50 relative")}>
         {children}
         {withPopOver &&
             <div

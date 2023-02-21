@@ -36,7 +36,7 @@ const ExchangeDocument: React.FC<Props> = ({type, status}) => {
     }
     return (
 
-        <div className={" z-20  bg-grey-400 text-grey-700 rounded-full shadow-lg " + getContainerClasses()}>
+        <div className={" z-10  bg-grey-400 text-grey-700 rounded-full shadow-lg " + getContainerClasses()}>
             <div
                 className={"flex     items-center justify-center  h-12 w-12 "}>
                 {
