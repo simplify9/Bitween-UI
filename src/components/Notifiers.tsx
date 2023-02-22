@@ -18,14 +18,14 @@ const Notifiers: React.FC = () => {
                         className="text-2xl font-bold tracking-wide text-gray-700">
                         Notifiers
                     </div>
-                    <Authorize roles={["Admin", "Editor"]}>
-
-                        <button onClick={() => {
-                        }}
-                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                            Create New Notifier
-                        </button>
-                    </Authorize>
+                    {/*<Authorize roles={["Admin", "Editor"]}>*/}
+                    
+                    {/*    <button onClick={() => {*/}
+                    {/*    }}*/}
+                    {/*            className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">*/}
+                    {/*        Create New Notifier*/}
+                    {/*    </button>*/}
+                    {/*</Authorize>*/}
                 </div>
                 {data.data
                     &&
