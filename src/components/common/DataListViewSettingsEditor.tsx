@@ -20,9 +20,9 @@ interface Props {
     total: number
     limit: number
     offset: number
-    sortByOptions: string[]
+    sortByOptions?: string[]
     sortByTitles?: { [k: string]: string }
-    sortBy: SortBy
+    sortBy?: SortBy
     onChange: (e: DataListViewSettingsChangeEvent) => void
 }
 
@@ -47,9 +47,9 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
     }, [offset, limit]);
 
     const handlePageChange = (newOffset: number) => {
-        if(newOffset<0 || newOffset >= total)
+        if (newOffset < 0 || newOffset >= total)
             return
-        
+
         onChange({
             limit,
             offset: newOffset,
@@ -70,12 +70,12 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             </div>
             {totalPages > 1
                 ? <>
-                    <Tab  onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
+                    <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
                     <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}><Icon shape="chevronLeft"
                                                                                                  className="h-2"/></Tab>
                     {pages.map(p => {
                         return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
-                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)} 
+                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)}
                                  selected={p === pageIndex}>{p + 1}</Tab>) : null
                     })}
                     <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"

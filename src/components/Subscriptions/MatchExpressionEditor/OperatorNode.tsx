@@ -15,7 +15,14 @@ type Props = {
     onChange: (v: AndMatchExpression
         | OrMatchExpression) => void
 }
-const OperatorNode: React.FC<Props> = ({onDeleteNode, promotedProperties, onChange, value, setCollapsed,collapsed}) => {
+const OperatorNode: React.FC<Props> = ({
+                                           onDeleteNode,
+                                           promotedProperties,
+                                           onChange,
+                                           value,
+                                           setCollapsed,
+                                           collapsed
+                                       }) => {
 
     const Arrow = collapsed ? AiOutlineArrowDown : AiOutlineArrowUp
 

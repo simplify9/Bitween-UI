@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import {AxiosInstance} from "axios";
 
 
 export interface AuthConfig {
@@ -6,12 +6,14 @@ export interface AuthConfig {
     logOutHandler: () => void
     refreshTokenCache?: ValueCache
     refreshTokenExpiry: number | null
-    accessTokenGenerator?: (axios:AxiosInstance, refreshToken: string) => Promise<AccessTokenResponse | null>
+    accessTokenGenerator?: (axios: AxiosInstance, refreshToken: string) => Promise<AccessTokenResponse | null>
 }
 
 export interface ValueCache {
     drop(): Promise<void>
+
     read(): Promise<string | null>
+
     write(value: string, expiryInSeconds: number | null): Promise<void>
 }
 
@@ -26,13 +28,14 @@ export interface AuthParams {
     logOutHandler?: () => void
     refreshTokenCache?: ValueCache
     refreshTokenExpiry?: number | null
-    accessTokenGenerator?: (axios:AxiosInstance, refreshToken: string) => Promise<AccessTokenResponse | null>
+    accessTokenGenerator?: (axios: AxiosInstance, refreshToken: string) => Promise<AccessTokenResponse | null>
 }
 
 export interface AuthApi {
     login: (tokens: AccessTokenResponse) => void
     logout: () => void
     isLoggedIn: boolean
+    tokens?: AccessTokenResponse
 }
 
 

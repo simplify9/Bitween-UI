@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "dom"],
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
     "module": "ESNext",
     "target": "ES6",
     "baseUrl": "./",
@@ -25,7 +28,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  
   "include": [
     "src"
   ]

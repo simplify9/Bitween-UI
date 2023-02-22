@@ -92,10 +92,10 @@ const Component = () => {
                         Trail
                     </Button>
                     <Authorize roles={["Admin", "Editor"]}>
-                    <Button onClick={deleteSubscription}
-                            className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
-                        Delete
-                    </Button>
+                        <Button onClick={deleteSubscription}
+                                className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
+                            Delete
+                        </Button>
                     </Authorize>
                 </div>
             </div>

@@ -8,7 +8,7 @@ type Props = {
     xids?: string[]
     onRefresh: () => void
 }
-const RetryModal: React.FC<Props> = ({onClose, xids,onRefresh}) => {
+const RetryModal: React.FC<Props> = ({onClose, xids, onRefresh}) => {
 
     const [resetForRetry, setResetForRetry] = useState<boolean>(false);
 

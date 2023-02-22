@@ -4,8 +4,8 @@ import Button from "src/components/common/forms/Button";
 
 
 type Props = JSX.IntrinsicElements['label'] & {
-    title: string 
-    actionTitle?: string| JSX.Element
+    title: string
+    actionTitle?: string | JSX.Element
     onClickAction?: () => void
 }
 

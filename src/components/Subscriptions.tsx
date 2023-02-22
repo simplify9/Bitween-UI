@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useState} from "react";
 import {useSubscriptionFinder} from "../hooks/queryHooks";
 import {jsBoolean, jsNumber, jsString} from "redux-ecq";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
@@ -91,7 +91,6 @@ const Component = ({}: Props) => {
     }, [newQuery, queryState.lastSent])
 
 
- 
     return (
         <>
             <div className="flex flex-col w-full px-8 py-4">
@@ -99,12 +98,12 @@ const Component = ({}: Props) => {
                     <div
                         className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions
                     </div>
-                    <Authorize roles={["Admin","Editor"]}>
+                    <Authorize roles={["Admin", "Editor"]}>
 
-                    <Button onClick={() => setCreatingOn(true)}
-                            className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                        Create New Subscription
-                    </Button>
+                        <Button onClick={() => setCreatingOn(true)}
+                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
+                            Create New Subscription
+                        </Button>
                     </Authorize>
                 </div>
                 <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}

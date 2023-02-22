@@ -78,12 +78,12 @@ export default (props: Props) => {
                     <div
                         className="text-2xl font-bold tracking-wide text-gray-700">Partners
                     </div>
-                    <Authorize roles={["Admin","Editor"]}>
+                    <Authorize roles={["Admin", "Editor"]}>
 
-                    <button onClick={() => setCreatingOn(true)}
-                            className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                        Create New Partner
-                    </button>
+                        <button onClick={() => setCreatingOn(true)}
+                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
+                            Create New Partner
+                        </button>
                     </Authorize>
                 </div>
                 <PartnerFinderPanel value={findSpecs} onChange={setFindSpecs}

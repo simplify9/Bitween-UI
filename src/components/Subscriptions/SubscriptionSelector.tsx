@@ -1,11 +1,11 @@
-import { useSubscriptionFinder} from "../../hooks/queryHooks";
-import { ChoiceEditor } from "../common/forms/ChoiceEditor";
+import {useSubscriptionFinder} from "../../hooks/queryHooks";
+import {ChoiceEditor} from "../common/forms/ChoiceEditor";
 
 
 interface Props {
     value?: string
-    onChange: (value:string) => void
-    disabled?:boolean
+    onChange: (value: string) => void
+    disabled?: boolean
 }
 
 const defaultQuery = {
@@ -17,7 +17,7 @@ const defaultQuery = {
     sortByDescending: false
 }
 
-const SubscriptionSelector:React.FC<Props> = ({ value, onChange,disabled }) => {
+const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled}) => {
 
     const [queryState, newQuery] = useSubscriptionFinder(defaultQuery);
     return (
@@ -28,7 +28,7 @@ const SubscriptionSelector:React.FC<Props> = ({ value, onChange,disabled }) => {
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
             optionValue={i => i.id}
-            optionTitle={i => i.name} />
+            optionTitle={i => i.name}/>
     );
 }
 

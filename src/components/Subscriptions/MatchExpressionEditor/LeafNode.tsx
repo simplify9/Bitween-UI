@@ -15,7 +15,7 @@ type Props = {
 }
 const LeafNode: React.FC<Props> = ({onDeleteNode, promotedProperties, onChange, value}) => {
     return <div className={"p-1 px-2 ml-8 border border-blue-200 shadow rounded-lg max-w-[650px]"}>
-       
+
 
         <div className={"  flex flex-row  items-end justify-between"}>
 

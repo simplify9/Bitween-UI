@@ -43,13 +43,15 @@ const NavBar = () => {
                              className={resolveClassName}>Documents</NavLink>
                     <NavLink to="/partners"
                              className={resolveClassName}>Partners</NavLink>
+                    <NavLink to="/notifiers"
+                             className={resolveClassName}>Notifiers</NavLink>
                     <NavLink to="/settings"
                              className={resolveClassName}>Settings</NavLink>
                 </div>
                 <div className={"p-3 flex   items-center justify-center"}>
                     <div onClick={() => AuthConfig.logOutHandler()}
-                          className={"text-md text-gray-700 w-full  text-center bg-gray-300 px-3 py-2 w-100 rounded-lg shadow-lg  cursor-pointer"}>
-                         Logout
+                         className={"text-md text-gray-700 w-full  text-center bg-gray-300 px-3 py-2 w-100 rounded-lg shadow-lg  cursor-pointer"}>
+                        Logout
                     </div>
 
                 </div>

@@ -23,12 +23,14 @@ const Component: React.FC<Props> = ({onClose, onAdd}) => {
                     id="modal-title">New Document</h3>
                 <div className="mt-4">
                     <FormField title="Please enter the ID of the document" className="grow">
-                        <TextEditor placeholder="Type in the id..." value={document.id} onChange={(t) => setDocument({...document,id:t})}/>
+                        <TextEditor placeholder="Type in the id..." value={document.id}
+                                    onChange={(t) => setDocument({...document, id: t})}/>
                     </FormField>
                 </div>
                 <div className="mt-4">
                     <FormField title="Please enter the name of the document" className="grow">
-                        <TextEditor placeholder="Type in the name..." value={document.name} onChange={(t) => setDocument({...document,name: t})}/>
+                        <TextEditor placeholder="Type in the name..." value={document.name}
+                                    onChange={(t) => setDocument({...document, name: t})}/>
                     </FormField>
                 </div>
 
