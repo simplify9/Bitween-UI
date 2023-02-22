@@ -1,3 +1,4 @@
-export const classes = (...classList:string[]) => classList.join(" ");
+export const classes = (...classList: string[]) => classList.join(" ");
 
-export const noOp = () => {};
+export const noOp = () => {
+};

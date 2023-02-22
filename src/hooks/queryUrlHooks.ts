@@ -1,7 +1,7 @@
-import { formatISO, isValid, parseISO } from "date-fns";
-import { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { CqBoolean, CqDateTime, CqNumber, CqString, } from "redux-ecq";
+import {formatISO, isValid, parseISO} from "date-fns";
+import {useMemo} from "react";
+import {useSearchParams} from "react-router-dom";
+import {CqBoolean, CqDateTime, CqNumber, CqString,} from "redux-ecq";
 import {QueryHook, QueryState} from "./queryHookUtil"
 
 type SelfOrArray<T> = T | T[]
@@ -14,47 +14,40 @@ export type QueryStringMapping<TQuery> = {
     [param in keyof TQuery]: QuerySchema
 }
 
-type HookResult<TQuery> = [TQuery,(params:Partial<TQuery>) => void]
+type HookResult<TQuery> = [TQuery, (params: Partial<TQuery>) => void]
 
-const parse = (node:QuerySchema, rawValue:string):any => {
+const parse = (node: QuerySchema, rawValue: string): any => {
     if (Array.isArray(node)) {
         return rawValue.split(",").filter(token => token !== undefined).map(token => parse(node[0], token));
-    }
-    else if (rawValue === undefined || rawValue === "") {
+    } else if (rawValue === undefined || rawValue === "") {
         return undefined;
-    }
-    else if (node.type === "boolean") {
+    } else if (node.type === "boolean") {
         return rawValue.toUpperCase() === "TRUE";
-    }
-    else if (node.type === "datetime") {
+    } else if (node.type === "datetime") {
         const n = parseISO(rawValue);
         return isValid(n) ? n : undefined;
-    }
-    else if (node.type === "number") {
+    } else if (node.type === "number") {
         const n = parseInt(rawValue);
         return isNaN(n) ? undefined : n;
-    }
-    else if (node.type === "string") {
+    } else if (node.type === "string") {
         return rawValue;
     }
     throw "Type not supported";
 }
 
-const encode = (node:QuerySchema, value:any):any => {
+const encode = (node: QuerySchema, value: any): any => {
     if (value === undefined || value === "" || value === null) {
         return "";
-    }
-    else if (Array.isArray(node)) {
-        return (value as any[]).map((i:any) => encode(node[0], i)).join(",");
-    }
-    else if (node.type === "boolean") return !!value ? "true": "false";
+    } else if (Array.isArray(node)) {
+        return (value as any[]).map((i: any) => encode(node[0], i)).join(",");
+    } else if (node.type === "boolean") return !!value ? "true" : "false";
     else if (node.type === "datetime") return formatISO(value);
     else if (node.type === "number") return value.toString();
     else return value;
 }
 
-const createMapper = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
-    return (queryString:Record<string,string>) =>
+const createMapper = <TQuery>(mapping: QueryStringMapping<TQuery>) => {
+    return (queryString: Record<string, string>) =>
         Object.fromEntries(
             Object.entries(mapping)
                 .map(([key, value]) => [key, parse(value as any, queryString[key])])
@@ -62,9 +55,9 @@ const createMapper = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
         );
 }
 
-const createEncoder = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
-    return (query:TQuery) => {
-        let outcome:Record<string,string> = {}
+const createEncoder = <TQuery>(mapping: QueryStringMapping<TQuery>) => {
+    return (query: TQuery) => {
+        let outcome: Record<string, string> = {}
         for (const key in mapping) {
             outcome[key] = encode(mapping[key], query[key]);
         }
@@ -72,12 +65,12 @@ const createEncoder = <TQuery>(mapping:QueryStringMapping<TQuery>) => {
     }
 }
 
-export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defaultValue:TQuery):HookResult<TQuery> => {
+export const useQueryString = <TQuery>(mapping: QueryStringMapping<TQuery>, defaultValue: TQuery): HookResult<TQuery> => {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
     const query = useMemo(() => {
-        let fromQueryString:Record<string,string> = {};
+        let fromQueryString: Record<string, string> = {};
         searchParams.forEach((value, key) => {
             if (value !== "") {
                 fromQueryString[key] = value;
@@ -89,19 +82,19 @@ export const useQueryString = <TQuery>(mapping:QueryStringMapping<TQuery>, defau
         }
     }, [searchParams.toString()]);
 
-    const encoder =  createEncoder(mapping);
+    const encoder = createEncoder(mapping);
 
-    const setQueryString = (change:Partial<TQuery>) => {
+    const setQueryString = (change: Partial<TQuery>) => {
 
-        setSearchParams(encoder({ ...query, ...change }));
+        setSearchParams(encoder({...query, ...change}));
     }
 
     return [query, setQueryString];
 }
 
-export const withUrlSupport = <TReq, TRes>(hook:QueryHook<TReq,TRes>, mapping:QueryStringMapping<TReq>) => {
+export const withUrlSupport = <TReq, TRes>(hook: QueryHook<TReq, TRes>, mapping: QueryStringMapping<TReq>) => {
 
-    return (initReq:TReq, maxDepth:number = 3):[QueryState<TReq,TRes>,(req:TReq) => void] => {
+    return (initReq: TReq, maxDepth: number = 3): [QueryState<TReq, TRes>, (req: TReq) => void] => {
 
         const [req, newQuery] = useQueryString<TReq>(mapping, initReq);
 

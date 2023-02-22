@@ -89,12 +89,12 @@ const Component = () => {
                             className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
                         Trail
                     </Button>
-                    <Authorize roles={["Admin","Editor"]}>
+                    <Authorize roles={["Admin", "Editor"]}>
 
-                    <Button onClick={deleteDocument}
-                            className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
-                        Delete
-                    </Button>
+                        <Button onClick={deleteDocument}
+                                className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
+                            Delete
+                        </Button>
                     </Authorize>
 
                 </div>

@@ -1,14 +1,24 @@
+export interface BaseSearchModel {
+    offset: number,
+    limit: number
+
+}
 
 
+export type ApiResponse<T> = {
+    result: Array<T>,
+    totalCount: number
 
-export interface KeyValuePair{
-    key:string;
-    value:string;
+}
+
+export interface KeyValuePair {
+    key: string;
+    value: string;
 }
 
 export type OptionType = {
-    id:string
-    title:string
+    id: string
+    title: string
 }
 
 export type CommonFindQuery = {

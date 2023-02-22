@@ -25,7 +25,7 @@ const CreateExchange: React.FC<Props> = ({onClose}) => {
     const onSubmit = async () => {
         if (createXchange.data) {
             const res = await apiClient.createExchange(createXchange)
-            if(res.status==204){
+            if (res.status == 204) {
                 onClose()
             }
         }
@@ -62,7 +62,9 @@ const CreateExchange: React.FC<Props> = ({onClose}) => {
 
 
             {
-                (createXchange.option) && <div className={"mt-5"}><textarea value={createXchange.data} onChange={(e)=>onChange((e.target.value), 'data')} className={"w-full border rounded shadow"}/>
+                (createXchange.option) && <div className={"mt-5"}><textarea value={createXchange.data}
+                                                                            onChange={(e) => onChange((e.target.value), 'data')}
+                                                                            className={"w-full border rounded shadow"}/>
                 </div>
             }
         </div>

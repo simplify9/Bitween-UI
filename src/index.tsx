@@ -17,8 +17,10 @@ client.defaults.baseURL = API_BASE_URL;
 
 const container = document.getElementById("root") as Element;
 const root = createRoot(container!);
-root.render(<AuthApiProvider authApp={AuthConfig}>
+root.render(
     <Provider store={store}>
-        <App/>
+        <AuthApiProvider authApp={AuthConfig}>
+            <App/>
+        </AuthApiProvider>
     </Provider>
-</AuthApiProvider>);
+);

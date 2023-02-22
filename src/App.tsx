@@ -13,28 +13,16 @@ import Subscription from "./components/Subscription";
 import Document from "./components/Document";
 import {ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import React, {useEffect} from "react";
+import React from "react";
 import Settings from "src/components/Settings";
-import {useAppDispatch} from "src/state/ReduxSotre";
-import {apiClient} from "src/client";
-import {setAccountInfo} from "src/state/stateSlices/user";
+import Notifier from "src/components/Notifier";
+import Notifiers from "src/components/Notifiers";
 
 function App() {
 
-    const dispatch = useAppDispatch()
     const {isLoggedIn} = useAuthApi();
 
-    const setUserInfo = async () => {
-        if (isLoggedIn) {
-            const info = await apiClient.getProfile()
-            if (info.succeeded) {
-                dispatch(setAccountInfo(info.data))
-            }
-        }
-    }
-    useEffect(() => {
-        setUserInfo()
-    }, [isLoggedIn])
+
     if (!isLoggedIn) return <Login/>;
 
     return (
@@ -57,6 +45,7 @@ function App() {
                             <Routes>
                                 <Route path="/" element={<Dashboard/>}/>
                                 <Route path="/settings" element={<Settings/>}/>
+                                <Route path="/notifiers" element={<Notifiers/>}/>
                                 <Route path="/exchanges" element={<Exchanges/>}/>
                                 <Route path="/subscriptions" element={<Subscriptions/>}/>
                                 <Route path="/documents" element={<Documents/>}/>
@@ -64,6 +53,8 @@ function App() {
                                 <Route path="/partners/:id" element={<Partner/>}/>
                                 <Route path="/documents/:id" element={<Document/>}/>
                                 <Route path="/subscriptions/:id" element={<Subscription/>}/>
+                                <Route path="/notifiers/:id" element={<Notifier/>}/>
+
                             </Routes>
                             {/*</div>*/}
                         </div>

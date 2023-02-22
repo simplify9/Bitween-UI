@@ -85,7 +85,7 @@ const MembersInfo: React.FC = () => {
                                     <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
                                                            className={"text-yellow-400 cursor-pointer"}/>
                                 </Authorize>
-                     
+
                             </td>
                         </tr>
                     ))

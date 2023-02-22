@@ -65,7 +65,6 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                         <TextEditor placeholder="Correlation ID" value={value.correlationId}
                                     onChange={(t) => onChange({...value, correlationId: t})}/>
                     </FormField>
-                  
 
 
                 </div>
@@ -99,9 +98,9 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                             onClick={handleFind}
                             className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
                             Find
-                        </button>   
+                        </button>
                     </div>
-                    
+
                 </div>
             </div>
 

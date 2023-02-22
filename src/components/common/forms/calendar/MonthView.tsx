@@ -1,4 +1,4 @@
-import { getDay, getDaysInMonth, isSameDay, startOfMonth } from "date-fns"
+import {getDay, getDaysInMonth, isSameDay, startOfMonth} from "date-fns"
 import DayView from "./DayView";
 
 
@@ -13,7 +13,7 @@ interface Props {
     onChange?: (value: Date) => void
 }
 
-const Component = ({ activeMonth, activeYear, value, onChange, firstDayOfWeek }: Props) => {
+const Component = ({activeMonth, activeYear, value, onChange, firstDayOfWeek}: Props) => {
 
 
     const firstDay = startOfMonth(new Date(activeYear, activeMonth));
@@ -45,34 +45,34 @@ const Component = ({ activeMonth, activeYear, value, onChange, firstDayOfWeek }:
         weeks.push(monthDays.splice(0, 7));
     }
 
-    const handleSelectDay = (date:Date) => {
+    const handleSelectDay = (date: Date) => {
         if (onChange) onChange(date);
     }
 
     return (
         <table>
             <thead>
-                <tr>
-                    {weekIndices.map(wd => (<th key={wd} className="p-1 text-xs font-light">{weekDays[wd]}</th>))}
-                </tr>
+            <tr>
+                {weekIndices.map(wd => (<th key={wd} className="p-1 text-xs font-light">{weekDays[wd]}</th>))}
+            </tr>
             </thead>
             <tbody>
-                {weeks.map((w,i) => (
-                    <tr key={i}>
-                        {w.map((date,j) => (
-                            <td key={(date || j).toString()} className="overflow-visible">
-                                {
-                                    date 
-                                    ? <DayView 
-                                        date={date} 
+            {weeks.map((w, i) => (
+                <tr key={i}>
+                    {w.map((date, j) => (
+                        <td key={(date || j).toString()} className="overflow-visible">
+                            {
+                                date
+                                    ? <DayView
+                                        date={date}
                                         selected={!!value && isSameDay(value, date)}
-                                        onSelect={handleSelectDay} />
-                                    : <div />
-                                }
-                            </td>
-                        ))}
-                    </tr>
-                ))}
+                                        onSelect={handleSelectDay}/>
+                                    : <div/>
+                            }
+                        </td>
+                    ))}
+                </tr>
+            ))}
             </tbody>
         </table>
     );

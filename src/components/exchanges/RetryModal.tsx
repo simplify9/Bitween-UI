@@ -1,6 +1,6 @@
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import Modal from "src/components/common/Modal";
-import React, {Fragment, useState} from "react";
+import React, {useState} from "react";
 import {apiClient} from "src/client";
 
 type Props = {
