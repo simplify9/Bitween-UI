@@ -99,12 +99,12 @@ const Component = () => {
 
                 </div>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="ID" className="grow">
                     <TextEditor disabled={true} value={id}/>
                 </FormField>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="Name" className="grow">
                     <TextEditor disabled={true} value={updateDocumentData?.name}
                                 onChange={(t) => setUpdateDocumentData({
@@ -113,7 +113,7 @@ const Component = () => {
                                 })}/>
                 </FormField>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="Duplicate Interval" className="grow">
                     <TextEditor value={updateDocumentData?.duplicateInterval} onChange={(t) => setUpdateDocumentData({
                         ...updateDocumentData,
@@ -123,7 +123,7 @@ const Component = () => {
             </div>
 
 
-            <div className="relative z-0 w-full mb-6 group flex">
+            <div className="  w-full mb-6 group flex">
 
                 <FormField title="Bus message type name" className="grow">
                     <TextEditor disabled={!updateDocumentData.busEnabled} value={updateDocumentData?.busMessageTypeName}
@@ -145,7 +145,7 @@ const Component = () => {
                     options={DocumentFormat}/>
             </FormField>
 
-            <div className="relative z-0 w-full group flex mt-3">
+            <div className="  w-full group flex mt-3">
                 <FormField title={""} className="">
                     <CheckBoxEditor label={"Bus Enabled"} checked={updateDocumentData.busEnabled}
                                     onChange={(t) => setUpdateDocumentData({
@@ -155,7 +155,7 @@ const Component = () => {
                 </FormField>
 
             </div>
-            <div className="relative z-0 w-full group flex">
+            <div className="  w-full group flex">
                 <FormField title={""} className=" ">
                     <CheckBoxEditor label={"Disregards unfiltered messages"}
                                     checked={updateDocumentData.disregardsUnfilteredMessages}
@@ -166,7 +166,7 @@ const Component = () => {
                 </FormField>
 
             </div>
-            <div className="relative z-0 w-full mb-6 group flex w-full">
+            <div className="  w-full mb-6 group flex w-full">
 
                 <KeyValueEditor values={updateDocumentData?.promotedProperties} title={'Promoted Properties'}
                                 keyLabel={"Friendly Name"} valueLabel={"Json Path"}

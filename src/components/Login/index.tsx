@@ -33,10 +33,7 @@ const Login = () => {
                 <div
                     className="flex items-center justify-center text-4xl font-black text-sky-900 m-3">
 
-                    <h1 className="tracking-wide" onClick={() => {
-                        setUsername("admin@infolink.systems")
-                        setPassword("Mtm@dmin!2")
-                    }}>Infolink</h1>
+                    <h1 className="tracking-wide" >Infolink</h1>
                 </div>
                 <div
 
