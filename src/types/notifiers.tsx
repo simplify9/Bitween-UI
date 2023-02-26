@@ -1,4 +1,4 @@
-import {BaseSearchModel} from "src/types/common";
+import {BaseSearchModel, KeyValuePair} from "src/types/common";
 
 export type NotifierModel = {
     id: number;
@@ -8,6 +8,17 @@ export type NotifierModel = {
     runOnFailedResult: boolean | null;
     handlerId: string;
     inactive: boolean | null;
+
+    handlerProperties?: KeyValuePair[];
+
+    runOnSubscriptions: RunOnSubscriptionsModel[]
+
+}
+
+type RunOnSubscriptionsModel = {
+
+    id: number
+    name?: string
 }
 
 export interface NotifiersSearchModel extends BaseSearchModel {

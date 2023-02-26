@@ -11,8 +11,8 @@ import Authorize from "src/components/common/authorize/authorize";
 
 
 const Component = () => {
-    let navigate = useNavigate();
-    let {id} = useParams();
+    const navigate = useNavigate();
+    const {id} = useParams();
     const [partner, setPartner] = useState<IPartner>();
     const [updatePartnerData, setUpdatePartnerData] = useState<UpdatePartner>({});
 

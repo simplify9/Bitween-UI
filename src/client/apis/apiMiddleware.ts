@@ -1,6 +1,7 @@
 import {BaseQueryFn, FetchArgs, fetchBaseQuery, FetchBaseQueryError,} from '@reduxjs/toolkit/query';
 import {Mutex} from 'async-mutex';
 import {API_BASE_URL} from "src/env";
+import {toast} from "react-toastify";
 
 const mutex = new Mutex();
 
@@ -28,8 +29,15 @@ const customFetchBase: BaseQueryFn<
 
     await mutex.waitForUnlock();
     await mutex.waitForUnlock();
-    let result = await baseQuery(args, api, extraOptions) as any
+    let result = await baseQuery(args, api, extraOptions)
+    console.log(result.meta.response.status)
+    if (204 === result.meta.response.status) {
+        toast("Action successful.", {type: "success",})
+    }
+    if (Boolean(result.error)) {
+        toast("Something went wrong: " + JSON.stringify(result.error, null, 4), {type: "error"})
 
+    }
     // if (result?.error?.data?.status === 401) {
     //
     //
