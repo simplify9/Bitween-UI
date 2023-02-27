@@ -14,7 +14,7 @@ const defaultQuery = {
     nameContains: '',
     keywords: "",
     offset: 0,
-    limit: 20,
+    limit: 100,
     sortBy: "docType",
     sortByDescending: false
 }
