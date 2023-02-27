@@ -16,7 +16,7 @@ const defaultQuery = {
     creationDateTo: undefined,
     keywords: "",
     offset: 0,
-    limit: 50,
+    limit: 100,
     sortBy: "docType",
     sortByDescending: false
 }
