@@ -41,7 +41,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                     <th scope="col" className="text-sm font-medium text-gray-900 px-2 py-2 text-left">
                         Status
                     </th>
-                    <th scope="col" colSpan={4} className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                    <th scope="col" colSpan={5} className="text-sm font-medium text-gray-900 px-6 py-2 text-left min-w-[330px]">
                     </th>
                     <th scope="col" colSpan={2} className="text-sm font-medium text-gray-900 px-4 py-2 text-left">
                         Properties
@@ -98,7 +98,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                             </td>
 
 
-                            <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap" colSpan={4}>
+                            <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap" colSpan={5}>
                                 <ExchangeJourney status={i.status} failed={Boolean(i.exception)} outputBad={i.outputBad}
                                                  mapperId={i.mapperId}
                                                  responseBad={i.responseBad}

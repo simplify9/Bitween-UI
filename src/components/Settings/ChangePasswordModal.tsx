@@ -39,7 +39,7 @@ const ChangePasswordModal: React.FC<Props> = ({onClose}) => {
         }
     }
     return <Modal onClose={onClose} onSubmit={onSubmit}>
-        <div className="relative z-0 w-full mb-6 group">
+        <div className="  w-full mb-6 group">
 
             <FormField title="Old Password" className="grow">
                 <TextEditor type={"password"} value={state.oldPassword}
@@ -47,13 +47,13 @@ const ChangePasswordModal: React.FC<Props> = ({onClose}) => {
             </FormField>
 
         </div>
-        <div className="relative z-0 w-full mb-6 group">
+        <div className="  w-full mb-6 group">
             <FormField title="New Password" className="grow">
                 <TextEditor type={"password"} value={state.newPassword}
                             onChange={(e) => setState((s) => ({...s, newPassword: e}))}/>
             </FormField>
         </div>
-        <div className="relative z-0 w-full mb-6 group">
+        <div className="  w-full mb-6 group">
             <FormField title="Confirm your password" className="grow">
                 <TextEditor type={"password"} value={state.newPasswordConfirmation}
                             onChange={(e) => setState((s) => ({...s, newPasswordConfirmation: e}))}/>

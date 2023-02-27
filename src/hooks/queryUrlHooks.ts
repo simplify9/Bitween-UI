@@ -1,8 +1,8 @@
-import {formatISO, isValid, parseISO} from "date-fns";
 import {useMemo} from "react";
 import {useSearchParams} from "react-router-dom";
 import {CqBoolean, CqDateTime, CqNumber, CqString,} from "redux-ecq";
 import {QueryHook, QueryState} from "./queryHookUtil"
+import dayjs from "dayjs";
 
 type SelfOrArray<T> = T | T[]
 
@@ -24,8 +24,8 @@ const parse = (node: QuerySchema, rawValue: string): any => {
     } else if (node.type === "boolean") {
         return rawValue.toUpperCase() === "TRUE";
     } else if (node.type === "datetime") {
-        const n = parseISO(rawValue);
-        return isValid(n) ? n : undefined;
+        const n = dayjs(rawValue);
+        return n.isValid() ? n : undefined;
     } else if (node.type === "number") {
         const n = parseInt(rawValue);
         return isNaN(n) ? undefined : n;
@@ -41,7 +41,7 @@ const encode = (node: QuerySchema, value: any): any => {
     } else if (Array.isArray(node)) {
         return (value as any[]).map((i: any) => encode(node[0], i)).join(",");
     } else if (node.type === "boolean") return !!value ? "true" : "false";
-    else if (node.type === "datetime") return formatISO(value);
+    else if (node.type === "datetime") return dayjs(value).toISOString();
     else if (node.type === "number") return value.toString();
     else return value;
 }

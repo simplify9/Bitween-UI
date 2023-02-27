@@ -5,7 +5,7 @@ export interface BaseSearchModel {
 }
 
 
-export type ApiResponse<T> = {
+export type ApiPagedResponse<T> = {
     result: Array<T>,
     totalCount: number
 

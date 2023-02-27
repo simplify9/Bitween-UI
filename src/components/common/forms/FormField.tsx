@@ -19,7 +19,7 @@ const Component: React.FC<Props> = ({
                                     }) => (
     <label {...htmlProps} className={classes("mb-6 md:mb-0", className || "")}>
         <div
-            className="block uppercase overflow-hidden tracking-wide text-gray-700 text-xs font-bold mb-2 flex flex-row justify-between z-50">
+            className="block uppercase overflow-hidden tracking-wide text-gray-700 text-xs font-bold mb-2 flex flex-row justify-between z-10">
             {title}
             {
                 onClickAction && <Button className={"mx-1"}
