@@ -4,6 +4,8 @@ import FormField from "../common/forms/FormField"
 import TextEditor from "../common/forms/TextEditor"
 import SubscriptionSelector from "../Subscriptions/SubscriptionSelector"
 import DateEditor from "src/components/common/forms/DateEditor";
+import React from "react";
+import {ExchangeFindQuery} from "src/types/xchange";
 
 
 type DeliveryStatus = {
@@ -21,17 +23,19 @@ export type ExchangeFindBySpecs = {
 }
 
 interface Props {
-    value: ExchangeFindBySpecs
-    onChange: (value: ExchangeFindBySpecs) => void
+    value: ExchangeFindQuery
+    onChange: (value: ExchangeFindQuery) => void
     onFindRequested: () => void
+    onClear: () => void
 }
 
-export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequested}) => {
+export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequested, onClear}) => {
 
     const handleFind = (e: any) => {
         e.preventDefault();
         onFindRequested();
     }
+   
 
     return (
         <div className="flex w-100 pb-5  pt-8">
@@ -76,24 +80,26 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                         </FormField>
                         <FormField title="Creation Time From">
                             <DateEditor onChange={(t) => onChange({
-                                ...value, creationTimeWindow: {
-                                    ...value.creationTimeWindow,
-                                    from: t
-                                }
-                            })} value={value.creationTimeWindow.from}/>
+                                ...value,
+                                creationDateFrom: t
+
+                            })} value={value.creationDateFrom}/>
                         </FormField>
                         <FormField title="Creation Time To">
                             <DateEditor onChange={(t) => onChange({
-                                ...value, creationTimeWindow: {
-                                    ...value.creationTimeWindow,
-                                    to: t
-                                }
-                            })} value={value.creationTimeWindow.to}/>
+                                ...value,
+                                creationDateTo: t
+                            })} value={value.creationDateTo}/>
                         </FormField>
                     </div>
 
 
-                    <div>
+                    <div className={"flex flex row"}>
+                        <button
+                            onClick={onClear}
+                            className="block appearance-none border bg-red-400 hover:bg-red-800 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                            Clear
+                        </button>
                         <button
                             onClick={handleFind}
                             className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">

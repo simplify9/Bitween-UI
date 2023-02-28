@@ -17,6 +17,7 @@ import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 import Authorize from "src/components/common/authorize/authorize";
+import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -80,7 +81,7 @@ const Component = () => {
             <div className="justify-between w-full flex py-4">
                 <div
                     className="text-2xl font-bold tracking-wide text-gray-700">
-                    Subscriptions
+                    Subscription <span className={"text-sm text-red-500 font-light"}>{updateSubscriptionData.inactive ? '(INACTIVE)' : ''}</span>
                 </div>
                 <div className={"flex gap-2"}>
 
@@ -141,6 +142,14 @@ const Component = () => {
                     <FormField title="Name" className="grow">
                         <TextEditor value={updateSubscriptionData?.name}
                                     onChange={(e) => onChangeSubscriptionData("name", e)}
+                        />
+                    </FormField>
+                </div>
+
+                <div className=" ">
+                    <FormField title="Inactive" className="grow">
+                        <CheckBoxEditor checked={updateSubscriptionData?.inactive}
+                                        onChange={(e) => onChangeSubscriptionData("inactive", e)}
                         />
                     </FormField>
                 </div>

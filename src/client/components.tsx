@@ -53,8 +53,6 @@ export const AuthApiProvider: React.FC<{ authApp: AuthConfig, children?: React.R
             const info = await apiClient.getProfile()
             if (info.succeeded) {
                 dispatch(setAccountInfo(info.data))
-                dispatch(setTokens(info.data))
-
             }
         }
     }

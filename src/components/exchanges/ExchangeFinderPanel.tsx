@@ -1,47 +1,31 @@
-import Tab from "../common/forms/Tab";
-import TabNavigator from "../common/forms/TabNavigator";
-import {ExchangeFindBy, ExchangeFindBySpecs} from "./ExchangeFindBy";
+import {ExchangeFindBy} from "./ExchangeFindBy";
+import {ExchangeFindQuery} from "src/types/xchange";
+import React from "react";
 
-
-type ExchangeFindMode = string;
-
-export type ExchangeSpecs = {
-    findMode: ExchangeFindMode
-    keywords: string
-    findBy: ExchangeFindBySpecs
-}
 
 interface Props {
-    value: ExchangeSpecs
-    onChange: (value: ExchangeSpecs) => void
+    value: ExchangeFindQuery
+    onChange: (value: ExchangeFindQuery) => void
     onFindRequested: () => void
+    onClear: () => void
 }
 
 export const ExchangeFinderPanel: React.FC<Props> = ({
                                                          value,
                                                          onChange,
-                                                         onFindRequested
+                                                         onFindRequested,
+                                                         onClear
                                                      }) => {
 
-    const {findMode} = value;
-
-    const handleModeChange = (findMode: ExchangeFindMode) => {
-        onChange({...value, findMode});
-    }
 
     return (
         <>
-            <TabNavigator className="w-full">
-                <Tab key="findby" selected={findMode === 'findby'} onClick={() => handleModeChange("findby")}>Find
-                    By</Tab>
-            </TabNavigator>
 
-
-            {(findMode === 'findby') &&
-                <ExchangeFindBy
-                    value={value.findBy}
-                    onChange={findBy => onChange({...value, findBy})}
-                    onFindRequested={onFindRequested}/>}
+            <ExchangeFindBy
+                value={value}
+                onClear={onClear}
+                onChange={newData => onChange(newData)}
+                onFindRequested={onFindRequested}/>
 
         </>
     )

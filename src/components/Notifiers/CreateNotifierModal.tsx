@@ -19,7 +19,6 @@ const CreateNotifierModal: React.FC<Props> = ({onClose}) => {
     }
 
     useEffect(() => {
-        console.log(response.data)
         if (response.data?.id) {
             nav(response.data.id.toString())
         }

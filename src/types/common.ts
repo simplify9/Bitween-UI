@@ -22,11 +22,11 @@ export type OptionType = {
 }
 
 export type CommonFindQuery = {
-    keywords?: string
-    creationDateFrom?: string
-    creationDateTo?: string
+    //keywords?: string
+    //creationDateFrom?: string
+    //creationDateTo?: string
     offset: number
     limit: number
-    sortBy: string
-    sortByDescending: boolean
+    //sortBy: string
+    //sortByDescending: boolean
 }

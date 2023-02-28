@@ -3,11 +3,13 @@ import {userSlice} from "src/state/stateSlices/user";
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 import {NotifiersApi} from "src/client/apis/notifiersApi";
 import {SubscriptionApi} from "src/client/apis/subscriptionsApi";
+import {XchangeApi} from "src/client/apis/xchangeApi";
 
 const reducers = combineReducers({
     user: userSlice.reducer,
     [NotifiersApi.reducerPath]: NotifiersApi.reducer,
-    [SubscriptionApi.reducerPath]: SubscriptionApi.reducer
+    [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
+    [XchangeApi.reducerPath]: XchangeApi.reducer
 
 });
 
@@ -17,7 +19,8 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({}).concat([
             NotifiersApi.middleware,
-            SubscriptionApi.middleware
+            SubscriptionApi.middleware,
+            XchangeApi.middleware,
         ])
 });
 

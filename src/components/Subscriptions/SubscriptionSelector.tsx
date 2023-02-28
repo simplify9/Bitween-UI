@@ -1,6 +1,6 @@
-import {useSubscriptionFinder} from "../../hooks/queryHooks";
 import {ChoiceEditor} from "../common/forms/ChoiceEditor";
-import React from "react";
+import React, {useMemo} from "react";
+import {useSubscriptionsQuery} from "src/client/apis/subscriptionsApi";
 
 
 interface Props {
@@ -21,8 +21,15 @@ const defaultQuery = {
 
 const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled, multiple}) => {
 
-    const [queryState, newQuery] = useSubscriptionFinder(defaultQuery);
-    
+    const data = useSubscriptionsQuery({offset: 0, limit: 200})
+    const options = useMemo(() => {
+
+            if (!data.data)
+                return []
+
+            return data.data.result.map(i => ({id: i.id.toString(), name: i.name.toString()}))
+        }
+        , [data.data]);
     return (
         <ChoiceEditor
             placeholder="Select Subscription"
@@ -30,7 +37,7 @@ const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled, multi
             multiple={multiple}
             value={value}
             onChange={onChange}
-            options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
+            options={options}
             optionValue={i => i.id}
             optionTitle={i => i.name}/>
     );
