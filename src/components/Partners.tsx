@@ -1,6 +1,5 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {useState} from "react";
-import {jsBoolean, jsNumber, jsString} from "redux-ecq";
 import {usePartnerFinder} from "../hooks/queryHooks";
 import {PartnerList} from "./Partners/PartnerList";
 import {PartnerFinderPanel} from "./Partners/PartnerFinderPanel";
@@ -17,16 +16,6 @@ const defaultQuery = {
     nameContains: "",
     offset: 0,
     limit: 20,
-    sortBy: "docType",
-    sortByDescending: false
-}
-
-const queryStringMapping = {
-    nameContains: jsString(),
-    sortBy: jsString(),
-    sortByDescending: jsBoolean(),
-    offset: jsNumber(),
-    limit: jsNumber()
 }
 
 const useQuery = usePartnerFinder;
@@ -35,7 +24,7 @@ export type PartnerSpecs = {
     nameContains: string
 }
 
-export default (props: Props) => {
+export default () => {
 
     const [creatingOn, setCreatingOn] = useState(false);
 
@@ -57,8 +46,6 @@ export default (props: Props) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            sortBy: viewOptions.sortBy.field,
-            sortByDescending: !!viewOptions.sortBy.descending,
             offset: viewOptions.offset,
             limit: viewOptions.limit
         });
@@ -92,14 +79,6 @@ export default (props: Props) => {
                     ? <>
                         <PartnerList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
-                            sortByOptions={["name"]}
-                            sortByTitles={{
-                                docType: "Partner Type"
-                            }}
-                            sortBy={{
-                                field: queryState.lastSent.sortBy,
-                                descending: queryState.lastSent.sortByDescending
-                            }}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

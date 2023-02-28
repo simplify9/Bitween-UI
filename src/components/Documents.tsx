@@ -1,8 +1,6 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {useState} from "react";
-import {jsBoolean, jsNumber, jsString} from "redux-ecq";
 import {useDocumentFinder} from "../hooks/queryHooks";
-import {DateTimeRange} from "./common/forms/DateTimeRangeEditor";
 import {DocumentList} from "./Documents/DocumentList";
 import {DocumentFinderPanel} from "./Documents/DocumentFinderPanel";
 import {apiClient} from "../client";
@@ -18,32 +16,16 @@ interface Props {
 
 const defaultQuery = {
     nameContains: '',
-    creationDateFrom: undefined,
-    creationDateTo: undefined,
-    keywords: "",
     offset: 0,
     limit: 20,
-    sortBy: "docType",
-    sortByDescending: false
 }
 
-const queryStringMapping = {
-    keywords: jsString(),
-    creationDateFrom: jsString(),
-    creationDateTo: jsString(),
-    mode: jsString(),
-    sortBy: jsString(),
-    sortByDescending: jsBoolean(),
-    offset: jsNumber(),
-    limit: jsNumber()
-}
 
 const useQuery = useDocumentFinder;
 
 export type DocumentSpecs = {
     nameContains: string
-    keywords: string
-    creationTimeWindow: DateTimeRange
+
 }
 
 
@@ -52,12 +34,6 @@ export default (props: Props) => {
     const [creatingOn, setCreatingOn] = useState(false);
     const [findSpecs, setFindSpecs] = useState<DocumentSpecs>({
         nameContains: queryState.lastSent.nameContains,
-        keywords: queryState.lastSent.keywords ?? "",
-        creationTimeWindow: {
-            from: queryState.lastSent.creationDateFrom,
-            to: queryState.lastSent.creationDateTo
-        },
-
     });
 
     const handleFindRequested = () => {
@@ -65,9 +41,6 @@ export default (props: Props) => {
             ...defaultQuery,
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
-            keywords: findSpecs.keywords,
-            creationDateFrom: findSpecs.creationTimeWindow.from,
-            creationDateTo: findSpecs.creationTimeWindow.to,
             offset: 0,
         });
     }
@@ -75,8 +48,6 @@ export default (props: Props) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            sortBy: viewOptions.sortBy.field,
-            sortByDescending: !!viewOptions.sortBy.descending,
             offset: viewOptions.offset,
             limit: viewOptions.limit
         });
@@ -109,14 +80,6 @@ export default (props: Props) => {
 
                         <DocumentList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
-                            sortByOptions={["name"]}
-                            sortByTitles={{
-                                docType: "Document Type"
-                            }}
-                            sortBy={{
-                                field: queryState.lastSent.sortBy,
-                                descending: queryState.lastSent.sortByDescending
-                            }}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

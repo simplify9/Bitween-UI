@@ -16,8 +16,8 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
         }
     }
     return (
-        <InputBox>
-            <DatePicker className={""} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
+        <InputBox className={"relative  z-50"}>
+            <DatePicker  className={"relative z-50"} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
         </InputBox>
 
     )

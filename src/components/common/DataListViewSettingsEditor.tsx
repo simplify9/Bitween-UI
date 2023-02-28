@@ -11,7 +11,7 @@ export type SortBy = {
 export type DataListViewSettings = {
     limit: number
     offset: number
-    sortBy: SortBy
+    //  sortBy: SortBy
 }
 
 export type DataListViewSettingsChangeEvent = DataListViewSettings & {}
@@ -20,9 +20,6 @@ interface Props {
     total: number
     limit: number
     offset: number
-    sortByOptions?: string[]
-    sortByTitles?: { [k: string]: string }
-    sortBy?: SortBy
     onChange: (e: DataListViewSettingsChangeEvent) => void
 }
 
@@ -30,9 +27,6 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                 offset,
                                                                 limit,
                                                                 total,
-                                                                sortBy,
-                                                                sortByOptions,
-                                                                sortByTitles = {},
                                                                 onChange
                                                             }) => {
 
@@ -53,7 +47,7 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
         onChange({
             limit,
             offset: newOffset,
-            sortBy: sortBy
+          //  sortBy: sortBy
         })
     }
 
@@ -86,22 +80,6 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                       className="h-2"/></Tab>
                 </>
                 : null}
-
-            {/*<div className="text-sm py-1">Sort By</div>*/}
-            {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
-
-            {/*    sortByOptions.map(opt => (*/}
-            {/*        <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}*/}
-            {/*                     selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>*/}
-            {/*    ))*/}
-            {/*}*/}
-            {/*</TabMenu>*/}
-            {/*<TabMenu title={sortBy.descending ? "Descending" : "Ascending"}>*/}
-            {/*    <TabMenuItem selected={!sortBy.descending} key="asc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>*/}
-            {/*    <TabMenuItem selected={!!sortBy.descending} key="desc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>*/}
-            {/*</TabMenu>*/}
         </div>
 
     );

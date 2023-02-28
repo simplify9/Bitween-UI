@@ -19,7 +19,7 @@ const Notifier = () => {
     const {id} = useParams() as { id: string }
     const [fetch] = useLazyNotifierQuery()
     const [update] = useUpdateNotifierMutation()
-    const subscriptions = useSubscriptionsQuery({})
+    const subscriptions = useSubscriptionsQuery({limit: 200, offset: 1})
     const fetchData = async () => {
         const data = await fetch(id)
         if (data.isSuccess) {
@@ -104,7 +104,6 @@ const Notifier = () => {
 
 
         </div>
-
 
 
         <div className={"flex w-full gap-2 mt-8"}>
