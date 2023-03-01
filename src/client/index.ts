@@ -183,7 +183,7 @@ export const apiClient = {
 
 }
 
-const formulateQueryString = (req: any) => {
+export const formulateQueryString = (req: any) => {
     let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
 

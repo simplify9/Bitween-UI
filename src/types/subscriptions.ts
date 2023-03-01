@@ -6,7 +6,7 @@ export type SubscriptionFindQuery = CommonFindQuery & {
 }
 
 export interface ISubscription {
-    id?: string
+    id?: number
     name?: string;
     documentId?: string;
     partnerId?: string;
@@ -19,10 +19,10 @@ export interface ISubscription {
     receiverId?: string;
     validatorId?: string;
     temporary?: boolean;
-    handlerProperties?: any[];
-    validatorProperties?: any[];
-    mapperProperties?: any[];
-    receiverProperties?: any[];
+    handlerProperties?: KeyValuePair[];
+    validatorProperties?: KeyValuePair[];
+    mapperProperties?: KeyValuePair[];
+    receiverProperties?: KeyValuePair[];
     inactive?: boolean;
     schedules?: Array<ScheduleView>;
     responseSubscriptionId?: number | null;

@@ -11,6 +11,7 @@ import KeyValueEditor from "./common/forms/KeyValueEditor";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
+import Authorize from "src/components/common/authorize/authorize";
 
 
 const Component = () => {
@@ -88,19 +89,22 @@ const Component = () => {
                             className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
                         Trail
                     </Button>
-                    <Button onClick={deleteDocument}
-                            className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
-                        Delete
-                    </Button>
+                    <Authorize roles={["Admin", "Editor"]}>
+
+                        <Button onClick={deleteDocument}
+                                className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
+                            Delete
+                        </Button>
+                    </Authorize>
 
                 </div>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="ID" className="grow">
                     <TextEditor disabled={true} value={id}/>
                 </FormField>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="Name" className="grow">
                     <TextEditor disabled={true} value={updateDocumentData?.name}
                                 onChange={(t) => setUpdateDocumentData({
@@ -109,7 +113,7 @@ const Component = () => {
                                 })}/>
                 </FormField>
             </div>
-            <div className="relative z-0 w-full mb-6 group">
+            <div className="  w-full mb-6 group">
                 <FormField title="Duplicate Interval" className="grow">
                     <TextEditor value={updateDocumentData?.duplicateInterval} onChange={(t) => setUpdateDocumentData({
                         ...updateDocumentData,
@@ -119,7 +123,7 @@ const Component = () => {
             </div>
 
 
-            <div className="relative z-0 w-full mb-6 group flex">
+            <div className="  w-full mb-6 group flex">
 
                 <FormField title="Bus message type name" className="grow">
                     <TextEditor disabled={!updateDocumentData.busEnabled} value={updateDocumentData?.busMessageTypeName}
@@ -141,7 +145,7 @@ const Component = () => {
                     options={DocumentFormat}/>
             </FormField>
 
-            <div className="relative z-0 w-full group flex mt-3">
+            <div className="  w-full group flex mt-3">
                 <FormField title={""} className="">
                     <CheckBoxEditor label={"Bus Enabled"} checked={updateDocumentData.busEnabled}
                                     onChange={(t) => setUpdateDocumentData({
@@ -151,7 +155,7 @@ const Component = () => {
                 </FormField>
 
             </div>
-            <div className="relative z-0 w-full group flex">
+            <div className="  w-full group flex">
                 <FormField title={""} className=" ">
                     <CheckBoxEditor label={"Disregards unfiltered messages"}
                                     checked={updateDocumentData.disregardsUnfilteredMessages}
@@ -162,7 +166,7 @@ const Component = () => {
                 </FormField>
 
             </div>
-            <div className="relative z-0 w-full mb-6 group flex w-full">
+            <div className="  w-full mb-6 group flex w-full">
 
                 <KeyValueEditor values={updateDocumentData?.promotedProperties} title={'Promoted Properties'}
                                 keyLabel={"Friendly Name"} valueLabel={"Json Path"}
@@ -178,10 +182,13 @@ const Component = () => {
                     onClick={() => navigate('/Documents')}
                     className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">Cancel
                 </Button>
-                <Button
-                    onClick={updateDocument}
-                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
-                </Button>
+                <Authorize roles={["Admin", "Editor"]}>
+
+                    <Button
+                        onClick={updateDocument}
+                        className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
+                    </Button>
+                </Authorize>
             </div>
 
 

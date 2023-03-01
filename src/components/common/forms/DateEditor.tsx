@@ -1,7 +1,6 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
-import InputPopOver from "src/components/common/forms/InputPopOver";
 import InputBox from "src/components/common/forms/InputBox";
 
 
@@ -17,9 +16,8 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
         }
     }
     return (
-        <InputBox>
-            <DatePicker selected={value ? new Date(value) : null} onChange={onChangeDate}/>
-
+        <InputBox className={"relative  z-50"}>
+            <DatePicker  className={"relative z-50"} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
         </InputBox>
 
     )

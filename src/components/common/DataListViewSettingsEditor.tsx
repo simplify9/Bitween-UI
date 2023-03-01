@@ -11,7 +11,7 @@ export type SortBy = {
 export type DataListViewSettings = {
     limit: number
     offset: number
-    sortBy: SortBy
+    //  sortBy: SortBy
 }
 
 export type DataListViewSettingsChangeEvent = DataListViewSettings & {}
@@ -20,9 +20,6 @@ interface Props {
     total: number
     limit: number
     offset: number
-    sortByOptions: string[]
-    sortByTitles?: { [k: string]: string }
-    sortBy: SortBy
     onChange: (e: DataListViewSettingsChangeEvent) => void
 }
 
@@ -30,9 +27,6 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                 offset,
                                                                 limit,
                                                                 total,
-                                                                sortBy,
-                                                                sortByOptions,
-                                                                sortByTitles = {},
                                                                 onChange
                                                             }) => {
 
@@ -47,14 +41,13 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
     }, [offset, limit]);
 
     const handlePageChange = (newOffset: number) => {
-        console.log(newOffset,"newOffset",newOffset<0 || newOffset > total)
-        if(newOffset<0 || newOffset > total)
+        if (newOffset < 0 || newOffset >= total)
             return
-        
+
         onChange({
             limit,
             offset: newOffset,
-            sortBy: sortBy
+          //  sortBy: sortBy
         })
     }
 
@@ -71,12 +64,12 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             </div>
             {totalPages > 1
                 ? <>
-                    <Tab  onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
+                    <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
                     <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}><Icon shape="chevronLeft"
                                                                                                  className="h-2"/></Tab>
                     {pages.map(p => {
                         return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
-                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)} 
+                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)}
                                  selected={p === pageIndex}>{p + 1}</Tab>) : null
                     })}
                     <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"
@@ -87,22 +80,6 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                                       className="h-2"/></Tab>
                 </>
                 : null}
-
-            {/*<div className="text-sm py-1">Sort By</div>*/}
-            {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
-
-            {/*    sortByOptions.map(opt => (*/}
-            {/*        <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}*/}
-            {/*                     selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>*/}
-            {/*    ))*/}
-            {/*}*/}
-            {/*</TabMenu>*/}
-            {/*<TabMenu title={sortBy.descending ? "Descending" : "Ascending"}>*/}
-            {/*    <TabMenuItem selected={!sortBy.descending} key="asc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>*/}
-            {/*    <TabMenuItem selected={!!sortBy.descending} key="desc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>*/}
-            {/*</TabMenu>*/}
         </div>
 
     );
