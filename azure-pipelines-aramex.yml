@@ -43,7 +43,7 @@ jobs:
         displayName: Helm package
         inputs:
           command: package
-          chartPath: charts/default
+          chartPath: charts
           arguments: --version $(version) --app-version $(version)
           updatedependency: true
 
