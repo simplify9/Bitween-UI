@@ -52,7 +52,6 @@ const Component: React.FC = () => {
 
     return (
         <div className="flex flex-col w-full px-3 py-4">
-
             {openModal === "BULK_RETRY" && <BulkRetryModal
                 xids={selectedRowsIds}
                 onRefresh={handleFindRequested}
@@ -61,14 +60,12 @@ const Component: React.FC = () => {
                     setOpenModal("NONE")
                 }}
             />}
-
             {openModal === "CREATE_XCHANGE" && <CreateExchange
                 onClose={() => {
                     handleFindRequested()
                     setOpenModal("NONE")
                 }}
             />}
-
             <div className="justify-between w-full flex pt-3">
                 <div className="text-2xl font-bold tracking-wide text-gray-700">Xchanges</div>
             </div>

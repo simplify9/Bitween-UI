@@ -9,7 +9,6 @@ type Props = {
     onChange: (val: string) => void
 }
 const DateEditor: React.FC<Props> = ({value, onChange}) => {
-
     const onChangeDate = (date: Date | null) => {
         if (date) {
             onChange(date?.toISOString())
@@ -17,7 +16,7 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
     }
     return (
         <InputBox className={"relative  z-50"}>
-            <DatePicker  className={"relative z-50"} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
+            <DatePicker  className={"relative "} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
         </InputBox>
 
     )
