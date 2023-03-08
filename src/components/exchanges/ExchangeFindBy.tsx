@@ -30,13 +30,10 @@ interface Props {
 }
 
 export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequested, onClear}) => {
-
     const handleFind = (e: any) => {
         e.preventDefault();
         onFindRequested();
     }
-   
-
     return (
         <div className="flex w-100 pb-5  pt-8">
             <div className={"flex flex-col w-full  "}>
@@ -46,7 +43,15 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                             value={value.subscription}
                             onChange={subscription => onChange({...value, subscription})}/>
                     </FormField>
+                  
 
+                    <FormField title="ID">
+                        <TextEditor placeholder="ID" value={value.id} onChange={(t) => onChange({...value, id: t})}/>
+                    </FormField>
+                    <FormField title="Correlation ID">
+                        <TextEditor placeholder="Correlation ID" value={value.correlationId}
+                                    onChange={(t) => onChange({...value, correlationId: t})}/>
+                    </FormField>
                     <FormField title="Delivery Status">
                         <ChoiceEditor
                             placeholder="Select Status"
@@ -61,16 +66,6 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
                                 {id: "3", title: "Failed"}
                             ]}/>
                     </FormField>
-
-                    <FormField title="ID">
-                        <TextEditor placeholder="ID" value={value.id} onChange={(t) => onChange({...value, id: t})}/>
-                    </FormField>
-                    <FormField title="Correlation ID">
-                        <TextEditor placeholder="Correlation ID" value={value.correlationId}
-                                    onChange={(t) => onChange({...value, correlationId: t})}/>
-                    </FormField>
-
-
                 </div>
                 <div className={"flex flex-row justify-between items-end p-1"}>
                     <div className={"flex gap-3"}>
