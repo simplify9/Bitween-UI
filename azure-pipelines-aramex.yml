@@ -1,9 +1,8 @@
 name: $(version)
 
 trigger:
-  - releases/*
   - main
-  - dev
+  - staging
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -18,7 +17,7 @@ jobs:
 
   - job: buildStg
     displayName: Build, push image and chart and deploy to stg
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main/')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/staging')
     steps:
 
 
@@ -44,7 +43,7 @@ jobs:
         displayName: Helm package
         inputs:
           command: package
-          chartPath: charts/default
+          chartPath: chart
           arguments: --version $(version) --app-version $(version)
           updatedependency: true
 
