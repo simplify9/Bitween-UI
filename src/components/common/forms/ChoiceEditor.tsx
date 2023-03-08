@@ -42,12 +42,15 @@ const createSelector = (changeHandler: (value: string) => void, value: string) =
 
 const defaultRenderOption = (props: OptionRenderProps<any>): JSX.Element => {
     return (
-        <div
-            key={props.value}
-            className={"px-4 py-2 break-all " + (props.selected ? "bg-blue-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
-            title={props.title}
-            onClick={props.select}>
-            {props.title}
+        <div className={"relative"} style={{zIndex: 50000000}}>
+            <div
+                key={props.value}
+                className={"px-4 relative py-2 break-all " + (props.selected ? "bg-blue-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
+                title={props.title}
+                style={{zIndex: 50000000}}
+                onClick={props.select}>
+                {props.title}
+            </div>
         </div>
     );
 }
@@ -124,7 +127,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
           value={state.partialInput}
           onChange={handleChange}
           onBlur={handleBlur}/>
-      <InputPopOver className="flex flex-col divide-y overflow-scroll max-h-[400px]">
+      <InputPopOver className="flex   flex-col divide-y overflow-scroll max-h-[400px] z-50">
         {optionList}
       </InputPopOver>
     </InputBox>

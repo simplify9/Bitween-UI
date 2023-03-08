@@ -14,11 +14,10 @@ type Props = {
         | NotOneOfMatchExpression) => void
 }
 const LeafNode: React.FC<Props> = ({onDeleteNode, promotedProperties, onChange, value}) => {
+    
+    console.log(promotedProperties)
     return <div className={"p-1 px-2 ml-8 border border-blue-200 shadow rounded-lg max-w-[650px]"}>
-
-
         <div className={"  flex flex-row  items-end justify-between"}>
-
             <div className={""}>
                 <ChoiceEditor
                     placeholder={"Property"}
