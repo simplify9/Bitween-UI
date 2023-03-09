@@ -229,6 +229,7 @@ const Component = () => {
                                            ...updateSubscriptionData,
                                            receiverId: t
                                        })}
+                                       onPropsChange={(e) => onChangeSubscriptionData("receiverProperties", e)}
                                        props={updateSubscriptionData?.receiverProperties}
                         />
                         <ScheduleEditor title={"Schedule"}

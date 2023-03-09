@@ -131,6 +131,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
             //  toast.dismiss(response.config.url)
             if ([204].includes(response.status)) {
+                console.log(response)
                 toast("Action successful", {type: "success",})
 
             }
