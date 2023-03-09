@@ -32,14 +32,14 @@ const Component: React.FC<Props> = ({
                 <div
                     className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-                <div className="fixed z-10 inset-0 overflow-y-auto">
+                <div className="fixed z-10 inset-0 overflow-scroll">
                     <div
                         className="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
 
                         <div
-                            className="relative flex flex-col justify-between min-h-[200px] h-auto grow bg-white rounded-lg text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:max-w-screen-lg sm:w-full">
+                            className="relative flex flex-col justify-between min-h-[200px] h-auto grow bg-white rounded-lg text-left overflow-scroll shadow-xl transform transition-all sm:my-8 sm:max-w-screen-lg sm:w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-3 sm:pb-4">
-                                <div className={classes("sm:items-start overflow-visible ", bodyContainerClasses)}>
+                                <div className={classes("sm:items-start overflow-scroll ", bodyContainerClasses)}>
                                     {children}
                                 </div>
                             </div>
