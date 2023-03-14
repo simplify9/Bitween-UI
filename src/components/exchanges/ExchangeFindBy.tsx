@@ -35,7 +35,7 @@ export const ExchangeFindBy: React.FC<Props> = ({value, onChange, onFindRequeste
         onFindRequested();
     }
     return (
-        <div className="flex w-100 pb-5  pt-8">
+        <div className="flex w-100 pb-5  pt-8 z-50">
             <div className={"flex flex-col w-full  "}>
                 <div className="flex w-full gap-3 flex-wrap items-end  mb-2 ">
                     <FormField title="Target Subscription" className={"min-w-[350px]"}>
