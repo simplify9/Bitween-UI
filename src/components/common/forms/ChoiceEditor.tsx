@@ -124,15 +124,12 @@ export const ChoiceEditor = <TOption extends {} = any>({
 
     return (
         <span>
-            
-
-    {/*<InputBox {...htmlProps}  className={"z-50 p-0 m-0"}>*/}
-            {/*    */}
             <Select
+               // isClearable={true}
                 options={optionData}
                 value={optionData.find(i => i.value == value)}
                 onChange={(newValue) => {
-                    createSelector(onChange, optionValue(newValue.value as any))
+                    onChange(newValue.value)
                 }}
                 className={"w-full  shadow min-w-[355px]"}
                 styles={{
@@ -144,17 +141,6 @@ export const ChoiceEditor = <TOption extends {} = any>({
                     },
 
                 }}/>
-            {/*<Input*/}
-            {/*    type="text"*/}
-            {/*    disabled={htmlProps.disabled}*/}
-            {/*    placeholder={placeholder}*/}
-            {/*    value={state.partialInput}*/}
-            {/*    onChange={handleChange}*/}
-            {/*    onBlur={handleBlur}/>*/}
-            {/*<InputPopOver className="flex   flex-col divide-y overflow-scroll max-h-[400px] z-50">*/}
-            {/*  {optionList}*/}
-            {/*</InputPopOver>*/}
-            {/*</InputBox>*/}
        </span>
     )
 }
