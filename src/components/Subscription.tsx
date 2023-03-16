@@ -88,13 +88,7 @@ const Component = () => {
             {/*</div>*/}
             <div
                 className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
-                <div className=" ">
-                    <FormField title="Id" className="grow">
-                        <TextEditor value={id}
-                                    disabled
-                        />
-                    </FormField>
-                </div>
+               
                 <div className=" ">
                     <FormField title="Name" className="grow">
                         <TextEditor value={updateSubscriptionData?.name}
@@ -153,12 +147,7 @@ const Component = () => {
                     >
                         Trail
                     </Button>
-                    <Authorize roles={["Admin", "Editor"]}>
-                        <Button onClick={deleteSubscription}
-                        >
-                            Delete
-                        </Button>
-                    </Authorize>
+                  
                 </div>
             </div>
 
@@ -288,20 +277,31 @@ const Component = () => {
                 </div>
             </div>
 
-            <div className={"flex flex-row-reverse w-full gap-2"}>
+            <div className={"flex flex-row justify-between w-full gap-2"}>
 
-                <Authorize roles={["Admin", "Editor"]}>
+                <div>
+                    <Authorize roles={["Admin", "Editor"]}>
+                        <Button variant={"secondary"} onClick={deleteSubscription}
+                        >
+                            Delete
+                        </Button>
+                    </Authorize>
+                </div>
+                <div className={"flex flex-row"}>
+                    <Authorize roles={["Admin", "Editor"]}>
+                        <Button
+                            onClick={updateSubscription}>
+                            Save
+                        </Button>
+                    </Authorize>
                     <Button
-                        onClick={updateSubscription}>
-                        Save
+                        variant={"secondary"}
+                        onClick={() => navigate('/subscriptions')}
+                    >
+                        Cancel
                     </Button>
-                </Authorize>
-                <Button
-                    variant={"secondary"}
-                    onClick={() => navigate('/subscriptions')}
-                >
-                    Cancel
-                </Button>
+                </div>
+                
             </div>
 
 

@@ -3,10 +3,10 @@ import MembersInfo from "src/components/Settings/MembersInfo";
 
 
 const Team: React.FC = () => {
-    return <div className={"p-8"}>
+    return <div className={""}>
 
 
-        <div className={"mt-5"}>
+        <div className={"mt-2 w-1/2"}>
             <MembersInfo/>
         </div>
     </div>

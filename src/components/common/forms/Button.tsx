@@ -21,9 +21,9 @@ const Button: React.FC<Props> = ({
 
         switch (variant) {
             case "primary":
-                return "text-white min-w-[120px] min-h-[42px] m-1  bg-primary-600 shadow-md  px-3 text-lg py-1 rounded  hover:scale-110 hover:bg-primary-500 transition ease-in-out delay-100 "
+                return "text-white min-w-[80px] min-h-[30px] m-1  bg-primary-600 shadow-md  px-2 text-md  rounded  hover:scale-110 hover:bg-primary-500 transition ease-in-out delay-100 "
             case "secondary":
-                return "text-white min-w-[120px]  bg-slate-800 m-1 shadow-md  px-3 text-lg py-1 rounded  hover:scale-110 hover:bg-slate-600 transition ease-in-out delay-100"
+                return "text-white min-w-[80px]  bg-slate-800 m-1 shadow-md  px-3 text-md rounded  hover:scale-110 hover:bg-slate-600 transition ease-in-out delay-100"
             case "none":
                 return " "
 

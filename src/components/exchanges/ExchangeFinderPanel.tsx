@@ -118,8 +118,10 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                                     optionValue={(item: DeliveryStatus) => item.id}
                                     options={[
                                         {id: "2000", title: "2 Seconds"},
+                                        {id: "3000", title: "3 Seconds"},
                                         {id: "5000", title: "5 Seconds"},
-                                        {id: "10000", title: "10 Seconds"},
+                                        {id: "8000", title: "8 Seconds"},
+                                        {id: "13000", title: "13 Seconds"},
                                     ]}/>
                             </FormField>
                         </div>

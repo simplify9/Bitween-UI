@@ -23,7 +23,7 @@ const MembersInfo: React.FC = () => {
         await apiClient.removeMember(id)
         newQuery(defaultQuery)
     }
-    return <div className={"bg-white p-3 shadow-lg rounded-lg md:w-1/2"}>
+    return <div className={"bg-white p-3 shadow-lg rounded-lg "}>
         {
             openModal === "ADD" && <AddMemberModal onClose={() => {
                 newQuery(defaultQuery)
