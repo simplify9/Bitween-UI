@@ -64,15 +64,15 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
 
     }, [documentId])
 
-    return <div className={"p-1 shadow-md rounded border"}>
+    return <div className={"p-1 shadow-md rounded border bg-white"}>
 
         {
-            !matchFeature && <div className={"text-center bg-blue-50 py-3"}>
+            !matchFeature && <div className={"text-center bg-primary-50 py-3"}>
                 <p>
                     <span className={"font-semibold"}>Expression matching</span> is the new way to filter documents for
                     internal type subscibtions Please <span
                     onClick={() => setMatchFeature(true)}
-                    className={"font-semibold underline cursor-pointer text-blue-800"}>Click</span> to enable it
+                    className={"font-semibold underline cursor-pointer text-primary-800"}>Click</span> to enable it
                 </p>
             </div>
         }

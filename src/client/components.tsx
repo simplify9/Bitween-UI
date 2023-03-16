@@ -45,16 +45,19 @@ export const AuthApiProvider: React.FC<{ authApp: AuthConfig, children?: React.R
     }, [authApp]);
 
     useEffect(() => {
-        setUserInfo()
+        if(isLoggedIn){
+            setUserInfo()
+        }
+      
     }, [isLoggedIn])
 
     const setUserInfo = async () => {
-        if (isLoggedIn) {
-            const info = await apiClient.getProfile()
-            if (info.succeeded) {
-                dispatch(setAccountInfo(info.data))
-            }
+
+        const info = await apiClient.getProfile()
+        if (info.succeeded) {
+            dispatch(setAccountInfo(info.data))
         }
+
     }
 
 

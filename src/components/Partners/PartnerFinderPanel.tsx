@@ -3,6 +3,7 @@ import TabNavigator from "../common/forms/TabNavigator";
 import {PartnerSpecs} from "../Partners";
 import FormField from "../common/forms/FormField";
 import TextEditor from "../common/forms/TextEditor";
+import Button from "src/components/common/forms/Button";
 
 
 interface Props {
@@ -31,12 +32,11 @@ export const PartnerFinderPanel: React.FC<Props> = ({
                         <TextEditor placeholder="Type in the name..." value={value.nameContains}
                                     onChange={(t) => onChange({...value, nameContains: t})}/>
                     </FormField>
-                    <button
+                    <Button
                         onClick={onFindRequested}
-
-                        className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-                        Find
-                    </button>
+                       >
+                        Search
+                    </Button>
                 </div>
             </div>
 

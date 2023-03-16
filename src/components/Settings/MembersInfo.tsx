@@ -6,6 +6,7 @@ import {AccountModel} from "src/types/accounts";
 import {apiClient} from "src/client";
 import {MdOutlineRemoveCircle} from "react-icons/md";
 import Authorize from "src/components/common/authorize/authorize";
+import Button from "src/components/common/forms/Button";
 
 const useQuery = useMembersFinder;
 
@@ -22,7 +23,7 @@ const MembersInfo: React.FC = () => {
         await apiClient.removeMember(id)
         newQuery(defaultQuery)
     }
-    return <div className={"p-3 shadow-lg rounded-lg md:w-1/2"}>
+    return <div className={"bg-white p-3 shadow-lg rounded-lg md:w-1/2"}>
         {
             openModal === "ADD" && <AddMemberModal onClose={() => {
                 newQuery(defaultQuery)
@@ -34,10 +35,10 @@ const MembersInfo: React.FC = () => {
                         Members Info
             </span>
             <Authorize roles={["Admin"]}>
-                <button onClick={() => setOpenModal("ADD")}
-                        className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
+                <Button onClick={() => setOpenModal("ADD")}
+              >
                     Add
-                </button>
+                </Button>
 
             </Authorize>
 

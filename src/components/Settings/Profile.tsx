@@ -7,7 +7,7 @@ const Profile: React.FC = () => {
     const [versionQueryState, newVersionQueryQuery] = useQuery({});
     const [openModal, setOpenModal] = useState<"NONE" | "CHANGE_PASSWORD">("NONE");
 
-    return (<div className={"shadow-lg rounded-2xl p-5 pb-2 min-h-[200px] mt-10 flex flex-col justify-between"}>
+    return (<div className={"bg-white shadow-lg rounded-2xl p-5 pb-2 min-h-[200px] mt-10 flex flex-col justify-between"}>
         {
             openModal === "CHANGE_PASSWORD" && <ChangePasswordModal onClose={() => setOpenModal("NONE")}/>
         }

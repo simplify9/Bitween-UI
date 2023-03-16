@@ -1,10 +1,11 @@
-import React, {Fragment, useState} from "react";
+import React, {useState} from "react";
 import {useNotifiersQuery} from "src/client/apis/notifiersApi";
 import Authorize from "src/components/common/authorize/authorize";
 import {NotifiersSearchModel} from "src/types/notifiers";
 import {NotifiersList} from "src/components/Notifiers/NotifiersList";
 import {DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import CreateNotifierModal from "src/components/Notifiers/CreateNotifierModal";
+import Button from "src/components/common/forms/Button";
 
 const Notifiers: React.FC = () => {
 
@@ -17,22 +18,25 @@ const Notifiers: React.FC = () => {
             {
                 openModal === "CREATE" && <CreateNotifierModal onClose={() => setOpenModal("NONE")}/>
             }
-            <div className="flex flex-col w-full px-8 py-4">
-                <div className="justify-between w-full flex py-4">
-                    <div
-                        className="text-2xl font-bold tracking-wide text-gray-700">
-                        Notifiers
+            <div className="flex flex-col w-full pt-2 pb-10 md:max-w-[1000px]">
+                <div className="flex flex-row-reverse justify-between w-full items-center shadow-lg p-2 my-2  rounded-lg bg-white ">
+
+                    <div>
+                        <Authorize roles={["Admin", "Editor"]}>
+
+                            <Button onClick={() => setOpenModal("CREATE")}
+                            >
+                                Create
+                            </Button>
+                        </Authorize>
                     </div>
-                    <Authorize roles={["Admin", "Editor"]}>
-                        <button onClick={() =>setOpenModal("CREATE")}
-                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                            Create New Notifier
-                        </button>
-                    </Authorize>
+
                 </div>
+
+                
                 {data.data
                     &&
-                    <div className={"mt-10"}>
+                    <div className={"shadow-lg  rounded-xl overflow-hidden mx-2 pt-5"}>
                         <NotifiersList data={data.data.result}/>
                         <DataListViewSettingsEditor
                             total={data.data.totalCount}

@@ -2,7 +2,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
 import InputBox from "src/components/common/forms/InputBox";
-
+import {SlCalender} from "react-icons/sl"
 
 type Props = {
     value: string | undefined
@@ -16,7 +16,8 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
     }
     return (
         <InputBox className={"relative  z-50"}>
-            <DatePicker  className={"relative "} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
+            <DatePicker className={"relative  "} selected={value ? new Date(value) : null}
+                        onChange={onChangeDate}/>
         </InputBox>
 
     )

@@ -3,6 +3,7 @@ import {TrailBaseModel} from "src/types/trail";
 import {toLocalDateTimeString} from "src/utils/DateUtils";
 import TrailDiffModal from "src/components/common/trails/trailDiffModal";
 import {useMembersFinder} from "src/hooks/queryHooks";
+import Button from "src/components/common/forms/Button";
 
 const useQuery = useMembersFinder;
 const defaultQuery = {
@@ -57,12 +58,11 @@ const TrailsTable: React.FC<Props> = ({data}) => {
                         </td>
 
                         <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
-                            <button onClick={() => {
+                            <Button onClick={() => {
                                 setShowDiffFor(i)
-                            }} type="button"
-                                    className="text-white bg-blue-900 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-3 py-1.5 text-center inline-flex items-center  mr-2 mb-2">
+                            }}  >
                                 View diff
-                            </button>
+                            </Button>
                         </td>
                     </tr>
                 ))

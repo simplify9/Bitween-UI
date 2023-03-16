@@ -81,8 +81,10 @@ const ScheduleEditor: React.FC<Props> = ({
                                       visible={visibleModal === "ADD_EDIT"}/>
             }
             <FormField title={title} className="grow" actionTitle={<div
-                className={"text-green-600 rounded "}><HiPlusCircle
-                size={25}/></div>}
+                className={"text-green-600 rounded "}>
+                <HiPlusCircle
+                    size={25}/></div>}
+                       
                        onClickAction={setVisibleModal.bind(this, "ADD_EDIT")}>
                 <div className={"flex flex-col gap-2"}>
 
@@ -131,13 +133,16 @@ const ScheduleEditor: React.FC<Props> = ({
                                         {
                                             onEdit && <Button onClick={() => {
                                                 onEdit(i.id)
-                                            }} className={"   text-yellow-400 w-8 h-8 mx-1"}>
+                                            }}
+                                                              variant={"none"}
+                                            >
                                                 <MdModeEditOutline size={21}/>
                                             </Button>
                                         }
 
-                                        <Button className={" text-red-600   w-8 h-8 mx-1"}
-                                                onClick={() => onRemove!(i.id)}
+                                        <Button
+                                            variant={"none"}
+                                            onClick={() => onRemove!(i.id)}
                                         >
                                             <MdOutlineRemoveCircle size={21}/>
                                         </Button>
