@@ -15,6 +15,14 @@ export type NotifierModel = {
 
 }
 
+export type NotificationModel = {
+    id: number;
+    xchangeId: string;
+    notifierName: string;
+    success: boolean;
+    exception: string;
+    finishedOn: string;
+}
 type RunOnSubscriptionsModel = {
 
     id: number

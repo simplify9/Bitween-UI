@@ -22,7 +22,7 @@ const Component: React.FC<Props> = ({
             className="block uppercase overflow-hidden tracking-wide text-gray-700 text-xs font-bold mb-2 flex flex-row justify-between z-10">
             {title}
             {
-                onClickAction && <Button className={"mx-1"}
+                onClickAction && <Button variant={"none"}
                                          onClick={onClickAction}>{actionTitle}</Button>
             }
 

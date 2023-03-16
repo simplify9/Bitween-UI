@@ -27,18 +27,18 @@ const ExpressionBranch: React.FC<Props> = ({value, promotedProperties, onChange}
         </div>
     const Arrow = collapsed ? AiOutlineArrowDown : AiOutlineArrowUp
     if (collapsed) {
-        return <div className={"border  border-blue-200 rounded shadow p-1 flex   ml-10 pr-5"}>
+        return <div className={"border  border-primary-200 rounded shadow p-1 flex   ml-10 pr-5"}>
             <div className={"  my-1 flex flex-row items-center "}>
                 <div
                     onClick={() => {
                         // @ts-ignore
                         onChange(({...value, type: value.type == "or" ? 'and' : "or"}))
                     }}
-                    className={"shadow rounded text-center p-1 w-[120px] underline bg-blue-100  cursor-pointer"}
+                    className={"shadow rounded text-center p-1 w-[120px] underline bg-primary-100  cursor-pointer"}
                 >
                     {value.type.toUpperCase()}
                 </div>
-                <div className={"text-blue-800 mx-3 bg-blue-200 px-3 rounded py-1"}>
+                <div className={"text-primary-800 mx-3 bg-primary-200 px-3 rounded py-1"}>
                     <Arrow size={21} onClick={() => setCollapsed(c => !c)}/>
                 </div>
                 <div>

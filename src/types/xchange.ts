@@ -56,6 +56,7 @@ export type ExchangeFindQuery = CommonFindQuery & {
     promotedProperties?: string
     creationDateFrom?: string
     creationDateTo?: string
+    fetchInterval: number
 }
 
 export type ExchangeDisplayStatus = "good" | "pending" | "bad"

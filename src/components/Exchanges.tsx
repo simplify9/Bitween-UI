@@ -17,7 +17,8 @@ const defaultQuery: ExchangeFindQuery = {
     limit: 20,
     correlationId: undefined,
     id: undefined,
-    promotedProperties: undefined
+    promotedProperties: undefined,
+    fetchInterval: 5000
 }
 
 
@@ -26,7 +27,8 @@ const Component: React.FC = () => {
     const [selectedRowsIds, setSelectedRowsIds] = useState<Array<string>>([]);
     const [openModal, setOpenModal] = useState<"CREATE_XCHANGE" | "BULK_RETRY" | "NONE">("NONE");
     const [findSpecs, setFindSpecs] = useState<ExchangeFindQuery>(defaultQuery);
-    const [fetch, data] = useLazyXChangesQuery({pollingInterval: 5000, refetchOnFocus: true})
+    console.log(findSpecs.fetchInterval)
+    const [fetch, data] = useLazyXChangesQuery({pollingInterval: findSpecs.fetchInterval, refetchOnFocus: true})
 
     useEffect(() => {
         fetch(findSpecs)
@@ -51,7 +53,7 @@ const Component: React.FC = () => {
 
 
     return (
-        <div className="flex flex-col w-full px-3 py-4">
+        <div className="flex flex-col w-full  py-2">
             {openModal === "BULK_RETRY" && <BulkRetryModal
                 xids={selectedRowsIds}
                 onRefresh={handleFindRequested}
@@ -66,29 +68,18 @@ const Component: React.FC = () => {
                     setOpenModal("NONE")
                 }}
             />}
-            <div className="justify-between w-full flex pt-3">
-                <div className="text-2xl font-bold tracking-wide text-gray-700">Xchanges</div>
-            </div>
-            <div className={"flex flex-row-reverse"}>
-                <button
-                    onClick={() => setOpenModal("BULK_RETRY")}
-                    className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-                    Bulk retry
-                </button>
-                <button
-                    onClick={() => setOpenModal("CREATE_XCHANGE")}
-                    className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-                    Create Xchange
-                </button>
-            </div>
+
             <ExchangeFinderPanel
+                isItemsSelected={selectedRowsIds.length > 0}
+                onBulkRetry={() => setOpenModal("BULK_RETRY")}
+                onCreateXchange={() => setOpenModal("CREATE_XCHANGE")}
                 value={findSpecs}
                 onChange={onChangeFindSpecs}
                 onClear={onClear}
                 onFindRequested={handleFindRequested}
             />
             {data.data &&
-                <>
+                <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
                     <ExchangeList
                         selectedRowsIds={selectedRowsIds}
                         setSelectedRowsIds={setSelectedRowsIds}
@@ -102,7 +93,7 @@ const Component: React.FC = () => {
                         limit={findSpecs.limit}
                         onChange={onChangeFindSpecs}
                     />
-                </>
+                </div>
             }
 
         </div>

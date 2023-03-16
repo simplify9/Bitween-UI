@@ -14,9 +14,9 @@ type Props = {
         | NotOneOfMatchExpression) => void
 }
 const LeafNode: React.FC<Props> = ({onDeleteNode, promotedProperties, onChange, value}) => {
-    
+
     console.log(promotedProperties)
-    return <div className={"p-1 px-2 ml-8 border border-blue-200 shadow rounded-lg max-w-[650px]"}>
+    return <div className={"p-1 px-2 ml-8 border border-primary-200 shadow rounded-lg max-w-[650px]"}>
         <div className={"  flex flex-row  items-end justify-between"}>
             <div className={""}>
                 <ChoiceEditor
@@ -35,7 +35,7 @@ const LeafNode: React.FC<Props> = ({onDeleteNode, promotedProperties, onChange, 
                     onClick={() => {
                         onChange({...value, type: value.type == "one_of" ? 'not_one_of' : "one_of"})
                     }}
-                    className={"shadow rounded text-center p-1 w-[120px] bg-blue-200 cursor-pointer "}
+                    className={"shadow rounded text-center p-1 w-[120px] bg-primary-200 cursor-pointer "}
                 >
                     {value.type === "one_of" ? "IN" : "NOT IN"}
                 </div>

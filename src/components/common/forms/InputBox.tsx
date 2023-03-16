@@ -7,7 +7,7 @@ type Props = JSX.IntrinsicElements['div'] & {
 }
 
 const ownCss = (withPopOver: boolean) => (
-    `overflow-hidden flex flex-nowrap relative bg-white group py-2 px-4 focus-within:drop-shadow-md  disabled:shadow-none transition border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && "focus-within:z-30 focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
+    `h-[42px] overflow-hidden flex flex-nowrap relative bg-white group py-2 px-2 focus-within:drop-shadow-md  disabled:shadow-none transition border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && "focus-within:z-30 focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
 );
 
 const Component: React.FC<Props> = ({
@@ -21,7 +21,7 @@ const Component: React.FC<Props> = ({
         {children}
         {withPopOver &&
             <div
-                className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-§ text-gray-700">
                 <svg
                     className="-rotate-90 group-focus-within:rotate-0 fill-current h-4 w-4"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

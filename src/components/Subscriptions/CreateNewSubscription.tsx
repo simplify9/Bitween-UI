@@ -24,26 +24,8 @@ const Component: React.FC<Props> = ({onClose, onAdd}) => {
     return (
         <Modal onClose={onClose} submitLabel={"Add"} onSubmit={() => onAdd(newSubscription)}>
             <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left grow">
-                <h3 className="text-lg leading-6 font-medium text-gray-900"
+                <h3 className="text-lg  font-medium text-gray-900"
                     id="modal-title">New Subscription</h3>
-                <div className="mt-4">
-                    <FormField title="Subscription Type" className="grow">
-                        <ChoiceEditor
-                            placeholder="Select Subscription Type"
-                            value={newSubscription.type}
-                            onChange={val => setNewSubscription({...newSubscription, type: val})}
-                            optionTitle={(item: OptionType) => item.title}
-                            optionValue={(item: OptionType) => item.id}
-                            options={SubscriptionTypeOptions}/>
-                    </FormField>
-                </div>
-                <div className="mt-4">
-                    <FormField title="Name" className="grow">
-                        <TextEditor placeholder="Type in the name..." value={newSubscription.name}
-                                    onChange={(t) => setNewSubscription({...newSubscription, name: t})}/>
-
-                    </FormField>
-                </div>
                 {newSubscription.type != "8" && <div className="mt-4">
                     <FormField title="Document" className="grow">
                         <DocumentSelector value={newSubscription.documentId}
@@ -65,6 +47,25 @@ const Component: React.FC<Props> = ({onClose, onAdd}) => {
                                               })}/>
                     </FormField>
                 </div>}
+                <div className="mt-4">
+                    <FormField title="Subscription Type" className="grow">
+                        <ChoiceEditor
+                            placeholder="Select Subscription Type"
+                            value={newSubscription.type}
+                            onChange={val => setNewSubscription({...newSubscription, type: val})}
+                            optionTitle={(item: OptionType) => item.title}
+                            optionValue={(item: OptionType) => item.id}
+                            options={SubscriptionTypeOptions}/>
+                    </FormField>
+                </div>
+                <div className="mt-4">
+                    <FormField title="Name" className="grow">
+                        <TextEditor placeholder="Type in the name..." value={newSubscription.name}
+                                    onChange={(t) => setNewSubscription({...newSubscription, name: t})}/>
+
+                    </FormField>
+                </div>
+
             </div>
         </Modal>
     )

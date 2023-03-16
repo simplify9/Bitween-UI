@@ -32,16 +32,15 @@ const Component: React.FC<Props> = ({
                 <div
                     className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-                <div className="fixed z-10 inset-0 overflow-y-auto">
+                <div className="fixed z-10 inset-0 overflow-scroll">
                     <div
                         className="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
 
                         <div
-                            className="relative flex flex-col justify-between min-h-[200px] h-auto grow bg-white rounded-lg text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:max-w-screen-lg sm:w-full">
-                            <div className="bg-white px-4 pt-5 pb-4 sm:p-3 sm:pb-4">
-                                <div className={classes("sm:items-start overflow-visible ", bodyContainerClasses)}>
-                                    {children}
-                                </div>
+                            className="relative flex flex-col justify-between min-h-[500px] h-auto grow bg-white rounded-lg text-left overflow-scroll overflow-y-auto  shadow-xl transform transition-all  sm:max-w-screen-lg sm:w-full">
+                            <div
+                                className={classes("sm:items-start px-4 pt-5 pb-4 sm:p-3 sm:pb-2 h-100 overflow-y-visible ", bodyContainerClasses)}>
+                                {children}
                             </div>
                             <div
                                 className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse ">
@@ -49,11 +48,11 @@ const Component: React.FC<Props> = ({
                                 {onSubmit && <Button disabled={submitDisabled} onClick={() => {
                                     onSubmit()
                                 }}
-
-                                                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">{submitLabel ?? "Save"}
+                                >{submitLabel ?? "Save"}
                                 </Button>}
                                 <Button onClick={onClose}
-                                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel
+                                        variant={"secondary"}
+                                >Cancel
                                 </Button>
                                 {extraFooterComponents}
                             </div>

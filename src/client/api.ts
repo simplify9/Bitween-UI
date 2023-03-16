@@ -6,6 +6,7 @@ import {toast} from "react-toastify";
 export const isLoggedInCallback = ({accessTokenCache}: AuthConfig) =>
     async () => {
         const value = await accessTokenCache.read();
+        console.log(value, "isLoggedInCallback")
         return value !== null;
     };
 
@@ -131,6 +132,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
 
             //  toast.dismiss(response.config.url)
             if ([204].includes(response.status)) {
+                console.log(response)
                 toast("Action successful", {type: "success",})
 
             }

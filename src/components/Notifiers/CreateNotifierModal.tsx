@@ -25,7 +25,7 @@ const CreateNotifierModal: React.FC<Props> = ({onClose}) => {
 
     }, [response.isSuccess, response.data]);
 
-    return <Modal onClose={onClose} submitLabel={"Create"} onSubmit={onCreate} >
+    return <Modal onClose={onClose} submitLabel={"Create"} onSubmit={onCreate}>
         <FormField title="Name" className="grow">
             <TextEditor value={name} onChange={(t) => setName(t)}/>
         </FormField>
