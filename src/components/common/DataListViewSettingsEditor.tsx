@@ -47,39 +47,48 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
         onChange({
             limit,
             offset: newOffset,
-          //  sortBy: sortBy
+            //  sortBy: sortBy
         })
     }
 
     return (
 
-        <div className="w-full flex py-1 my-3">
+        <div className="w-full flex py-1 my-3 px-3">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
-                &nbsp;records
+                {" "}records
                 {totalPages > 1
                     ?
                     <span>, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)</span>
                     : null}
             </div>
-            {totalPages > 1
-                ? <>
-                    <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
-                    <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}><Icon shape="chevronLeft"
-                                                                                                 className="h-2"/></Tab>
-                    {pages.map(p => {
-                        return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
-                            <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)}
-                                 selected={p === pageIndex}>{p + 1}</Tab>) : null
-                    })}
-                    <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}><Icon shape="chevronRight"
-                                                                                                 className="h-2"/></Tab>
-                    <Tab onClick={() => {
-                        handlePageChange(pages.slice(-1)[0] * limit)
-                    }} key="rr"><Icon shape="chevronDoubleRight"
-                                      className="h-2"/></Tab>
-                </>
-                : null}
+
+            <Tab onClick={() => handlePageChange(0)} key="ll">
+                <Icon shape="chevronDoubleLeft" className="h-2"/>
+            </Tab>
+
+            <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}>
+                <Icon shape="chevronLeft" className="h-2"/>
+            </Tab>
+
+            {pages.map(p => {
+                return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
+                    <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)}
+                         selected={p === pageIndex}>
+                        {p + 1}
+                    </Tab>) : null
+            })}
+
+            <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}>
+                <Icon shape="chevronRight" className="h-2"/>
+            </Tab>
+
+            <Tab key="rr" onClick={() => {
+                handlePageChange(pages.slice(-1)[0] * limit)
+            }}>
+                <Icon shape="chevronDoubleRight" className="h-2"/>
+            </Tab>
+
         </div>
 
     );

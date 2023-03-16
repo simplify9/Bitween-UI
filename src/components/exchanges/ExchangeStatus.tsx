@@ -26,7 +26,7 @@ const ExchangeStatus: React.FC<Props> = ({status, onClick, responseBad}) => {
                             : <button type="button"
                                       className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-4 py-1.5 text-center mr-2 mb-2 ">Failed</button>
                         : <button type="button"
-                                  className="text-white bg-blue-500 hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-200 font-medium rounded-full text-sm px-4 py-1.5 text-center mr-2 mb-2  ">
+                                  className="text-white bg-primary-500 hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 font-medium rounded-full text-sm px-4 py-1.5 text-center mr-2 mb-2  ">
                             Running
                         </button>
 

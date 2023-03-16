@@ -22,7 +22,7 @@
     "react-toastify": "^9.1.1",
     "redux-ecq": "^1.0.11",
     "select": "^1.1.2",
-    "vite": "^4.1.4"
+    "vite": "^4.2.0"
   },
   "scripts": {
     "dev": "vite",

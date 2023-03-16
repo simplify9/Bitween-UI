@@ -46,10 +46,10 @@ const customFetchBase: BaseQueryFn<
                 await mutex.acquire();
                 await apiClient.getProfile()
             }
-        }finally {
+        } finally {
             mutex.release()
         }
-      
+
         // const release = await mutex.acquire();
         // try {
         //     const refreshToken: any = (api.getState() as RootState)?.user

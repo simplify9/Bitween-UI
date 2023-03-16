@@ -28,18 +28,18 @@ const OperatorNode: React.FC<Props> = ({
 
     return <div className={"ml-8 mr-8"}>
 
-        <div className={"border border-blue-200 rounded shadow-md p-1 flex flex-col justify-between   "}>
+        <div className={"border border-primary-200 rounded shadow-md p-1 flex flex-col justify-between   "}>
             <div className={"  flex flex-row  justify-between items-center  w-full"}>
                 <div className={"  flex flex-row items-center  "}>
                     <div
                         onClick={() => {
                             onChange(({...value, type: value.type == "or" ? 'and' : "or"}))
                         }}
-                        className={"shadow rounded text-center p-1 w-[120px] underline bg-blue-100  cursor-pointer"}
+                        className={"shadow rounded text-center p-1 w-[120px] underline bg-primary-100  cursor-pointer"}
                     >
                         {value.type.toUpperCase()}
                     </div>
-                    <div className={"text-blue-800 mx-3 bg-blue-200 px-3 rounded py-1"}>
+                    <div className={"text-primary-800 mx-3 bg-primary-200 px-3 rounded py-1"}>
                         <Arrow size={21} onClick={() => setCollapsed(c => !c)}/>
                     </div>
                 </div>

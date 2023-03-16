@@ -1,5 +1,5 @@
-const MultiSelect = ()=>{
+const MultiSelect = () => {
 
-    
+
 }
 export default MultiSelect

@@ -2,10 +2,11 @@ import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataLis
 import {useState} from "react";
 import {usePartnerFinder} from "../hooks/queryHooks";
 import {PartnerList} from "./Partners/PartnerList";
-import {PartnerFinderPanel} from "./Partners/PartnerFinderPanel";
 import CreateNewPartner from "./Partners/CreateNewPartner";
 import {apiClient} from "../client";
 import Authorize from "src/components/common/authorize/authorize";
+import Button from "src/components/common/forms/Button";
+import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
 
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 const defaultQuery = {
     nameContains: "",
     offset: 0,
-    limit: 20,
+    limit: 10,
 }
 
 const useQuery = usePartnerFinder;
@@ -60,30 +61,34 @@ export default () => {
 
     return (
         <>
-            <div className="flex flex-col w-full px-8 py-4">
-                <div className="justify-between w-full flex py-4">
-                    <div
-                        className="text-2xl font-bold tracking-wide text-gray-700">Partners
-                    </div>
-                    <Authorize roles={["Admin", "Editor"]}>
+            <div className="flex flex-col w-full pt-2 pb-10 md:max-w-[1000px]">
 
-                        <button onClick={() => setCreatingOn(true)}
-                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                            Create New Partner
-                        </button>
-                    </Authorize>
+
+                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                    <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
+                                             onFindRequested={handleFindRequested}/>
+                    <div>
+                        <Authorize roles={["Admin", "Editor"]}>
+
+                            <Button onClick={() => setCreatingOn(true)}
+                            >
+                                Create
+                            </Button>
+                        </Authorize>
+                    </div>
+
                 </div>
-                <PartnerFinderPanel value={findSpecs} onChange={setFindSpecs}
-                                    onFindRequested={handleFindRequested}/>
+
                 {queryState.response !== null
-                    ? <>
+                    ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
+
                         <PartnerList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                    </>
+                    </div>
                     : null}
 
             </div>

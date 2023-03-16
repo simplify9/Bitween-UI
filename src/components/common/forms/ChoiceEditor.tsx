@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react"
+import React, {useEffect, useMemo, useState} from "react"
 import {noOp} from "./utils"
 import Select from 'react-select'
 
@@ -22,28 +22,29 @@ type State<TOption> = {
 }
 
 type Props<TOption extends {}> =
-    Omit<JSX.IntrinsicElements['input'], "onChange">
-    & {
-    value?: string
-    onChange?: (value: string) => void
-    options: TOption[] | ((params: FetcherParams) => Promise<TOption[]>)
-    optionValue: (option: TOption) => string
-    optionTitle: (option: TOption) => string
-    renderOption?: (props: OptionRenderProps<TOption>) => JSX.Element
-}
-
-const createSelector = (changeHandler: (value: string) => void, value: string) => {
-    return () => {
-        changeHandler(value);
+    {
+        disabled?: boolean
+        placeholder?: string
+        value?: string
+        onChange?: (value: string) => void
+        options: TOption[] | ((params: FetcherParams) => Promise<TOption[]>)
+        optionValue: (option: TOption) => string
+        optionTitle: (option: TOption) => string
+        renderOption?: (props: OptionRenderProps<TOption>) => JSX.Element
     }
-}
+
+// const createSelector = (changeHandler: (value: string) => void, value: string) => {
+//     return () => {
+//         changeHandler(value);
+//     }
+// }
 
 const defaultRenderOption = (props: OptionRenderProps<any>): JSX.Element => {
     return (
         <div className={"relative"} style={{zIndex: 50000000}}>
             <div
                 key={props.value}
-                className={"px-4 relative py-2 break-all " + (props.selected ? "bg-blue-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
+                className={"px-4 relative py-2 break-all " + (props.selected ? "bg-primary-900 text-white cursor-default" : "hover:bg-gray-100 cursor-pointer")}
                 title={props.title}
                 style={{zIndex: 50000000}}
                 onClick={props.select}>
@@ -55,12 +56,12 @@ const defaultRenderOption = (props: OptionRenderProps<any>): JSX.Element => {
 
 export const ChoiceEditor = <TOption extends {} = any>({
                                                            placeholder,
-                                                           children,
                                                            onChange = noOp,
                                                            value = "",
                                                            options,
                                                            optionTitle,
                                                            optionValue,
+                                                           disabled,
                                                            renderOption = defaultRenderOption,
                                                            ...htmlProps
                                                        }: Props<TOption>): JSX.Element => {
@@ -123,15 +124,16 @@ export const ChoiceEditor = <TOption extends {} = any>({
     }, [onChange, optionTitle, optionValue, renderOption, state.optionList, value])
 
     return (
-        <span>
+        <div className={""}>
             <Select
-               // isClearable={true}
+                // isClearable={true}
+                isDisabled={disabled}
                 options={optionData}
                 value={optionData.find(i => i.value == value)}
                 onChange={(newValue) => {
                     onChange(newValue.value)
                 }}
-                className={"w-full  shadow min-w-[355px]"}
+                className={"w-full  shadow min-w-[200px]"}
                 styles={{
                     control: (base) => {
                         return {
@@ -141,7 +143,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
                     },
 
                 }}/>
-       </span>
+        </div>
     )
 }
 
