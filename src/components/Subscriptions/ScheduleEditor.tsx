@@ -84,7 +84,7 @@ const ScheduleEditor: React.FC<Props> = ({
                 className={"text-green-600 rounded "}>
                 <HiPlusCircle
                     size={25}/></div>}
-                       
+
                        onClickAction={setVisibleModal.bind(this, "ADD_EDIT")}>
                 <div className={"flex flex-col gap-2"}>
 

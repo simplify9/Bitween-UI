@@ -1,8 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import React from "react";
 import {NotifierModel} from "src/types/notifiers";
-import {AiOutlineCheck} from "react-icons/ai";
-import {BsFillCheckCircleFill, BsFillEyeFill} from "react-icons/bs";
+import {BsFillEyeFill} from "react-icons/bs";
 import Button from "src/components/common/forms/Button";
 
 interface Props {

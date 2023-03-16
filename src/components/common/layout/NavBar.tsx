@@ -1,6 +1,5 @@
 import {NavLink} from "react-router-dom";
 import React from "react";
-import AuthConfig from "src/authConfig";
 import {RiDashboardFill} from "react-icons/ri"
 import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
@@ -52,10 +51,10 @@ const NavBar = () => {
                         <NavLink to="/notifiers"
                                  className={resolveClassName}><TbBellRinging2Filled className={"t mr-2"}
                                                                                     size={27}/> Notifiers</NavLink>
-         
+
 
                     </div>
-                   
+
 
                 </div>
             </nav>

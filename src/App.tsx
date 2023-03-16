@@ -60,7 +60,7 @@ function App() {
 
                         </div>
                     </div>
-                    
+
                     <div className={"md:h-[6%] px-2"}>
                         <Footer/>
                     </div>

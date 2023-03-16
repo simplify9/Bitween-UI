@@ -19,7 +19,8 @@ const Notifiers: React.FC = () => {
                 openModal === "CREATE" && <CreateNotifierModal onClose={() => setOpenModal("NONE")}/>
             }
             <div className="flex flex-col w-full pt-2 pb-10 md:max-w-[1000px]">
-                <div className="flex flex-row-reverse justify-between w-full items-center shadow-lg p-2 my-2  rounded-lg bg-white ">
+                <div
+                    className="flex flex-row-reverse justify-between w-full items-center shadow-lg p-2 my-2  rounded-lg bg-white ">
 
                     <div>
                         <Authorize roles={["Admin", "Editor"]}>
@@ -33,7 +34,7 @@ const Notifiers: React.FC = () => {
 
                 </div>
 
-                
+
                 {data.data
                     &&
                     <div className={"shadow-lg  rounded-xl overflow-hidden mx-2 pt-5"}>

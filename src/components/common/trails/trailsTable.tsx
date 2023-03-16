@@ -60,7 +60,7 @@ const TrailsTable: React.FC<Props> = ({data}) => {
                         <td className="text-sm text-gray-900 font-light px-6 py-1 whitespace-nowrap">
                             <Button onClick={() => {
                                 setShowDiffFor(i)
-                            }}  >
+                            }}>
                                 View diff
                             </Button>
                         </td>

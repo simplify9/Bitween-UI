@@ -36,7 +36,7 @@ const MembersInfo: React.FC = () => {
             </span>
             <Authorize roles={["Admin"]}>
                 <Button onClick={() => setOpenModal("ADD")}
-              >
+                >
                     Add
                 </Button>
 

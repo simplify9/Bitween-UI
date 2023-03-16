@@ -171,7 +171,7 @@ const Component = () => {
             </div>
 
             <div className={"flex w-full gap-2 flex flex-row-reverse"}>
-               
+
                 <Authorize roles={["Admin", "Editor"]}>
 
                     <Button

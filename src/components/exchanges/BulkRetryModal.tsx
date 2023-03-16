@@ -30,7 +30,7 @@ const RetryModal: React.FC<Props> = ({onClose, xids, onRefresh}) => {
                 <div className={"flex align-middle justify-between items-center gap-5"}>
 
                     <Button onClick={() => onRetry()}
-          >
+                    >
                         Retry
                     </Button>
 

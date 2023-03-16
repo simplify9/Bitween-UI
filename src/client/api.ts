@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 export const isLoggedInCallback = ({accessTokenCache}: AuthConfig) =>
     async () => {
         const value = await accessTokenCache.read();
-        console.log(value,"isLoggedInCallback")
+        console.log(value, "isLoggedInCallback")
         return value !== null;
     };
 

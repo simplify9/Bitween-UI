@@ -7,42 +7,43 @@ const Profile: React.FC = () => {
     const [versionQueryState, newVersionQueryQuery] = useQuery({});
     const [openModal, setOpenModal] = useState<"NONE" | "CHANGE_PASSWORD">("NONE");
 
-    return (<div className={"bg-white shadow-lg rounded-2xl p-5 pb-2 min-h-[200px] mt-10 flex flex-col justify-between"}>
-        {
-            openModal === "CHANGE_PASSWORD" && <ChangePasswordModal onClose={() => setOpenModal("NONE")}/>
-        }
-        <div className={""}>
-            <div>
+    return (
+        <div className={"bg-white shadow-lg rounded-2xl p-5 pb-2 min-h-[200px] mt-10 flex flex-col justify-between"}>
+            {
+                openModal === "CHANGE_PASSWORD" && <ChangePasswordModal onClose={() => setOpenModal("NONE")}/>
+            }
+            <div className={""}>
+                <div>
             <span className={"font-light text-gray-700"}>
                 Name: 
             </span>
-                <span className={"mx-1"}>
+                    <span className={"mx-1"}>
               {versionQueryState.response?.data?.name}
             </span>
-            </div>
-            <div>
+                </div>
+                <div>
             <span className={"font-light text-gray-700"}>
                 Email: 
             </span>
-                <span className={"mx-1"}>
+                    <span className={"mx-1"}>
               {versionQueryState.response?.data?.email}
             </span>
-            </div>
-            <div>
+                </div>
+                <div>
             <span className={"font-light text-gray-700"}>
                 Role: 
             </span>
-                <span className={"mx-1"}>
+                    <span className={"mx-1"}>
               {versionQueryState.response?.data?.role}
             </span>
+                </div>
             </div>
-        </div>
-        <div>
+            <div>
             <span onClick={() => setOpenModal("CHANGE_PASSWORD")} className={"text-gray-700 underline cursor-pointer"}>
                 Change your password
             </span>
-        </div>
-    </div>)
+            </div>
+        </div>)
 }
 
 export default Profile;

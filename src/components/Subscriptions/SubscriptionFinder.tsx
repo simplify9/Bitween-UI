@@ -1,5 +1,3 @@
-import Tab from "../common/forms/Tab";
-import TabNavigator from "../common/forms/TabNavigator";
 import {SubscriptionSpecs} from "../Subscriptions";
 import FormField from "../common/forms/FormField";
 import TextEditor from "../common/forms/TextEditor";
@@ -32,7 +30,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     <Button
                         onClick={onFindRequested}
                     >
-                       Search
+                        Search
                     </Button>
                 </div>
             </div>

@@ -34,7 +34,7 @@ export const PartnerFinderPanel: React.FC<Props> = ({
                     </FormField>
                     <Button
                         onClick={onFindRequested}
-                       >
+                    >
                         Search
                     </Button>
                 </div>

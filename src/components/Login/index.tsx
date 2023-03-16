@@ -38,7 +38,7 @@ const Login = () => {
                 >
                     <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
                         <div>
-                           
+
                             <img className="w-auto h-12 sm:h-8" src="/Graphics/BitweenFull.svg"
                                  alt=""/>
                             <p className="max-w-xl mt-3 text-gray-200">
@@ -46,10 +46,10 @@ const Login = () => {
                                 with exchanges coming from all forms of requests, ranging from internal messages to
                                 files dumped on a server.
                             </p>
-                            
+
 
                         </div>
-                        
+
                     </div>
                 </div>
 

@@ -45,10 +45,10 @@ export const AuthApiProvider: React.FC<{ authApp: AuthConfig, children?: React.R
     }, [authApp]);
 
     useEffect(() => {
-        if(isLoggedIn){
+        if (isLoggedIn) {
             setUserInfo()
         }
-      
+
     }, [isLoggedIn])
 
     const setUserInfo = async () => {

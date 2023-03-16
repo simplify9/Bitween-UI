@@ -65,7 +65,7 @@ const Component: React.FC<Props> = ({onClose, onAdd}) => {
 
                     </FormField>
                 </div>
-               
+
             </div>
         </Modal>
     )

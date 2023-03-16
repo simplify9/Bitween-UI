@@ -72,7 +72,7 @@ export default () => {
 
                             <Button onClick={() => setCreatingOn(true)}
                             >
-                                Create 
+                                Create
                             </Button>
                         </Authorize>
                     </div>

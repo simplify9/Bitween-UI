@@ -68,10 +68,10 @@ const Component: React.FC = () => {
                     setOpenModal("NONE")
                 }}
             />}
-            
+
             <ExchangeFinderPanel
                 isItemsSelected={selectedRowsIds.length > 0}
-                onBulkRetry={()=>setOpenModal("BULK_RETRY")}
+                onBulkRetry={() => setOpenModal("BULK_RETRY")}
                 onCreateXchange={() => setOpenModal("CREATE_XCHANGE")}
                 value={findSpecs}
                 onChange={onChangeFindSpecs}

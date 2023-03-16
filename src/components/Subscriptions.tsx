@@ -75,7 +75,7 @@ const Component = ({}: Props) => {
 
                             <Button onClick={() => setCreatingOn(true)}
                             >
-                                Create 
+                                Create
                             </Button>
                         </Authorize>
                     </div>
