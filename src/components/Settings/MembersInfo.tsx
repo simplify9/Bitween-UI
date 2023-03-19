@@ -34,13 +34,16 @@ const MembersInfo: React.FC = () => {
             <span className={"text-lg"}>
                         Members Info
             </span>
-            <Authorize roles={["Admin"]}>
-                <Button onClick={() => setOpenModal("ADD")}
-                >
-                    Add
-                </Button>
+            <div>
+                <Authorize roles={["Admin"]}>
+                    <Button onClick={() => setOpenModal("ADD")}
+                    >
+                        Add
+                    </Button>
 
-            </Authorize>
+                </Authorize>
+            </div>
+            
 
 
         </div>
