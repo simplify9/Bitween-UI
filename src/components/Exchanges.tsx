@@ -53,7 +53,7 @@ const Component: React.FC = () => {
 
 
     return (
-        <div className="flex flex-col w-full  py-2">
+        <div className="flex flex-col w-full  ">
             {openModal === "BULK_RETRY" && <BulkRetryModal
                 xids={selectedRowsIds}
                 onRefresh={handleFindRequested}

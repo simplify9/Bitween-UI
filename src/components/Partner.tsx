@@ -63,8 +63,8 @@ const Component = () => {
     }
 
     return (
-        <div className="flex flex-col w-full gap-10 pt-3">
-            <div className={"w-1/3 bg-white flex flex-col h-fit p-3 rounded-lg shadow-lg"}>
+        <div className="flex flex-col w-full gap-10 ">
+            <div className={"w-1/3 bg-white flex flex-col h-fit p-2 rounded-lg shadow-lg"}>
 
 
                 <div className="  flex flex-row justify-between items-end">

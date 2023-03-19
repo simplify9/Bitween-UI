@@ -63,7 +63,7 @@ export default (props: Props) => {
 
     return (
         <>
-            <div className="flex flex-col w-full pt-2 pb-10 md:max-w-[1000px]">
+            <div className="flex flex-col w-full md:max-w-[1000px]">
 
                 <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
                     <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
@@ -73,7 +73,7 @@ export default (props: Props) => {
 
                             <Button onClick={() => setCreatingOn(true)}
                             >
-                                Create
+                                Add
                             </Button>
                         </Authorize>
                     </div>

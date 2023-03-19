@@ -73,7 +73,7 @@ const Component = () => {
     if (!updateSubscriptionData) return <></>
 
     return (
-        <div className="flex flex-col w-full  pb-10 ">
+        <div className="flex flex-col w-full  ">
             {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>

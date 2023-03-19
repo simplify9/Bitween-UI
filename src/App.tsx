@@ -32,15 +32,18 @@ function App() {
         <>
             <ToastContainer/>
             <Router>
-                <div className={"flex flex-col justify-between bg-slate-100   h-[100vh] px-3  pt-3"}>
-                    <div className={"md:h-[6%] px-2"}>
-                        <Header/>
-                    </div>
-                    <div className={"flex flex row   md:h-[83vh]  "}>
+                <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
+
+                    <div className={"flex flex row     "}>
                         <div className={"md:w-[13%]  "}>
                             <NavBar/>
                         </div>
-                        <div className={"md:w-[87%]  px-3 pt-1 rounded-lg overflow-scroll pl-5 overflow-hidden "}>
+                        <div
+                            className={"md:w-[87%]  px-3   rounded-lg md:h-[92.5vh] overflow-scroll pl-5 overflow-hidden "}>
+                            <Header/>
+                            <div className={"pt-3 pb-5"}>
+                                
+                          
                             <Routes>
                                 <Route path="/" element={<Exchanges/>}/>
                                 <Route path={"dashboard"} element={<Dashboard/>}/>
@@ -57,11 +60,11 @@ function App() {
                                 <Route path={"/notifications"} element={<Notifications/>}/>
                                 <Route path={"/team"} element={<Team/>}/>
                             </Routes>
-
+                            </div>
                         </div>
                     </div>
 
-                    <div className={"md:h-[6%] px-2"}>
+                    <div className={"md:h-[4%] px-2 bg-transparent"}>
                         <Footer/>
                     </div>
 

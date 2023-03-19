@@ -100,16 +100,6 @@ const Component = () => {
                 </div>
             </div>
 
-            {/*<div className="  w-full mb-6 ">*/}
-            {/*    <FormField title="Duplicate Interval" className="grow">*/}
-            {/*        <TextEditor value={updateDocumentData?.duplicateInterval} onChange={(t) => setUpdateDocumentData({*/}
-            {/*            ...updateDocumentData,*/}
-            {/*            duplicateInterval: t*/}
-            {/*        })}/>*/}
-            {/*    </FormField>*/}
-            {/*</div>*/}
-
-
             {
                 updateDocumentData?.busEnabled && <div className="  w-full mb-6  flex">
 

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 const Footer = () => {
-    return <>
+    return <div className={""}>
         <footer className="bg-white shadow-lg rounded-lg ">
             <div
                 className="container flex flex-col items-center justify-between p-6 py-3 mx-auto space-y-4 sm:space-y-0 sm:flex-row">
@@ -45,6 +45,6 @@ const Footer = () => {
                 </div>
             </div>
         </footer>
-    </>
+    </div>
 }
 export default Footer

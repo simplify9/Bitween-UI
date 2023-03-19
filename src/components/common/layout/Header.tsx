@@ -6,12 +6,14 @@ import {TbBellRingingFilled} from "react-icons/tb";
 const Header = () => {
     const location = useLocation()
 
+    const pathName = location.pathname.split("/")?.[1]?.trim()
+    console.log({pathName})
     return <nav className="relative bg-white rounded-lg shadow ">
         <div className=" px-5  py-4 mx-auto">
             <div className="lg:flex lg:items-center lg:justify-between">
                 <div className="flex items-center justify-between">
                     <h4 className={"capitalize text-3xl  text-primary-500"}>
-                        {location.pathname.split("/")?.[1]}
+                        {pathName || "Xchanges"}
                     </h4>
                 </div>
 
