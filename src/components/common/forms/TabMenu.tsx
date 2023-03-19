@@ -6,7 +6,7 @@ type Props = JSX.IntrinsicElements['div'] & {}
 
 const Component: React.FC<Props> = ({className = "", title, children, ...htmlProps}) => (
     <div {...htmlProps}
-         className={classes("flex flex-nowrap items-center  first:ml-0 ml-4 text-sm font-light text-gray-400 group focus-within:shadow-b-2 focus-within:shadow-blue-400 focus-within:hover:shadow-blue-400 focus-within:hover:text-gray-400 hover:text-gray-500 hover:shadow-b-2 hover:shadow-gray-400 cursor-pointer", className)}>
+         className={classes("flex flex-nowrap items-center  first:ml-0 ml-4 text-sm font-light text-gray-400 group focus-within:shadow-b-2 focus-within:shadow-primary-400 focus-within:hover:shadow-primary-400 focus-within:hover:text-gray-400 hover:text-gray-500 hover:shadow-b-2 hover:shadow-gray-400 cursor-pointer", className)}>
         <button className="focus:outline-none flex flex-nowrap items-center py-1 px-2 focus-within:text-black">{title}
             <Icon shape="chevronRight" className="h-2 ml-2 rotate-90"/></button>
         <div

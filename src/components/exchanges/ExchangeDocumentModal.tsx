@@ -5,6 +5,27 @@ import ReactJson from "react-json-view";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {xcode} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
+const prettifyXml = (sourceXml: string) => {
+    const xmlDoc = new DOMParser().parseFromString(sourceXml, 'application/xml');
+    const xsltDoc = new DOMParser().parseFromString([
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
+        '  <xsl:strip-space elements="*"/>',
+        '  <xsl:template match="para[content-style][not(text())]">',
+        '    <xsl:value-of select="normalize-space(.)"/>',
+        '  </xsl:template>',
+        '  <xsl:template match="node()|@*">',
+        '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
+        '  </xsl:template>',
+        '  <xsl:output indent="yes"/>',
+        '</xsl:stylesheet>',
+    ].join('\n'), 'application/xml');
+
+    const xsltProcessor = new XSLTProcessor();
+    xsltProcessor.importStylesheet(xsltDoc);
+    const resultDoc = xsltProcessor.transformToDocument(xmlDoc);
+    const resultXml = new XMLSerializer().serializeToString(resultDoc);
+    return resultXml;
+};
 type Props = {
     onClose: () => void
     name: string
@@ -28,9 +49,7 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
                 setData({data: JSON.parse(resp), type: "json", raw: resp})
             } catch {
                 try {
-                    new DOMParser().parseFromString(resp, 'text/xml');
-                    setData({data: resp, type: "xml", raw: resp})
-
+                    setData({data: prettifyXml(resp), type: "xml", raw: resp})
 
                 } catch {
                     setData({data: resp, type: "text", raw: resp})

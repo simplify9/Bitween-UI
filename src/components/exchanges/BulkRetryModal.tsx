@@ -2,6 +2,7 @@ import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import Modal from "src/components/common/Modal";
 import React, {useState} from "react";
 import {apiClient} from "src/client";
+import Button from "src/components/common/forms/Button";
 
 type Props = {
     onClose: () => void
@@ -28,10 +29,10 @@ const RetryModal: React.FC<Props> = ({onClose, xids, onRefresh}) => {
             extraFooterComponents={
                 <div className={"flex align-middle justify-between items-center gap-5"}>
 
-                    <button onClick={() => onRetry()}
-                            className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
+                    <Button onClick={() => onRetry()}
+                    >
                         Retry
-                    </button>
+                    </Button>
 
                 </div>}
         >

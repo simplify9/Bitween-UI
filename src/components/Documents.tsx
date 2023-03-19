@@ -2,12 +2,12 @@ import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataLis
 import {useState} from "react";
 import {useDocumentFinder} from "../hooks/queryHooks";
 import {DocumentList} from "./Documents/DocumentList";
-import {DocumentFinderPanel} from "./Documents/DocumentFinderPanel";
 import {apiClient} from "../client";
 import {CreateDocument} from "../types/document";
 import CreateNewDocument from "./Documents/CreateNewDocument";
 import Button from "./common/forms/Button";
 import Authorize from "src/components/common/authorize/authorize";
+import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
 
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 const defaultQuery = {
     nameContains: '',
     offset: 0,
-    limit: 20,
+    limit: 10,
 }
 
 
@@ -63,20 +63,26 @@ export default (props: Props) => {
 
     return (
         <>
-            <div className="flex flex-col w-full px-8 py-4">
-                <div className="justify-between w-full flex py-4">
-                    <div className="text-2xl font-bold tracking-wide text-gray-700">Documents</div>
-                    <Authorize roles={['Admin', 'Editor']}>
-                        <Button onClick={() => setCreatingOn(true)}
-                                className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                            Create New Document
-                        </Button>
-                    </Authorize>
+            <div className="flex flex-col w-full md:max-w-[1000px]">
+
+                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                    <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
+                                             onFindRequested={handleFindRequested}/>
+                    <div>
+                        <Authorize roles={["Admin", "Editor"]}>
+
+                            <Button onClick={() => setCreatingOn(true)}
+                            >
+                                Add
+                            </Button>
+                        </Authorize>
+                    </div>
 
                 </div>
-                <DocumentFinderPanel value={findSpecs} onChange={setFindSpecs} onFindRequested={handleFindRequested}/>
+
+
                 {queryState.response !== null
-                    ? <>
+                    ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
 
                         <DocumentList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
@@ -84,7 +90,7 @@ export default (props: Props) => {
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                    </>
+                    </div>
                     : null}
 
             </div>

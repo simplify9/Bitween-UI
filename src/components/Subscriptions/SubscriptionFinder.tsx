@@ -1,10 +1,9 @@
-import Tab from "../common/forms/Tab";
-import TabNavigator from "../common/forms/TabNavigator";
 import {SubscriptionSpecs} from "../Subscriptions";
 import FormField from "../common/forms/FormField";
 import TextEditor from "../common/forms/TextEditor";
 import React from "react";
-
+import Button from "src/components/common/forms/Button";
+import {BsSearch} from "react-icons/bs"
 
 interface Props {
     value: SubscriptionSpecs
@@ -21,25 +20,19 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
 
     return (
         <>
-            <TabNavigator className="w-full">
-                <Tab key="Search" selected={true} onClick={() => {
-                }}>
-                    Find by
-                </Tab>
-            </TabNavigator>
-
-            <div className="flex w-1/2 px-4 py-5 pb-3">
-                <div className="flex flex-wrap items-end -mx-3 mb-2 space-x-4 w-full">
+            <div className="flex flex-row w-1/2 px-4 ">
+                <div className="flex flex-wrap items-end mb-2 space-x-4 w-full">
                     <FormField title="Name" className="grow">
                         <TextEditor placeholder="Type in the name..." value={value.nameContains}
                                     onChange={(t) => onChange({...value, nameContains: t})}
                         />
                     </FormField>
-                    <button
+                    <Button
+                        variant={"none"}
                         onClick={onFindRequested}
-                        className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-                        Find
-                    </button>
+                    >
+                        <BsSearch size={33} className={" mb-2 text-primary-600"}/>
+                    </Button>
                 </div>
             </div>
 

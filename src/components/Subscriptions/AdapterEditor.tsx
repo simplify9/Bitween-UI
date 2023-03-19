@@ -62,12 +62,12 @@ const AdapterEditor: React.FC<Props> = ({
     }
 
     return (
-        <>
+        <div className={""}>
             <div className={"flex flex-col gap-2"}>
-                <FormField title={title} className="grow">
+                <FormField title={title} className="grow ">
                     <AdapterSelector type={type} value={value} onChange={onChange}/>
                 </FormField>
-
+                <div className={"mb-1"}/>
                 <KeyValueEditor values={props} title={'Properties'}
                                 keyLabel={"Name"} valueLabel={"Value"}
                                 onAdd={onAdd} onRemove={onRemove}
@@ -75,9 +75,10 @@ const AdapterEditor: React.FC<Props> = ({
                                 onEdit={onEdit}
                                 keyOptions={availableOptions()}
                 />
+
             </div>
 
-        </>
+        </div>
     );
 }
 

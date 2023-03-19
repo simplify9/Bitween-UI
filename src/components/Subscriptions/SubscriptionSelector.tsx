@@ -7,7 +7,6 @@ interface Props {
     value?: string
     onChange: (value: string) => void
     disabled?: boolean
-    multiple?: boolean
 }
 
 const defaultQuery = {
@@ -19,7 +18,7 @@ const defaultQuery = {
     sortByDescending: false
 }
 
-const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled, multiple}) => {
+const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled}) => {
 
     const data = useSubscriptionsQuery({offset: 0, limit: 200})
     const options = useMemo(() => {
@@ -34,7 +33,6 @@ const SubscriptionSelector: React.FC<Props> = ({value, onChange, disabled, multi
         <ChoiceEditor
             placeholder="Select Subscription"
             disabled={disabled}
-            multiple={multiple}
             value={value}
             onChange={onChange}
             options={options}

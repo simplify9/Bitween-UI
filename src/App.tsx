@@ -1,9 +1,7 @@
 import Dashboard from "./components/Dashboard";
-import Helmet from 'react-helmet';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Exchanges from './components/Exchanges';
 import Subscriptions from './components/Subscriptions';
-import NavBar from './components/NavBar';
 import {useAuthApi} from "./client/components";
 import Login from "./components/Login";
 import Documents from "./components/Documents";
@@ -17,6 +15,11 @@ import React from "react";
 import Settings from "src/components/Settings";
 import Notifier from "src/components/Notifier";
 import Notifiers from "src/components/Notifiers";
+import Notifications from "src/components/Notifications";
+import Header from "src/components/common/layout/Header";
+import NavBar from "src/components/common/layout/NavBar";
+import Team from "src/components/Team";
+import Footer from "src/components/common/layout/Footer";
 
 function App() {
 
@@ -27,26 +30,26 @@ function App() {
 
     return (
         <>
-            <Helmet>
-                <title>Infolink</title>
-            </Helmet>
             <ToastContainer/>
+            <Router>
+                <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
 
-            <div>
-
-                <Router>
-
-                    <div className={"flex flex-col md:flex-row "}>
-                        <div className={"md:w-[11%] "}>
+                    <div className={"flex flex row     "}>
+                        <div className={"md:w-[13%]  "}>
                             <NavBar/>
                         </div>
-                        <div className={"md:w-[88%] overflow-scroll  md:rounded-xl md:h-[98vh] md:shadow-lg m-2  "}>
-                            {/*<div className={"mx-5 my-3 shadow-lg border rounded-xl"}>*/}
+                        <div
+                            className={"md:w-[87%]  px-3   rounded-lg md:h-[92.5vh] overflow-scroll pl-5 overflow-hidden "}>
+                            <Header/>
+                            <div className={"pt-3 pb-5"}>
+                                
+                          
                             <Routes>
-                                <Route path="/" element={<Dashboard/>}/>
+                                <Route path="/" element={<Exchanges/>}/>
+                                <Route path={"dashboard"} element={<Dashboard/>}/>
                                 <Route path="/settings" element={<Settings/>}/>
                                 <Route path="/notifiers" element={<Notifiers/>}/>
-                                <Route path="/exchanges" element={<Exchanges/>}/>
+                                <Route path="/Xchanges" element={<Exchanges/>}/>
                                 <Route path="/subscriptions" element={<Subscriptions/>}/>
                                 <Route path="/documents" element={<Documents/>}/>
                                 <Route path="/partners" element={<Partners/>}/>
@@ -54,15 +57,20 @@ function App() {
                                 <Route path="/documents/:id" element={<Document/>}/>
                                 <Route path="/subscriptions/:id" element={<Subscription/>}/>
                                 <Route path="/notifiers/:id" element={<Notifier/>}/>
-
+                                <Route path={"/notifications"} element={<Notifications/>}/>
+                                <Route path={"/team"} element={<Team/>}/>
                             </Routes>
-                            {/*</div>*/}
+                            </div>
                         </div>
                     </div>
 
-                </Router>
+                    <div className={"md:h-[4%] px-2 bg-transparent"}>
+                        <Footer/>
+                    </div>
 
-            </div>
+                </div>
+            </Router>
+
 
         </>
     );

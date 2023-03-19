@@ -3,7 +3,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
 import InputBox from "src/components/common/forms/InputBox";
 
-
 type Props = {
     value: string | undefined
     onChange: (val: string) => void
@@ -16,7 +15,8 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
     }
     return (
         <InputBox className={"relative  z-50"}>
-            <DatePicker  className={"relative "} selected={value ? new Date(value) : null} onChange={onChangeDate}/>
+            <DatePicker className={"relative  "} selected={value ? new Date(value) : null}
+                        onChange={onChangeDate}/>
         </InputBox>
 
     )
