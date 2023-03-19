@@ -39,7 +39,7 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
     }
     return (
         <div className={"shadow px-2 mb-2  rounded-lg bg-white"} style={{zIndex: 1000}}>
-            <div className="flex flex-row w-100 pb-4  pt-3 z-50">
+            <div className="flex flex-row justify-between w-100 pb-4  pt-3 z-50">
                 <div className={"flex flex-col w-full  "}>
                     <div className={"flex flex-row justify-between items-end p-1"}>
                         <div className={"flex flex-row gap-3 "}>
@@ -103,61 +103,60 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
 
                     </div>
                 </div>
-                <div>
-                    <div className={"flex-row-reverse flex  "}>
-                        <div className={"flex-row-reverse flex max-w-[100px] "}>
-                            <FormField title="Refetch every">
-                                <ChoiceEditor
-                                    placeholder="Select Status"
-                                    value={value.fetchInterval?.toString()}
-                                    onChange={fetchInterval => onChange({
-                                        ...value,
-                                        fetchInterval: Number(fetchInterval)
-                                    })}
-                                    optionTitle={(item: DeliveryStatus) => item.title}
-                                    optionValue={(item: DeliveryStatus) => item.id}
-                                    options={[
-                                        {id: "2000", title: "2 Seconds"},
-                                        {id: "3000", title: "3 Seconds"},
-                                        {id: "5000", title: "5 Seconds"},
-                                        {id: "8000", title: "8 Seconds"},
-                                        {id: "13000", title: "13 Seconds"},
-                                    ]}/>
-                            </FormField>
-                        </div>
+                <div className={"w-[300px] items-end justify-end flex flex-col"}>
+                    <div className={" flex w-full items-end justify-end mx-1 "}>
+                        <FormField title="Refresh every" className={"w-full"}>
+                            <ChoiceEditor
+                                placeholder="Select Status"
+                                value={value.fetchInterval?.toString()}
+                                onChange={fetchInterval => onChange({
+                                    ...value,
+                                    fetchInterval: Number(fetchInterval)
+                                })}
+                                optionTitle={(item: DeliveryStatus) => item.title}
+                                optionValue={(item: DeliveryStatus) => item.id}
+                                options={[
+                                    {id: "2000", title: "2 Seconds"},
+                                    {id: "3000", title: "3 Seconds"},
+                                    {id: "5000", title: "5 Seconds"},
+                                    {id: "8000", title: "8 Seconds"},
+                                    {id: "13000", title: "13 Seconds"},
+                                ]}/>
+                        </FormField>
+
                     </div>
-                    <div className={"flex flex-row-reverse pt-1"}>
-
-
-                        <Button
-                            onClick={() => {
-                                console.log("onCreate")
-                                onCreateXchange()
-                            }}
-                        >
-                            Create
-                        </Button>
-                        {
-                            isItemsSelected && <Button
-                                onClick={onBulkRetry}
+                    <div className={"pt-1  w-full"}>
+                        <div className={"flex flex-row  "}>
+                            <Button
+                                onClick={() => {
+                                    console.log("onCreate")
+                                    onCreateXchange()
+                                }}
                             >
-                                Bulk retry
+                                Create Xchange
                             </Button>
-                        }
+                            {
+                                isItemsSelected && <Button
+                                    onClick={onBulkRetry}
+                                >
+                                    Bulk retry
+                                </Button>
+                            }
 
-                    </div>
-                    <div className={"flex flex-row pt-1"}>
-                        <Button
-                            variant={"secondary"}
-                            onClick={onClear}
-                        >
-                            Clear
-                        </Button>
-                        <Button
-                            onClick={handleFind}
-                        >
-                            Search
-                        </Button>
+                        </div>
+                        <div className={"flex flex-row pt-1"}>
+                            <Button
+                                variant={"secondary"}
+                                onClick={onClear}
+                            >
+                                Clear
+                            </Button>
+                            <Button
+                                onClick={handleFind}
+                            >
+                                Search
+                            </Button>
+                        </div>
                     </div>
 
 

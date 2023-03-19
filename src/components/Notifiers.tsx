@@ -27,7 +27,7 @@ const Notifiers: React.FC = () => {
 
                             <Button onClick={() => setOpenModal("CREATE")}
                             >
-                                Create
+                                Add
                             </Button>
                         </Authorize>
                     </div>

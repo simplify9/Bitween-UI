@@ -8,7 +8,7 @@ const Notifications: React.FC = () => {
     const [searchState, setSearchState] = useState<BaseSearchModel>({limit: 20, offset: 0});
     const data = useNotificationsQuery(searchState)
 
-    return <div className="flex flex-col w-full  py-2 md:max-w-[1000px]">
+    return <div className="flex flex-col w-full   md:max-w-[1000px]">
 
         {data.data
             &&

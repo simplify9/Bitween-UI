@@ -15,7 +15,7 @@ const resolveClassName = ({isActive}: any) => {
 
 const NavBar = () => {
     return (
-        <div className={"flex h-full pl-2 py-3"}>
+        <div className={"flex h-full pl-2 "}>
             <nav
                 className="flex flex-col bg-white w-full h-full shadow-2xl rounded-xl overflow-hidden h-full">
                 <div className="flex flex-col justify-center items-center  text-white pt-5 pb-2 bg bg-white">
