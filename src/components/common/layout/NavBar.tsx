@@ -8,8 +8,8 @@ import {HiDocument} from "react-icons/hi";
 // style={{backgroundColor:"#e3311d"}}
 const resolveClassName = ({isActive}: any) => {
     return (isActive
-        ? "   bg-primary-600  text-white font-bold cursor-default "
-        : " cursor-pointer  text-primary-600 mr-4 hover:text-white") + " flex flex-row items-center  hover:bg-primary-600 px-3 py-1 md:my-5 mx-2 md:py-3 md:px-6 mt-4 lg:mt-0 block rounded"
+        ? "   bg-primary-600  text-white font-bold cursor-default  "
+        : " cursor-pointer  text-primary-600 mr-4 hover:text-white") + " transition-colors duration-150 flex flex-row items-center  hover:bg-primary-500 px-3 py-1 md:my-5 mx-2 md:py-3 md:px-6 mt-4 lg:mt-0 block rounded"
 }
 
 

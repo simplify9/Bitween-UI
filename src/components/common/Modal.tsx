@@ -50,10 +50,15 @@ const Component: React.FC<Props> = ({
                                 }}
                                 >{submitLabel ?? "Save"}
                                 </Button>}
-                                <Button onClick={onClose}
-                                        variant={"secondary"}
-                                >Cancel
-                                </Button>
+                                <div>
+                                    
+                                    <Button onClick={onClose}
+                                            variant={"secondary"}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+
                                 {extraFooterComponents}
                             </div>
                         </div>

@@ -6,7 +6,7 @@ const Team: React.FC = () => {
     return <div className={""}>
 
 
-        <div className={"mt-2 w-1/2"}>
+        <div className={"mt-2 max-w-[1000px]"}>
             <MembersInfo/>
         </div>
     </div>

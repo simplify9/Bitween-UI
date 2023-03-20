@@ -12,7 +12,6 @@ type Props = {
 }
 const MatchExpressionSelector: React.FC<Props> = ({onChange, value}) => {
     const onSelect = (key: string) => {
-        console.log(key)
         if (key === "or" || key === "and") {
             onChange({
                 ...value,
