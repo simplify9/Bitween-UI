@@ -45,11 +45,14 @@ const Component: React.FC<Props> = ({
                             <div
                                 className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse ">
 
-                                {onSubmit && <Button disabled={submitDisabled} onClick={() => {
-                                    onSubmit()
-                                }}
-                                >{submitLabel ?? "Save"}
-                                </Button>}
+                                <div>
+                                    {onSubmit && <Button disabled={submitDisabled} onClick={() => {
+                                        onSubmit()
+                                    }}
+                                    >{submitLabel ?? "Save"}
+                                    </Button>}
+                                </div>
+                              
                                 <div>
                                     
                                     <Button onClick={onClose}

@@ -17,6 +17,9 @@ const defaultQuery = {
     nameContains: "",
     offset: 0,
     limit: 10,
+    orderBy: {
+        field: "Name"
+    }
 }
 
 const useQuery = usePartnerFinder;
@@ -48,7 +51,9 @@ export default () => {
             ...defaultQuery,
             ...queryState.lastSent,
             offset: viewOptions.offset,
-            limit: viewOptions.limit
+            limit: viewOptions.limit,
+            orderBy: viewOptions.orderBy
+
         });
     }
     const createPartner = async (name: string) => {
@@ -84,6 +89,11 @@ export default () => {
 
                         <PartnerList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
+                            orderByFields={[{value: "Name", key: "Name"}, {
+                                value: "Id",
+                                key: "Id"
+                            }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

@@ -14,6 +14,9 @@ const defaultQuery = {
     nameContains: "",
     offset: 0,
     limit: 20,
+    orderBy: {
+        field: "Name"
+    }
 }
 
 
@@ -51,7 +54,8 @@ const Component = ({}: Props) => {
             ...defaultQuery,
             ...queryState.lastSent,
             offset: viewOptions.offset,
-            limit: viewOptions.limit
+            limit: viewOptions.limit,
+            orderBy: viewOptions.orderBy
         });
     }, [newQuery, queryState.lastSent])
 
@@ -72,7 +76,6 @@ const Component = ({}: Props) => {
                                              onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Editor"]}>
-
                             <Button onClick={() => setCreatingOn(true)}
                             >
                                 Add
@@ -86,6 +89,14 @@ const Component = ({}: Props) => {
                     ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
                         <SubscriptionList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
+                            orderByFields={[
+                                {value: "Name", key: "Name"},
+                                {value: "Id", key: "Id"},
+                                {
+                                    value: "DocumentId",
+                                    key: "Document"
+                                }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

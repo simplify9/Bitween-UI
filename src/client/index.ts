@@ -183,10 +183,30 @@ export const apiClient = {
 
 }
 
-export const formulateQueryString = (req: any) => {
+export type OrderBy = {
+    field: string
+    descending?: boolean
+}
+
+interface QueryParams {
+    orderBy?: OrderBy
+    offset: number;
+    limit: number;
+    nameContains?: string;
+    status?: string;
+    subscription?: string;
+    id?: string;
+    correlationId?: string;
+    promotedProperties?: string;
+    creationDateFrom?: string;
+    creationDateTo?: string;
+    test?: boolean;
+}
+
+export const formulateQueryString = (req: QueryParams) => {
+
     let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
-
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;
     if ('subscription' in req && req.subscription && req.subscription != '') query += `&filter=SubscriptionId:1:${req.subscription}`;
     if ('id' in req && req.id && req.id != '') query += `&filter=Id:1:${req.id}`;
@@ -195,7 +215,7 @@ export const formulateQueryString = (req: any) => {
     if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${req.creationDateFrom}`;
     if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${req.creationDateTo}`;
     if ('test' in req && req.test) query += `&test=${req.test}`;
-
+    if ('orderBy' in req && req.orderBy.field) query += `&sort=${req.orderBy.field}:${req.orderBy.descending ? 2 : 1}`;
     return query;
 }
 
