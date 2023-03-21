@@ -67,7 +67,6 @@ const Component: React.FC = () => {
                     setOpenModal("NONE")
                 }}
             />}
-
             <ExchangeFinderPanel
                 isItemsSelected={selectedRowsIds.length > 0}
                 onBulkRetry={() => setOpenModal("BULK_RETRY")}

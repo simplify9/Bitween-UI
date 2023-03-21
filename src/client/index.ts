@@ -215,7 +215,7 @@ export const formulateQueryString = (req: QueryParams) => {
     if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${req.creationDateFrom}`;
     if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${req.creationDateTo}`;
     if ('test' in req && req.test) query += `&test=${req.test}`;
-    if ('orderBy' in req && req.orderBy.field) query += `&sort=${req.orderBy.field}:${req.orderBy.descending ? 2 : 1}`;
+    if ('orderBy' in req && req.orderBy?.field) query += `&sort=${req.orderBy?.field}:${req.orderBy?.descending ? 2 : 1}`;
     return query;
 }
 
