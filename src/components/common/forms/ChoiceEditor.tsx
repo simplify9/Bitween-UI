@@ -59,7 +59,11 @@ export const ChoiceEditor = <TOption extends {} = any>({
                 options={options}
                 value={options.find(i => optionValue(i) == value)}
                 onChange={(newValue) => {
-                    onChange(optionValue(newValue))
+                    if (Boolean(newValue)) {
+                        onChange(optionValue(newValue))
+                    } else {
+                        onChange(undefined)
+                    }
                 }}
                 placeholder={placeholder}
                 className={"w-full  shadow min-w-[200px]"}
