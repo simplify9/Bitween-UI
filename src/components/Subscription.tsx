@@ -179,8 +179,7 @@ const Component = () => {
                         <FormField title="Aggregation">
                             <SubscriptionSelector
                                 value={updateSubscriptionData.aggregationForId}
-                                onChange={() => {
-                                }}
+                                onChange={(e)=>onChangeSubscriptionData("aggregationForId",updateSubscriptionData.aggregationForId)}
                                 disabled={true}
                             />
                         </FormField>
