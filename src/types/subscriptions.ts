@@ -3,6 +3,7 @@ import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
 
 export type SubscriptionFindQuery = CommonFindQuery & {
     nameContains: string
+    rawsubscriptionproperties?: string
 }
 
 export interface ISubscription {
