@@ -65,9 +65,6 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
             </FormField>
         </div>
         <div className="  w-full mb-6 ">
-            {
-                state.role
-            }
             <FormField title="Role" className="grow">
                 <ChoiceEditor optionTitle={(e) => e.title} optionValue={(e) => e.id} options={RolesSelection}
                               value={state.role?.toString()}
