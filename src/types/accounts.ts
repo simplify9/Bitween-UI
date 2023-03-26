@@ -24,12 +24,12 @@ export const RolesSelection: OptionType[] = [
     },
     {
         id: "10",
-        title: "Editor"
+        title: "Viewer"
     },
     {
         id: "20",
-        title: "Viewer"
-    }
+        title: "Editor"
+    },
 ]
 
 
