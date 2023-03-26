@@ -16,7 +16,7 @@ type Props = {
 }
 const AddMemberModal: React.FC<Props> = ({onClose}) => {
 
-    const [state, setState] = useState<CreateAccountModel>({name: "", email: "", password: "", role: 0});
+    const [state, setState] = useState<CreateAccountModel>({name: "", email: "", password: "", role: 10});
     const [errors, setErrors] = useState<string[]>([]);
     const onSubmit = async () => {
         setErrors([])
@@ -65,7 +65,9 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
             </FormField>
         </div>
         <div className="  w-full mb-6 ">
-
+            {
+                state.role
+            }
             <FormField title="Role" className="grow">
                 <ChoiceEditor optionTitle={(e) => e.title} optionValue={(e) => e.id} options={RolesSelection}
                               value={state.role?.toString()}
