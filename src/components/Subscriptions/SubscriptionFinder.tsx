@@ -9,24 +9,34 @@ interface Props {
     value: SubscriptionSpecs
     onChange: (value: SubscriptionSpecs) => void
     onFindRequested: () => void
+    searchAdapterData?: boolean
 }
 
 export const SubscriptionFinderPanel: React.FC<Props> = ({
                                                              value,
                                                              onChange,
-                                                             onFindRequested
+                                                             onFindRequested,
+                                                             searchAdapterData
                                                          }) => {
 
 
     return (
         <>
-            <div className="flex flex-row w-1/2 px-4 ">
+            <div className="flex flex-row  px-4 ">
                 <div className="flex flex-wrap items-end mb-2 space-x-4 w-full">
                     <FormField title="Name" className="grow">
-                        <TextEditor placeholder="Type in the name..." value={value.nameContains}
+                        <TextEditor placeholder="Name" value={value.nameContains}
                                     onChange={(t) => onChange({...value, nameContains: t})}
                         />
                     </FormField>
+                    {
+                        searchAdapterData &&
+                        <FormField title="Adapter data" className="grow">
+                            <TextEditor placeholder="Adapter data" value={value.rawsubscriptionproperties}
+                                        onChange={(t) => onChange({...value, rawsubscriptionproperties: t})}
+                            />
+                        </FormField>
+                    }
                     <Button
                         variant={"none"}
                         onClick={onFindRequested}

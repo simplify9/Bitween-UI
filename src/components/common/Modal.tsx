@@ -25,7 +25,7 @@ const Component: React.FC<Props> = ({
                                     }) => {
 
     return (
-        <div className="absolute " style={{zIndex: 50000}}>
+        <div className="absolute " style={{zIndex: 500000000000}}>
 
             <div className={classes("relative z-50 overflow-scroll ", className || "")}
                  aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -45,15 +45,23 @@ const Component: React.FC<Props> = ({
                             <div
                                 className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse ">
 
-                                {onSubmit && <Button disabled={submitDisabled} onClick={() => {
-                                    onSubmit()
-                                }}
-                                >{submitLabel ?? "Save"}
-                                </Button>}
-                                <Button onClick={onClose}
-                                        variant={"secondary"}
-                                >Cancel
-                                </Button>
+                                <div>
+                                    {onSubmit && <Button disabled={submitDisabled} onClick={() => {
+                                        onSubmit()
+                                    }}
+                                    >{submitLabel ?? "Save"}
+                                    </Button>}
+                                </div>
+                              
+                                <div>
+                                    
+                                    <Button onClick={onClose}
+                                            variant={"secondary"}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+
                                 {extraFooterComponents}
                             </div>
                         </div>

@@ -48,7 +48,9 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                             <FormField title="Target Subscription" className={"min-w-[350px]"}>
                                 <SubscriptionSelector
                                     value={value.subscription}
-                                    onChange={subscription => onChange({...value, subscription})}/>
+                                    onChange={subscription => {
+                                        onChange({...value, subscription})
+                                    }}/>
                             </FormField>
                             <FormField title="Creation Time From">
                                 <DateEditor onChange={(t) => onChange({
@@ -129,7 +131,6 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                         <div className={"flex flex-row  "}>
                             <Button
                                 onClick={() => {
-                                    console.log("onCreate")
                                     onCreateXchange()
                                 }}
                             >

@@ -175,7 +175,7 @@ const Component: React.FC<Props> = ({
                                         onEdit && <Button variant={"none"} onClick={() => {
                                             onPressEdit(i)
                                         }}>
-                                            <MdModeEditOutline className={"text-primary-600"} size={21}/>
+                                            <MdModeEditOutline className={"text-yellow-300"} size={21}/>
                                         </Button>
                                     }
 

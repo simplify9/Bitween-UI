@@ -16,7 +16,7 @@ export interface LoginRequest {
     refreshToken?: string;
 }
 
-export type Role = "Admin" | "Editor" | "Viewer"
+export type Role = "Admin" | "Member" | "Viewer"
 export const RolesSelection: OptionType[] = [
     {
         id: "0",
@@ -24,12 +24,12 @@ export const RolesSelection: OptionType[] = [
     },
     {
         id: "10",
-        title: "Editor"
+        title: "Viewer"
     },
     {
         id: "20",
-        title: "Viewer"
-    }
+        title: "Member"
+    },
 ]
 
 

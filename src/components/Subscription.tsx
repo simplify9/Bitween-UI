@@ -179,8 +179,7 @@ const Component = () => {
                         <FormField title="Aggregation">
                             <SubscriptionSelector
                                 value={updateSubscriptionData.aggregationForId}
-                                onChange={() => {
-                                }}
+                                onChange={(e)=>onChangeSubscriptionData("aggregationForId",updateSubscriptionData.aggregationForId)}
                                 disabled={true}
                             />
                         </FormField>
@@ -198,7 +197,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "2" &&
                     <div
-                        className="bg-white border shadow-lg rounded-lg px-2 py-2">
+                        className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Validator"} type={"validators"}
                                        value={updateSubscriptionData?.validatorId}
@@ -206,6 +205,7 @@ const Component = () => {
                                            ...updateSubscriptionData,
                                            validatorId: t
                                        })}
+                                       onPropsChange={(e) => onChangeSubscriptionData("validatorProperties", e)}
                                        props={updateSubscriptionData?.validatorProperties}
                         />
 
@@ -213,7 +213,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "4" &&
                     <div
-                        className=" border shadow-lg rounded-lg px-2 py-2">
+                        className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
 
                         <AdapterEditor title={"Receiver"} type={"receivers"}
                                        value={updateSubscriptionData?.receiverId}

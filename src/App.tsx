@@ -35,11 +35,11 @@ function App() {
                 <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
 
                     <div className={"flex flex row     "}>
-                        <div className={"md:w-[13%]  "}>
+                        <div className={"md:w-[11%]  "}>
                             <NavBar/>
                         </div>
                         <div
-                            className={"md:w-[87%]  px-3   rounded-lg md:h-[92.5vh] overflow-scroll pl-5 overflow-hidden "}>
+                            className={"md:w-[89%]  px-2   rounded-lg md:h-[92.5vh] overflow-scroll pl-4 overflow-hidden "}>
                             <Header/>
                             <div className={"pt-3 pb-5"}>
                                 

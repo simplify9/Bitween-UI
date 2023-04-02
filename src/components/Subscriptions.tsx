@@ -12,13 +12,18 @@ import Authorize from "src/components/common/authorize/authorize";
 
 const defaultQuery = {
     nameContains: "",
+    rawsubscriptionproperties: "",
     offset: 0,
     limit: 20,
+    orderBy: {
+        field: "Name"
+    }
 }
 
 
 export type SubscriptionSpecs = {
     nameContains: string
+    rawsubscriptionproperties?: string
 }
 
 const useQuery = useSubscriptionFinder;
@@ -34,7 +39,7 @@ const Component = ({}: Props) => {
 
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
         nameContains: '',
-
+        rawsubscriptionproperties: '',
     });
 
     const handleFindRequested = useCallback(() => {
@@ -42,6 +47,7 @@ const Component = ({}: Props) => {
             ...defaultQuery,
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
+            rawsubscriptionproperties: findSpecs.rawsubscriptionproperties,
             offset: 0,
         });
     }, [findSpecs.nameContains, newQuery, queryState.lastSent])
@@ -51,7 +57,8 @@ const Component = ({}: Props) => {
             ...defaultQuery,
             ...queryState.lastSent,
             offset: viewOptions.offset,
-            limit: viewOptions.limit
+            limit: viewOptions.limit,
+            orderBy: viewOptions.orderBy
         });
     }, [newQuery, queryState.lastSent])
 
@@ -68,11 +75,10 @@ const Component = ({}: Props) => {
         <>
             <div className="flex flex-col w-full  md:max-w-[1000px]">
                 <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
-                    <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
+                    <SubscriptionFinderPanel searchAdapterData value={findSpecs} onChange={setFindSpecs}
                                              onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Editor"]}>
-
                             <Button onClick={() => setCreatingOn(true)}
                             >
                                 Add
@@ -86,6 +92,14 @@ const Component = ({}: Props) => {
                     ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
                         <SubscriptionList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
+                            orderByFields={[
+                                {value: "Name", key: "Name"},
+                                {value: "Id", key: "Id"},
+                                {
+                                    value: "DocumentId",
+                                    key: "Document"
+                                }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

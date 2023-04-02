@@ -1,33 +1,34 @@
 import Tab from "./forms/Tab"
 import {Icon} from "./icons"
-import {useMemo} from "react";
+import React, {useMemo} from "react";
+import ChoiceEditor from "src/components/common/forms/ChoiceEditor";
+import {OrderBy} from "src/client";
+import {KeyValuePair} from "@/src/types/common";
 
-
-export type SortBy = {
-    field: string
-    descending?: boolean
-}
 
 export type DataListViewSettings = {
     limit: number
     offset: number
-    //  sortBy: SortBy
+    orderBy?: OrderBy
 }
 
-export type DataListViewSettingsChangeEvent = DataListViewSettings & {}
 
 interface Props {
     total: number
     limit: number
     offset: number
-    onChange: (e: DataListViewSettingsChangeEvent) => void
+    orderBy?: OrderBy
+    orderByFields?: KeyValuePair[]
+    onChange: (e: DataListViewSettings) => void
 }
 
 export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                 offset,
                                                                 limit,
                                                                 total,
-                                                                onChange
+                                                                onChange,
+                                                                orderBy,
+                                                                orderByFields
                                                             }) => {
 
 
@@ -36,24 +37,34 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
         const _totalPages = Math.ceil(total / limit);
         const _pages = []
         for (let i = 0; i < _totalPages; ++i) _pages.push(i);
-
         return {pages: _pages, pageIndex: _pageIndex, totalPages: _totalPages}
     }, [offset, limit]);
 
     const handlePageChange = (newOffset: number) => {
         if (newOffset < 0 || newOffset >= total)
-            return
+            return;
 
         onChange({
             limit,
             offset: newOffset,
-            //  sortBy: sortBy
+            orderBy
+        })
+    }
+
+    const handleSortChange = (orderBy: string) => {
+
+
+        onChange({
+            limit,
+            offset,
+            orderBy: {
+                field: orderBy
+            }
         })
     }
 
     return (
-
-        <div className="w-full flex py-1 my-3 px-3">
+        <div className="w-full flex py-1 my-3 px-3 items-center">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
                 {" "}records
@@ -88,6 +99,15 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             }}>
                 <Icon shape="chevronDoubleRight" className="h-2"/>
             </Tab>
+            {
+                orderByFields && <div className={"mx-3 "}>
+                    <ChoiceEditor value={orderBy?.field} onChange={handleSortChange} menuPlacement={"top"}
+                                  placeholder={"Order By"} options={orderByFields}
+                                  optionValue={option => option.value} optionTitle={option => option.key}
+                    />
+                </div>
+            }
+
 
         </div>
 

@@ -9,17 +9,14 @@ import Button from "./common/forms/Button";
 import Authorize from "src/components/common/authorize/authorize";
 import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
 
-
-interface Props {
-
-}
-
 const defaultQuery = {
     nameContains: '',
     offset: 0,
     limit: 10,
+    orderBy: {
+        field: "Name"
+    }
 }
-
 
 const useQuery = useDocumentFinder;
 
@@ -27,9 +24,7 @@ export type DocumentSpecs = {
     nameContains: string
 
 }
-
-
-export default (props: Props) => {
+export default () => {
     const [queryState, newQuery] = useQuery(defaultQuery);
     const [creatingOn, setCreatingOn] = useState(false);
     const [findSpecs, setFindSpecs] = useState<DocumentSpecs>({
@@ -80,12 +75,16 @@ export default (props: Props) => {
 
                 </div>
 
-
                 {queryState.response !== null
                     ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
 
                         <DocumentList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
+                            orderByFields={[{value: "Name", key: "Name"}, {
+                                value: "Id",
+                                key: "Id"
+                            }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}

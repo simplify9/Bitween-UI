@@ -27,7 +27,6 @@ const Component: React.FC = () => {
     const [selectedRowsIds, setSelectedRowsIds] = useState<Array<string>>([]);
     const [openModal, setOpenModal] = useState<"CREATE_XCHANGE" | "BULK_RETRY" | "NONE">("NONE");
     const [findSpecs, setFindSpecs] = useState<ExchangeFindQuery>(defaultQuery);
-    console.log(findSpecs.fetchInterval)
     const [fetch, data] = useLazyXChangesQuery({pollingInterval: findSpecs.fetchInterval, refetchOnFocus: true})
 
     useEffect(() => {
@@ -68,7 +67,6 @@ const Component: React.FC = () => {
                     setOpenModal("NONE")
                 }}
             />}
-
             <ExchangeFinderPanel
                 isItemsSelected={selectedRowsIds.length > 0}
                 onBulkRetry={() => setOpenModal("BULK_RETRY")}
