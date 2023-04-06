@@ -206,7 +206,10 @@ interface QueryParams {
 export const formulateQueryString = (req: QueryParams) => {
 
     let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
+
     
+    if ('rawfiltersproperties' in req && req.rawfiltersproperties) query += `&filter=rawfiltersproperties:4:${req.rawfiltersproperties}`;
+
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;
