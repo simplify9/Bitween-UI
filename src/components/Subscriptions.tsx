@@ -13,6 +13,7 @@ import Authorize from "src/components/common/authorize/authorize";
 const defaultQuery = {
     nameContains: "",
     rawsubscriptionproperties: "",
+    rawfiltersproperties:'',
     offset: 0,
     limit: 20,
     orderBy: {
@@ -24,6 +25,7 @@ const defaultQuery = {
 export type SubscriptionSpecs = {
     nameContains: string
     rawsubscriptionproperties?: string
+    rawfiltersproperties?: string
 }
 
 const useQuery = useSubscriptionFinder;
@@ -40,6 +42,7 @@ const Component = ({}: Props) => {
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
         nameContains: '',
         rawsubscriptionproperties: '',
+        rawfiltersproperties: ''
     });
 
     const handleFindRequested = useCallback(() => {
@@ -48,6 +51,7 @@ const Component = ({}: Props) => {
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
             rawsubscriptionproperties: findSpecs.rawsubscriptionproperties,
+            rawfiltersproperties: findSpecs.rawfiltersproperties,
             offset: 0,
         });
     }, [findSpecs.nameContains, newQuery, queryState.lastSent])
