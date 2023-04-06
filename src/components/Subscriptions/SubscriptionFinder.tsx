@@ -37,6 +37,15 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                             />
                         </FormField>
                     }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Filter data" className="grow">
+                            <TextEditor placeholder="Filter data" value={value.rawfiltersproperties}
+                                        onChange={(t) => onChange({...value, rawfiltersproperties: t})}
+                            />
+                        </FormField>
+                    }
+                    
                     <Button
                         variant={"none"}
                         onClick={onFindRequested}
