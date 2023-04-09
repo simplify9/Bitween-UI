@@ -57,6 +57,14 @@ export interface ICreateSubscription {
     aggregationForId?: string;
 }
 
+export interface IDuplicateSubscription {
+    type: string;
+    documentId: string;
+    id?: number
+    name: string
+}
+
+
 export type AndMatchExpression = {
     type: "and"
 
