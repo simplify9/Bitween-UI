@@ -1,14 +1,22 @@
-import {ISubscription, SubscriptionTypeOptions} from "../../types/subscriptions";
+import {
+    ICreateSubscription,
+    IDuplicateSubscription,
+    ISubscription,
+    SubscriptionTypeOptions
+} from "../../types/subscriptions";
 import {useNavigate} from "react-router-dom";
 import {BsFillEyeFill} from "react-icons/bs";
 import Button from "src/components/common/forms/Button";
+import {IoCopy} from "react-icons/io5";
+import React from "react";
 
 interface Props {
     data: ISubscription[]
+    handelDuplicate: (data: ISubscription) => void
 }
 
-export const SubscriptionList: React.FC<Props> = ({data}) => {
-    let navigate = useNavigate();
+export const SubscriptionList: React.FC<Props> = ({data, handelDuplicate}) => {
+    const navigate = useNavigate();
     return (
 
         <table className="appearance-none min-w-full  ">
@@ -55,11 +63,18 @@ export const SubscriptionList: React.FC<Props> = ({data}) => {
                             {i.inactive ? 'Inactive' : "Active"}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-2 whitespace-nowrap">
-                            <Button variant={"none"} onClick={() => navigate(`${i.id}`)}
-                            >
-                                <BsFillEyeFill className={"text-primary-600"} size={21}/>
+                            <div className={"flex flex-row gap-3  text-primary-600"}>
+                                <Button variant={"none"} onClick={() => navigate(`${i.id}`)}
+                                >
+                                    <BsFillEyeFill size={21}/>
 
-                            </Button>
+                                </Button>
+                                <Button variant={"none"} onClick={() => {
+                                    handelDuplicate(i)
+                                }}>
+                                    <IoCopy/>
+                                </Button>
+                            </div>
                         </td>
 
                     </tr>
