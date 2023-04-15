@@ -1,8 +1,8 @@
-import React, {Fragment, useState} from "react";
+import React from "react";
 import ExchangeDocument from "src/components/exchanges/ExchangeDocument";
-import ExchangeDocumentModal from "src/components/exchanges/ExchangeDocumentModal";
 import {ExchangeDisplayStatus} from "src/types/xchange";
-import Pipe from "src/components/exchanges/ExchangeDataPipe";
+import {getDateDifferenceHumanized} from "src/utils/DateUtils";
+import dayjs from "dayjs";
 
 type Props = {
     inputKey: string
@@ -13,6 +13,8 @@ type Props = {
     outputBad: boolean | null
     failed: boolean
     status: boolean | null
+    finishedOn: string
+    startedOn: string
 }
 
 
@@ -25,32 +27,55 @@ const ExchangeJourney: React.FC<Props> = (
         mapperId,
         outputBad,
         failed,
-        status
+        status,
+        startedOn,
+        finishedOn
     }
 ) => {
-    const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
 
     const getHandlerStatus = (): ExchangeDisplayStatus => {
 
-        if (status) {
+        console.log(failed, !outputKey, status, responseBad, responseKey)
+
+        // if (failed) {
+        //     console.log(2)
+        //     return "bad"
+        // }
+        if (responseBad) {
+            console.log(3)
+
+            return "bad"
+        }
+        if (status === true) {
+            console.log(1)
             return "good"
         }
-        if (failed) {
-            return "bad"
-        }
-        if (failed && !outputKey) {
-            return "bad"
-        }
         if (!responseKey && !responseBad) {
-            return "pending"
+            console.log(4)
+            return "error"
         }
 
 
         return "good"
     }
-    const getMapperStatus = (): ExchangeDisplayStatus => {
 
+    const getLineColor = (k: string) => {
+        console.log("kine", k)
+        switch (k) {
+            case "good":
+                return "bg-primary-green"
+            case "pending":
+                return "bg-gray-400"
+            case "bad":
+                return "bg-yellow-400 "
+            case "error":
+                return "bg-red-500 "
+
+
+        }
+    }
+    const getMapperStatus = (): ExchangeDisplayStatus => {
 
         if (!mapperId || !outputKey) {
             return "pending"
@@ -63,33 +88,70 @@ const ExchangeJourney: React.FC<Props> = (
         return "good"
     }
 
-    return <Fragment>
-        {
-            Boolean(downloadUrl) &&
-            <ExchangeDocumentModal downloadUrl={downloadUrl!} name={downloadUrl} onClose={() => setDownloadUrl(null)}/>
-        }
-        <div className={"flex flex row justify-between items-center "}>
+    return <div className={"bg-white border rounded-lg overflow-hidden flex flex-col  "}>
 
 
-            <ExchangeDocument status={"good"} type={"receiver"}/>
-            <Pipe type={"Input"} onClick={() => setDownloadUrl(inputKey)} fileKey={inputKey} completed={true}/>
+        <div className={"flex flex-row  "}>
+            <div className={"w-1/3  rounded-bl-xl  "}>
+                <div className={`${getLineColor('good')} h-6 rounded-l-lg  mt-1 ml-1`}>
 
+                </div>
+                <div className={"border-r py-1 "}>
+                    <ExchangeDocument error={false} fileKey={inputKey} title={"Input"} completed={true} status={"good"}
+                                      type={"receiver"}/>
+                </div>
+            </div>
+            <div className={"w-1/3  "}>
+                <div className={` ${getLineColor(getMapperStatus())} h-6 text-center  mt-1 `}>
+                    {!mapperId && <span className={"text-xs text-white"}>Skipped</span>}
+                </div>
+                <div className={"border-r py-1 "}>
+                    <ExchangeDocument error={Boolean(mapperId) && Boolean(failed) && !outputKey}
+                                      completed={!mapperId || Boolean(outputKey)} fileKey={outputKey} title={"Mapping"}
+                                      status={getMapperStatus()}
+                                      type={mapperId ? "mapper" : "skipped"}/>
+                </div>
 
-            <ExchangeDocument status={getMapperStatus()} type={mapperId ? "mapper" : "skipped"}/>
-            <Pipe type={"Mapper output"} fileKey={outputKey} onClick={() => setDownloadUrl(outputKey)}
-                  error={Boolean(mapperId) && Boolean(failed) && !outputKey}
-                  completed={!mapperId || Boolean(outputKey)}/>
+            </div>
+            <div className={"w-1/3   "}>
+                <div className={` h-6 rounded-r-lg  mt-1 mr-1 ${getLineColor(getHandlerStatus())}`}/>
+                <div className={" py-1 "}>
 
-
-            <ExchangeDocument status={getHandlerStatus()} type={"handler"}/>
-            <Pipe type={"Response"} fileKey={responseKey} onClick={() => setDownloadUrl(responseKey)}
-                  completed={status || Boolean(responseKey)}
-                  bad={Boolean(responseBad)}
-
-                  error={failed}/>
-
+                    <ExchangeDocument completed={status || Boolean(responseKey)}
+                                      error={failed}
+                                      bad={Boolean(responseBad)} fileKey={responseKey} title={"Handled"}
+                                      status={getHandlerStatus()}
+                                      type={"handler"}/>
+                </div>
+            </div>
 
         </div>
-    </Fragment>
+        <div className={"flex bg-gray-100 text-xs flex-row gap-3 pt-1 px-2"}>
+            <span>  {finishedOn ? `ELAPSED TIME ${getDateDifferenceHumanized(finishedOn, startedOn)}` : "Running"}</span>
+            <span><span
+                className={"text-gray-400"}>Started </span> {getDateDifferenceHumanized(dayjs().toDate(), startedOn)}<span
+                className={"text-gray-400 ml-1"}>ago </span></span>
+        </div>
+        {/*<div className={"flex flex row justify-between items-center "}>*/}
+        {/*    */}
+        {/*    <ExchangeDocument status={"good"} type={"receiver"}/>*/}
+
+
+        {/*    <ExchangeDocument status={getMapperStatus()} type={mapperId ? "mapper" : "skipped"}/>*/}
+        {/*    <Pipe type={"Mapper output"} fileKey={outputKey} onClick={() => setDownloadUrl(outputKey)}*/}
+        {/*          error={Boolean(mapperId) && Boolean(failed) && !outputKey}*/}
+        {/*          completed={!mapperId || Boolean(outputKey)}/>*/}
+
+
+        {/*    <ExchangeDocument status={getHandlerStatus()} type={"handler"}/>*/}
+        {/*    <Pipe type={"Response"} fileKey={responseKey} onClick={() => setDownloadUrl(responseKey)}*/}
+        {/*          completed={status || Boolean(responseKey)}*/}
+        {/*          bad={Boolean(responseBad)}*/}
+
+        {/*          error={failed}/>*/}
+
+
+        {/*</div>*/}
+    </div>
 }
 export default React.memo(ExchangeJourney)
