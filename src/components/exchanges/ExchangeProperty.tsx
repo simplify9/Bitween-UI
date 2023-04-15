@@ -7,7 +7,7 @@ interface Props {
 const ExchangeProperty: React.FC<Props> = ({label, value, className}) => {
     if (!value) return <></>;
     return (
-        <div className={"px-1 rounded-full " + className ?? ''}><strong>{label}</strong>: {value}</div>
+        <div className={"px-2 py-1 rounded-full border " + className ?? ''}><strong>{label}</strong>: {value}</div>
     )
 }
 

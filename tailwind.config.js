@@ -22,6 +22,7 @@ module.exports = {
                 "primary-700": "#bf2716",
                 "primary-800": "#9e2416",
                 "primary-900": "#832419",
+                "primary-green":"#48BB78"
             }
         },
     },
