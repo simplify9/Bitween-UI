@@ -46,24 +46,20 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                 <thead className="border-y bg-white">
                 <tr className={"border-l-8 border-white"}>
                     <th scope="col" className="text-sm font-medium  px-2 py-2 text-left  ">
-
                     </th>
-                    <th scope="col" className="text-sm font-medium text-gray-500 px-2 py-2 text-left border-r">
-                        Subscription
+                    <th scope="col" className="text-sm font-medium text-gray-500 px-2 py-2  text-left ">
                     </th>
-
                     <th scope="col"
                         className="text-sm font-medium text-gray-500  px-2 py-2 text-left w-[393px] border-r">
-                        Progression
-                    </th>
-                    <th scope="col" className="text-sm font-medium text-gray-500  px-2 py-2 text-left">
-                        Properties
-                    </th>
-                    <th scope="col" className="text-sm font-medium text-gray-500  px-2 py-2 text-left border-r">
-                        Status
                     </th>
                     <th scope="col" className="text-sm font-medium text-gray-500  px-6 py-2 text-left border-r">
-                        Optiopns
+                        Properties
+                    </th>
+                    <th scope="col" className="text-sm font-medium text-gray-500  px-2 py-2 text-center border-r">
+                        Status
+                    </th>
+                    <th scope="col" className="text-sm font-medium text-gray-500  px-6 py-2 text-center border-r">
+                        Options
                     </th>
 
                 </tr>
@@ -83,21 +79,33 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                 </div>
 
                             </td>
-                            <td className="text-sm text-gray-900 font-light px-2 py-2 whitespace-nowrap">
-                                <div className={"flex flex-col gap-2"}>
+                            <td className="text-sm text-gray-900 font-light px-1 py-2 min-w-[153px] max-w-[240px]">
+                                <div className={"flex flex-col gap-2 "}>
                                     <NavLink to={`/documents/${i.documentId}`}>
                                         <div
-                                            className={"flex items-center gap-x-2  cursor-pointer border rounded-[12px] px-3 py-2"}>
+                                            title={i.documentName}
+                                            className={"flex items-center gap-x-2  cursor-pointer border rounded-[12px] px-1 py-2"}>
                                             <img src={"/Icons/document.svg"} className={"h-5"}/>
-                                            {i.documentName}
+                                            <p>
+                                                {i.documentName}
+
+                                            </p>
                                         </div>
                                     </NavLink>
                                     {
                                         i.subscriptionId && <NavLink to={`/subscriptions/${i.subscriptionId}`}>
                                             <div
-                                                className={"flex items-center gap-x-2  cursor-pointer border rounded-[12px] px-3 py-2"}>
-                                                <img src={"/Icons/subscription.svg"} className={"h-5"}/>
-                                                {i.subscriptionName}
+                                                title={i.subscriptionName}
+                                                className={"flex items-center gap-x-2  cursor-pointer border rounded-[12px] px-1 py-2 overflow-hidden"}>
+                                                <img src={"/Icons/subscription.svg"} className={"h-5 z-10"}/>
+
+                                             
+                                                    <p className="truncate ">
+                                                        {(i.subscriptionName + i.subscriptionName + i.subscriptionName)}
+
+                                                    </p>
+                                             
+
                                             </div>
                                         </NavLink>
                                     }
@@ -121,7 +129,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
 
                             <td className="  ">
                                 <div
-                                    className={"flex gap-2 px-4 py-2 flex   flex-wrap "}>
+                                    className={"flex gap-2 px-3 py-2 flex   flex-wrap "}>
                                     <ExchangeProperty className={"text-xs bg-primary-400 text-white "} label={"Id"}
                                                       value={i.id}/>
 
