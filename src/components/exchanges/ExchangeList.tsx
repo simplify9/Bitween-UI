@@ -2,12 +2,11 @@ import ExchangeStatus from "./ExchangeStatus"
 import {IXchange} from "src/types/xchange";
 import ExchangeProperty from "./ExchangeProperty";
 import React, {useState} from "react";
-import {getDateDifferenceHumanized} from "src/utils/DateUtils";
 import ExchangeJourney from "src/components/exchanges/ExchangeJourney";
 import RetryModal from "src/components/exchanges/RetryModal";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
-import dayjs from "dayjs";
 import {NavLink} from "react-router-dom";
+import {MdLoop} from "react-icons/md"
 
 interface Props {
     data: IXchange[]
@@ -52,16 +51,19 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                     <th scope="col" className="text-sm font-medium text-gray-500 px-2 py-2 text-left border-r">
                         Subscription
                     </th>
-                   
-                    <th scope="col" colSpan={7}
-                        className="text-sm font-medium text-gray-500  px-6 py-2 text-left min-w-[420px] border-r">
+
+                    <th scope="col"
+                        className="text-sm font-medium text-gray-500  px-2 py-2 text-left w-[393px] border-r">
                         Progression
                     </th>
-                    <th scope="col"  className="text-sm font-medium text-gray-500  px-4 py-2 text-left">
+                    <th scope="col" className="text-sm font-medium text-gray-500  px-2 py-2 text-left">
                         Properties
                     </th>
                     <th scope="col" className="text-sm font-medium text-gray-500  px-2 py-2 text-left border-r">
                         Status
+                    </th>
+                    <th scope="col" className="text-sm font-medium text-gray-500  px-6 py-2 text-left border-r">
+                        Optiopns
                     </th>
 
                 </tr>
@@ -74,10 +76,10 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                         >
                             <td className="text-sm text-gray-900 font-light whitespace-nowrap ">
                                 <div className={"flex flex-row items-center  ml-3"}>
-                                    
-                                        <CheckBoxEditor onChange={() => onClickRow(i.id)}
-                                                        checked={selectedRowsIds.includes(i.id)}/>
-                                 
+
+                                    <CheckBoxEditor onChange={() => onClickRow(i.id)}
+                                                    checked={selectedRowsIds.includes(i.id)}/>
+
                                 </div>
 
                             </td>
@@ -102,26 +104,29 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
 
                                 </div>
                             </td>
-                          
 
-                            <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap" colSpan={6}>
+
+                            <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap">
                                 <ExchangeJourney
                                     finishedOn={i.finishedOn}
                                     startedOn={i.startedOn}
                                     status={i.status} failed={Boolean(i.exception)} outputBad={i.outputBad}
-                                                 mapperId={i.mapperId}
-                                                 responseBad={i.responseBad}
-                                                 outputKey={i.outputKey}
-                                                 inputKey={i.inputKey}
-                                                 responseKey={i.responseKey}/>
-                                
+                                    mapperId={i.mapperId}
+                                    responseBad={i.responseBad}
+                                    outputKey={i.outputKey}
+                                    inputKey={i.inputKey}
+                                    responseKey={i.responseKey}/>
+
                             </td>
 
-                            <td className="  " colSpan={2}>
+                            <td className="  ">
                                 <div
                                     className={"flex gap-2 px-4 py-2 flex   flex-wrap "}>
-                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "} label={"Id"} value={i.id}/>
-                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "} label={"Correlation Id"}
+                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "} label={"Id"}
+                                                      value={i.id}/>
+
+                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "}
+                                                      label={"Correlation Id"}
                                                       value={i.correlationId}/>
                                     {
                                         i.retryFor &&
@@ -136,13 +141,18 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                 </div>
                             </td>
 
-                            <td  className="text-sm text-gray-900 font-light px-2 py-2 whitespace-nowrap z-10">
+                            <td className="text-sm text-gray-900 font-light px-2 py-2 whitespace-nowrap z-10">
                                 <ExchangeStatus
                                     status={i.status!} responseBad={i.responseBad}
-                                    onClick={() => {
-                                        setShowExceptionFor(i.id)
-                                    }}
+
                                 />
+
+                            </td>
+                            <td className="text-sm text-gray-900 font-light px-2 py-2 whitespace-nowrap z-10">
+                                <div className={"flex items-center justify-center"}>
+                                    <MdLoop className={"text-gray-500"} size={24}
+                                            onClick={() => setShowExceptionFor(i.id)}/>
+                                </div>
 
                             </td>
 

@@ -61,18 +61,27 @@ const ExchangeJourney: React.FC<Props> = (
     }
 
     const getLineColor = (k: string) => {
-        console.log("kine", k)
         switch (k) {
             case "good":
-                return "bg-primary-green"
+                return "bg-primary-green "
             case "pending":
-                return "bg-gray-400"
+                return "bg-gray-400 "
             case "bad":
                 return "bg-yellow-400 "
             case "error":
                 return "bg-red-500 "
-
-
+        }
+    }
+    const getFooterColor = (k: string) => {
+        switch (k) {
+            case "good":
+                return "bg-green-100"
+            case "pending":
+                return "bg-gray-100"
+            case "bad":
+                return "bg-yellow-100 "
+            case "error":
+                return "bg-red-100 "
         }
     }
     const getMapperStatus = (): ExchangeDisplayStatus => {
@@ -126,8 +135,10 @@ const ExchangeJourney: React.FC<Props> = (
             </div>
 
         </div>
-        <div className={"flex bg-gray-100 text-xs flex-row gap-3 pt-1 px-2"}>
-            <span>  {finishedOn ? `ELAPSED TIME ${getDateDifferenceHumanized(finishedOn, startedOn)}` : "Running"}</span>
+        <div
+            className={`flex ${getFooterColor(getHandlerStatus())} bg-gray-100 text-xs flex-row gap-3 pt-0.5 pb-1 px-2`}>
+            <span>  {finishedOn ? <span> <span
+                className={"text-gray-400"}>Elapsed Time</span> {getDateDifferenceHumanized(finishedOn, startedOn)}</span> : "Running"}</span>
             <span><span
                 className={"text-gray-400"}>Started </span> {getDateDifferenceHumanized(dayjs().toDate(), startedOn)}<span
                 className={"text-gray-400 ml-1"}>ago </span></span>
