@@ -6,6 +6,7 @@ type UserSliceState = {
     refreshToken: string | undefined;
     isLoggedIn: boolean
     userInfo: AccountModel | undefined
+    isLoading: false
 }
 
 
@@ -13,7 +14,8 @@ const initialState: UserSliceState = {
     accessToken: undefined,
     refreshToken: undefined,
     isLoggedIn: false,
-    userInfo: undefined
+    userInfo: undefined,
+    isLoading: false
 }
 export const userSlice = createSlice({
     name: "user",
@@ -33,7 +35,10 @@ export const userSlice = createSlice({
         },
         setAccountInfo: (state, action: PayloadAction<AccountModel>) => {
             state.userInfo = action.payload;
-        }
+        },
+        setIsLoading: (state, action: PayloadAction<AccountModel>) => {
+            state.userInfo = action.payload;
+        },
     }
 });
 

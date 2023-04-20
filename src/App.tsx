@@ -20,18 +20,21 @@ import Header from "src/components/common/layout/Header";
 import NavBar from "src/components/common/layout/NavBar";
 import Team from "src/components/Team";
 import Footer from "src/components/common/layout/Footer";
+import {useSelector} from "react-redux";
+import LoadingIndicator from "src/components/common/LoadingIndicator";
 
 function App() {
     const [isOpen, setIsOpen] = useState(true);
 
     const {isLoggedIn} = useAuthApi();
 
-
+   
     if (!isLoggedIn) return <Login/>;
 
     return (
         <>
             <ToastContainer/>
+            <LoadingIndicator/>
             <Router>
                 <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
 
