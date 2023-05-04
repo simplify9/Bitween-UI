@@ -14,7 +14,6 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
         const offsetMs = date.getTimezoneOffset() * 60 * 1000; // Convert offset to milliseconds
         const dateWithOffset = new Date(date.getTime() - offsetMs); // Apply offset to create new date object
         const isoString = dateWithOffset.toISOString(); // Convert to ISO string
-        console.log("x",isoString)
         onChange(isoString);
     }
     return (

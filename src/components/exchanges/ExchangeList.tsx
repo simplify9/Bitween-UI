@@ -116,6 +116,7 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
 
                             <td className="text-sm text-gray-900 font-light  py-2 whitespace-nowrap">
                                 <ExchangeJourney
+                                    hasSubscription={!!i.subscriptionId}
                                     finishedOn={i.finishedOn}
                                     startedOn={i.startedOn}
                                     status={i.status} failed={Boolean(i.exception)} outputBad={i.outputBad}

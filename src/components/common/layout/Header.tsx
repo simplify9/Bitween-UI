@@ -7,7 +7,6 @@ const Header = () => {
     const location = useLocation()
 
     const pathName = location.pathname.split("/")?.[1]?.trim()
-    console.log({pathName})
     return <nav className="relative bg-white rounded-lg shadow ">
         <div className=" px-5  py-4 mx-auto">
             <div className="lg:flex lg:items-center lg:justify-between">

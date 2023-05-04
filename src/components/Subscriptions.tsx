@@ -93,7 +93,6 @@ const Component = ({}: Props) => {
         setDataToDuplicate(data)
         setOpenModal("DUPLICATE")
     }
-    console.log({dataToDuplicate})
     return (
         <>
             <div className="flex flex-col w-full  md:max-w-[1000px]">
