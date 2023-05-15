@@ -20,7 +20,6 @@ const ExchangeDocument: React.FC<Props> = ({type, status, title, fileKey, bad, c
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
     const getIconClasses = () => {
-        console.log("getIconClasses", status)
         if (status == "good") {
             return "text-primary-green font-medium "
         }

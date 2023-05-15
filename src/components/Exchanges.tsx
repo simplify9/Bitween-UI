@@ -44,7 +44,6 @@ const Component: React.FC = () => {
     }, [defaultQuery])
 
     const onChangeFindSpecs = useCallback((spec: ExchangeFindQuery) => {
-        console.log(spec)
         setFindSpecs((s) => ({
             ...spec,
             limit: defaultQuery.limit,

@@ -15,6 +15,7 @@ type Props = {
     status: boolean | null
     finishedOn: string
     startedOn: string
+    hasSubscription: boolean
 }
 
 
@@ -29,30 +30,23 @@ const ExchangeJourney: React.FC<Props> = (
         failed,
         status,
         startedOn,
-        finishedOn
+        finishedOn,
+        hasSubscription
     }
 ) => {
 
 
     const getHandlerStatus = (): ExchangeDisplayStatus => {
-
-        console.log(failed, !outputKey, status, responseBad, responseKey)
-
-        // if (failed) {
-        //     console.log(2)
-        //     return "bad"
-        // }
+        if (!hasSubscription) {
+            return 'pending'
+        }
         if (responseBad) {
-            console.log(3)
-
             return "bad"
         }
         if (status === true) {
-            console.log(1)
             return "good"
         }
         if (!responseKey && !responseBad) {
-            console.log(4)
             return "error"
         }
 
@@ -86,9 +80,12 @@ const ExchangeJourney: React.FC<Props> = (
     }
     const getMapperStatus = (): ExchangeDisplayStatus => {
 
+       
+        
         if (!mapperId || !outputKey) {
             return "pending"
         }
+        
         if (failed && !outputKey) {
             return "bad"
         }
@@ -98,8 +95,6 @@ const ExchangeJourney: React.FC<Props> = (
     }
 
     return <div className={"bg-white border rounded-lg overflow-hidden flex flex-col  "}>
-
-
         <div className={"flex flex-row  "}>
             <div className={"w-1/3  rounded-bl-xl  "}>
                 <div className={`${getLineColor('good')} h-6 rounded-l-lg  mt-1 ml-1`}>
@@ -118,7 +113,8 @@ const ExchangeJourney: React.FC<Props> = (
                     <ExchangeDocument error={Boolean(mapperId) && Boolean(failed) && !outputKey}
                                       completed={!mapperId || Boolean(outputKey)} fileKey={outputKey} title={"Mapping"}
                                       status={getMapperStatus()}
-                                      type={mapperId ? "mapper" : "skipped"}/>
+                                      type={mapperId ? "mapper" : "skipped"}
+                    />
                 </div>
 
             </div>
@@ -130,7 +126,8 @@ const ExchangeJourney: React.FC<Props> = (
                                       error={failed}
                                       bad={Boolean(responseBad)} fileKey={responseKey} title={"Handled"}
                                       status={getHandlerStatus()}
-                                      type={"handler"}/>
+                                      type={"handler"}
+                    />
                 </div>
             </div>
 
