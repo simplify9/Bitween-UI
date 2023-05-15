@@ -58,7 +58,7 @@ jobs:
           chartVersion: $(version)
           releaseName: '$(imageName)'
           arguments: >
-            --set ingress.host={infolink-stg.aramex.com}
+            --set ingress.host=infolink-stg.aramex.com
             --set image.repo="azrinfoaxscrprod.azurecr.io"
 
   - job: buildProd
