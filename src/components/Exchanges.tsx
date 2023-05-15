@@ -43,7 +43,15 @@ const Component: React.FC = () => {
         fetch(defaultQuery)
     }, [defaultQuery])
 
-    const onChangeFindSpecs = useCallback((spec: DataListViewSettings | ExchangeFindQuery) => {
+    const onChangeFindSpecs = useCallback((spec: ExchangeFindQuery) => {
+        setFindSpecs((s) => ({
+            ...spec,
+            limit: defaultQuery.limit,
+            offset: defaultQuery.offset
+        }));
+    }, [])
+
+    const onChangePaging = useCallback((spec: DataListViewSettings) => {
         setFindSpecs((s) => ({
             ...s,
             ...spec,
@@ -82,14 +90,13 @@ const Component: React.FC = () => {
                         selectedRowsIds={selectedRowsIds}
                         setSelectedRowsIds={setSelectedRowsIds}
                         data={data.data.result}
-                        refresh={handleFindRequested
-                        }
+                        refresh={handleFindRequested}
                     />
                     <DataListViewSettingsEditor
                         total={data.data.totalCount}
                         offset={findSpecs.offset}
                         limit={findSpecs.limit}
-                        onChange={onChangeFindSpecs}
+                        onChange={onChangePaging}
                     />
                 </div>
             }

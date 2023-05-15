@@ -59,5 +59,5 @@ export type ExchangeFindQuery = CommonFindQuery & {
     fetchInterval: number
 }
 
-export type ExchangeDisplayStatus = "good" | "pending" | "bad"
+export type ExchangeDisplayStatus = "good" | "pending" | "bad" | "error"
 export type ExchangeDisplayType = "receiver" | "mapper" | "handler" | "skipped"

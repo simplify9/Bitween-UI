@@ -1,5 +1,4 @@
-import React from "react";
-import {AiFillFile} from "react-icons/ai";
+import React, {Fragment} from "react";
 
 type Props = {
     completed: boolean,
@@ -11,21 +10,20 @@ type Props = {
 }
 const Pipe: React.FC<Props> = ({completed, error, onClick, bad, fileKey, type}) => {
 
-    const color = `${bad ? "bg-yellow-400" : error ? " bg-red-400 " : completed ? " bg-teal-400 " : " bg-gray-400 "}`
-    return <div
+    const color = `${bad ? "bg-yellow-400" : error ? " bg-red-400 " : completed ? " bg-primary-green " : " bg-gray-400 "}`
+    return <Fragment
 
-        className={`h-2  relative flex items-center justify-center ${color} w-full rounded-full -mx-2 z-0 `}>
-
+    >
         {
             fileKey &&
             <div title={type}
                  key={`${fileKey}_${type}`} onClick={onClick}
-                 className={`absolute left-1/3 flex items-center justify-center rounded-full p-1 ${onClick ? "cursor-pointer" : ""} w-7 h-7 ${color}`}>
-                <AiFillFile size={16} className={"text-white "}/>
+                 className={` ${onClick ? "cursor-pointer" : ""} flex justify-center items-center rounded p-1 w-6 h-6 ${color} `}>
+                <img src={"/Icons/document-white.svg"} color={'white'} className={"h-5 text-white"}/>
             </div>
         }
 
-    </div>
+    </Fragment>
 }
 
 export default Pipe

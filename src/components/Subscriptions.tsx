@@ -4,7 +4,7 @@ import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataLis
 import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
 import {apiClient} from "../client";
-import {ICreateSubscription} from "../types/subscriptions";
+import {ICreateSubscription, IDuplicateSubscription, ISubscription} from "../types/subscriptions";
 import Button from "./common/forms/Button";
 import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
 import Authorize from "src/components/common/authorize/authorize";
@@ -13,7 +13,7 @@ import Authorize from "src/components/common/authorize/authorize";
 const defaultQuery = {
     nameContains: "",
     rawsubscriptionproperties: "",
-    rawfiltersproperties:'',
+    rawfiltersproperties: '',
     offset: 0,
     limit: 20,
     orderBy: {
@@ -36,7 +36,9 @@ interface Props {
 
 const Component = ({}: Props) => {
 
-    const [creatingOn, setCreatingOn] = useState(false);
+    const [openModal, setOpenModal] = useState<"NONE" | "ADD" | "DUPLICATE">("NONE");
+    const [dataToDuplicate, setDataToDuplicate] = useState<ISubscription | null>(null);
+
     const [queryState, newQuery] = useQuery(defaultQuery);
 
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
@@ -67,14 +69,30 @@ const Component = ({}: Props) => {
     }, [newQuery, queryState.lastSent])
 
     const createSubscription = useCallback(async (subscription: ICreateSubscription) => {
-        let res = await apiClient.createSubscription(subscription);
+        const res = await apiClient.createSubscription(subscription);
         if (res.succeeded) {
-            setCreatingOn(false);
+            setOpenModal("NONE");
             newQuery(queryState.lastSent)
         }
     }, [newQuery, queryState.lastSent])
 
 
+    const onDuplicateSubscription = async (data: IDuplicateSubscription) => {
+        const copiedFrom = await apiClient.findSubscription(dataToDuplicate.id.toString());
+        const newSubscription = await apiClient.createSubscription(data);
+        copiedFrom.data.inactive = true
+        copiedFrom.data.name = data.name
+        const res = await apiClient.updateSubscription(newSubscription.data, copiedFrom.data);
+        if (res.succeeded) {
+            setDataToDuplicate(null)
+            setOpenModal("NONE");
+            newQuery(queryState.lastSent)
+        }
+    }
+    const handelDuplicate = (data: ISubscription) => {
+        setDataToDuplicate(data)
+        setOpenModal("DUPLICATE")
+    }
     return (
         <>
             <div className="flex flex-col w-full  md:max-w-[1000px]">
@@ -83,7 +101,7 @@ const Component = ({}: Props) => {
                                              onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Editor"]}>
-                            <Button onClick={() => setCreatingOn(true)}
+                            <Button onClick={() => setOpenModal("ADD")}
                             >
                                 Add
                             </Button>
@@ -94,7 +112,7 @@ const Component = ({}: Props) => {
 
                 {queryState.response !== null
                     ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
-                        <SubscriptionList data={queryState.response.data}/>
+                        <SubscriptionList handelDuplicate={handelDuplicate} data={queryState.response.data}/>
                         <DataListViewSettingsEditor
                             orderByFields={[
                                 {value: "Name", key: "Name"},
@@ -112,8 +130,18 @@ const Component = ({}: Props) => {
                     : null}
 
             </div>
-            {creatingOn && <CreateNewSubscription onAdd={createSubscription}
-                                                  onClose={() => setCreatingOn(false)}/>}
+            {openModal === "ADD" && <CreateNewSubscription onAdd={createSubscription}
+                                                           onClose={() => setOpenModal("NONE")}/>}
+            {(openModal === "DUPLICATE" && dataToDuplicate) &&
+                <CreateNewSubscription initialState={{
+                    type: dataToDuplicate.type,
+                    documentId: dataToDuplicate.documentId,
+                    name:`${dataToDuplicate.name} (Copy)`
+                }} onAdd={onDuplicateSubscription}
+                                       onClose={() => {
+                                           setOpenModal("NONE")
+                                           setDataToDuplicate(null)
+                                       }}/>}
         </>
     )
 }

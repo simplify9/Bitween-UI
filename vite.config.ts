@@ -1,6 +1,6 @@
 import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import path from "path";
+import {posix} from "path";
 
 export default defineConfig({
     plugins: [react()],
@@ -13,8 +13,8 @@ export default defineConfig({
     },
     resolve: {
         alias: [
-            {find: "@/src", replacement: path.posix.resolve("/", "src")},
-            {find: "src", replacement: path.posix.resolve("/", "/src")}
+            {find: "@/src", replacement: posix.resolve("/", "src")},
+            {find: "src", replacement: posix.resolve("/", "/src")}
         ]
     },
 })

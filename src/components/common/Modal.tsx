@@ -37,7 +37,7 @@ const Component: React.FC<Props> = ({
                         className="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
 
                         <div
-                            className="relative flex flex-col justify-between min-h-[500px] h-auto grow bg-white rounded-lg text-left overflow-scroll overflow-y-auto  shadow-xl transform transition-all  sm:max-w-screen-lg sm:w-full">
+                            className="relative flex flex-col justify-between min-h-[400px] h-auto grow bg-white rounded-lg text-left overflow-scroll overflow-y-auto  shadow-xl transform transition-all  sm:max-w-screen-lg sm:w-full">
                             <div
                                 className={classes("sm:items-start px-4 pt-5 pb-4 sm:p-3 sm:pb-2 h-100 overflow-y-visible ", bodyContainerClasses)}>
                                 {children}
