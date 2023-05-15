@@ -57,13 +57,14 @@ jobs:
           chartName: $(Build.ArtifactStagingDirectory)/$(imageName)-$(version).tgz
           chartVersion: $(version)
           releaseName: '$(imageName)'
+          arguments: >
+            --set ingress.host={infolink-stg.aramex.com}
+            --set image.repo="azrinfoaxscrprod.azurecr.io"
 
   - job: buildProd
-    dependsOn: buildStg
     displayName: Build, push image and chart and deploy to prod
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
     steps:
-
       - task: Docker@2
         displayName: Build and push an image to container registry
         inputs:
