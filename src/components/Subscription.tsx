@@ -280,7 +280,7 @@ const Component = () => {
             <div className={"flex flex-row justify-between w-full gap-2"}>
 
                 <div>
-                    <Authorize roles={["Admin", "Editor"]}>
+                    <Authorize roles={["Admin", "Member"]}>
                         <Button variant={"secondary"} onClick={deleteSubscription}
                         >
                             Delete
@@ -288,7 +288,7 @@ const Component = () => {
                     </Authorize>
                 </div>
                 <div className={"flex flex-row"}>
-                    <Authorize roles={["Admin", "Editor"]}>
+                    <Authorize roles={["Admin", "Member"]}>
                         <Button
                             onClick={updateSubscription}>
                             Save

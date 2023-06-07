@@ -100,7 +100,7 @@ const Component = ({}: Props) => {
                     <SubscriptionFinderPanel searchAdapterData value={findSpecs} onChange={setFindSpecs}
                                              onFindRequested={handleFindRequested}/>
                     <div>
-                        <Authorize roles={["Admin", "Editor"]}>
+                        <Authorize roles={["Admin", "Member"]}>
                             <Button onClick={() => setOpenModal("ADD")}
                             >
                                 Add
