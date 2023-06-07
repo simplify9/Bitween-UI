@@ -2,7 +2,7 @@ import React from "react";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
 type Props = {
-    roles: Array<"Admin" | "Editor" | "Viewer">
+    roles: Array<"Admin" | "Member" | "Viewer">
     children: JSX.Element
 }
 const Authorize: React.FC<Props> = ({roles, children}) => {

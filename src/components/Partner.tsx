@@ -85,7 +85,7 @@ const Component = () => {
                 </div>
                 <div className=" mt-5  flex  w-full ">
 
-                    <Authorize roles={["Admin", "Editor"]}>
+                    <Authorize roles={["Admin", "Member"]}>
 
                         <KeyValueEditor hideEmptyLabel values={updatePartnerData?.apiCredentials}
                                         title={'Api Credentials'}
@@ -98,7 +98,7 @@ const Component = () => {
                 </div>
                 <div className={"flex w-full flex-row-reverse gap-2 mt-3"}>
 
-                    <Authorize roles={["Admin", "Editor"]}>
+                    <Authorize roles={["Admin", "Member"]}>
                         <Button
                             onClick={updatePartner}
                         >Save

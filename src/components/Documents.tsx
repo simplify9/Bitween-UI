@@ -64,7 +64,7 @@ export default () => {
                     <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
                                              onFindRequested={handleFindRequested}/>
                     <div>
-                        <Authorize roles={["Admin", "Editor"]}>
+                        <Authorize roles={["Admin", "Member"]}>
 
                             <Button onClick={() => setCreatingOn(true)}
                             >

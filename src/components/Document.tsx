@@ -89,7 +89,7 @@ const Component = () => {
                     >
                         Trail
                     </Button>
-                    <Authorize roles={["Admin", "Editor"]}>
+                    <Authorize roles={["Admin", "Member"]}>
 
                         <Button onClick={deleteDocument}
                         >
@@ -162,7 +162,7 @@ const Component = () => {
 
             <div className={"flex w-full gap-2 flex flex-row-reverse"}>
 
-                <Authorize roles={["Admin", "Editor"]}>
+                <Authorize roles={["Admin", "Member"]}>
 
                     <Button
                         onClick={updateDocument}

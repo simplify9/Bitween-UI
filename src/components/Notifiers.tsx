@@ -23,7 +23,7 @@ const Notifiers: React.FC = () => {
                     className="flex flex-row-reverse justify-between w-full items-center shadow-lg p-2 my-2  rounded-lg bg-white ">
 
                     <div>
-                        <Authorize roles={["Admin", "Editor"]}>
+                        <Authorize roles={["Admin", "Member"]}>
 
                             <Button onClick={() => setOpenModal("CREATE")}
                             >

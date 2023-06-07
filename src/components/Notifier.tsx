@@ -91,7 +91,7 @@ const Notifier = () => {
 
         <div className={"flex w-full flex-row-reverse gap-2 mt-8"}>
 
-            <Authorize roles={["Admin", "Editor"]}>
+            <Authorize roles={["Admin", "Member"]}>
                 <Button
                     onClick={onUpdate}
                 >Save
