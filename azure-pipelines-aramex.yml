@@ -59,6 +59,8 @@ jobs:
           releaseName: '$(imageName)'
           arguments: >
             --set ingress.host=infolink-stg.aramex.com
+            --set image.repo="azrinfoaxsstg.azurecr.io"
+
 
   - job: buildProd
     displayName: Build, push image and chart and deploy to prod
