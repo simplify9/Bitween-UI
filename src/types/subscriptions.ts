@@ -5,6 +5,7 @@ export type SubscriptionFindQuery = CommonFindQuery & {
     nameContains: string
     rawsubscriptionproperties?: string
     rawfiltersproperties?: string
+    partnerId?: number | string
 }
 
 export interface ISubscription {

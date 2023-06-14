@@ -190,6 +190,7 @@ export type OrderBy = {
 }
 
 interface QueryParams {
+    partnerId?: number | string
     orderBy?: OrderBy
     offset: number;
     limit: number;
@@ -210,6 +211,7 @@ export const formulateQueryString = (req: QueryParams) => {
 
 
     if ('rawfiltersproperties' in req && req.rawfiltersproperties) query += `&filter=rawfiltersproperties:4:${req.rawfiltersproperties}`;
+    if ('partnerId' in req && req.partnerId) query += `&filter=partnerId:1:${req.partnerId}`;
 
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;

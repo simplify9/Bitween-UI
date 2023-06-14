@@ -3,7 +3,7 @@ import {ChoiceEditor} from "../common/forms/ChoiceEditor";
 
 
 interface Props {
-    value?: string
+    value?: string | number
     onChange: (value: string) => void
     disabled?: boolean
 }
@@ -23,7 +23,7 @@ const PartnerSelector: React.FC<Props> = ({value, onChange, disabled}) => {
         <ChoiceEditor
             placeholder="Select Partner"
             disabled={disabled}
-            value={value}
+            value={value?.toString()}
             onChange={onChange}
             options={queryState.response && queryState.response?.data !== null ? queryState.response?.data : []}
             optionValue={i => i.id}
