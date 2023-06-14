@@ -14,6 +14,7 @@ const defaultQuery = {
     nameContains: "",
     rawsubscriptionproperties: "",
     rawfiltersproperties: '',
+    partnerId: null,
     offset: 0,
     limit: 20,
     orderBy: {
@@ -26,6 +27,7 @@ export type SubscriptionSpecs = {
     nameContains: string
     rawsubscriptionproperties?: string
     rawfiltersproperties?: string
+    partnerId?: number | null | string
 }
 
 const useQuery = useSubscriptionFinder;
@@ -54,6 +56,7 @@ const Component = ({}: Props) => {
             nameContains: findSpecs.nameContains,
             rawsubscriptionproperties: findSpecs.rawsubscriptionproperties,
             rawfiltersproperties: findSpecs.rawfiltersproperties,
+            partnerId: findSpecs.partnerId,
             offset: 0,
         });
     }, [findSpecs.nameContains, newQuery, queryState.lastSent])
@@ -136,7 +139,7 @@ const Component = ({}: Props) => {
                 <CreateNewSubscription initialState={{
                     type: dataToDuplicate.type,
                     documentId: dataToDuplicate.documentId,
-                    name:`${dataToDuplicate.name} (Copy)`
+                    name: `${dataToDuplicate.name} (Copy)`
                 }} onAdd={onDuplicateSubscription}
                                        onClose={() => {
                                            setOpenModal("NONE")
