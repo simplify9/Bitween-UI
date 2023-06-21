@@ -70,6 +70,7 @@ const Component = () => {
     }, [])
 
 
+    console.log(updateSubscriptionData.responseSubscriptionId)
     if (!updateSubscriptionData) return <></>
 
     return (
@@ -88,7 +89,7 @@ const Component = () => {
             {/*</div>*/}
             <div
                 className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
-               
+
                 <div className=" ">
                     <FormField title="Name" className="grow">
                         <TextEditor value={updateSubscriptionData?.name}
@@ -147,7 +148,7 @@ const Component = () => {
                     >
                         Trail
                     </Button>
-                  
+
                 </div>
             </div>
 
@@ -179,7 +180,7 @@ const Component = () => {
                         <FormField title="Aggregation">
                             <SubscriptionSelector
                                 value={updateSubscriptionData.aggregationForId}
-                                onChange={(e)=>onChangeSubscriptionData("aggregationForId",updateSubscriptionData.aggregationForId)}
+                                onChange={(e) => onChangeSubscriptionData("aggregationForId", updateSubscriptionData.aggregationForId)}
                                 disabled={true}
                             />
                         </FormField>
@@ -266,6 +267,7 @@ const Component = () => {
                                 subscribtion</h6>
                             <SubscriptionSelector onChange={(t) => setUpdateSubscriptionData({
                                 ...updateSubscriptionData,
+                                responseSubscriptionId: Number(t)
                             })} value={updateSubscriptionData.responseSubscriptionId?.toString()}/>
                             <div className={"my-3"}/>
                             <FormField title="Response message type name" className="grow pt-2">
@@ -301,7 +303,7 @@ const Component = () => {
                         Cancel
                     </Button>
                 </div>
-                
+
             </div>
 
 
