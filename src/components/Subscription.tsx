@@ -263,8 +263,9 @@ const Component = () => {
                         />
 
                         <div className={"pt-1"}>
-                            <h6 className={"mb-2 mt-1 text-xs font-bold tracking-wide text-gray-700  uppercase"}>Response
-                                subscribtion</h6>
+                            <h6 className={"mb-2 mt-1 text-xs font-bold tracking-wide text-gray-700  uppercase"}>
+                                Response subscription
+                            </h6>
                             <SubscriptionSelector onChange={(t) => setUpdateSubscriptionData({
                                 ...updateSubscriptionData,
                                 responseSubscriptionId: Number(t)
