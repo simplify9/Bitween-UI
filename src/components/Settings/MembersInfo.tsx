@@ -2,34 +2,50 @@ import React, {useState} from "react";
 import {useMembersFinder} from "src/hooks/queryHooks";
 import {toLocalDateTimeString} from "src/utils/DateUtils";
 import AddMemberModal from "src/components/Settings/AddMemberModal";
-import {AccountModel} from "src/types/accounts";
-import {apiClient} from "src/client";
-import {MdOutlineRemoveCircle} from "react-icons/md";
+import {AccountModel, EditModal} from "src/types/accounts";
+import {MdOutlineRemoveCircle,MdModeEditOutline} from "react-icons/md";
 import Authorize from "src/components/common/authorize/authorize";
 import Button from "src/components/common/forms/Button";
+import EditMemberModal from "src/components/Settings/EditMemberModal";
+import {useFindMembersQuery, useRemoveMemberMutation} from "src/client/apis/generalApi";
 
-const useQuery = useMembersFinder;
 
 const defaultQuery = {
     offset: 0,
     limit: 100,
 }
+
 const MembersInfo: React.FC = () => {
+const {data}=useFindMembersQuery(defaultQuery)
+ const [removeMember]=useRemoveMemberMutation()
+    const [openModal, setOpenModal] = useState<"NONE" | "ADD" | "EDIT">("NONE");
+    const [memberToEdit, setMemberToEdit] = useState<EditModal | null>(null);
 
-    const [queryState, newQuery] = useQuery(defaultQuery);
-    const [openModal, setOpenModal] = useState<"NONE" | "ADD">("NONE");
-
-    const onRemoveMember = async (id: number) => {
-        await apiClient.removeMember(id)
-        newQuery(defaultQuery)
+const getRole=(role)=>{
+    switch (role){
+        case 'Admin':
+            return 0
+        case 'Viewer':
+            return 10
+        case 'Member':
+            return 20
     }
+}
+    const onRemoveMember = async (id: number) => {
+        await removeMember({id:id})
+    }
+
     return <div className={"bg-white p-3 shadow-lg rounded-lg "}>
         {
             openModal === "ADD" && <AddMemberModal onClose={() => {
-                newQuery(defaultQuery)
                 setOpenModal("NONE")
             }}/>
         }
+        {
+            openModal==="EDIT" && <EditMemberModal member={memberToEdit} onClose={()=>{
+                setOpenModal("NONE")
+
+            }}/> }
         <div className={"flex justify-between"}>
             <span className={"text-lg"}>
                         Members Info
@@ -43,7 +59,7 @@ const MembersInfo: React.FC = () => {
 
                 </Authorize>
             </div>
-            
+
 
 
         </div>
@@ -70,7 +86,7 @@ const MembersInfo: React.FC = () => {
                 </thead>
                 <tbody>
                 {
-                    queryState.response?.data?.result?.filter((i: AccountModel) => i.id != 9999)?.map((i: AccountModel) => (
+                   data && data?.result?.filter((i: AccountModel) => i.id != 9999)?.map((i: AccountModel) => (
                         <tr key={i.email} className="bg-white border-b">
                             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                 {i.role}
@@ -86,8 +102,16 @@ const MembersInfo: React.FC = () => {
                             </td>
                             <td className="text-sm  font-light px-6 py-4 whitespace-nowrap">
                                 <Authorize roles={["Admin"]}>
-                                    <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
-                                                           className={"text-yellow-400 cursor-pointer"}/>
+                                    <div className={'flex flex-row-reverse items-center gap-x-2'}>
+                                        <MdOutlineRemoveCircle onClick={() => onRemoveMember(i.id)} size={21}
+                                                               className={"text-yellow-400 cursor-pointer"}/>
+                                         <MdModeEditOutline className={"cursor-pointer"} onClick={()=>{
+                                             setMemberToEdit({id:i.id,name:i.name,role:getRole(i.role)})
+                                             setOpenModal("EDIT")
+                                         }} />
+
+                                    </div>
+
                                 </Authorize>
 
                             </td>

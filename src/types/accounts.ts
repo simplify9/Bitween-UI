@@ -41,6 +41,12 @@ export interface AccountModel {
     role: Role
 }
 
+export interface EditModal {
+    name: string
+    id: number
+    role: number
+}
+
 export interface CreateAccountModel {
     name: string
     email: string
