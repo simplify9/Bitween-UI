@@ -4,12 +4,14 @@ import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 import {NotifiersApi} from "src/client/apis/notifiersApi";
 import {SubscriptionApi} from "src/client/apis/subscriptionsApi";
 import {XchangeApi} from "src/client/apis/xchangeApi";
+import {GeneralApi} from "src/client/apis/generalApi";
 
 const reducers = combineReducers({
     user: userSlice.reducer,
     [NotifiersApi.reducerPath]: NotifiersApi.reducer,
     [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
-    [XchangeApi.reducerPath]: XchangeApi.reducer
+    [XchangeApi.reducerPath]: XchangeApi.reducer,
+    [GeneralApi.reducerPath]:GeneralApi.reducer
 
 });
 
@@ -21,6 +23,7 @@ export const store = configureStore({
             NotifiersApi.middleware,
             SubscriptionApi.middleware,
             XchangeApi.middleware,
+            GeneralApi.middleware
         ])
 });
 

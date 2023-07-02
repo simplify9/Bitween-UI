@@ -10,7 +10,6 @@ export interface BaseSearchModel {
 export type ApiPagedResponse<T> = {
     result: Array<T>,
     totalCount: number
-
 }
 
 export interface KeyValuePair {
