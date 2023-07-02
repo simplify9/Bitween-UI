@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="add update member feature">
-      <change afterPath="$PROJECT_DIR$/src/components/Settings/EditMemberModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/apis/generalApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/apis/generalApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Settings/MembersInfo.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Settings/MembersInfo.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/authorize/authorize.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/authorize/authorize.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/state/ReduxSotre.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/ReduxSotre.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/accounts.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/accounts.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/common.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
-    </list>
+    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="add update member feature" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -86,7 +76,7 @@
       <workItem from="1656947361183" duration="1711000" />
       <workItem from="1657534866726" duration="312000" />
       <workItem from="1657699828815" duration="5578000" />
-      <workItem from="1688292907914" duration="14620000" />
+      <workItem from="1688292907914" duration="15147000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -193,7 +183,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657707811737</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="add update member feature">
+      <created>1688313937628</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1688313937628</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
