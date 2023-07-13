@@ -74,8 +74,7 @@ stages:
               overrideValues: 'ingress.enabled=true,ingress.host=infolink.sf9.io'
               arguments: >
                 --repo https://charts.sf9.io
-                --set ingress.tls[0].secretName="infolink-tls"
-                --set ingress.tls[0].hosts={infolink.sf9.io}
+                --set ingress.tlsSecret="infolink-tls"
                 --set ingress.annotations."cert-manager\.io/cluster-issuer"="letsencrypt-nginx"
 
 
