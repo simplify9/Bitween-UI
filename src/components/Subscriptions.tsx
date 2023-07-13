@@ -1,41 +1,33 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useState} from "react";
 import {useSubscriptionFinder} from "../hooks/queryHooks";
-import {jsBoolean, jsNumber, jsString} from "redux-ecq";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
-import {DateTimeRange} from "./common/forms/DateTimeRangeEditor";
 import {apiClient} from "../client";
-import {ICreateSubscription} from "../types/subscriptions";
+import {ICreateSubscription, IDuplicateSubscription, ISubscription} from "../types/subscriptions";
 import Button from "./common/forms/Button";
 import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
+import Authorize from "src/components/common/authorize/authorize";
 
 
 const defaultQuery = {
     nameContains: "",
-    creationDateFrom: undefined,
-    creationDateTo: undefined,
+    rawsubscriptionproperties: "",
+    rawfiltersproperties: '',
+    partnerId: null,
     offset: 0,
     limit: 20,
-    sortBy: "docType",
-    sortByDescending: false
+    orderBy: {
+        field: "Name"
+    }
 }
 
-const queryStringMapping = {
-    keywords: jsString(),
-    creationDateFrom: jsString(),
-    creationDateTo: jsString(),
-    mode: jsString(),
-    sortBy: jsString(),
-    sortByDescending: jsBoolean(),
-    offset: jsNumber(),
-    limit: jsNumber()
-}
 
 export type SubscriptionSpecs = {
     nameContains: string
-    keywords: string
-    creationTimeWindow: DateTimeRange
+    rawsubscriptionproperties?: string
+    rawfiltersproperties?: string
+    partnerId?: number | null | string
 }
 
 const useQuery = useSubscriptionFinder;
@@ -46,17 +38,15 @@ interface Props {
 
 const Component = ({}: Props) => {
 
-    const [creatingOn, setCreatingOn] = useState(false);
+    const [openModal, setOpenModal] = useState<"NONE" | "ADD" | "DUPLICATE">("NONE");
+    const [dataToDuplicate, setDataToDuplicate] = useState<ISubscription | null>(null);
+
     const [queryState, newQuery] = useQuery(defaultQuery);
 
     const [findSpecs, setFindSpecs] = useState<SubscriptionSpecs>({
         nameContains: '',
-        keywords: queryState.lastSent.keywords ?? "",
-        creationTimeWindow: {
-            from: queryState.lastSent.creationDateFrom,
-            to: queryState.lastSent.creationDateTo
-        }
-
+        rawsubscriptionproperties: '',
+        rawfiltersproperties: ''
     });
 
     const handleFindRequested = useCallback(() => {
@@ -64,71 +54,97 @@ const Component = ({}: Props) => {
             ...defaultQuery,
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
-            creationDateFrom: findSpecs.creationTimeWindow.from,
-            creationDateTo: findSpecs.creationTimeWindow.to,
+            rawsubscriptionproperties: findSpecs.rawsubscriptionproperties,
+            rawfiltersproperties: findSpecs.rawfiltersproperties,
+            partnerId: findSpecs.partnerId,
             offset: 0,
         });
-    }, [findSpecs.creationTimeWindow.from, findSpecs.creationTimeWindow.to, findSpecs.nameContains, newQuery, queryState.lastSent])
+    }, [findSpecs.nameContains, newQuery, queryState.lastSent])
 
     const handleViewOptionsChange = useCallback((viewOptions: DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            sortBy: viewOptions.sortBy.field,
-            sortByDescending: !!viewOptions.sortBy.descending,
             offset: viewOptions.offset,
-            limit: viewOptions.limit
+            limit: viewOptions.limit,
+            orderBy: viewOptions.orderBy
         });
     }, [newQuery, queryState.lastSent])
 
     const createSubscription = useCallback(async (subscription: ICreateSubscription) => {
-        let res = await apiClient.createSubscription(subscription);
+        const res = await apiClient.createSubscription(subscription);
         if (res.succeeded) {
-            setCreatingOn(false);
+            setOpenModal("NONE");
             newQuery(queryState.lastSent)
         }
     }, [newQuery, queryState.lastSent])
 
 
- 
+    const onDuplicateSubscription = async (data: IDuplicateSubscription) => {
+        const copiedFrom = await apiClient.findSubscription(dataToDuplicate.id.toString());
+        const newSubscription = await apiClient.createSubscription(data);
+        copiedFrom.data.inactive = true
+        copiedFrom.data.name = data.name
+        const res = await apiClient.updateSubscription(newSubscription.data, copiedFrom.data);
+        if (res.succeeded) {
+            setDataToDuplicate(null)
+            setOpenModal("NONE");
+            newQuery(queryState.lastSent)
+        }
+    }
+    const handelDuplicate = (data: ISubscription) => {
+        setDataToDuplicate(data)
+        setOpenModal("DUPLICATE")
+    }
     return (
         <>
-            <div className="flex flex-col w-full px-8 py-4">
-                <div className="justify-between w-full flex py-4">
-                    <div
-                        className="text-2xl font-bold tracking-wide text-gray-700">Subscriptions
+            <div className="flex flex-col w-full  md:max-w-[1000px]">
+                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                    <SubscriptionFinderPanel searchAdapterData value={findSpecs} onChange={setFindSpecs}
+                                             onFindRequested={handleFindRequested}/>
+                    <div>
+                        <Authorize roles={["Admin", "Member"]}>
+                            <Button onClick={() => setOpenModal("ADD")}
+                            >
+                                Add
+                            </Button>
+                        </Authorize>
                     </div>
-                    <Button onClick={() => setCreatingOn(true)}
-                            className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                        Create New Subscription
-                    </Button>
+
                 </div>
-                <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
-                                         onFindRequested={handleFindRequested}/>
+
                 {queryState.response !== null
-                    ? <>
+                    ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
+                        <SubscriptionList handelDuplicate={handelDuplicate} data={queryState.response.data}/>
                         <DataListViewSettingsEditor
-                            sortByOptions={["subscription", "status", "docType"]}
-                            sortByTitles={{
-                                subscription: "Subscription",
-                                status: "Delivery Status",
-                                docType: "Document Type"
-                            }}
-                            sortBy={{
-                                field: queryState.lastSent.sortBy,
-                                descending: queryState.lastSent.sortByDescending
-                            }}
+                            orderByFields={[
+                                {value: "Name", key: "Name"},
+                                {value: "Id", key: "Id"},
+                                {
+                                    value: "DocumentId",
+                                    key: "Document"
+                                }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                        <SubscriptionList data={queryState.response.data}/>
-                    </>
+                    </div>
                     : null}
 
             </div>
-            {creatingOn && <CreateNewSubscription onAdd={createSubscription}
-                                                  onClose={() => setCreatingOn(false)}/>}
+            {openModal === "ADD" && <CreateNewSubscription onAdd={createSubscription}
+                                                           onClose={() => setOpenModal("NONE")}/>}
+            {(openModal === "DUPLICATE" && dataToDuplicate) &&
+                <CreateNewSubscription initialState={{
+                    type: dataToDuplicate.type,
+                    documentId: dataToDuplicate.documentId,
+                    name: `${dataToDuplicate.name} (Copy)`
+                }} onAdd={onDuplicateSubscription}
+                                       onClose={() => {
+                                           setOpenModal("NONE")
+                                           setDataToDuplicate(null)
+                                       }}/>}
         </>
     )
 }

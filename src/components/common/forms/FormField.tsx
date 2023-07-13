@@ -5,7 +5,7 @@ import Button from "src/components/common/forms/Button";
 
 type Props = JSX.IntrinsicElements['label'] & {
     title: string
-    actionTitle?: string
+    actionTitle?: string | JSX.Element
     onClickAction?: () => void
 }
 
@@ -17,12 +17,12 @@ const Component: React.FC<Props> = ({
                                         actionTitle,
                                         ...htmlProps
                                     }) => (
-    <label {...htmlProps} className={classes("mb-6 md:mb-0", className || "")}>
+    <label {...htmlProps} className={classes("mb-6 md:mb-1", className || "")}>
         <div
-            className="block uppercase overflow-hidden tracking-wide text-gray-700 text-xs font-bold mb-2 flex flex-row justify-between">
+            className="min-w-[221px] block uppercase overflow-hidden tracking-wide text-gray-700 text-xs font-bold mb-2 flex flex-row justify-between z-10">
             {title}
             {
-                onClickAction && <Button className={"bg-blue-900 rounded w-5 h-5 mr-1"}
+                onClickAction && <Button variant={"none"}
                                          onClick={onClickAction}>{actionTitle}</Button>
             }
 

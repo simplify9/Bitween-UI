@@ -49,13 +49,15 @@ export type CreateXchangeModel = {
 }
 
 export type ExchangeFindQuery = CommonFindQuery & {
-    mode: string
     subscription?: string
     status?: string
     id?: string
     correlationId?: string
     promotedProperties?: string
+    creationDateFrom?: string
+    creationDateTo?: string
+    fetchInterval: number
 }
 
-export type ExchangeDisplayStatus = "good" | "pending" | "bad"
+export type ExchangeDisplayStatus = "good" | "pending" | "bad" | "error"
 export type ExchangeDisplayType = "receiver" | "mapper" | "handler" | "skipped"

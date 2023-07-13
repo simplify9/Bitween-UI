@@ -5,6 +5,36 @@ import ReactJson from "react-json-view";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {xcode} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
+function removeInvalidXmlChars(input: string) {
+    const invalidChars = /[\x00-\x08\x0B\x0C\x0E-\x1F]/g;
+    //const sanitizedString = xmlString.replace(invalidChars, ' ');
+    //const invalidChars = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g;
+    // const invalidChar = /&#xB;/g;
+    // const sanitizedString = xmlString.replace(invalidChar, '&#x0B;');
+    return input.replace(invalidChars, '').replace(/&#xB;/g,'');
+}
+
+const prettifyXml = (sourceXml: string) => {
+    const xmlDoc = new DOMParser().parseFromString((sourceXml), 'application/xml');
+    const xsltDoc = new DOMParser().parseFromString([
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
+        '  <xsl:strip-space elements="*"/>',
+        '  <xsl:template match="para[content-style][not(text())]">',
+        '    <xsl:value-of select="normalize-space(.)"/>',
+        '  </xsl:template>',
+        '  <xsl:template match="node()|@*">',
+        '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
+        '  </xsl:template>',
+        '  <xsl:output indent="yes"/>',
+        '</xsl:stylesheet>',
+    ].join('\n'), 'application/xml');
+
+    const xsltProcessor = new XSLTProcessor();
+    xsltProcessor.importStylesheet(xsltDoc);
+    const resultDoc = xsltProcessor.transformToDocument(xmlDoc);
+    const resultXml = new XMLSerializer().serializeToString(resultDoc);
+    return resultXml;
+};
 type Props = {
     onClose: () => void
     name: string
@@ -28,9 +58,7 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
                 setData({data: JSON.parse(resp), type: "json", raw: resp})
             } catch {
                 try {
-                    new DOMParser().parseFromString(resp, 'text/xml');
-                    setData({data: resp, type: "xml", raw: resp})
-
+                    setData({data: prettifyXml(removeInvalidXmlChars(resp)), type: "xml", raw: resp})
 
                 } catch {
                     setData({data: resp, type: "text", raw: resp})
@@ -43,12 +71,9 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
         const element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data.raw));
         element.setAttribute('download', name);
-
         element.style.display = 'none';
         document.body.appendChild(element);
-
         element.click();
-
         document.body.removeChild(element);
     }
 
@@ -57,11 +82,12 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
     }, []);
     return <Modal onClose={onClose} className={" min-w-[2000px] "} submitLabel={"Download"} onSubmit={download}
                   title={name}>
-        <div className={"px-1 min-w-[2000px]"}>
+        <div className={"px-1 min-w-[2000px] overflow-y-scroll"}>
             <h5 className={"font-semibold underline mb-5 text-lg"}>
                 {name}
             </h5>
             <p style={{whiteSpace: "break-spaces"}} className={"flex break-all  "}>
+
                 {
                     data.type === "xml" &&
                     <SyntaxHighlighter wrapLines={true} language="xml" showLineNumbers style={xcode}>

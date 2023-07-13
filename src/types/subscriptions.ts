@@ -3,10 +3,13 @@ import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
 
 export type SubscriptionFindQuery = CommonFindQuery & {
     nameContains: string
+    rawsubscriptionproperties?: string
+    rawfiltersproperties?: string
+    partnerId?: number | string
 }
 
 export interface ISubscription {
-    id?: string
+    id?: number
     name?: string;
     documentId?: string;
     partnerId?: string;
@@ -19,10 +22,10 @@ export interface ISubscription {
     receiverId?: string;
     validatorId?: string;
     temporary?: boolean;
-    handlerProperties?: any[];
-    validatorProperties?: any[];
-    mapperProperties?: any[];
-    receiverProperties?: any[];
+    handlerProperties?: KeyValuePair[];
+    validatorProperties?: KeyValuePair[];
+    mapperProperties?: KeyValuePair[];
+    receiverProperties?: KeyValuePair[];
     inactive?: boolean;
     schedules?: Array<ScheduleView>;
     responseSubscriptionId?: number | null;
@@ -34,6 +37,8 @@ export interface ISubscription {
     aggregationTarget?: string;
     pausedOn?: string | null;
     documentFilter?: Array<KeyValuePair>
+    matchExpressionAsString?: string
+    matchExpression?: MatchExpression
 }
 
 export interface ScheduleView {
@@ -53,6 +58,60 @@ export interface ICreateSubscription {
     aggregationForId?: string;
 }
 
+export interface IDuplicateSubscription {
+    type: string;
+    documentId: string;
+    id?: number
+    name: string
+}
+
+
+export type AndMatchExpression = {
+    type: "and"
+
+    left: MatchExpression
+
+    right: MatchExpression
+}
+
+export type OrMatchExpression = {
+    type: "or"
+
+    left: MatchExpression
+
+    right: MatchExpression
+}
+
+export type OneOfMatchExpression = {
+    type: "one_of"
+    path: string
+    values: Array<string>
+}
+
+export type NotOneOfMatchExpression = {
+    type: "not_one_of"
+    path: string
+    values: Array<string>
+}
+
+export type MatchExpressionValue = {
+    type: "one_of" | "not_one_of"
+    path: string
+    values: Array<string>
+}
+
+export type MatchExpressionBranch = {
+    type: "and" | "or"
+    left: MatchExpression | MatchExpressionValue,
+    right: MatchExpression | MatchExpressionValue
+}
+
+export type MatchExpression =
+    AndMatchExpression
+    | OrMatchExpression
+    | OneOfMatchExpression
+    | NotOneOfMatchExpression
+    | MatchExpressionValue
 
 export const SubscriptionTypeOptions: OptionType[] = [{
     id: "0",

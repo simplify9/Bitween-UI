@@ -1,83 +1,195 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useAuthApi} from "../../client/components";
 import {apiClient} from "../../client";
+import Button from "src/components/common/forms/Button";
 
 
 const Login = () => {
 
-  const { login } = useAuthApi();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [failed, setFailed] = useState(false);
+    const {login} = useAuthApi();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [failed, setFailed] = useState(false);
+    const onSubmit = async () => {
 
-  const onSubmit = async () => {
-
-    let res = await apiClient.login({ username, password });
-    if (res.succeeded) {
-
-      login({
-        accessToken: res.data.jwt,
-        refreshToken: res.data.refreshToken,
-        accessTokenExpiry: 3
-      })
-    } else {
-
-      setFailed(true);
+        let res = await apiClient.login({username, password});
+        if (res.succeeded) {
+            login({
+                accessToken: res.data.jwt,
+                refreshToken: res.data.refreshToken,
+                accessTokenExpiry: 3
+            })
+        } else {
+            setFailed(true);
+        }
     }
-  }
 
-  return (
-    <div
-      className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto ">
-      <div className="p-10 pt-12 pb-16 shadow-lg backdrop-blur-2xl rounded-xl ">
-        <div
-          className="flex items-center justify-center text-4xl font-black text-sky-900 m-3">
-          
-          <h1 className="tracking-wide" onClick={() => {
-            setUsername("admin@infolink.systems")
-            setPassword("Mtm@dmin!2")
-          }}>Infolink</h1>
-        </div>
-        <div
+    return (
+        // <div
+        //     className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto ">
+        <div className="bg-white dark:bg-gray-900 relative">
+            <img src="/Graphics/s9.png" className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>
 
-          className="flex flex-col justify-center">
-          <label className="text-sm font-medium">Username</label>
-          <input className="mb-3 px-2 py-1.5
-          mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-          focus:outline-none
-          focus:border-sky-500
-          focus:ring-1
-          focus:ring-sky-500
-          focus:invalid:border-red-500 focus:invalid:ring-red-500" type="email"
-                 name="username"
-                 placeholder="john@simth.com"
-                 value={username}
-                 onChange={(e) => setUsername(e.target.value)}
-                 required/>
-          <label className="text-sm font-medium">Password</label>
-          <input className="
-          mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-          focus:outline-none
-          focus:border-sky-500
-          focus:ring-1
-          focus:ring-sky-500
-          focus:invalid:border-red-500 focus:invalid:ring-red-500"
-                 type="password" name="password"
-                 placeholder="********" required
-                 value={password}
-                 onChange={(e) => setPassword(e.target.value)}
-          />
-          {failed &&
-            <a className="pb-4 text-red-600">Wrong username or password</a>}
-          <button
-            className="mt-5 px-4 py-1.5 rounded-md shadow-lg bg-sky-600 font-medium text-gray-100 block hover:bg-sky-700 transition duration-300"
+            <div className="flex justify-center h-screen">
+                <div className="hidden bg-cover lg:block lg:w-2/3"
+                     style={{
+                         backgroundImage: "url(https://www.ship-technology.com/wp-content/uploads/sites/8/2022/02/GettyImages-968819844-scaled.jpg)"
+                     }}
+                >
+                    <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
+                        <div>
 
-            onClick={() => onSubmit()}>
-            <span className="hidden">Checking ...</span>
-            <span>Login</span></button>
-        </div>
-      </div>
-    </div>)
+                            <img className="w-auto h-12 sm:h-8" src="/Graphics/BitweenFull.svg"
+                                 alt=""/>
+                            <p className="max-w-xl mt-3 text-gray-200">
+                                is all-in-one solution to solving integration with third parties, automating workflows
+                                with exchanges coming from all forms of requests, ranging from internal messages to
+                                files dumped on a server.
+                            </p>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div className="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6">
+                    <div className="flex-1">
+                        <div className="text-center">
+                            <div className="flex justify-center mx-auto">
+                                <img className="w-auto h-12 sm:h-8" src="/Graphics/BitweenFull.svg"
+                                     alt=""/>
+                            </div>
+
+                            <p className="mt-3 text-gray-500 dark:text-gray-300">Sign in to access your account</p>
+                        </div>
+
+                        <div className="mt-8">
+                            <form>
+                                <div>
+                                    <label htmlFor="email"
+                                           className="block mb-2 text-sm text-gray-600 dark:text-gray-200">Email
+                                        Address</label>
+                                    <input value={username} onChange={(e) => setUsername(e.target.value)} type="email"
+                                           name="email" id="email" placeholder="example@example.com"
+                                           className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
+                                </div>
+
+                                <div className="mt-6">
+                                    <div className="flex justify-between mb-2">
+                                        <label htmlFor="password"
+                                               className="text-sm text-gray-600 dark:text-gray-200">Password</label>
+
+                                    </div>
+
+                                    <input value={password} onChange={(e) => setPassword(e.target.value)}
+                                           type="password" name="password" id="password" placeholder="Your Password"
+                                           className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
+                                </div>
+
+                                <div className="mt-6 w-full">
+
+                                    <Button onClick={onSubmit} className={"w-full"}>
+                                        Sign in
+                                    </Button>
+
+                                </div>
+
+                            </form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>)
+    {/*  <div className="p-10 pt-12 pb-16 shadow-lg backdrop-blur-2xl rounded-xl ">*/
+    }
+    {/*      <div*/
+    }
+    {/*          className="flex items-center justify-center text-4xl font-black text-sky-900 m-3">*/
+    }
+
+    {/*          <img src="/Graphics/BitweenFull.svg"/>*/
+    }
+    {/*      </div>*/
+    }
+    {/*      <div*/
+    }
+
+    {/*          className="flex flex-col justify-center mt-10">*/
+    }
+    {/*          <label className="text-sm font-medium">Username</label>*/
+    }
+    {/*          <input className="mb-3 px-2 py-1.5*/
+    }
+    {/*mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400*/
+    }
+    {/*focus:outline-none*/
+    }
+    {/*focus:border-sky-500*/
+    }
+    {/*focus:ring-1*/
+    }
+    {/*focus:ring-sky-500*/
+    }
+    {/*focus:invalid:border-red-500 focus:invalid:ring-red-500" type="email"*/
+    }
+    {/*                 name="username"*/
+    }
+    {/*                 placeholder="john@simth.com"*/
+    }
+    {/*                 value={username}*/
+    }
+    {/*                 onChange={(e) => setUsername(e.target.value)}*/
+    }
+    {/*                 required/>*/
+    }
+    {/*          <label className="text-sm font-medium">Password</label>*/
+    }
+    {/*          <input className="*/
+    }
+    {/*mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400*/
+    }
+    {/*focus:outline-none*/
+    }
+    {/*focus:border-sky-500*/
+    }
+    {/*focus:ring-1*/
+    }
+    {/*focus:ring-sky-500*/
+    }
+    {/*focus:invalid:border-red-500 focus:invalid:ring-red-500"*/
+    }
+    {/*                 type="password" name="password"*/
+    }
+    {/*                 placeholder="********" required*/
+    }
+    {/*                 value={password}*/
+    }
+    {/*                 onChange={(e) => setPassword(e.target.value)}*/
+    }
+    {/*          />*/
+    }
+    {/*          {failed &&*/
+    }
+    {/*              <a className="pb-4 text-red-600">Wrong username or password</a>}*/
+    }
+    {/*          <Button*/
+    }
+
+
+    {/*              onClick={() => onSubmit()}>*/
+    }
+    {/*              <span className="hidden">Checking ...</span>*/
+    }
+    {/*              <span>Login</span></Button>*/
+    }
+    {/*      </div>*/
+    }
+    {/*  </div>*/
+    }
+
 
 }
 

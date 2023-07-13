@@ -18,8 +18,8 @@ export type QueryReturnType<TReq, TRes> = [QueryState<TReq, TRes>, (req: TReq) =
 export type QueryHook<TReq, TRes> = (req: TReq) => QueryReturnType<TReq, TRes>
 
 export const queryHook = <TReq, TRes>({
-                                   fetcher,
-                               }: UseQueryOptions<TReq, TRes>): QueryHook<TReq, TRes> =>
+                                          fetcher,
+                                      }: UseQueryOptions<TReq, TRes>): QueryHook<TReq, TRes> =>
     (req: TReq): QueryReturnType<TReq, TRes> => {
 
         const [state, setState] = useState<QueryState<TReq, TRes>>({

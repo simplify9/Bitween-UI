@@ -1,109 +1,114 @@
 import Tab from "./forms/Tab"
 import {Icon} from "./icons"
+import React, {useMemo} from "react";
+import ChoiceEditor from "src/components/common/forms/ChoiceEditor";
+import {OrderBy} from "src/client";
+import {KeyValuePair} from "@/src/types/common";
 
-
-export type SortBy = {
-    field: string
-    descending?: boolean
-}
 
 export type DataListViewSettings = {
     limit: number
     offset: number
-    sortBy: SortBy
+    orderBy?: OrderBy
 }
 
-export type DataListViewSettingsChangeEvent = DataListViewSettings & {}
 
 interface Props {
     total: number
     limit: number
     offset: number
-    sortByOptions: string[]
-    sortByTitles?: { [k: string]: string }
-    sortBy: SortBy
-    onChange: (e: DataListViewSettingsChangeEvent) => void
+    orderBy?: OrderBy
+    orderByFields?: KeyValuePair[]
+    onChange: (e: DataListViewSettings) => void
 }
 
 export const DataListViewSettingsEditor: React.FC<Props> = ({
                                                                 offset,
                                                                 limit,
                                                                 total,
-                                                                sortBy,
-                                                                sortByOptions,
-                                                                sortByTitles = {},
-                                                                onChange
+                                                                onChange,
+                                                                orderBy,
+                                                                orderByFields
                                                             }) => {
 
-    const pageIndex = Math.floor(offset / limit);
-    let pages = [];
-    const totalPages = Math.ceil(total / limit);
-    for (let i = 0; i < totalPages; ++i) pages.push(i);
 
-    // const handleSortByChange = (field: string) => {
-    //     onChange({
-    //         limit,
-    //         offset: 0,
-    //         sortBy: {...sortBy, field}
-    //     })
-    // }
-    //
-    // const handleSortDescendingChange = (descending: boolean) => {
-    //     onChange({
-    //         limit,
-    //         offset: 0,
-    //         sortBy: {...sortBy, descending}
-    //     })
-    // }
+    const {pages, totalPages, pageIndex} = useMemo(() => {
+        const _pageIndex = Math.floor(offset / limit);
+        const _totalPages = Math.ceil(total / limit);
+        const _pages = []
+        for (let i = 0; i < _totalPages; ++i) _pages.push(i);
+        return {pages: _pages, pageIndex: _pageIndex, totalPages: _totalPages}
+    }, [offset, limit]);
+
     const handlePageChange = (newOffset: number) => {
+        if (newOffset < 0 || newOffset >= total)
+            return;
+
         onChange({
             limit,
             offset: newOffset,
-            sortBy: sortBy
+            orderBy
+        })
+    }
+
+    const handleSortChange = (orderBy: string) => {
+
+
+        onChange({
+            limit,
+            offset,
+            orderBy: {
+                field: orderBy
+            }
         })
     }
 
     return (
-
-        <div className="w-full flex py-1 my-3">
+        <div className="w-full flex py-1 my-3 px-3 items-center">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
-                &nbsp;records
+                {" "}records
                 {totalPages > 1
                     ?
                     <span>, showing (<strong>{offset + 1}</strong> - <strong>{Math.min(total, offset + limit)}</strong>)</span>
                     : null}
             </div>
-            {totalPages > 1
-                ? <>
-                    <Tab onClick={() => handlePageChange(0)} key="ll"><Icon shape="chevronDoubleLeft" className="h-2"/></Tab>
-                    <Tab key="l"><Icon shape="chevronLeft" className="h-2"/></Tab>
-                    {pages.map(p => {
-                        return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
-                            <Tab onClick={() => handlePageChange(p * limit)} key={p}
-                                 selected={p === pageIndex}>{p + 1}</Tab>) : <></>
-                    })}
-                    <Tab key="r"><Icon shape="chevronRight" className="h-2"/></Tab>
-                    <Tab onClick={() => handlePageChange(total - limit)} key="rr"><Icon shape="chevronDoubleRight"
-                                                                                        className="h-2"/></Tab>
-                </>
-                : null}
-          
-            {/*<div className="text-sm py-1">Sort By</div>*/}
-            {/*<TabMenu title={sortByTitles[sortBy.field ?? ""] || sortBy.field}>{*/}
 
-            {/*    sortByOptions.map(opt => (*/}
-            {/*        <TabMenuItem key={opt} onClick={() => handleSortByChange(opt)}*/}
-            {/*                     selected={sortBy.field === opt}>{sortByTitles[opt] || opt}</TabMenuItem>*/}
-            {/*    ))*/}
-            {/*}*/}
-            {/*</TabMenu>*/}
-            {/*<TabMenu title={sortBy.descending ? "Descending" : "Ascending"}>*/}
-            {/*    <TabMenuItem selected={!sortBy.descending} key="asc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(false)}>Ascending</TabMenuItem>*/}
-            {/*    <TabMenuItem selected={!!sortBy.descending} key="desc"*/}
-            {/*                 onClick={() => handleSortDescendingChange(true)}>Descending</TabMenuItem>*/}
-            {/*</TabMenu>*/}
+            <Tab onClick={() => handlePageChange(0)} key="ll">
+                <Icon shape="chevronDoubleLeft" className="h-2"/>
+            </Tab>
+
+            <Tab key="l" onClick={() => handlePageChange((pageIndex - 1) * limit)}>
+                <Icon shape="chevronLeft" className="h-2"/>
+            </Tab>
+
+            {pages.map(p => {
+                return p >= (pageIndex - 2) && p <= (pageIndex + 2) ? (
+                    <Tab key={`page${p}`} onClick={() => handlePageChange(p * limit)}
+                         selected={p === pageIndex}>
+                        {p + 1}
+                    </Tab>) : null
+            })}
+
+            <Tab key="r" onClick={() => handlePageChange((pageIndex + 1) * limit)}>
+                <Icon shape="chevronRight" className="h-2"/>
+            </Tab>
+
+            <Tab key="rr" onClick={() => {
+                handlePageChange(pages.slice(-1)[0] * limit)
+            }}>
+                <Icon shape="chevronDoubleRight" className="h-2"/>
+            </Tab>
+            {
+                orderByFields && <div className={"mx-3 "}>
+                    <ChoiceEditor value={orderBy?.field} onChange={handleSortChange} menuPlacement={"top"}
+                                  placeholder={"Order By"} options={orderByFields}
+                                  optionValue={option => option.value} optionTitle={option => option.key}
+                    />
+                </div>
+            }
+
+
         </div>
 
     );

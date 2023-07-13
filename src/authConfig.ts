@@ -30,6 +30,7 @@ const authConfig: AuthConfig = {
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("refresh_token");
         window.location.reload()
+
     },
     refreshTokenExpiry: null
 }

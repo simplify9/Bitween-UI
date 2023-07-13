@@ -2,7 +2,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import Button from "./common/forms/Button";
 import FormField from "./common/forms/FormField";
 import TextEditor from "./common/forms/TextEditor";
-import {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {apiClient} from "../client";
 import {OptionType} from "../types/common";
 import {ISubscription, ScheduleView, SubscriptionTypeOptions} from "../types/subscriptions";
@@ -15,12 +15,14 @@ import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
+import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
+import Authorize from "src/components/common/authorize/authorize";
+import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 
 const Component = () => {
     let navigate = useNavigate();
     let {id} = useParams();
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
-    const [subscription, setSubscription] = useState<ISubscription>({});
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
 
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
@@ -41,7 +43,6 @@ const Component = () => {
                     id: index
                 }))
             }
-            setSubscription(data);
             setUpdateSubscriptionData(data)
         }
     }
@@ -68,41 +69,36 @@ const Component = () => {
         }))
     }, [])
 
-    if (!subscription) return <></>
+
+    console.log(updateSubscriptionData.responseSubscriptionId)
+    if (!updateSubscriptionData) return <></>
 
     return (
-        <div className="flex flex-col w-full px-8 py-10">
+        <div className="flex flex-col w-full  ">
             {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
-            <div className="justify-between w-full flex py-4">
-                <div
-                    className="text-2xl font-bold tracking-wide text-gray-700">
-                    Subscriptions
-                </div>
-                <div className={"flex gap-2"}>
+            {/*<div className="justify-between w-full flex py-4 ">*/}
+            {/*    <div*/}
+            {/*        className="text-2xl font-bold tracking-wide text-gray-700">*/}
+            {/*         <span*/}
+            {/*             className={"text-sm text-red-500 font-light"}>{updateSubscriptionData.inactive ? '(INACTIVE)' : ''}</span>*/}
+            {/*    </div>*/}
+            {/*  */}
+            {/*</div>*/}
+            <div
+                className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
 
-                    <Button onClick={() => {
-                        getTrails()
-                        setOpenModal("TRAIL")
-                    }}
-                            className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded">
-                        Trail
-                    </Button>
-                    <Button onClick={deleteSubscription}
-                            className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded">
-                        Delete
-                    </Button>
-                </div>
-            </div>
-            <div className="grid grid-cols-6 gap-5 rounded mb-6 border px-2 py-2 shadow">
-                <div className="col-span-6 sm:col-span-3 lg:col-span-1 ">
-                    <FormField title="ID" className="grow">
-                        <TextEditor disabled={true} value={id}/>
+                <div className=" ">
+                    <FormField title="Name" className="grow">
+                        <TextEditor value={updateSubscriptionData?.name}
+                                    onChange={(e) => onChangeSubscriptionData("name", e)}
+                        />
                     </FormField>
                 </div>
-                <div className="col-span-6 sm:col-span-3 lg:col-span-1 ">
+
+                <div className=" ">
                     <FormField title="Type" className="grow">
                         <ChoiceEditor
                             disabled={true}
@@ -114,7 +110,7 @@ const Component = () => {
                     </FormField>
                 </div>
 
-                <div className="col-span-6 sm:col-span-3 lg:col-span-1 ">
+                <div className=" ">
                     <FormField title="Document" className="grow">
                         <DocumentSelector disabled={true}
                                           value={updateSubscriptionData?.documentId}
@@ -123,7 +119,7 @@ const Component = () => {
                     </FormField>
                 </div>
 
-                <div className="col-span-6 sm:col-span-3 lg:col-span-1 ">
+                <div className=" ">
                     <FormField title="Partner" className="grow">
                         <PartnerSelector disabled={true}
                                          value={updateSubscriptionData?.partnerId}
@@ -134,41 +130,57 @@ const Component = () => {
                     </FormField>
                 </div>
 
+
                 <div className=" ">
-                    <FormField title="Name" className="grow">
-                        <TextEditor value={updateSubscriptionData?.name}
-                                    onChange={(e) => onChangeSubscriptionData("name", e)}
+                    <FormField title="Inactive" className="grow">
+                        <CheckBoxEditor checked={updateSubscriptionData?.inactive}
+                                        onChange={(e) => onChangeSubscriptionData("inactive", e)}
                         />
                     </FormField>
                 </div>
 
+                <div className={""}>
 
+                    <Button onClick={() => {
+                        getTrails()
+                        setOpenModal("TRAIL")
+                    }}
+                    >
+                        Trail
+                    </Button>
+
+                </div>
             </div>
 
 
-            <div className="flex flex-col gap-6 rounded mb-6 ">
+            <div className="flex flex-col gap-6 rounded-lg mb-6 ">
 
-                {updateSubscriptionData?.type == "1" &&
+                {
+                    updateSubscriptionData?.type == "1" &&
+                    <MatchExpressionEditor
+                        onChange={(e) => onChangeSubscriptionData("matchExpression", e)}
+                        documentId={updateSubscriptionData.documentId}
+                        expression={updateSubscriptionData.matchExpression}
+                    />
+                }
+                {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1") &&
                     <div
-                        className=" border shadow px-2 py-2">
+                        className="bg-white  border shadow-lg rounded-lg px-2 py-2 w-1/2">
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
-                                documentId={subscription.documentId}
+                                documentId={updateSubscriptionData.documentId}
                                 onChange={(e) => onChangeSubscriptionData("documentFilter", e)}
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>
                     </div>}
                 {updateSubscriptionData?.type == "8" &&
                     <div
-                        className=" border shadow px-2 py-2">
+                        className="bg-white border shadow-lg px-2 py-2 rounded-lg w-1/2">
 
-                        <FormField title="Aggregation" className="grow">
-                        </FormField>
-                        <FormField title="Subscription">
+                        <FormField title="Aggregation">
                             <SubscriptionSelector
                                 value={updateSubscriptionData.aggregationForId}
-                                onChange={() => {
-                                }}
+                                onChange={(e) => onChangeSubscriptionData("aggregationForId", updateSubscriptionData.aggregationForId)}
                                 disabled={true}
                             />
                         </FormField>
@@ -186,7 +198,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "2" &&
                     <div
-                        className=" border shadow px-2 py-2">
+                        className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Validator"} type={"validators"}
                                        value={updateSubscriptionData?.validatorId}
@@ -194,6 +206,7 @@ const Component = () => {
                                            ...updateSubscriptionData,
                                            validatorId: t
                                        })}
+                                       onPropsChange={(e) => onChangeSubscriptionData("validatorProperties", e)}
                                        props={updateSubscriptionData?.validatorProperties}
                         />
 
@@ -201,7 +214,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "4" &&
                     <div
-                        className=" border shadow px-2 py-2">
+                        className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
 
                         <AdapterEditor title={"Receiver"} type={"receivers"}
                                        value={updateSubscriptionData?.receiverId}
@@ -209,6 +222,7 @@ const Component = () => {
                                            ...updateSubscriptionData,
                                            receiverId: t
                                        })}
+                                       onPropsChange={(e) => onChangeSubscriptionData("receiverProperties", e)}
                                        props={updateSubscriptionData?.receiverProperties}
                         />
                         <ScheduleEditor title={"Schedule"}
@@ -218,9 +232,9 @@ const Component = () => {
 
                     </div>}
 
-                <div className={"flex flex-row gap-3"}>
+                <div className={" flex flex-row gap-3"}>
                     <div
-                        className=" border shadow px-2 py-2 w-1/2">
+                        className=" bg-white border rounded-lg shadow-lg px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Mapper"} type={"mappers"}
                                        value={updateSubscriptionData?.mapperId}
@@ -236,7 +250,7 @@ const Component = () => {
                     </div>
 
                     <div
-                        className=" border shadow px-2 py-2 w-1/2">
+                        className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Handler"} type={"handlers"}
                                        value={updateSubscriptionData?.handlerId}
@@ -248,23 +262,49 @@ const Component = () => {
                                        props={updateSubscriptionData?.handlerProperties}
                         />
 
-
+                        <div className={"pt-1"}>
+                            <h6 className={"mb-2 mt-1 text-xs font-bold tracking-wide text-gray-700  uppercase"}>
+                                Response subscription
+                            </h6>
+                            <SubscriptionSelector onChange={(t) => setUpdateSubscriptionData({
+                                ...updateSubscriptionData,
+                                responseSubscriptionId: Number(t)
+                            })} value={updateSubscriptionData.responseSubscriptionId?.toString()}/>
+                            <div className={"my-3"}/>
+                            <FormField title="Response message type name" className="grow pt-2">
+                                <TextEditor onChange={(e) => onChangeSubscriptionData("responseMessageTypeName", e)}
+                                            value={updateSubscriptionData.responseMessageTypeName}/>
+                            </FormField>
+                        </div>
                     </div>
                 </div>
-
-
             </div>
 
+            <div className={"flex flex-row justify-between w-full gap-2"}>
 
-            <div className={"flex w-full gap-2"}>
-                <Button
-                    onClick={() => navigate('/subscriptions')}
-                    className="text-white bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Cancel
-                </Button>
-                <Button
-                    onClick={updateSubscription}
-                    className="text-white bg-blue-800 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  grow sm:w-auto px-5 py-2.5 text-center">Save
-                </Button>
+                <div>
+                    <Authorize roles={["Admin", "Member"]}>
+                        <Button variant={"secondary"} onClick={deleteSubscription}
+                        >
+                            Delete
+                        </Button>
+                    </Authorize>
+                </div>
+                <div className={"flex flex-row"}>
+                    <Authorize roles={["Admin", "Member"]}>
+                        <Button
+                            onClick={updateSubscription}>
+                            Save
+                        </Button>
+                    </Authorize>
+                    <Button
+                        variant={"secondary"}
+                        onClick={() => navigate('/subscriptions')}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+
             </div>
 
 

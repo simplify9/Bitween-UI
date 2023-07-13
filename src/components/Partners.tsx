@@ -1,11 +1,12 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {useState} from "react";
-import {jsBoolean, jsNumber, jsString} from "redux-ecq";
 import {usePartnerFinder} from "../hooks/queryHooks";
 import {PartnerList} from "./Partners/PartnerList";
-import {PartnerFinderPanel} from "./Partners/PartnerFinderPanel";
 import CreateNewPartner from "./Partners/CreateNewPartner";
 import {apiClient} from "../client";
+import Authorize from "src/components/common/authorize/authorize";
+import Button from "src/components/common/forms/Button";
+import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
 
 
 interface Props {
@@ -16,16 +17,9 @@ const defaultQuery = {
     nameContains: "",
     offset: 0,
     limit: 20,
-    sortBy: "docType",
-    sortByDescending: false
-}
-
-const queryStringMapping = {
-    nameContains: jsString(),
-    sortBy: jsString(),
-    sortByDescending: jsBoolean(),
-    offset: jsNumber(),
-    limit: jsNumber()
+    orderBy: {
+        field: "Name"
+    }
 }
 
 const useQuery = usePartnerFinder;
@@ -34,7 +28,7 @@ export type PartnerSpecs = {
     nameContains: string
 }
 
-export default (props: Props) => {
+export default () => {
 
     const [creatingOn, setCreatingOn] = useState(false);
 
@@ -56,10 +50,10 @@ export default (props: Props) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
-            sortBy: viewOptions.sortBy.field,
-            sortByDescending: !!viewOptions.sortBy.descending,
             offset: viewOptions.offset,
-            limit: viewOptions.limit
+            limit: viewOptions.limit,
+            orderBy: viewOptions.orderBy
+
         });
     }
     const createPartner = async (name: string) => {
@@ -72,35 +66,39 @@ export default (props: Props) => {
 
     return (
         <>
-            <div className="flex flex-col w-full px-8 py-4">
-                <div className="justify-between w-full flex py-4">
-                    <div
-                        className="text-2xl font-bold tracking-wide text-gray-700">Partners
+            <div className="flex flex-col w-full  md:max-w-[1000px]">
+
+
+                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                    <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
+                                             onFindRequested={handleFindRequested}/>
+                    <div>
+                        <Authorize roles={["Admin", "Member"]}>
+
+                            <Button onClick={() => setCreatingOn(true)}
+                            >
+                                Add
+                            </Button>
+                        </Authorize>
                     </div>
-                    <button onClick={() => setCreatingOn(true)}
-                            className="bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded">
-                        Create New Partner
-                    </button>
+
                 </div>
-                <PartnerFinderPanel value={findSpecs} onChange={setFindSpecs}
-                                    onFindRequested={handleFindRequested}/>
+
                 {queryState.response !== null
-                    ? <>
+                    ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
+
+                        <PartnerList data={queryState.response.data}/>
                         <DataListViewSettingsEditor
-                            sortByOptions={["name"]}
-                            sortByTitles={{
-                                docType: "Partner Type"
-                            }}
-                            sortBy={{
-                                field: queryState.lastSent.sortBy,
-                                descending: queryState.lastSent.sortByDescending
-                            }}
+                            orderByFields={[{value: "Name", key: "Name"}, {
+                                value: "Id",
+                                key: "Id"
+                            }]}
+                            orderBy={queryState.lastSent.orderBy}
                             total={queryState.response.total}
                             offset={queryState.lastSent.offset}
                             limit={queryState.lastSent.limit}
                             onChange={handleViewOptionsChange}/>
-                        <PartnerList data={queryState.response.data}/>
-                    </>
+                    </div>
                     : null}
 
             </div>

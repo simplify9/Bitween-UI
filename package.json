@@ -3,29 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@vitejs/plugin-react-swc": "^3.0.1",
-    "axios": "^1.2.6",
-    "date-fns": "^2.28.0",
-    "dayjs": "^1.11.7",
-    "jss-rtl": "^0.3.0",
+    "@reduxjs/toolkit": "^1.9.5",
+    "async-mutex": "^0.4.0",
+    "axios": "^1.4.0",
+    "dayjs": "^1.11.8",
     "react": "^18.2.0",
-    "react-datepicker": "^4.10.0",
+    "react-datepicker": "^4.13.0",
     "react-diff-viewer": "^3.1.1",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
-    "react-i18next": "^12.1.4",
-    "react-icons": "^4.7.1",
+    "react-icons": "^4.9.0",
     "react-json-view": "^1.21.3",
-    "react-redux": "^8.0.2",
-    "react-router-dom": "^6.8.0",
+    "react-redux": "^8.1.0",
+    "react-router-dom": "^6.12.1",
+    "react-select": "^5.7.3",
     "react-syntax-highlighter": "^15.5.0",
-    "react-toastify": "^9.1.1",
-    "redux-devtools-extension": "^2.13.9",
+    "react-toastify": "^9.1.3",
     "redux-ecq": "^1.0.11",
-    "redux-logger": "^3.0.6",
-    "stacktrace-js": "^2.0.2",
-    "typescript": "^4.9.5",
-    "vite": "^4.0.4"
+    "select": "^1.1.2"
   },
   "scripts": {
     "dev": "vite",
@@ -37,15 +32,15 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
     "production": [
       ">3%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "not ie 11 "
     ],
     "development": [
       "last 1 chrome version",
@@ -54,22 +49,25 @@
     ]
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/lodash": "^4.14.181",
-    "@types/node": "^18.0.6",
-    "@types/react": "^18.0.15",
-    "@types/react-datepicker": "^4.8.0",
-    "@types/react-dom": "^18.0.6",
+    "vite": "^4.3.9",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.3.1",
+    "@types/react": "^18.2.12",
+    "@types/react-datepicker": "^4.11.2",
+    "@types/react-dom": "^18.2.5",
     "@types/react-helmet": "^6.1.5",
     "@types/react-icons": "^3.0.0",
-    "@types/react-syntax-highlighter": "^15.5.5",
+    "@types/react-syntax-highlighter": "^15.5.7",
     "@types/redux-logger": "^3.0.9",
-    "autoprefixer": "^10.4.13",
-    "eslint": "^8.33.0",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.42.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.32.2",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.2.4"
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^5.1.3"
   }
 }

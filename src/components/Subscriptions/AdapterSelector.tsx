@@ -1,17 +1,17 @@
-import { useAdapterFinder} from "../../hooks/queryHooks";
-import { ChoiceEditor } from "../common/forms/ChoiceEditor";
+import {useAdapterFinder} from "../../hooks/queryHooks";
+import {ChoiceEditor} from "../common/forms/ChoiceEditor";
 
 
 interface Props {
     value?: string
-    onChange: (value:string) => void
+    onChange: (value: string) => void
     type: 'mappers' | 'receivers' | 'handlers' | 'notifiers' | 'validators'
 }
 
 
-const AdapterSelector:React.FC<Props> = ({ value, onChange,type }) => {
+const AdapterSelector: React.FC<Props> = ({value, onChange, type}) => {
 
-    const [queryState, newQuery] = useAdapterFinder({prefix:type});
+    const [queryState, newQuery] = useAdapterFinder({prefix: type});
 
     return (
         <ChoiceEditor
@@ -20,7 +20,7 @@ const AdapterSelector:React.FC<Props> = ({ value, onChange,type }) => {
             onChange={onChange}
             options={queryState.response && queryState.response !== null ? queryState.response : []}
             optionValue={i => i.id}
-            optionTitle={i => i.title} />
+            optionTitle={i => i.title}/>
     );
 }
 

@@ -6,6 +6,7 @@ import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
 import {CreateDocument, DocumentFindQuery, UpdateDocument} from "../types/document";
 import {OptionType} from "../types/common";
+import dayjs from "dayjs";
 
 export const client = axios.create();
 
@@ -183,19 +184,46 @@ export const apiClient = {
 
 }
 
-const formulateQueryString = (req: any) => {
-    let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
-    if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
+export type OrderBy = {
+    field: string
+    descending?: boolean
+}
 
+interface QueryParams {
+    partnerId?: number | string
+    orderBy?: OrderBy
+    offset: number;
+    limit: number;
+    nameContains?: string;
+    status?: string;
+    subscription?: string;
+    id?: string;
+    correlationId?: string;
+    promotedProperties?: string;
+    creationDateFrom?: string;
+    creationDateTo?: string;
+    test?: boolean;
+}
+
+export const formulateQueryString = (req: QueryParams) => {
+
+    let query = `?page=${Math.floor(req.offset / req.limit)}&size=${req.limit}`;
+
+
+    if ('rawfiltersproperties' in req && req.rawfiltersproperties) query += `&filter=rawfiltersproperties:4:${req.rawfiltersproperties}`;
+    if ('partnerId' in req && req.partnerId) query += `&filter=partnerId:1:${req.partnerId}`;
+
+    if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
+    if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;
     if ('subscription' in req && req.subscription && req.subscription != '') query += `&filter=SubscriptionId:1:${req.subscription}`;
     if ('id' in req && req.id && req.id != '') query += `&filter=Id:1:${req.id}`;
     if ('correlationId' in req && req.correlationId && req.correlationId != '') query += `&filter=CorrelationId:1:${req.correlationId}`;
     if ('promotedProperties' in req && req.promotedProperties && req.promotedProperties != '') query += `&filter=PromotedPropertiesRaw:1:${req.promotedProperties}`;
-    if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${req.creationDateFrom}`;
-    if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${req.creationDateTo}`;
+    if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${dayjs(req.creationDateFrom).set('h', 0).set('m', 0).toISOString()}`;
+    if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${dayjs(req.creationDateTo).set('h', 23).set('m', 59).toISOString()}`;
     if ('test' in req && req.test) query += `&test=${req.test}`;
-
+    if ('orderBy' in req && req.orderBy?.field) query += `&sort=${req.orderBy?.field}:${req.orderBy?.descending ? 2 : 1}`;
     return query;
 }
 

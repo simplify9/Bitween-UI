@@ -1,7 +1,8 @@
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import Modal from "src/components/common/Modal";
-import React, {Fragment, useState} from "react";
+import React, {useState} from "react";
 import {apiClient} from "src/client";
+import Button from "src/components/common/forms/Button";
 
 type Props = {
     exception?: string
@@ -29,11 +30,9 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid}) => {
         extraFooterComponents={
             <div className={"flex align-middle justify-between items-center gap-5"}>
 
-                <button onClick={() => onRetry()}
-                        className="block appearance-none border bg-blue-900 hover:bg-blue-900 text-white py-2 px-4 rounded drop-shadow-sm focus:drop-shadow-lg focus:outline-none">
-
+                <Button onClick={() => onRetry()}>
                     Retry
-                </button>
+                </Button>
 
             </div>}
     >
@@ -46,13 +45,17 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid}) => {
                             label={"Reset Configuration"}
                             checked={resetForRetry}/>
         </div>
-        <div className="flex gap-2 flex-col py-1 border bg-gray-50 px-2 align-center rounded shadow-sm  ">
+        {
+            exception &&
+            <div className="flex gap-2 flex-col py-1 border bg-gray-50 px-2 align-center rounded shadow-sm  ">
 
-            <div className={"min-h-[50px]"}>
-                {exception?.split("{{newline}}").map((d, i) => <p key={i}>{d}</p>)}
+                <div className={"min-h-[50px]"}>
+                    {exception?.split("{{newline}}").map((d, i) => <p key={i}>{d}</p>)}
+                </div>
+
             </div>
+        }
 
-        </div>
     </Modal>)
 }
 
