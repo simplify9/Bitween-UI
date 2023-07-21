@@ -4,6 +4,7 @@ import {AdapterFindQuery} from "src/types/subscriptions";
 import {AccountModel, ChangePasswordModel, CreateAccountModel, EditModal} from "src/types/accounts";
 import {formulateQueryString} from "src/client";
 import {ApiPagedResponse} from "src/types/common";
+import {ChartPointsResponse, MainInfoResponse, XchangeMainInfo} from "src/types/dashboard";
 
 export const GeneralApi = createApi({
     baseQuery: customFetchBase,
@@ -69,13 +70,30 @@ export const GeneralApi = createApi({
                 body:body
             })
         }),
-
+        dashboardXchangesInfo: builder.query<XchangeMainInfo, void>({
+            query: (body) => ({
+                url: `Dashboard/XChangesAndSubscriptionsInfo`,
+            })
+        }),
+        chartsDataPoints: builder.query<ChartPointsResponse, void>({
+            query: (body) => ({
+                url: `Dashboard/ChartsDataPoints`,
+            })
+        }),
+        dashboardMainInfo: builder.query<MainInfoResponse, void>({
+            query: (body) => ({
+                url: `Dashboard/MainInfo`,
+            })
+        }),
 
     })
 });
 
 
 export const {
+    useChartsDataPointsQuery,
+    useDashboardXchangesInfoQuery,
+    useDashboardMainInfoQuery,
     useAdaptersLookupQuery,
     useProfileQuery,
     useUpdateMemberMutation,

@@ -20,15 +20,14 @@ import Header from "src/components/common/layout/Header";
 import NavBar from "src/components/common/layout/NavBar";
 import Team from "src/components/Team";
 import Footer from "src/components/common/layout/Footer";
-import {useSelector} from "react-redux";
 import LoadingIndicator from "src/components/common/LoadingIndicator";
 
 function App() {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const {isLoggedIn} = useAuthApi();
 
-   
+
     if (!isLoggedIn) return <Login/>;
 
     return (
@@ -38,15 +37,15 @@ function App() {
             <Router>
                 <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
 
-                    <div className={"flex flex row     "}>
+                    <div className={"flex  flex-row     "}>
                         <div
                             // className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-                            className={" duration-200 transition-w ease-in ease-out  " + (isOpen ? "md:w-[11%]  " : "md:w-[4%]")}
+                            className={" duration-200 transition-w min-w-[80px] ease-in " + (isOpen ? "md:w-[11%]  " : "md:w-[4%]")}
                         >
                             <NavBar setIsOpen={setIsOpen} isOpen={isOpen}/>
                         </div>
                         <div
-                            className={"  px-2   rounded-lg md:h-[92.5vh] overflow-scroll pl-4 overflow-hidden  delay-100 duration-200 transition-w ease-in ease-out  " + (isOpen ? "md:w-[89%]" : "w-[96%]")}>
+                            className={"  px-2 rounded-lg md:h-[92.5vh] overflow-scroll pl-4   delay-100 duration-200 transition-w ease-in ease-out  " + (isOpen ? "md:w-[89%]" : "w-[96%]")}>
                             <Header/>
                             <div className={"pt-3 pb-5"}>
 
