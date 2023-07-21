@@ -22,8 +22,8 @@ const XchangeAndSubInfo = () => {
 
     }, [subscriptionsLookup.data, chartsDataPoints.data?.subscriptionsUsageCount])
 
-    return <div className={"flex flex-row gap-5 mt-5"}>
-        <div className={"bg-white py-3 px-5 rounded-lg shadow-lg w-2/5"}>
+    return <div className={"flex flex-col xl:flex-row gap-5 mt-5"}>
+        <div className={"bg-white py-3 px-5 rounded-lg shadow-lg xl:w-2/5"}>
             <div className={"mb-3 font-semibold"}>
                 Subscriptions actions in the past 3 months
             </div>
@@ -42,7 +42,7 @@ const XchangeAndSubInfo = () => {
                         </div>)}
             </div>
         </div>
-        <div className={"bg-white p-3 rounded-lg shadow-lg w-3/5"}>
+        <div className={"bg-white p-3 rounded-lg shadow-lg xl:w-3/5"}>
             <div className={"mb-3 font-semibold"}>
                 Most used subscriptions
             </div>

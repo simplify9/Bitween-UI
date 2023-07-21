@@ -40,7 +40,7 @@ function App() {
                     <div className={"flex  flex-row     "}>
                         <div
                             // className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-                            className={" duration-200 transition-w min-w-[80px] ease-in " + (isOpen ? "md:w-[11%]  " : "md:w-[4%]")}
+                            className={" duration-200 transition-w  ease-in " + (isOpen ? " min-w-[200px] lg:w-[11%]  " : " min-w-[80px] md:w-[4%]")}
                         >
                             <NavBar setIsOpen={setIsOpen} isOpen={isOpen}/>
                         </div>
@@ -51,7 +51,7 @@ function App() {
 
 
                                 <Routes>
-                                    <Route path="/" element={<Exchanges/>}/>
+                                    <Route path="/" element={<Dashboard/>}/>
                                     <Route path={"dashboard"} element={<Dashboard/>}/>
                                     <Route path="/settings" element={<Settings/>}/>
                                     <Route path="/notifiers" element={<Notifiers/>}/>

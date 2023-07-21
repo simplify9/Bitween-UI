@@ -11,7 +11,7 @@ const MainInfo = () => {
 
     if (!data)
         return <></>
-    return <div className={" grid grid-cols-5 flex-row flex-wrap flex-grow w-full  gap-5"}>
+    return <div className={" grid  grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 flex-row flex-wrap flex-grow w-full  gap-5"}>
         <ItemInfo number={xChangeInfo.data?.totalXchangesCount ?? 0} color={""} title={"Total Xchanges"}
                   icon={<HiDocument
                       className={"w-6 h-6 text-primary-600"}

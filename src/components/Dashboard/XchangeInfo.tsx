@@ -33,8 +33,8 @@ const DataInCharts = () => {
 
     const tickFormatter = (tick, index) => index % 3 === 0 ? tick : '';
 
-    return <div className={"flex flex-row gap-5 h-[450px] "}>
-        <div className={"bg-white p-3 rounded-lg shadow-lg w-2/3"}>
+    return <div className={"flex flex-col xl:flex-row gap-5"}>
+        <div className={"bg-white p-3 rounded-lg shadow-lg xl:w-3/5"}>
             <div className={"mb-3 font-semibold"}>
                 Xchanges in the past 3 months
             </div>
@@ -52,11 +52,11 @@ const DataInCharts = () => {
             </div>
 
         </div>
-        <div className={"bg-white py-3 px-5 rounded-lg  overflow-scroll shadow-lg w-2/5"}>
+        <div className={"bg-white py-3 px-5 rounded-lg  overflow-scroll shadow-lg xl:w-2/5"}>
             <div className={"mb-3 font-semibold"}>
                 Recently failed Xchanges
             </div>
-            <div className={"min-h-[300px] overflow-scroll"}>
+            <div className={"min-h-[300px] max-h-[460px] overflow-scroll"}>
                 {
                     xChangeInfo.data?.latestFailedxCahanges?.map(i =>
                         <div key={i.subscriptionName}>

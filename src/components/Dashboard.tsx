@@ -1,6 +1,6 @@
 import MainInfo from "src/components/Dashboard/MainInfo";
-import DataInCharts from "src/components/Dashboard/DataInCharts";
-import XchangeAndSubInfo from "src/components/Dashboard/XchangeAndSubInfo";
+import SubscriptionsInfo from "src/components/Dashboard/SubscriptionsInfo";
+import XchangeInfo from "src/components/Dashboard/XchangeInfo";
 
 
 export default () => {
@@ -9,9 +9,8 @@ export default () => {
     return (
         <div className={"flex flex-col gap-3 mt-3 "}>
             <MainInfo/>
-
-            <XchangeAndSubInfo/>
-            <DataInCharts/>
+            <XchangeInfo/>
+            <SubscriptionsInfo/>
         </div>
     )
 }

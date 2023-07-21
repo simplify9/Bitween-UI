@@ -8,7 +8,7 @@ type ItemInfoProps = {
 }
 const ItemInfo: React.FC<ItemInfoProps> = (props) => {
 
-    return <div className={"flex flex-row items-center bg-white rounded-lg shadow px-3 py-5 min-w-[250px]"}>
+    return <div className={"flex flex-row items-center bg-white rounded-lg shadow px-3 py-5 "}>
         <div className={"bg-primary-200 flex items-center justify-center w-10 h-10 rounded-full p-1"}>
             {props.icon}
         </div>
