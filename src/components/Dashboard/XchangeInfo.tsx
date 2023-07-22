@@ -1,14 +1,15 @@
 import {useChartsDataPointsQuery, useDashboardXchangesInfoQuery} from "src/client/apis/generalApi";
-import React, {useMemo} from "react";
+import React, {useMemo, useState} from "react";
 import {Area, AreaChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
 import {useSubscriptionsLookupQuery} from "src/client/apis/subscriptionsApi";
 import {toLocalDateTimeString} from "src/utils/DateUtils";
+import RetryModal from "src/components/exchanges/RetryModal";
 
 const DataInCharts = () => {
     const subscriptionsLookup = useSubscriptionsLookupQuery()
     const chartsDataPoints = useChartsDataPointsQuery()
     const xChangeInfo = useDashboardXchangesInfoQuery()
-
+    const [exceptionToView, setExceptionToView] = useState<string>("");
     const items = useMemo(() => {
             if (!chartsDataPoints.data)
                 return []
@@ -34,6 +35,10 @@ const DataInCharts = () => {
     const tickFormatter = (tick, index) => index % 3 === 0 ? tick : '';
 
     return <div className={"flex flex-col xl:flex-row gap-5"}>
+        {exceptionToView && <RetryModal exception={exceptionToView} xid={""} onClose={() => setExceptionToView(null)}/>
+
+        }
+
         <div className={"bg-white p-3 rounded-lg shadow-lg xl:w-3/5"}>
             <div className={"mb-3 font-semibold"}>
                 Xchanges in the past 3 months
@@ -63,7 +68,12 @@ const DataInCharts = () => {
                             <div className={"border-b flex justify-between py-2 text-sm "}>
                                 <div className={"w-1/5"}>
                                     <div
-                                        className={"text-center text-xs rounded-full " + (i.responseBad ? "bg-yellow-400" : "bg-red-600 text-white")}>
+                                        onClick={() => {
+                                            if (!i.responseBad) {
+                                                setExceptionToView(i.exception)
+                                            }
+                                        }}
+                                        className={"text-center text-xs rounded-full " + (i.responseBad ? "bg-yellow-400" : "bg-red-600 text-white cursor-pointer")}>
                                         {i.responseBad ? "Bad response" : "Failed"}
                                     </div>
 

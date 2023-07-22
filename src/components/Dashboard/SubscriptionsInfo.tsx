@@ -1,13 +1,9 @@
-import {useChartsDataPointsQuery, useDashboardXchangesInfoQuery} from "src/client/apis/generalApi";
+import {useChartsDataPointsQuery} from "src/client/apis/generalApi";
 import {useSubscriptionsLookupQuery} from "src/client/apis/subscriptionsApi";
 import React, {useMemo} from "react";
-import ItemInfo from "src/components/Dashboard/ItemInfo";
-import {HiDocument} from "react-icons/hi";
-import {toLocalDateTimeString} from "src/utils/DateUtils";
 import {Bar, BarChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
 
 const XchangeAndSubInfo = () => {
-    const xChangeInfo = useDashboardXchangesInfoQuery()
     const subscriptionsLookup = useSubscriptionsLookupQuery()
     const chartsDataPoints = useChartsDataPointsQuery()
 
@@ -21,13 +17,24 @@ const XchangeAndSubInfo = () => {
         }))
 
     }, [subscriptionsLookup.data, chartsDataPoints.data?.subscriptionsUsageCount])
+    const subscriptionsDataLimited = useMemo(() => {
+        if (!subscriptionsLookup.data || !chartsDataPoints.data?.subscriptionsUsageCount)
+            return []
+
+        return chartsDataPoints.data?.subscriptionsUsageCount?.slice(0, 5)?.map(({subscriptionId, count}) => ({
+            name: subscriptionsLookup.data[subscriptionId],
+            count: count
+        }))
+
+    }, [subscriptionsLookup.data, chartsDataPoints.data?.subscriptionsUsageCount])
+
 
     return <div className={"flex flex-col xl:flex-row gap-5 mt-5"}>
         <div className={"bg-white py-3 px-5 rounded-lg shadow-lg xl:w-2/5"}>
             <div className={"mb-3 font-semibold"}>
-                Subscriptions actions in the past 3 months
+                Subscriptions usages
             </div>
-            <div className={"min-h-[300px] overflow-scroll"}>
+            <div className={"min-h-[300px] max-h-[500px] overflow-scroll"}>
                 {
                     subscriptionsData.map(i =>
                         <div key={i.name}>
@@ -48,7 +55,7 @@ const XchangeAndSubInfo = () => {
             </div>
             <ResponsiveContainer width="95%" height={400}>
                 <BarChart
-                    data={subscriptionsData}
+                    data={subscriptionsDataLimited}
 
                 >
                     <XAxis dataKey="name"/>

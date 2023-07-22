@@ -29,10 +29,10 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid}) => {
         onClose={onClose}
         extraFooterComponents={
             <div className={"flex align-middle justify-between items-center gap-5"}>
-
-                <Button onClick={() => onRetry()}>
+                {xid&& <Button onClick={() => onRetry()}>
                     Retry
-                </Button>
+                </Button>}
+               
 
             </div>}
     >

@@ -7,7 +7,8 @@ export default () => {
 
 
     return (
-        <div className={"flex flex-col gap-3 mt-3 "}>
+        <div className={"flex flex-col gap-3  "}>
+            <div className={"text-xs text-gray-400 mb-3"}>*Data points are based on the last 3 months usages</div>
             <MainInfo/>
             <XchangeInfo/>
             <SubscriptionsInfo/>
