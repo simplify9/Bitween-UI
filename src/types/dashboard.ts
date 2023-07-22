@@ -40,5 +40,5 @@ export interface LatestFailedXcahange {
     finishedOn: string
     responseBad: boolean
     exception?: string
-    responseUrl?: string
+    responseFileKey?: string
 }

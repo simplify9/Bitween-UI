@@ -79,7 +79,7 @@ const DataInCharts = () => {
                                                 setExceptionToView(i.exception)
                                             }
                                             if (i.responseBad) {
-                                                setXchangeDocumentToView(i.responseUrl)
+                                                setXchangeDocumentToView(i.responseFileKey)
                                             }
                                         }}
                                         className={"text-center text-xs rounded-full cursor-pointer " + (i.responseBad ? "bg-yellow-400" : "bg-red-600 text-white ")}>
@@ -88,7 +88,6 @@ const DataInCharts = () => {
 
                                 </div>
                                 <div className={""}>
-
                                     {i.subscriptionName}
                                 </div>
                                 <div className={"text-gray-500 text-xs"}>
