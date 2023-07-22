@@ -31,13 +31,13 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                 <div className="flex flex-col justify-center items-center  text-white pt-5 pb-2 bg bg-white">
                     <NavLink to="/">
                         <div
-                            className={`font-semibold  text-xl tracking-tight px-5 duration-300 transition-w ease-in ease-out ease-in-out ${!isOpen ? "hidden" : "block"}`}>
-                            <img alt={"B I T W E E N"} className={"h-16 object-contain"}
+                            className={`font-semibold  text-xl tracking-tight px-5 duration-300 transition-w  ease-in-out ${!isOpen ? "hidden" : "block"}`}>
+                            <img alt={"B I T W E E N"} className={"h-20 object-contain"}
                                  src={"/Graphics/BitweenFull.png"}/>
                         </div>
                         <div
-                            className={`font-semibold text-xl tracking-tight px-5 duration-300 transition-w ease-in ease-out ease-in-out ${isOpen ? "hidden" : "block"}`}>
-                            <img alt={"B I T W E E N"} className={"h-14 w-14 object-contain"}
+                            className={`font-semibold text-xl tracking-tight px-5 duration-300 transition-w h-20 w-20 ease-in-out ${isOpen ? "hidden" : "block"}`}>
+                            <img alt={"B I T W E E N"} className={"h-20 w-10 object-contain"}
                                  src={"/Graphics/BitweenIcon.png"}/>
                         </div>
                     </NavLink>
@@ -46,46 +46,67 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                     <div>
                         <NavLink to="/dashboard"
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
-                            <RiDashboardFill
-                                className={"w-6 h-6"} size={27}/>
+                            <div>
+                                <RiDashboardFill
+                                    className={"w-6 h-6"} size={27}/>
+                            </div>
+
                             <span className={isOpen ? "block" : "hidden"}>   Dashboard</span>
 
                         </NavLink>
                         <NavLink to="/Xchanges"
-                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}> <TbExchange
-                            className={"w-6 h-6"}
-                            size={27}/>
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <TbExchange
+                                    className={"w-6 h-6"}
+                                    size={27}/>
+                            </div>
+
+
                             <span className={isOpen ? "block" : "hidden"}>   Xchanges</span>
 
                         </NavLink>
                         <div className={"border border-b mx-2 mt-12 mb-3"}/>
                         <NavLink to="/subscriptions"
-                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}> <TbArrowsRandom
-                            className={"w-6 h-6"}
-                            size={27}/>
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <TbArrowsRandom
+                                    className={"w-6 h-6"}
+                                    size={27}/>
+                            </div>
+
                             <span className={isOpen ? "block" : "hidden"}>Subscriptions</span>
                         </NavLink>
                         <NavLink to="/documents"
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             {/*<img src={"/Icons/document-white.svg"}/>*/}
-                            <HiDocument
-                                className={"w-6 h-6"}
-                                size={27}/>
+                            <div>
+
+
+                                <HiDocument
+                                    className={"w-6 h-6"}
+                                    size={27}/>
+                            </div>
                             <span className={isOpen ? "block" : "hidden"}>Documents</span>
 
                         </NavLink>
 
                         <NavLink to="/partners"
-                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}> <BsFillPersonFill
-                            className={"w-6 h-6"}
-                            size={27}/>
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div><BsFillPersonFill
+                                className={"w-6 h-6"}
+                                size={27}/></div>
+
                             <span className={isOpen ? "block" : "hidden"}>Partners</span>
 
                         </NavLink>
                         <NavLink to="/notifiers"
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
-                            <TbBellRinging2Filled className={"w-6 h-6"}
-                                                  size={27}/>
+                            <div>
+                                <TbBellRinging2Filled className={"w-6 h-6"}
+                                                      size={27}/>
+                            </div>
+
                             <span className={isOpen ? "block" : "hidden"}>Notifiers</span>
 
                         </NavLink>
@@ -94,7 +115,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                     </div>
 
                     <div className={"flex mb-5 text-primary-500 justify-center"} onClick={() => setIsOpen(!isOpen)}>
-                        {isOpen ? <AiOutlineArrowLeft size={33}/> : <AiOutlineArrowRight  size={33}/>}
+                        {isOpen ? <AiOutlineArrowLeft size={33}/> : <AiOutlineArrowRight size={33}/>}
                     </div>
 
                 </div>

@@ -89,7 +89,7 @@ const Login = () => {
 
                                 <div className="mt-6 w-full">
 
-                                    <Button onClick={onSubmit} className={"w-full"}>
+                                    <Button onClick={onSubmit} className={"w-full py-2"}>
                                         Sign in
                                     </Button>
 
