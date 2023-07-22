@@ -4,12 +4,15 @@ import {Area, AreaChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
 import {useSubscriptionsLookupQuery} from "src/client/apis/subscriptionsApi";
 import {toLocalDateTimeString} from "src/utils/DateUtils";
 import RetryModal from "src/components/exchanges/RetryModal";
+import ExchangeDocumentModal from "src/components/exchanges/ExchangeDocumentModal";
 
 const DataInCharts = () => {
     const subscriptionsLookup = useSubscriptionsLookupQuery()
     const chartsDataPoints = useChartsDataPointsQuery()
     const xChangeInfo = useDashboardXchangesInfoQuery()
     const [exceptionToView, setExceptionToView] = useState<string>("");
+    const [xchangeDocumentToView, setXchangeDocumentToView] = useState<string>("");
+
     const items = useMemo(() => {
             if (!chartsDataPoints.data)
                 return []
@@ -35,8 +38,11 @@ const DataInCharts = () => {
     const tickFormatter = (tick, index) => index % 3 === 0 ? tick : '';
 
     return <div className={"flex flex-col xl:flex-row gap-5"}>
-        {exceptionToView && <RetryModal exception={exceptionToView} xid={""} onClose={() => setExceptionToView(null)}/>
-
+        {exceptionToView && <RetryModal exception={exceptionToView} xid={""} onClose={() => setExceptionToView(null)}/>}
+        {
+            Boolean(xchangeDocumentToView) &&
+            <ExchangeDocumentModal downloadUrl={xchangeDocumentToView!} name={"Response"}
+                                   onClose={() => setXchangeDocumentToView(null)}/>
         }
 
         <div className={"bg-white p-3 rounded-lg shadow-lg xl:w-3/5"}>
@@ -72,8 +78,11 @@ const DataInCharts = () => {
                                             if (!i.responseBad) {
                                                 setExceptionToView(i.exception)
                                             }
+                                            if (i.responseBad) {
+                                                setXchangeDocumentToView(i.responseUrl)
+                                            }
                                         }}
-                                        className={"text-center text-xs rounded-full " + (i.responseBad ? "bg-yellow-400" : "bg-red-600 text-white cursor-pointer")}>
+                                        className={"text-center text-xs rounded-full cursor-pointer " + (i.responseBad ? "bg-yellow-400" : "bg-red-600 text-white ")}>
                                         {i.responseBad ? "Bad response" : "Failed"}
                                     </div>
 
