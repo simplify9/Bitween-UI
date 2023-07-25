@@ -2,7 +2,7 @@ import {useChartsDataPointsQuery, useDashboardXchangesInfoQuery} from "src/clien
 import React, {useMemo, useState} from "react";
 import {Area, AreaChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
 import {useSubscriptionsLookupQuery} from "src/client/apis/subscriptionsApi";
-import {toLocalDateTimeString} from "src/utils/DateUtils";
+import {getDateDifferenceHumanized} from "src/utils/DateUtils";
 import RetryModal from "src/components/exchanges/RetryModal";
 import ExchangeDocumentModal from "src/components/exchanges/ExchangeDocumentModal";
 
@@ -91,7 +91,8 @@ const DataInCharts = () => {
                                     {i.subscriptionName}
                                 </div>
                                 <div className={"text-gray-500 text-xs"}>
-                                    {toLocalDateTimeString(i.finishedOn)}
+                                    {getDateDifferenceHumanized(new Date(), i.finishedOn)} {'ago'}
+
                                 </div>
                             </div>
                         </div>)}
