@@ -21,7 +21,7 @@ const XchangeAndSubInfo = () => {
         if (!subscriptionsLookup.data || !chartsDataPoints.data?.subscriptionsUsageCount)
             return []
 
-        return chartsDataPoints.data?.subscriptionsUsageCount?.slice(0, 5)?.map(({subscriptionId, count}) => ({
+        return chartsDataPoints.data?.subscriptionsUsageCount?.slice(0, 3)?.map(({subscriptionId, count}) => ({
             name: subscriptionsLookup.data[subscriptionId],
             count: count
         }))
@@ -56,7 +56,6 @@ const XchangeAndSubInfo = () => {
             <ResponsiveContainer width="95%" height={400}>
                 <BarChart
                     data={subscriptionsDataLimited}
-
                 >
                     <XAxis dataKey="name"/>
                     <YAxis/>
