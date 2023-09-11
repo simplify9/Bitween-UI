@@ -20,15 +20,15 @@ import Header from "src/components/common/layout/Header";
 import NavBar from "src/components/common/layout/NavBar";
 import Team from "src/components/Team";
 import Footer from "src/components/common/layout/Footer";
-import {useSelector} from "react-redux";
 import LoadingIndicator from "src/components/common/LoadingIndicator";
+import ManageCategories from "src/components/ManageCategories";
 
 function App() {
     const [isOpen, setIsOpen] = useState(true);
 
     const {isLoggedIn} = useAuthApi();
 
-   
+
     if (!isLoggedIn) return <Login/>;
 
     return (
@@ -58,6 +58,7 @@ function App() {
                                     <Route path="/notifiers" element={<Notifiers/>}/>
                                     <Route path="/Xchanges" element={<Exchanges/>}/>
                                     <Route path="/subscriptions" element={<Subscriptions/>}/>
+                                    <Route path="/subscriptions/manage-categories" element={<ManageCategories/>}/>
                                     <Route path="/documents" element={<Documents/>}/>
                                     <Route path="/partners" element={<Partners/>}/>
                                     <Route path="/partners/:id" element={<Partner/>}/>

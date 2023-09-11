@@ -8,6 +8,7 @@ import {ICreateSubscription, IDuplicateSubscription, ISubscription} from "../typ
 import Button from "./common/forms/Button";
 import CreateNewSubscription from "./Subscriptions/CreateNewSubscription";
 import Authorize from "src/components/common/authorize/authorize";
+import {useNavigate} from "react-router-dom";
 
 
 const defaultQuery = {
@@ -37,7 +38,7 @@ interface Props {
 }
 
 const Component = ({}: Props) => {
-
+    const nav= useNavigate()
     const [openModal, setOpenModal] = useState<"NONE" | "ADD" | "DUPLICATE">("NONE");
     const [dataToDuplicate, setDataToDuplicate] = useState<ISubscription | null>(null);
 
@@ -99,16 +100,26 @@ const Component = ({}: Props) => {
     return (
         <>
             <div className="flex flex-col w-full  md:max-w-[1000px]">
-                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                <div className="flex flex-col  w-full  shadow p-2 my-2  rounded-lg bg-white ">
                     <SubscriptionFinderPanel searchAdapterData value={findSpecs} onChange={setFindSpecs}
                                              onFindRequested={handleFindRequested}/>
-                    <div>
-                        <Authorize roles={["Admin", "Member"]}>
-                            <Button onClick={() => setOpenModal("ADD")}
-                            >
-                                Add
-                            </Button>
-                        </Authorize>
+                    <div className={"flex flex-row justify-end"}>
+                        <div className={"w-[100px]"}>
+                            <Authorize roles={["Admin", "Member"]}>
+                                <Button onClick={() => setOpenModal("ADD")}
+                                >
+                                    Add
+                                </Button>
+                            </Authorize>
+                        </div>
+                        <div className={"w-[180px]"}>
+                            <Authorize roles={["Admin", "Member"]}>
+                                <Button onClick={() => nav("manage-categories")}
+                                >
+                                    Manage Categories
+                                </Button>
+                            </Authorize>
+                        </div>
                     </div>
 
                 </div>

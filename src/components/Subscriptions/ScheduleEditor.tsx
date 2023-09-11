@@ -130,13 +130,16 @@ const ScheduleEditor: React.FC<Props> = ({
                                     </td>
 
                                     <td>
+                                        <div className={"flex flex-row "}>
+                                            
+                                      
                                         {
                                             onEdit && <Button onClick={() => {
                                                 onEdit(i.id)
                                             }}
                                                               variant={"none"}
                                             >
-                                                <MdModeEditOutline size={21}/>
+                                                <MdModeEditOutline className={"text-yellow-300"} size={21}/>
                                             </Button>
                                         }
 
@@ -144,8 +147,9 @@ const ScheduleEditor: React.FC<Props> = ({
                                             variant={"none"}
                                             onClick={() => onRemove!(i.id)}
                                         >
-                                            <MdOutlineRemoveCircle size={21}/>
+                                            <MdOutlineRemoveCircle className={"text-red-600"} size={21}/>
                                         </Button>
+                                        </div>
                                     </td>
 
                                 </tr>

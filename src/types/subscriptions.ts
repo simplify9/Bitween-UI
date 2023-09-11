@@ -9,6 +9,9 @@ export type SubscriptionFindQuery = CommonFindQuery & {
 }
 
 export interface ISubscription {
+    categoryId?: number
+    categoryCode?: string
+    categoryDescription?: string
     id?: number
     name?: string;
     documentId?: string;
@@ -126,3 +129,24 @@ export interface AdapterFindQuery {
     prefix: string;
 }
 
+
+export type SubscriptionCategoryModel = {
+    id: number;
+    code: string;
+    description: string;
+    createdOn: Date;
+};
+
+export type CreateSubscriptionCategoryModel = {
+    code: string;
+    description: string;
+};
+
+export type SearchSubscriptionCategoryModel = {
+    limit?: number;
+    offset?: number;
+};
+
+export type UpdateSubscriptionCategoryModel = { id: number } & CreateSubscriptionCategoryModel;
+
+export type DeleteSubscriptionCategoryModel = { id: number };

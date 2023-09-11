@@ -18,10 +18,13 @@ import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 import Authorize from "src/components/common/authorize/authorize";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
+import {useSubscriptionCategoriesQuery} from "src/client/apis/subscriptionsApi";
 
 const Component = () => {
     let navigate = useNavigate();
     let {id} = useParams();
+    const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
+
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
 
@@ -70,7 +73,6 @@ const Component = () => {
     }, [])
 
 
-    console.log(updateSubscriptionData.responseSubscriptionId)
     if (!updateSubscriptionData) return <></>
 
     return (
@@ -107,6 +109,16 @@ const Component = () => {
                             optionTitle={(item: OptionType) => item.title}
                             optionValue={(item: OptionType) => item.id}
                             options={SubscriptionTypeOptions}/>
+                    </FormField>
+                </div>
+                <div className=" ">
+                    <FormField title="Category" className="grow">
+                        <ChoiceEditor
+                            value={updateSubscriptionData?.categoryId?.toString()}
+                            onChange={(e) => onChangeSubscriptionData("categoryId", e)}
+                            optionTitle={(item) => item.code}
+                            optionValue={(item) => item.id}
+                            options={subscriptionCategories.data?.result ?? []}/>
                     </FormField>
                 </div>
 
