@@ -1,14 +1,17 @@
-interface Props {
-
-}
+import MainInfo from "src/components/Dashboard/MainInfo";
+import SubscriptionsInfo from "src/components/Dashboard/SubscriptionsInfo";
+import XchangeInfo from "src/components/Dashboard/XchangeInfo";
 
 
 export default () => {
+
+
     return (
-        <div className={"flex items-center justify-center pt-52"}>
-            <div className={"flex p-10 bg-white shadow-lg shadow-[#e3311d21] rounded-lg"}>
-                <h1 className={"text-primary-600 font-semiblod text-3xl"}>Coming soon analytics dashboard</h1>
-            </div>
+        <div className={"flex flex-col gap-3  "}>
+            <div className={"text-xs text-gray-400 mb-3"}>*Data points are based on the last 3 months usages</div>
+            <MainInfo/>
+            <XchangeInfo/>
+            <SubscriptionsInfo/>
         </div>
     )
 }

@@ -19,11 +19,13 @@
     "react-select": "^5.7.4",
     "react-syntax-highlighter": "^15.5.0",
     "react-toastify": "^9.1.3",
+    "recharts": "^2.7.2",
     "redux-ecq": "^1.0.11",
     "select": "^1.1.2"
   },
   "scripts": {
     "dev": "vite",
+    "dev:bun": "bun --bun vite dev",
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",

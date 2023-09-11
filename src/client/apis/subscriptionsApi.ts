@@ -58,11 +58,20 @@ export const SubscriptionApi = createApi({
                 body
             })
         }),
+        subscriptionsLookup: builder.query<Record<string, string>, void>({
+            providesTags: ['subscription'],
+            query: () => ({
+                url: 'subscriptions',
+                method: "GET",
+                params:{lookup:true}
+            })
+        })
     })
 });
 
 
 export const {
+    useSubscriptionsLookupQuery,
     useCreateSubscriptionCategoryMutation,
     useUpdateSubscriptionCategoryMutation,
     useSubscriptionCategoriesQuery,

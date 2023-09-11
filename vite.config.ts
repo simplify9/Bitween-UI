@@ -2,7 +2,7 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import {posix} from "path";
 
-export default defineConfig({
+const config= defineConfig({
     plugins: [react()],
     build: {
         outDir: "build",
@@ -18,3 +18,5 @@ export default defineConfig({
         ]
     },
 })
+
+export default config
