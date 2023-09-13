@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {useSubscriptionFinder} from "../hooks/queryHooks";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
@@ -34,14 +33,7 @@ const defaultQuery = {
     }
 }
 
-
-const useQuery = useSubscriptionFinder;
-
-interface Props {
-
-}
-
-const Component = ({}: Props) => {
+const Component = () => {
     const nav = useNavigate()
     const [fetchData, data] = useLazySubscriptionsQuery();
     const [createSubscription] = useCreateSubscriptionMutation()

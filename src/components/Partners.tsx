@@ -6,7 +6,7 @@ import CreateNewPartner from "./Partners/CreateNewPartner";
 import {apiClient} from "../client";
 import Authorize from "src/components/common/authorize/authorize";
 import Button from "src/components/common/forms/Button";
-import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
+import {PartnersFinderPanel} from "src/components/Subscriptions/PartnersFinder";
 
 
 interface Props {
@@ -70,8 +70,8 @@ export default () => {
 
 
                 <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
-                    <SubscriptionFinderPanel value={findSpecs} onChange={setFindSpecs}
-                                             onFindRequested={handleFindRequested}/>
+                    <PartnersFinderPanel value={findSpecs} onChange={setFindSpecs}
+                                         onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Member"]}>
 
