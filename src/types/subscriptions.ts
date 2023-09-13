@@ -1,7 +1,38 @@
 import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
 
+enum SubscriptionType {
+    Unknown = 0,
+    Internal = 1,
+    ApiCall = 2,
+    Receiving = 4,
+    Aggregation = 8
+}
+
+export const SubscriptionTypes = [
+    {label: 'Internal', value: 1},
+    {label: 'ApiCall', value: 2},
+    {label: 'Receiving', value: 4},
+    {label: 'Aggregation', value: 8}
+]
+
 
 export type SubscriptionFindQuery = CommonFindQuery & {
+    nameContains: string
+    rawsubscriptionproperties?: string
+    rawfiltersproperties?: string
+    partnerId?: number | null | string
+    id: number | null
+    type: number | null
+    mapperId: string | null
+    handlerId: string | null
+    validatorId: string | null
+    receiverId: string | null
+    isRunning: boolean | null
+    categoryId: number | null
+    inactive: boolean | null
+}
+
+export type SubscriptionSearchQuery = CommonFindQuery & {
     nameContains: string
     rawsubscriptionproperties?: string
     rawfiltersproperties?: string
@@ -116,10 +147,7 @@ export type MatchExpression =
     | NotOneOfMatchExpression
     | MatchExpressionValue
 
-export const SubscriptionTypeOptions: OptionType[] = [{
-    id: "0",
-    title: "Unknown"
-},
+export const SubscriptionTypeOptions: OptionType[] = [
     {id: "1", title: "Internal"},
     {id: "2", title: "ApiCall"},
     {id: "4", title: "Receiving"},

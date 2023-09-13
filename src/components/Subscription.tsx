@@ -18,28 +18,33 @@ import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 import Authorize from "src/components/common/authorize/authorize";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
-import {useSubscriptionCategoriesQuery} from "src/client/apis/subscriptionsApi";
+import {
+    useLazySubscriptionQuery,
+    useSubscriptionCategoriesQuery,
+    useUpdateSubscriptionMutation
+} from "src/client/apis/subscriptionsApi";
 
 const Component = () => {
     let navigate = useNavigate();
     let {id} = useParams();
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
-
+    const [updateSubscription] = useUpdateSubscriptionMutation()
+    const [getSubscription] = useLazySubscriptionQuery()
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
-
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
 
     useEffect(() => {
         if (id) {
-            refreshSubscription(id).then();
+            refreshSubscription(Number(id));
         }
     }, [id]);
 
-    const refreshSubscription = async (id: string) => {
-        let res = await apiClient.findSubscription(id);
-        if (res.succeeded) {
+    const refreshSubscription = async (id: number) => {
+        let res = await getSubscription(id);
+        if (res.data) {
             const data = {
+                id,
                 ...res.data,
                 schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
                     ...s,
@@ -49,13 +54,10 @@ const Component = () => {
             setUpdateSubscriptionData(data)
         }
     }
+    const onClickUpdateSubscription = async () => {
+        await updateSubscription(updateSubscriptionData);
+        await getTrails();
 
-    const updateSubscription = async () => {
-        let res = await apiClient.updateSubscription(id!, updateSubscriptionData!);
-        if (res.succeeded) {
-            await refreshSubscription(id!);
-            await getTrails();
-        }
     }
     const deleteSubscription = async () => {
         let res = await apiClient.deleteSubscription(id!);
@@ -81,14 +83,7 @@ const Component = () => {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
-            {/*<div className="justify-between w-full flex py-4 ">*/}
-            {/*    <div*/}
-            {/*        className="text-2xl font-bold tracking-wide text-gray-700">*/}
-            {/*         <span*/}
-            {/*             className={"text-sm text-red-500 font-light"}>{updateSubscriptionData.inactive ? '(INACTIVE)' : ''}</span>*/}
-            {/*    </div>*/}
-            {/*  */}
-            {/*</div>*/}
+       
             <div
                 className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
 
@@ -305,7 +300,7 @@ const Component = () => {
                 <div className={"flex flex-row"}>
                     <Authorize roles={["Admin", "Member"]}>
                         <Button
-                            onClick={updateSubscription}>
+                            onClick={onClickUpdateSubscription}>
                             Save
                         </Button>
                     </Authorize>

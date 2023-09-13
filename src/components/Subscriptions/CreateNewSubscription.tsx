@@ -37,7 +37,7 @@ const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
                             disabled={Boolean(initialState?.type)}
                             placeholder="Select Subscription Type"
                             value={newSubscription.type}
-                            onChange={val => setNewSubscription({...newSubscription, type: val})}
+                            onChange={val => setNewSubscription({...newSubscription, type: val.toString()})}
                             optionTitle={(item: OptionType) => item.title}
                             optionValue={(item: OptionType) => item.id}
                             options={SubscriptionTypeOptions}/>

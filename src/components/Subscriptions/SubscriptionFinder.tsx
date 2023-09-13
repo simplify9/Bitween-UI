@@ -1,14 +1,15 @@
-import {SubscriptionSpecs} from "../Subscriptions";
 import FormField from "../common/forms/FormField";
 import TextEditor from "../common/forms/TextEditor";
 import React from "react";
-import Button from "src/components/common/forms/Button";
-import {BsSearch} from "react-icons/bs"
 import PartnerSelector from "src/components/Partners/PartnerSelector";
+import {SubscriptionFindQuery, SubscriptionTypes} from "src/types/subscriptions";
+import AdapterSelector from "src/components/Subscriptions/AdapterSelector";
+import ChoiceEditor from "src/components/common/forms/ChoiceEditor";
+import {useSubscriptionCategoriesQuery} from "src/client/apis/subscriptionsApi";
 
 interface Props {
-    value: SubscriptionSpecs
-    onChange: (value: SubscriptionSpecs) => void
+    value: SubscriptionFindQuery
+    onChange: (value: SubscriptionFindQuery) => void
     onFindRequested: () => void
     searchAdapterData?: boolean
 }
@@ -20,19 +21,29 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                                                              searchAdapterData
                                                          }) => {
 
+    const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
 
     return (
         <>
-            <div className="flex flex-row  px-4 ">
-                <div className="flex flex-wrap  items-end mb-2  w-full">
-                    <FormField title="Name" className="grow  mr-2">
-                        <TextEditor placeholder="Name" value={value.nameContains}
-                                    onChange={(t) => onChange({...value, nameContains: t})}
-                        />
-                    </FormField>
+            <div className="flex  px-4  w-full">
+                <div className="grid grid-cols-5 gap-x-5 gap-y-2 w-full">
+                    {
+                        searchAdapterData && <FormField title="Name" className="grow  mr-2">
+                            <TextEditor placeholder="Name" value={value.nameContains}
+                                        onChange={(t) => onChange({...value, nameContains: t})}
+                            />
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData && <FormField title="Id" className="grow  mr-2">
+                            <TextEditor placeholder="Id" value={value.id}
+                                        onChange={(t) => onChange({...value, id: Number(t)})}
+                            />
+                        </FormField>
+                    }
                     {
                         searchAdapterData &&
-                        <FormField title="Adapter data" className="grow mr-2">
+                        <FormField title="Adapter Properties" className="grow mr-2">
                             <TextEditor placeholder="Adapter data" value={value.rawsubscriptionproperties}
                                         onChange={(t) => onChange({...value, rawsubscriptionproperties: t})}
                             />
@@ -40,7 +51,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     }
                     {
                         searchAdapterData &&
-                        <FormField title="Filter data" className="grow mr-2">
+                        <FormField title="Filter Properties" className="grow mr-2">
                             <TextEditor placeholder="Filter data" value={value.rawfiltersproperties}
                                         onChange={(t) => onChange({...value, rawfiltersproperties: t})}
                             />
@@ -48,21 +59,96 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     }
                     {
                         searchAdapterData &&
-                        <FormField title="Partner Id" className="mt-2">
+                        <FormField title="Partner Id" className="grow ">
                             <PartnerSelector value={value.partnerId}
                                              onChange={val => onChange({...value, partnerId: val})}/>
-                           
+
                         </FormField>
                     }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Validator" className=" grow ">
+                            <AdapterSelector type={'validators'} value={value.validatorId}
+                                             onChange={(val) => onChange({...value, validatorId: val})}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Receiver" className="grow">
+                            <AdapterSelector type={'receivers'} value={value.receiverId}
+                                             onChange={(val) => onChange({...value, receiverId: val})}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Mapper" className="grow">
+                            <AdapterSelector type={'mappers'} value={value.mapperId}
+                                             onChange={(val) => onChange({...value, mapperId: val})}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Handler" className="grow">
+                            <AdapterSelector type={'handlers'} value={value.handlerId}
+                                             onChange={(val) => onChange({...value, handlerId: val})}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Type" className="grow">
+                            <ChoiceEditor value={value.type?.toString()}
+                                          options={SubscriptionTypes}
+                                          optionValue={o => o.value}
+                                          optionTitle={i => i.label}
+                                          onChange={(val) => onChange({...value, type: Number(val)})}
+                            />
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Category" className="grow">
+                            <ChoiceEditor
+                                value={value?.categoryId?.toString()}
+                                onChange={(val) => onChange({...value, categoryId: Number(val)})}
+                                optionTitle={(item) => item.code}
+                                optionValue={(item) => item.id}
+                                options={subscriptionCategories.data?.result ?? []}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="State" className="grow">
+                            <ChoiceEditor value={value.type?.toString()}
+                                          options={[
+                                              {value: undefined, label: 'All'},
+                                              {value: 'Idle', label: 'Idle'},
+                                              {value: 'Running', label: 'Running'},
 
-                    <Button
-                        className={'mx-5'}
-                        variant={"none"}
-                        onClick={onFindRequested}
-                    >
-                        <BsSearch size={33} className={" mb-2 text-primary-600"}/>
-                    </Button>
+                                          ]}
+                                          optionValue={o => o.value}
+                                          optionTitle={i => i.label}
+                                          onChange={(val) => onChange({...value, isRunning: val === 'Running'})}
+                            />
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Status" className="grow">
+                            <ChoiceEditor value={value.inactive?.toString()}
+                                          options={[
+                                              {value: undefined, label: 'All'},
+                                              {value: 'Active', label: 'Active'},
+                                              {value: 'Inactive', label: 'Inactive'},
+
+                                          ]}
+                                          optionValue={o => o.value}
+                                          optionTitle={i => i.label}
+                                          onChange={(val) => onChange({...value, inactive: val === 'Inactive'})}
+                            />
+                        </FormField>
+                    }
                 </div>
+
             </div>
 
 
