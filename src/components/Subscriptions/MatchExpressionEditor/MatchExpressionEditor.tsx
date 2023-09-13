@@ -81,9 +81,7 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
             matchFeature && <Fragment>
                 <div className={"text-center pt-2 pb-1"}>
                     <SyntaxHighlighter wrapLines={true} language="sql" style={xcode}>
-                        {`SELECT *
-                          FROM "${documentName}"
-                          WHERE ${getDescription(expression) || "TRUE"} `}
+                        {`SELECT * FROM "${documentName}" WHERE ${getDescription(expression) || "TRUE"} `}
                     </SyntaxHighlighter>
                 </div>
 

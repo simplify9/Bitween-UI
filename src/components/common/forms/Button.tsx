@@ -14,7 +14,7 @@ const Button: React.FC<Props> = ({
                                      children,
                                      onClick,
                                      variant = "primary",
-                                     className
+                                     className, disabled
                                  }) => {
 
     const getVariant = (variant: "primary" | "secondary" | "none") => {
@@ -31,7 +31,7 @@ const Button: React.FC<Props> = ({
     }
 
     return (
-        <button onClick={(event) => {
+        <button disabled={disabled} onClick={(event) => {
             event.stopPropagation();
             event.preventDefault()
             onClick(event)

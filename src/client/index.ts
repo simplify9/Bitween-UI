@@ -1,6 +1,6 @@
 import axios from "axios";
 import {CreateXchangeModel, ExchangeFindQuery} from "../types/xchange";
-import {AdapterFindQuery, ICreateSubscription, ISubscription, SubscriptionFindQuery} from "../types/subscriptions";
+import {AdapterFindQuery, ISubscription} from "../types/subscriptions";
 import {ChangePasswordModel, CreateAccountModel, LoginRequest} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
@@ -152,31 +152,18 @@ export const apiClient = {
         return arr;
 
     },
-    findSubscriptions: async (req: SubscriptionFindQuery) => {
-
-        const res = await client.get(`subscriptions${formulateQueryString(req)}`)
-        return {
-            total: res.data.totalCount,
-            data: res.data.result
-        }
-
-    },
     findSubscriptionTrail: async (id: string) => {
         const res: ApiResponse = await client.get(`subscriptions/trail?SubscriptionId=${id}&limit=1000`)
         return res
     },
-    findSubscription: async (id: string) => {
-        const res: ApiResponse = await client.get(`subscriptions/${id}`)
-        return res
-    },
-    createSubscription: async (req: ICreateSubscription) => {
-        const res: ApiResponse = await client.post("subscriptions", req)
-        return res
-    },
-    updateSubscription: async (id: string, req: ISubscription) => {
-        const res: ApiResponse = await client.post(`subscriptions/${id}`, req)
-        return res
-    },
+    // findSubscription: async (id: string) => {
+    //     const res: ApiResponse = await client.get(`subscriptions/${id}`)
+    //     return res
+    // },
+    // updateSubscription: async (id: string, req: ISubscription) => {
+    //     const res: ApiResponse = await client.post(`subscriptions/${id}`, req)
+    //     return res
+    // },
     deleteSubscription: async (id: string) => {
         const res: ApiResponse = await client.delete(`subscriptions/${id}`)
         return res
@@ -203,6 +190,13 @@ interface QueryParams {
     creationDateFrom?: string;
     creationDateTo?: string;
     test?: boolean;
+    type?: string
+    mapperId?: string | null
+    handlerId?: string | null
+    validatorId?: string | null
+    receiverId?: string | null
+    isRunning?: boolean | null
+    categoryId?: number | null
 }
 
 export const formulateQueryString = (req: QueryParams) => {
@@ -212,7 +206,14 @@ export const formulateQueryString = (req: QueryParams) => {
 
     if ('rawfiltersproperties' in req && req.rawfiltersproperties) query += `&filter=rawfiltersproperties:4:${req.rawfiltersproperties}`;
     if ('partnerId' in req && req.partnerId) query += `&filter=partnerId:1:${req.partnerId}`;
-
+    if ('type' in req && req.type) query += `&filter=type:1:${req.type}`;
+    if ('inactive' in req && req.inactive!=null) query += `&filter=inactive:1:${req.inactive}`;
+    if ('handlerId' in req && req.handlerId) query += `&filter=handlerId:1:${req.handlerId}`;
+    if ('validatorId' in req && req.validatorId) query += `&filter=validatorId:1:${req.validatorId}`;
+    if ('receiverId' in req && req.receiverId) query += `&filter=receiverId:1:${req.receiverId}`;
+    if ('isRunning' in req && req.isRunning!=null) query += `&filter=isRunning:1:${req.isRunning}`;
+    if ('categoryId' in req && req.categoryId) query += `&filter=categoryId:1:${req.categoryId}`;
+    if ('mapperId' in req && req.mapperId) query += `&filter=mapperId:1:${req.mapperId}`;
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;

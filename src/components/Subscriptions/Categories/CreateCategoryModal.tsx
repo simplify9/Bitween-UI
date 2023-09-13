@@ -15,11 +15,12 @@ const CreateCategoryModal: React.FC<Props> = (props) => {
         description: ""
     });
     const onSubmit = async () => {
+
         const res = await create(data)
         if ('data' in res)
             props.onClose()
     }
-    
+
     return <Modal onClose={props.onClose} submitLabel={"Create"} onSubmit={onSubmit}
                   submitDisabled={!(data.code && data.description)}>
         <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">

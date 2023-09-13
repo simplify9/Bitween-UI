@@ -3,12 +3,14 @@ import customFetchBase from "src/client/apis/apiMiddleware";
 import {
     CreateSubscriptionCategoryModel,
     DeleteSubscriptionCategoryModel,
+    ICreateSubscription,
     ISubscription,
     SearchSubscriptionCategoryModel,
     SubscriptionCategoryModel,
     UpdateSubscriptionCategoryModel
 } from "src/types/subscriptions";
 import {ApiPagedResponse} from "src/types/common";
+import {formulateQueryString} from "src/client";
 
 export const SubscriptionApi = createApi({
     baseQuery: customFetchBase,
@@ -21,9 +23,38 @@ export const SubscriptionApi = createApi({
         }>({
             providesTags: ['subscription'],
             query: params => ({
-                url: 'subscriptions',
+                url: `subscriptions${formulateQueryString(params)}`,
                 method: "GET",
-                params
+            })
+        }),
+        subscription: builder.query<ISubscription, number>({
+            providesTags: ['subscription'],
+            query: id => ({
+                url: `subscriptions/${id}`,
+                method: "GET",
+            })
+        }),
+        createSubscription: builder.mutation<number, ICreateSubscription>({
+            invalidatesTags: ['subscription'],
+            query: body => ({
+                url: 'subscriptions',
+                method: "POST",
+                body
+            })
+        }),
+        deleteSubscription: builder.mutation<{ id: number }, number>({
+            invalidatesTags: ['subscription'],
+            query: id => ({
+                url: `subscriptions/${id}`,
+                method: "DELETE",
+            })
+        }),
+        updateSubscription: builder.mutation<{ id: number }, ISubscription>({
+            invalidatesTags: ['subscription'],
+            query: body => ({
+                url: `subscriptions/${body.id}`,
+                method: "POST",
+                body
             })
         }),
         subscriptionCategories: builder.query<ApiPagedResponse<SubscriptionCategoryModel>, SearchSubscriptionCategoryModel>({
@@ -63,7 +94,7 @@ export const SubscriptionApi = createApi({
             query: () => ({
                 url: 'subscriptions',
                 method: "GET",
-                params:{lookup:true}
+                params: {lookup: true}
             })
         })
     })
@@ -71,10 +102,14 @@ export const SubscriptionApi = createApi({
 
 
 export const {
+    useUpdateSubscriptionMutation,
+    useLazySubscriptionQuery,
+    useCreateSubscriptionMutation,
     useSubscriptionsLookupQuery,
     useCreateSubscriptionCategoryMutation,
     useUpdateSubscriptionCategoryMutation,
     useSubscriptionCategoriesQuery,
     useDeleteSubscriptionCategoryMutation,
     useSubscriptionsQuery,
+    useLazySubscriptionsQuery,
 } = SubscriptionApi
