@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {useSubscriptionFinder} from "../hooks/queryHooks";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
@@ -35,8 +34,6 @@ const defaultQuery = {
 }
 
 
-const useQuery = useSubscriptionFinder;
-
 interface Props {
 
 }
@@ -59,13 +56,14 @@ const Component = ({}: Props) => {
         receiverId: undefined,
         type: undefined,
         validatorId: undefined,
+        documentId: null,
         nameContains: '',
         rawsubscriptionproperties: '',
         rawfiltersproperties: '',
         categoryId: null,
         limit: 20,
         offset: 0,
-        inactive: null
+        inactive: null,
     });
 
     useEffect(() => {

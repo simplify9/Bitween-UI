@@ -30,6 +30,7 @@ export type SubscriptionFindQuery = CommonFindQuery & {
     isRunning: boolean | null
     categoryId: number | null
     inactive: boolean | null
+    documentId: number | null
 }
 
 export type SubscriptionSearchQuery = CommonFindQuery & {
