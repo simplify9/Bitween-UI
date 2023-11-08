@@ -19,14 +19,6 @@ export const GeneralApi = createApi({
                 method: "GET",
             })
         }),
-        msLogin: builder.mutation<Record<string, string>, AdapterFindQuery>({
-            invalidatesTags: ['adapters'],
-            query: body => ({
-                url: 'Adapters',
-                method: "POST",
-                body
-            })
-        }),
         profile: builder.query<AccountModel, void>({
             //providesTags: ['account'],
             query: () => ({
@@ -34,48 +26,58 @@ export const GeneralApi = createApi({
                 method: "GET",
             })
         }),
-        removeMember:builder.mutation<{},{id:number}>({
-            invalidatesTags:['account'],
-            query:(body)=> ({
-                url:`Accounts/${body.id}/remove`,
-                method:'POST',
-                body:body
+        removeMember: builder.mutation<{}, { id: number }>({
+            invalidatesTags: ['account'],
+            query: (body) => ({
+                url: `Accounts/${body.id}/remove`,
+                method: 'POST',
+                body: body
             })
         }),
-        findMembers:builder.query<ApiPagedResponse<AccountModel>,{ lookup?: boolean, limit: number, offset: number }>({
-            providesTags:['account']
-            ,query:(params)=> ({
-                url:`Accounts?${formulateQueryString(params)}&lookup=${Boolean(params?.lookup)}`,
-                method:'GET',
+        findMembers: builder.query<ApiPagedResponse<AccountModel>, {
+            lookup?: boolean,
+            limit: number,
+            offset: number
+        }>({
+            providesTags: ['account']
+            , query: (params) => ({
+                url: `Accounts?${formulateQueryString(params)}&lookup=${Boolean(params?.lookup)}`,
+                method: 'GET',
             })
         }),
-        findAppVersion:builder.query <{infolinkApiVersion:string},{}>({
-            query:()=> ({
-                url:"Settings/myversion",
-                method:'GET',
+        findAppVersion: builder.query <{ infolinkApiVersion: string }, {}>({
+            query: () => ({
+                url: "Settings/myversion",
+                method: 'GET',
             })
         }),
-        createMember:builder.mutation<{},CreateAccountModel>({
-            invalidatesTags:['account'],
-            query:(body)=>({
-                url:"Accounts/",
-                method:'POST',
-                body:body
+        appConfig: builder.query <{ msalClientId: string | null }, void>({
+            query: () => ({
+                url: "Settings/config",
+                method: 'GET',
             })
         }),
-        changePassword:builder.mutation<{},ChangePasswordModel>({
-            query:(body)=>({
-                url:"Accounts/changePassword",
-                method:'POST',
-                body:body
+        createMember: builder.mutation<{}, CreateAccountModel>({
+            invalidatesTags: ['account'],
+            query: (body) => ({
+                url: "Accounts/",
+                method: 'POST',
+                body: body
             })
         }),
-        updateMember:builder.mutation<{},EditModal>({
-            invalidatesTags:['account'],
-            query:(body)=>({
-                url:`Accounts/${body.id}`,
-                method:'POST',
-                body:body
+        changePassword: builder.mutation<{}, ChangePasswordModel>({
+            query: (body) => ({
+                url: "Accounts/changePassword",
+                method: 'POST',
+                body: body
+            })
+        }),
+        updateMember: builder.mutation<{}, EditModal>({
+            invalidatesTags: ['account'],
+            query: (body) => ({
+                url: `Accounts/${body.id}`,
+                method: 'POST',
+                body: body
             })
         }),
         dashboardXchangesInfo: builder.query<XchangeMainInfo, void>({
@@ -99,7 +101,7 @@ export const GeneralApi = createApi({
 
 
 export const {
-    useMsLoginMutation,
+    useAppConfigQuery,
     useChartsDataPointsQuery,
     useDashboardXchangesInfoQuery,
     useDashboardMainInfoQuery,

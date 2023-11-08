@@ -1,18 +1,27 @@
-import {MSAL_CLIENT_ID} from "src/env";
 import {PublicClientApplication} from "@azure/msal-browser";
 import {apiClient} from "src/client";
 import {useAuthApi} from "src/client/components";
+import {useAppConfigQuery} from "src/client/apis/generalApi";
+import {useEffect} from "react";
 
-const msalConfig = {
-    auth: {
-        clientId: MSAL_CLIENT_ID
-    }
-};
 
-const msalInstance = new PublicClientApplication(msalConfig);
-msalInstance.initialize().then()
+let msalInstance: PublicClientApplication
 const SignInWithMsButton = () => {
+    const config = useAppConfigQuery()
     const {login} = useAuthApi();
+
+    useEffect(() => {
+        if (config.data?.msalClientId) {
+            msalInstance = new PublicClientApplication({
+                auth: {
+                    clientId: config.data.msalClientId
+                }
+            });
+            msalInstance.initialize().then()
+        }
+
+
+    }, [config.data?.msalClientId]);
 
     const onClickLoginWithMicrosoft = async () => {
         const msRes = await msalInstance.loginPopup({
@@ -31,8 +40,9 @@ const SignInWithMsButton = () => {
 
     }
 
-    if (!MSAL_CLIENT_ID)
+    if (!config.data?.msalClientId)
         return null
+
     return <div onClick={onClickLoginWithMicrosoft} className={"my-5"}>
 
         <img src={"/external/ms.svg"} className={"w-full h-[42px]"}/>
