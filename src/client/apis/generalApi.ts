@@ -19,6 +19,14 @@ export const GeneralApi = createApi({
                 method: "GET",
             })
         }),
+        msLogin: builder.mutation<Record<string, string>, AdapterFindQuery>({
+            invalidatesTags: ['adapters'],
+            query: body => ({
+                url: 'Adapters',
+                method: "POST",
+                body
+            })
+        }),
         profile: builder.query<AccountModel, void>({
             //providesTags: ['account'],
             query: () => ({
@@ -91,6 +99,7 @@ export const GeneralApi = createApi({
 
 
 export const {
+    useMsLoginMutation,
     useChartsDataPointsQuery,
     useDashboardXchangesInfoQuery,
     useDashboardMainInfoQuery,

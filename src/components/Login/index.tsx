@@ -1,7 +1,8 @@
-import {useState} from "react";
-import {useAuthApi} from "../../client/components";
-import {apiClient} from "../../client";
+import {useEffect, useState} from "react";
+import {useAuthApi} from "src/client/components";
+import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
+import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
 
 
 const Login = () => {
@@ -23,6 +24,11 @@ const Login = () => {
             setFailed(true);
         }
     }
+
+    useEffect(() => {
+
+        ;
+    }, []);
 
     return (
         // <div
@@ -94,6 +100,7 @@ const Login = () => {
                                     </Button>
 
                                 </div>
+                                <SignInWithMsButton/>
 
                             </form>
 
