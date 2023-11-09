@@ -25,7 +25,7 @@ const SignInWithMsButton = () => {
 
     const onClickLoginWithMicrosoft = async () => {
         const msRes = await msalInstance.loginPopup({
-            redirectUri: "http://localhost:3000/",
+            redirectUri: config.data?.msalRedirectUri,
             scopes: ["openid", "profile", "User.Read"]
         });
         if (msRes.idToken) {
@@ -40,7 +40,7 @@ const SignInWithMsButton = () => {
 
     }
 
-    if (!config.data?.msalClientId)
+    if (!config.data?.msalClientId || !config.data?.msalRedirectUri)
         return null
 
     return <div onClick={onClickLoginWithMicrosoft} className={"my-5"}>
