@@ -36,8 +36,6 @@ const SignInWithMsButton = () => {
                 accessTokenExpiry: 3
             })
         }
-
-
     }
 
     if (!config.data?.msalClientId || !config.data?.msalRedirectUri)
