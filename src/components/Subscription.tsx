@@ -19,6 +19,7 @@ import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionE
 import Authorize from "src/components/common/authorize/authorize";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import {
+    useAggregateSubscriptionMutation,
     useLazySubscriptionQuery,
     useSubscriptionCategoriesQuery,
     useUpdateSubscriptionMutation
@@ -26,31 +27,34 @@ import {
 
 const Component = () => {
     let navigate = useNavigate();
-    let {id} = useParams();
+    let params = useParams();
+    const id = Number(params.id)
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
     const [updateSubscription] = useUpdateSubscriptionMutation()
     const [getSubscription] = useLazySubscriptionQuery()
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
-
+    const [aggregateNow] = useAggregateSubscriptionMutation()
     useEffect(() => {
         if (id) {
-            refreshSubscription(Number(id));
+            refreshSubscription((id));
         }
     }, [id]);
-
+    const onClickAggregateNow = () => {
+        aggregateNow((id))
+    }
     const refreshSubscription = async (id: number) => {
         let res = await getSubscription(id);
         if (res.data) {
-            const data = {
+            const data = structuredClone({
                 id,
                 ...res.data,
                 schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
                     ...s,
                     id: index
                 }))
-            }
+            })
             setUpdateSubscriptionData(data)
         }
     }
@@ -83,7 +87,7 @@ const Component = () => {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
-       
+
             <div
                 className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
 
@@ -289,13 +293,23 @@ const Component = () => {
 
             <div className={"flex flex-row justify-between w-full gap-2"}>
 
-                <div>
+                <div className={"flex flex-row"}>
                     <Authorize roles={["Admin", "Member"]}>
                         <Button variant={"secondary"} onClick={deleteSubscription}
                         >
                             Delete
                         </Button>
                     </Authorize>
+                    {
+                        updateSubscriptionData.type == '8' && <Authorize roles={["Admin", "Member"]}>
+                            <Button variant={"secondary"} onClick={onClickAggregateNow}
+                            >
+                                Aggregate Now
+                            </Button>
+                        </Authorize>
+                    }
+
+
                 </div>
                 <div className={"flex flex-row"}>
                     <Authorize roles={["Admin", "Member"]}>

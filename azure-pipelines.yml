@@ -12,7 +12,7 @@ variables:
   - name: imageName
     value: 'infolinkui'
   - name: version
-    value: $[format('6.0.{0}', counter('6.0', 0))]
+    value: $[format('6.1.{0}', counter('6.1', 0))]
 
 stages:
   - stage: Build

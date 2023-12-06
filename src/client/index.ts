@@ -152,7 +152,7 @@ export const apiClient = {
         return arr;
 
     },
-    findSubscriptionTrail: async (id: string) => {
+    findSubscriptionTrail: async (id: number) => {
         const res: ApiResponse = await client.get(`subscriptions/trail?SubscriptionId=${id}&limit=1000`)
         return res
     },
@@ -164,7 +164,7 @@ export const apiClient = {
     //     const res: ApiResponse = await client.post(`subscriptions/${id}`, req)
     //     return res
     // },
-    deleteSubscription: async (id: string) => {
+    deleteSubscription: async (id: number) => {
         const res: ApiResponse = await client.delete(`subscriptions/${id}`)
         return res
     },
