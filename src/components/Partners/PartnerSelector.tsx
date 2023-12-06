@@ -11,7 +11,7 @@ interface Props {
 const defaultQuery = {
     nameContains: "",
     offset: 0,
-    limit: 50,
+    limit: 10000,
     sortBy: "docType",
     sortByDescending: false
 }
