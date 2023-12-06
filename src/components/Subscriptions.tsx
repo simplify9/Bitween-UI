@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {useSubscriptionFinder} from "../hooks/queryHooks";
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
 import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
