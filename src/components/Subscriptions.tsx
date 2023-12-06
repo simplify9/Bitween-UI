@@ -52,6 +52,7 @@ const Component = () => {
         type: undefined,
         validatorId: undefined,
         nameContains: '',
+        documentId: null,
         rawsubscriptionproperties: '',
         rawfiltersproperties: '',
         categoryId: null,

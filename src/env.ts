@@ -2,7 +2,6 @@ declare global {
     interface ImportMeta {
         env: {
             VITE_ApiBaseUrl: string;
-            // add other environment variables here
         }
     }
 }

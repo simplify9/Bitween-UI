@@ -197,6 +197,7 @@ interface QueryParams {
     receiverId?: string | null
     isRunning?: boolean | null
     categoryId?: number | null
+    documentId?: number | null
 }
 
 export const formulateQueryString = (req: QueryParams) => {
@@ -206,6 +207,8 @@ export const formulateQueryString = (req: QueryParams) => {
 
     if ('rawfiltersproperties' in req && req.rawfiltersproperties) query += `&filter=rawfiltersproperties:4:${req.rawfiltersproperties}`;
     if ('partnerId' in req && req.partnerId) query += `&filter=partnerId:1:${req.partnerId}`;
+    if ('documentId' in req && req.documentId) query += `&filter=documentId:1:${req.documentId}`;
+
     if ('type' in req && req.type) query += `&filter=type:1:${req.type}`;
     if ('inactive' in req && req.inactive!=null) query += `&filter=inactive:1:${req.inactive}`;
     if ('handlerId' in req && req.handlerId) query += `&filter=handlerId:1:${req.handlerId}`;

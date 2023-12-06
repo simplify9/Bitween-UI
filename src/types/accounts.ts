@@ -14,6 +14,7 @@ export interface LoginRequest {
     username?: string;
     password?: string;
     refreshToken?: string;
+    msToken?: string
 }
 
 export type Role = "Admin" | "Member" | "Viewer"

@@ -6,6 +6,7 @@ import {SubscriptionFindQuery, SubscriptionTypes} from "src/types/subscriptions"
 import AdapterSelector from "src/components/Subscriptions/AdapterSelector";
 import ChoiceEditor from "src/components/common/forms/ChoiceEditor";
 import {useSubscriptionCategoriesQuery} from "src/client/apis/subscriptionsApi";
+import DocumentSelector from "src/components/Documents/DocumentSelector";
 
 interface Props {
     value: SubscriptionFindQuery
@@ -59,9 +60,17 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     }
                     {
                         searchAdapterData &&
-                        <FormField title="Partner Id" className="grow ">
+                        <FormField title="Partner" className="grow ">
                             <PartnerSelector value={value.partnerId}
                                              onChange={val => onChange({...value, partnerId: val})}/>
+
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData &&
+                        <FormField title="Document" className="grow ">
+                            <DocumentSelector value={value.documentId?.toString()}
+                                              onChange={val => onChange({...value, documentId: Number(val)})}/>
 
                         </FormField>
                     }
