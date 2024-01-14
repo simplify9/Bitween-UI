@@ -88,7 +88,6 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                             <img src={"/Icons/document.svg"} className={"h-5"}/>
                                             <p>
                                                 {i.documentName}
-
                                             </p>
                                         </div>
                                     </NavLink>
@@ -99,13 +98,10 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
                                                 className={"flex items-center gap-x-2  cursor-pointer border rounded-[12px] px-1 py-2 overflow-hidden"}>
                                                 <img src={"/Icons/subscription.svg"} className={"h-5 z-10"}/>
 
-                                             
-                                                    <p className="truncate ">
-                                                        {(i.subscriptionName + i.subscriptionName + i.subscriptionName)}
+                                                <p className="truncate ">
+                                                    {(i.subscriptionName + i.subscriptionName + i.subscriptionName)}
 
-                                                    </p>
-                                             
-
+                                                </p>
                                             </div>
                                         </NavLink>
                                     }
@@ -130,16 +126,16 @@ export const ExchangeList: React.FC<Props> = ({data, refresh, setSelectedRowsIds
 
                             <td className="  ">
                                 <div
-                                    className={"flex gap-2 px-3 py-2 flex   flex-wrap "}>
-                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "} label={"Id"}
+                                    className={"flex gap-2 px-1 py-2  flex-wrap  "}>
+                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white font-thin"} label={"Id"}
                                                       value={i.id}/>
 
-                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white "}
-                                                      label={"Correlation Id"}
+                                    <ExchangeProperty className={"text-xs bg-primary-400 text-white font-thin"}
+                                                      label={"CId"}
                                                       value={i.correlationId}/>
                                     {
                                         i.retryFor &&
-                                        <ExchangeProperty className={"text-xs bg-yellow-100"} label={"Retry for"}
+                                        <ExchangeProperty className={"text-xs bg-yellow-100 font-thin"} label={"Retry for"}
                                                           value={i.retryFor}/>
 
                                     }

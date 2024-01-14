@@ -97,6 +97,7 @@ const Notifier = () => {
                 >Save
                 </Button>
             </Authorize>
+            
             <Button
                 variant={"secondary"}
                 onClick={() => nav('/notifiers')}

@@ -39,71 +39,55 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
     }
     return (
         <div className={"shadow px-2 mb-2  rounded-lg bg-white"} style={{zIndex: 1000}}>
-            <div className="flex flex-row justify-between w-100 pb-4  pt-3 z-50">
-                <div className={"flex flex-col w-full  "}>
-                    <div className={"flex flex-row justify-between items-end p-1"}>
-                        <div className={"flex flex-row gap-3 "}>
+            <div className="flex flex-row justify-between items-start w-100 pb-4 pt-3 z-50 gap-x-5">
+                <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"}>
+                    <FormField title="Target Subscription">
+                        <SubscriptionSelector
+                            value={value.subscription}
+                            onChange={subscription => {
+                                onChange({...value, subscription})
+                            }}/>
+                    </FormField>
+                    <FormField title="Creation Time From">
+                        <DateEditor onChange={(t) => onChange({
+                            ...value,
+                            creationDateFrom: t
 
+                        })} value={value.creationDateFrom}/>
+                    </FormField>
+                    <FormField title="Creation Time To">
+                        <DateEditor onChange={(t) => onChange({
+                            ...value,
+                            creationDateTo: t
+                        })} value={value.creationDateTo}/>
+                    </FormField>
+                    <FormField title="Delivery Status">
+                        <ChoiceEditor
+                            placeholder="Select Status"
+                            value={value.status}
+                            onChange={status => onChange({...value, status})}
+                            optionTitle={(item: DeliveryStatus) => item.title}
+                            optionValue={(item: DeliveryStatus) => item.id}
+                            options={[
+                                {id: "0", title: "Running"},
+                                {id: "1", title: "Success"},
+                                {id: "2", title: "Bad response"},
+                                {id: "3", title: "Failed"}
+                            ]}/>
+                    </FormField>
+                    <FormField title="Promoted Properties">
+                        <TextEditor placeholder="Promoted Properties" value={value.promotedProperties}
+                                    onChange={(t) => onChange({...value, promotedProperties: t})}/>
+                    </FormField>
+                    <FormField title="ID">
+                        <TextEditor placeholder="ID" value={value.id}
+                                    onChange={(t) => onChange({...value, id: t})}/>
+                    </FormField>
+                    <FormField title="Correlation ID">
+                        <TextEditor placeholder="Correlation ID" value={value.correlationId}
+                                    onChange={(t) => onChange({...value, correlationId: t})}/>
+                    </FormField>
 
-                            <FormField title="Target Subscription" className={"min-w-[350px]"}>
-                                <SubscriptionSelector
-                                    value={value.subscription}
-                                    onChange={subscription => {
-                                        onChange({...value, subscription})
-                                    }}/>
-                            </FormField>
-                            <FormField title="Creation Time From">
-                                <DateEditor onChange={(t) => onChange({
-                                    ...value,
-                                    creationDateFrom: t
-
-                                })} value={value.creationDateFrom}/>
-                            </FormField>
-                            <FormField title="Creation Time To">
-                                <DateEditor onChange={(t) => onChange({
-                                    ...value,
-                                    creationDateTo: t
-                                })} value={value.creationDateTo}/>
-                            </FormField>
-
-
-                            <FormField title="Delivery Status">
-                                <ChoiceEditor
-                                    placeholder="Select Status"
-                                    value={value.status}
-                                    onChange={status => onChange({...value, status})}
-                                    optionTitle={(item: DeliveryStatus) => item.title}
-                                    optionValue={(item: DeliveryStatus) => item.id}
-                                    options={[
-                                        {id: "0", title: "Running"},
-                                        {id: "1", title: "Success"},
-                                        {id: "2", title: "Bad response"},
-                                        {id: "3", title: "Failed"}
-                                    ]}/>
-                            </FormField>
-                        </div>
-
-                    </div>
-                    <div className={"flex flex-row justify-between items-end p-1"}>
-                        <div className={"flex gap-3"}>
-                            <FormField title="Promoted Properties" className={"min-w-[350px]"}>
-                                <TextEditor placeholder="Promoted Properties" value={value.promotedProperties}
-                                            onChange={(t) => onChange({...value, promotedProperties: t})}/>
-                            </FormField>
-
-                            <FormField title="ID">
-                                <TextEditor placeholder="ID" value={value.id}
-                                            onChange={(t) => onChange({...value, id: t})}/>
-                            </FormField>
-                            <FormField title="Correlation ID">
-                                <TextEditor placeholder="Correlation ID" value={value.correlationId}
-                                            onChange={(t) => onChange({...value, correlationId: t})}/>
-                            </FormField>
-
-                        </div>
-
-
-                    </div>
                 </div>
                 <div className={"w-[300px] items-end justify-end flex flex-col"}>
                     <div className={" flex w-full items-end justify-end mx-1 "}>
