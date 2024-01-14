@@ -7,13 +7,14 @@ import {xcode} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 function removeInvalidXmlChars(input: string) {
     const invalidChars = /[\x00-\x08\x0B\x0C\x0E-\x1F]/g;
-    //const sanitizedString = xmlString.replace(invalidChars, ' ');
-    //const invalidChars = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g;
-    // const invalidChar = /&#xB;/g;
-    // const sanitizedString = xmlString.replace(invalidChar, '&#x0B;');
-    return input.replace(invalidChars, '').replace(/&#xB;/g,'');
+    return input.replace(invalidChars, '').replace(/&#xB;/g, '');
 }
 
+function isValidXML(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+    return !xmlDoc.getElementsByTagName("parsererror").length;
+}
 const prettifyXml = (sourceXml: string) => {
     const xmlDoc = new DOMParser().parseFromString((sourceXml), 'application/xml');
     const xsltDoc = new DOMParser().parseFromString([
@@ -54,13 +55,21 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
         if (res.data?.data) {
             const resp = res.data.data
 
+            setData({data: resp, type: "text", raw: resp})
+
             try {
                 setData({data: JSON.parse(resp), type: "json", raw: resp})
             } catch {
                 try {
-                    setData({data: prettifyXml(removeInvalidXmlChars(resp)), type: "xml", raw: resp})
+                    const xml = removeInvalidXmlChars(resp)
+                    console.log(xml)
+                    if (!isValidXML(xml))
+                        throw new Error("PARSE_ERROR")
+                    
+                    setData({data: prettifyXml(xml), type: "xml", raw: resp})
 
                 } catch {
+                    console.log("RAW")
                     setData({data: resp, type: "text", raw: resp})
                 }
             }

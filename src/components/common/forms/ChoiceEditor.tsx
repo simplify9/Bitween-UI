@@ -66,8 +66,9 @@ export const ChoiceEditor = <TOption extends {} = any>({
                     }
                 }}
                 placeholder={placeholder}
-                className={"w-full  shadow min-w-[200px]"}
+                className={"w-full  shadow "}
                 styles={{
+                    // @ts-ignore
                     control: (base) => {
                         return {
                             ...base,

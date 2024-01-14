@@ -17,16 +17,15 @@ const DateEditor: React.FC<Props> = ({value, onChange}) => {
         onChange(isoString);
     }
     return (
-        <InputBox className={"relative  z-50"}>
-            <div className={"flex flex-row justify-between items-center"}>
-                <div className={"pr-1"}>
+        <InputBox className={"relative z-50 "}>
+            <div className={"flex flex-row w-full justify-between items-center  "}>
+                <div className={" w-[90%]"}>
                     <DatePicker
-
                         className={"relative  "}
                         selected={value ? new Date(value) : null}
                         onChange={onChangeDate}/>
                 </div>
-                <div>
+                <div >
                     <BsFillCalendarFill size={21} className={"text-primary-600 "}/>
                 </div>
             </div>
