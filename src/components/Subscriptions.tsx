@@ -75,7 +75,7 @@ const Component = () => {
         setFindSpecs(newSpecs);
         fetchData(newSpecs)
 
-    }, [])
+    }, [findSpecs])
 
     const onClickCreateSubscription = useCallback(async (subscription: ICreateSubscription) => {
         const res = await createSubscription(subscription);
