@@ -64,9 +64,23 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
 
     }, [documentId])
 
+
+    const onClickAddNode=()=>{
+        const newExepression:MatchExpression = {
+        left:null,
+        right:expression,
+        type:"and",
+        
+        }
+        onChange(newExepression)
+        
+        }
+
     return <div className={"p-1 shadow-md rounded border bg-white"}>
 
         {
+
+            
             !matchFeature && <div className={"text-center bg-primary-50 py-3"}>
                 <p>
                     <span className={"font-semibold"}>Expression matching</span> is the new way to filter documents for
@@ -76,6 +90,8 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
                 </p>
             </div>
         }
+
+<div onClick={onClickAddNode}>Add Node</div>
 
         {
             matchFeature && <Fragment>
