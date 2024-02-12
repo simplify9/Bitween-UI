@@ -29,7 +29,7 @@ const MatchExpressionSelector: React.FC<Props> = ({onChange, value}) => {
             })
         }
     }
-
+    
     return <div className={"max-w-[650px] ml-8 border border-primary-200 shadow rounded px-2 py-1"}>
 
         <ChoiceEditor
