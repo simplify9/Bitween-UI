@@ -39,7 +39,7 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
     const [promotedProperties, setPromotedProperties] = useState<Array<any>>([])
     const [matchFeature, setMatchFeature] = useState(Boolean(expression) ?? false)
     const [documentName, setDocumentName] = useState<string>("DOCUMENT")
-
+    const [isClick,setIsClick]=useState(false)
     const onChangeExpression = useCallback((e: MatchExpression) => {
         onChange(e)
     }, [])
@@ -76,6 +76,7 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
         
         }
 
+  
     return <div className={"p-1 shadow-md rounded border bg-white"}>
 
         {
@@ -85,13 +86,21 @@ const MatchExpressionEditor: React.FC<Props> = ({expression, documentId, onChang
                 <p>
                     <span className={"font-semibold"}>Expression matching</span> is the new way to filter documents for
                     internal type subscibtions Please <span
-                    onClick={() => setMatchFeature(true)}
+                    onClick={() =>{
+                         {setMatchFeature(true)}
+                         {setIsClick(true)}
+                    }
+                        }
                     className={"font-semibold underline cursor-pointer text-primary-800"}>Click</span> to enable it
                 </p>
             </div>
         }
 
-<div onClick={onClickAddNode}>Add Node</div>
+        { isClick ? <button className="cursor-pointer flex text-center flex items-center justify-center   text-white min-w-[80px] grow min-h-[30px] m-1   px-3 bg-green-600 shadow-md  text-md  rounded  hover:scale-105 hover:bg-green-500 transition  ease-in-out delay-100 " onClick={onClickAddNode}>Add Node</button>:<></>}
+
+           
+
+
 
         {
             matchFeature && <Fragment>
