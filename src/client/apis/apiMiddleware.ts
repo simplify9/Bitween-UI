@@ -1,5 +1,5 @@
 import {BaseQueryFn, FetchArgs, fetchBaseQuery, FetchBaseQueryError,} from '@reduxjs/toolkit/query';
-import {API_BASE_URL} from "src/env";
+import ENV from "src/env";
 import {toast} from "react-toastify";
 import {apiClient} from "src/client";
 import {Mutex} from "async-mutex";
@@ -7,7 +7,7 @@ import {Mutex} from "async-mutex";
 export const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: API_BASE_URL,
+    baseUrl: ENV.API_BASE_URL,
     prepareHeaders: (headers, {getState}) => {
 
         // const token = (getState() as any)?.user?.accessToken;
