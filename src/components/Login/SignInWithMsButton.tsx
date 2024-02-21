@@ -3,7 +3,6 @@ import {apiClient} from "src/client";
 import {useAuthApi} from "src/client/components";
 import {useAppConfigQuery} from "src/client/apis/generalApi";
 import {useEffect} from "react";
-import ENV from "src/env";
 
 
 let msalInstance: PublicClientApplication
@@ -16,7 +15,7 @@ const SignInWithMsButton = () => {
             msalInstance = new PublicClientApplication({
                 auth: {
                     clientId: config.data.msalClientId,
-                    authority: ENV.MSAL_AUTHORITY_URL
+                    authority: config.data.msalTenantId ? `https://login.microsoftonline.com/${config.data.msalTenantId}` : undefined
                 },
 
             });
