@@ -51,7 +51,11 @@ export const GeneralApi = createApi({
                 method: 'GET',
             })
         }),
-        appConfig: builder.query <{ msalClientId: string | null, msalRedirectUri: string | null }, void>({
+        appConfig: builder.query <{
+            msalClientId: string | null,
+            msalRedirectUri: string | null,
+            msalTenantId: string | null
+        }, void>({
             query: () => ({
                 url: "Settings/config",
                 method: 'GET',
