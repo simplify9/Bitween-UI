@@ -96,7 +96,7 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                 // ...
             }
         }
-        
+
         await logOut();
 
         throw ERR_SIGNIN_REQUESTED;
@@ -148,8 +148,16 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                     });
             }
 
+            console.log()
+            if (error.response?.data) {
+                toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
+            } else {
+                if (!error.request.responseURL.endsWith("login"))
+                    toast("Something went wrong", {type: "error"})
 
-            toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
+            }
+
+
             return {
                 status: error.response?.status,
                 succeeded: false,

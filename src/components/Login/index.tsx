@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useAuthApi} from "src/client/components";
 import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
@@ -11,7 +11,7 @@ const Login = () => {
     const {login} = useAuthApi();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [failed, setFailed] = useState(false);
+    const [error, setError] = useState("")
     const onSubmit = async () => {
 
         let res = await apiClient.login({username, password});
@@ -22,18 +22,11 @@ const Login = () => {
                 accessTokenExpiry: 3
             })
         } else {
-            setFailed(true);
+            setError("Something went wrong while trying to log you in")
         }
     }
-
-    useEffect(() => {
-
-        ;
-    }, []);
-
     return (
-        // <div
-        //     className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto ">
+      
         <div className="bg-white dark:bg-gray-900 relative">
             <ToastContainer/>
             <img src="/Graphics/s9.png" className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>
@@ -103,7 +96,11 @@ const Login = () => {
 
                                 </div>
                                 <SignInWithMsButton/>
-
+                                {
+                                    error && <div className={"text-center mt-3 text-red-500"}>
+                                        {error}
+                                    </div>
+                                }
                             </form>
 
 
