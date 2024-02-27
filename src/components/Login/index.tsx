@@ -1,8 +1,9 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useAuthApi} from "src/client/components";
 import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
 import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
+import {ToastContainer} from "react-toastify";
 
 
 const Login = () => {
@@ -34,6 +35,7 @@ const Login = () => {
         // <div
         //     className="p-4 flex flex-col justify-center min-h-screen max-w-md mx-auto ">
         <div className="bg-white dark:bg-gray-900 relative">
+            <ToastContainer/>
             <img src="/Graphics/s9.png" className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>
 
             <div className="flex justify-center h-screen">
