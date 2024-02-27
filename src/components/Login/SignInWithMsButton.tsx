@@ -9,7 +9,7 @@ let msalInstance: PublicClientApplication
 const SignInWithMsButton = () => {
     const config = useAppConfigQuery()
     const {login} = useAuthApi();
-    const [error, setError] = useState()
+    const [error, setError] = useState("")
     useEffect(() => {
         if (config.data?.msalClientId) {
             msalInstance = new PublicClientApplication({
