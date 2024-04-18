@@ -2,6 +2,7 @@ import {NavLink, useLocation} from "react-router-dom";
 import SubMenu from "src/components/common/layout/SubMenu";
 import React from "react";
 import {TbBellRingingFilled} from "react-icons/tb";
+import ENV from "src/env";
 
 const Header = () => {
     const location = useLocation()
@@ -27,7 +28,7 @@ const Header = () => {
 
                             <div className="p-1 border-2 border-primary-500 rounded-full">
                                 <img
-                                    src="/Graphics/BitweenIcon.svg"
+                                    src={`${ENV.THEME.BITWEEN_HEADER_ICON}`}
                                     className=" w-6 h-6"/>
                             </div>
                         </SubMenu>

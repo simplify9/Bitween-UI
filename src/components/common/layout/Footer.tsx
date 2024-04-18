@@ -11,10 +11,9 @@ const Footer = () => {
                 <div></div>
 
                 <div>
-                    <p className="text-sm text-gray-600 d">© {dayjs().year()} <a
+                    <p className="text-sm text-gray-600 d">{`${ENV.THEME.COPY_RIGHTS_ICON}`} {dayjs().year()} <a
                         className={"underline text-red-600 font-semibold"}
-                        href={"https://www.simplify9.com/"}>Simplify9</a> All
-                        Rights Reserved.</p>
+                        href={`${ENV.THEME.WEBSITE_LINK}`}>{`${ENV.THEME.COMPANY_NAME}`}</a> {ENV.THEME.ALL_RIGHTS_RESERVED}</p>
                 </div>
 
 

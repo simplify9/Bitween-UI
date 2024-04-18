@@ -8,7 +8,12 @@ const ENV = {
             "                                files dumped on a server.",
         LINKEDIN_LINK: "https://www.linkedin.com/company/simplify9",
         GITHUB_LINK: "https://github.com/simplify9",
-        BTIWEEN_ICON: "/Graphics/BitweenIcon.png"
+        BTIWEEN_ICON: "/Graphics/BitweenIcon.png",
+        BITWEEN_HEADER_ICON: "/Graphics/BitweenIcon.svg",
+        WEBSITE_LINK: "https://www.simplify9.com/",
+        COMPANY_NAME: "Simplify9",
+        ALL_RIGHTS_RESERVED: 'All Rights Reserved.',
+        COPY_RIGHTS_ICON: '©'
     }
 }
 export default ENV
