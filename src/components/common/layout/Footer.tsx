@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import {AiFillGithub, AiFillLinkedin} from "react-icons/ai";
 import React from "react";
+import ENV from "src/env";
 
 const Footer = () => {
     return <div className={""}>
@@ -19,17 +20,17 @@ const Footer = () => {
 
                 <div className="flex -mx-2">
 
-                    <a href="https://www.linkedin.com/company/simplify9"
+                    {ENV.THEME.LINKEDIN_LINK && <a href={`${ENV.THEME.LINKEDIN_LINK}`}
                        className="mx-2 text-gray-600 transition-colors duration-300  hover:text-blue-500 "
-                       aria-label="Facebook">
+                       aria-label="Linkedin">
                         <AiFillLinkedin size={23}/>
-                    </a>
+                    </a>}
 
-                    <a href="https://github.com/simplify9"
+                    {ENV.THEME.LINKEDIN_LINK && <a href={`${ENV.THEME.GITHUB_LINK}`}
                        className="mx-2 text-gray-600 transition-colors duration-300  hover:text-slate-900"
                        aria-label="Github">
                         <AiFillGithub size={23}/>
-                    </a>
+                    </a>}
                 </div>
             </div>
         </footer>
