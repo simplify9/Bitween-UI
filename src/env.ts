@@ -13,7 +13,9 @@ const ENV = {
         WEBSITE_LINK: "https://www.simplify9.com/",
         COMPANY_NAME: "Simplify9",
         ALL_RIGHTS_RESERVED: 'All Rights Reserved.',
-        COPY_RIGHTS_ICON: '©'
+        COPY_RIGHTS_ICON: '©',
+        TAB_TITLE: "Bitween",
+        TAB_ICON: "/favicon.ico"
     }
 }
 export default ENV
