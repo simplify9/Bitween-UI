@@ -1,5 +1,5 @@
 const ENV = {
-    API_BASE_URL: "https://bitween-stg.traxis.app/api/",
+    API_BASE_URL: "/api/",
     THEME: {
         LOGIN_LOGO: "/Graphics/s9.png",
         BITWEEN_LOGO: "/Graphics/BitweenFull.svg",
