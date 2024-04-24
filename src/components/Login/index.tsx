@@ -4,6 +4,7 @@ import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
 import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
 import {ToastContainer} from "react-toastify";
+import ENV from "src/env";
 
 
 const Login = () => {
@@ -29,7 +30,7 @@ const Login = () => {
       
         <div className="bg-white dark:bg-gray-900 relative">
             <ToastContainer/>
-            <img src="/Graphics/s9.png" className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>
+            {ENV.THEME.LOGIN_LOGO && <img src={`${ENV.THEME.LOGIN_LOGO}`} className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>}
 
             <div className="flex justify-center h-screen">
                 <div className="hidden bg-cover lg:block lg:w-2/3"
@@ -39,18 +40,11 @@ const Login = () => {
                 >
                     <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
                         <div>
-
-                            <img className="w-auto h-12 sm:h-8" src="/Graphics/BitweenFull.svg"
-                                 alt=""/>
+                            {ENV.THEME.BITWEEN_LOGO && <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             <p className="max-w-xl mt-3 text-gray-200">
-                                is all-in-one solution to solving integration with third parties, automating workflows
-                                with exchanges coming from all forms of requests, ranging from internal messages to
-                                files dumped on a server.
+                                {ENV.THEME.BITWEEEN_TEXT}
                             </p>
-
-
                         </div>
-
                     </div>
                 </div>
 
@@ -58,10 +52,8 @@ const Login = () => {
                     <div className="flex-1">
                         <div className="text-center">
                             <div className="flex justify-center mx-auto">
-                                <img className="w-auto h-12 sm:h-8" src="/Graphics/BitweenFull.svg"
-                                     alt=""/>
+                                {ENV.THEME.BITWEEN_LOGO && <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             </div>
-
                             <p className="mt-3 text-gray-500 dark:text-gray-300">Sign in to access your account</p>
                         </div>
 

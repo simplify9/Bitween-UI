@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import {AiFillGithub, AiFillLinkedin} from "react-icons/ai";
 import React from "react";
+import ENV from "src/env";
 
 const Footer = () => {
     return <div className={""}>
@@ -10,26 +11,25 @@ const Footer = () => {
                 <div></div>
 
                 <div>
-                    <p className="text-sm text-gray-600 d">© {dayjs().year()} <a
+                    <p className="text-sm text-gray-600 d">{`${ENV.THEME.COPY_RIGHTS_ICON}`} {dayjs().year()} <a
                         className={"underline text-red-600 font-semibold"}
-                        href={"https://www.simplify9.com/"}>Simplify9</a> All
-                        Rights Reserved.</p>
+                        href={`${ENV.THEME.WEBSITE_LINK}`}>{`${ENV.THEME.COMPANY_NAME}`}</a> {ENV.THEME.ALL_RIGHTS_RESERVED}</p>
                 </div>
 
 
                 <div className="flex -mx-2">
 
-                    <a href="https://www.linkedin.com/company/simplify9"
+                    {ENV.THEME.LINKEDIN_LINK && <a href={`${ENV.THEME.LINKEDIN_LINK}`}
                        className="mx-2 text-gray-600 transition-colors duration-300  hover:text-blue-500 "
-                       aria-label="Facebook">
+                       aria-label="Linkedin">
                         <AiFillLinkedin size={23}/>
-                    </a>
+                    </a>}
 
-                    <a href="https://github.com/simplify9"
+                    {ENV.THEME.LINKEDIN_LINK && <a href={`${ENV.THEME.GITHUB_LINK}`}
                        className="mx-2 text-gray-600 transition-colors duration-300  hover:text-slate-900"
                        aria-label="Github">
                         <AiFillGithub size={23}/>
-                    </a>
+                    </a>}
                 </div>
             </div>
         </footer>

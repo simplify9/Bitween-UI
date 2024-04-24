@@ -22,6 +22,7 @@ import Team from "src/components/Team";
 import Footer from "src/components/common/layout/Footer";
 import LoadingIndicator from "src/components/common/LoadingIndicator";
 import ManageCategories from "src/components/ManageCategories";
+import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
 
 function App() {
     const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +38,7 @@ function App() {
             <LoadingIndicator/>
             <Router>
                 <div className={"flex flex-col justify-between items-stretch bg-slate-100 py-3  h-[100vh] px-3  "}>
-
+                    <DynamicIconAndTitle/>
                     <div className={"flex  flex-row     "}>
                         <div
                             // className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
