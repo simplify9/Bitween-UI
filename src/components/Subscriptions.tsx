@@ -88,15 +88,16 @@ const Component = () => {
     const onDuplicateSubscription = async (data: IDuplicateSubscription) => {
         const copiedFrom = await getSubscription(dataToDuplicate.id);
         const newSubscription = await createSubscription(data);
-
         if ('data' in newSubscription && copiedFrom.data) {
-            copiedFrom.data.inactive = true
-            copiedFrom.data.name = data.name
-            copiedFrom.data.id = data.id
-            copiedFrom.data.id = newSubscription.data
-            const res = await updateSubscription(copiedFrom.data);
+            const template = structuredClone(copiedFrom)
+            template.data.inactive = true
+            template.data.name = data.name
+            template.data.id = data.id
+            template.data.id = newSubscription.data
+            const res = await updateSubscription(template.data);
             if ('data' in res) {
                 setDataToDuplicate(null)
+                nav(`/subscriptions/${newSubscription.data}`)
                 setOpenModal("NONE");
             }
         }
