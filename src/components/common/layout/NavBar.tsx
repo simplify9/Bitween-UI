@@ -5,7 +5,8 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
-// style={{backgroundColor:"#e3311d"}}
+import ENV from "src/env";
+
 const resolveClosedClassName = ({isActive}: any) => {
 
     return (isActive
@@ -32,13 +33,14 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                     <NavLink to="/">
                         <div
                             className={`font-semibold  text-xl tracking-tight px-5 duration-300 transition-w  ease-in-out ${!isOpen ? "hidden" : "block"}`}>
-                            <img alt={"B I T W E E N"} className={"h-20 object-contain"}
-                                 src={"/Graphics/BitweenFull.png"}/>
+                            {ENV.THEME.BITWEEN_LOGO &&<img alt={"B I T W E E N"} className={"h-20 object-contain"}
+                                 src={`${ENV.THEME.BITWEEN_LOGO}`}/>}
                         </div>
                         <div
                             className={`font-semibold text-xl tracking-tight px-5 duration-300 transition-w h-20 w-20 ease-in-out ${isOpen ? "hidden" : "block"}`}>
-                            <img alt={"B I T W E E N"} className={"h-20 w-10 object-contain"}
-                                 src={"/Graphics/BitweenIcon.png"}/>
+                            {ENV.THEME.BTIWEEN_ICON &&
+                                <img alt={"B I T W E E N"} className={"h-20 w-10 object-contain"}
+                                 src={`${ENV.THEME.BTIWEEN_ICON}`}/>}
                         </div>
                     </NavLink>
                 </div>
