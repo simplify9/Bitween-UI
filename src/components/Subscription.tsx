@@ -18,6 +18,8 @@ import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import MatchExpressionEditor from "src/components/Subscriptions/MatchExpressionEditor/MatchExpressionEditor";
 import Authorize from "src/components/common/authorize/authorize";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
+import {MdOutlineContentCopy} from "react-icons/md";
+
 import {
     useAggregateSubscriptionMutation,
     useLazySubscriptionQuery,
@@ -88,8 +90,26 @@ const Component = () => {
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
 
+            {Boolean(updateSubscriptionData?.lastException) &&
+                <div className={"shadow-xl bg-white  p-2 rounded-lg border-rose-500 border-2 mb-5"}>
+                    <h2 className={"text-2xl font-bold text-red-600 uppercase"}>
+                        Last Exception !
+                    </h2>
+                    <div className={"bg-gray-200 rounded mt-2 px-2 pt-2 pb-3 flex flex-row  justify-between"}>
+                        <p className={" text-gray-600 text-wrap  break-all"}>
+                            {updateSubscriptionData.lastException?.split("{{newline}}").map((d, i) => <p
+                                key={i}>{d}</p>)}
+                        </p>
+                        <div className={"ml-5 mt-1"}>
+                            <MdOutlineContentCopy className={"cursor-pointer active:scale-125"} size={21} onClick={() => {
+                                navigator.clipboard.writeText(updateSubscriptionData.lastException.replaceAll('{{newline}}', '\n'))
+                            }}/>
+                        </div>
+                    </div>
+
+                </div>}
             <div
-                className="flex flex-row justify-between items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
+                className="flex flex-row justify-between flex-wrap items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
 
                 <div className=" ">
                     <FormField title="Name" className="grow">
@@ -142,15 +162,12 @@ const Component = () => {
                 </div>
 
 
-                <div className=" ">
+                <div className={"flex flex-row items-end justify-end"}>
                     <FormField title="Inactive" className="grow">
                         <CheckBoxEditor checked={updateSubscriptionData?.inactive}
                                         onChange={(e) => onChangeSubscriptionData("inactive", e)}
                         />
                     </FormField>
-                </div>
-
-                <div className={""}>
 
                     <Button onClick={() => {
                         getTrails()
@@ -161,6 +178,7 @@ const Component = () => {
                     </Button>
 
                 </div>
+
             </div>
 
 
@@ -308,8 +326,6 @@ const Component = () => {
                             </Button>
                         </Authorize>
                     }
-
-
                 </div>
                 <div className={"flex flex-row"}>
                     <Authorize roles={["Admin", "Member"]}>
