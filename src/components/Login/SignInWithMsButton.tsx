@@ -45,8 +45,8 @@ const SignInWithMsButton = () => {
         }
     }
 
-    // if (!config.data?.msalClientId || !config.data?.msalRedirectUri)
-    //     return null
+    if (!config.data?.msalClientId || !config.data?.msalRedirectUri)
+        return null
 
     return <div onClick={onClickLoginWithMicrosoft} className={"my-5"}>
         <img src={"/external/ms.svg"} className={"w-full h-[42px]"}/>
