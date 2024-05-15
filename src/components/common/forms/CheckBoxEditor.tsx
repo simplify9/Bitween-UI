@@ -27,15 +27,16 @@ const Component: React.FC<Props> = ({
 
     return (
 
-        <div className="flex flex-row items-center  mb-3">
-
-            <input type="checkbox" value="" checked={checked}
-                   onClick={() => handleChange()}
-                   onChange={() => {
-                   }}
-                   className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-                   required/>
-            <label className="ml-2 text-sm font-medium  ">{label}</label>
+        <div className="flex flex-row items-center  mb-3 min-w-[500px]">
+            <div>
+                <input type="checkbox" value="" checked={checked}
+                       onClick={() => handleChange()}
+                       onChange={() => {
+                       }}
+                       className="block w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300  "
+                       required
+                /></div>
+            <div className="ml-2 t uppercase tracking-wide text-gray-700 text-xs font-bold  ">{label}</div>
 
 
         </div>

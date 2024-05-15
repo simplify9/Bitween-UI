@@ -23,21 +23,25 @@ import {MdOutlineContentCopy} from "react-icons/md";
 import {
     useAggregateSubscriptionMutation,
     useLazySubscriptionQuery,
+    usePauseSubscriptionMutation,
     useSubscriptionCategoriesQuery,
     useUpdateSubscriptionMutation
 } from "src/client/apis/subscriptionsApi";
+import dayjs from "dayjs";
 
 const Component = () => {
     let navigate = useNavigate();
     let params = useParams();
     const id = Number(params.id)
-    const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
-    const [updateSubscription] = useUpdateSubscriptionMutation()
-    const [getSubscription] = useLazySubscriptionQuery()
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
-    const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({});
+    const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
+    const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
     const [aggregateNow] = useAggregateSubscriptionMutation()
+    const [getSubscription] = useLazySubscriptionQuery()
+    const [pauseSubscription] = usePauseSubscriptionMutation()
+    const [updateSubscription] = useUpdateSubscriptionMutation()
+    ;
     useEffect(() => {
         if (id) {
             refreshSubscription((id));
@@ -79,7 +83,10 @@ const Component = () => {
             [key]: value
         }))
     }, [])
-
+    const onPauseSubscription = useCallback(() => {
+        onChangeSubscriptionData('pausedOn', updateSubscriptionData?.pausedOn ? null : dayjs().toISOString())
+        pauseSubscription(updateSubscriptionData.id)
+    }, [updateSubscriptionData?.id, updateSubscriptionData?.pausedOn])
 
     if (!updateSubscriptionData) return <></>
 
@@ -101,86 +108,94 @@ const Component = () => {
                                 key={i}>{d}</p>)}
                         </p>
                         <div className={"ml-5 mt-1"}>
-                            <MdOutlineContentCopy className={"cursor-pointer active:scale-125"} size={21} onClick={() => {
-                                navigator.clipboard.writeText(updateSubscriptionData.lastException.replaceAll('{{newline}}', '\n'))
-                            }}/>
+                            <MdOutlineContentCopy className={"cursor-pointer active:scale-125"} size={21}
+                                                  onClick={() => {
+                                                      navigator.clipboard.writeText(updateSubscriptionData.lastException.replaceAll('{{newline}}', '\n'))
+                                                  }}/>
                         </div>
                     </div>
 
                 </div>}
-            <div
-                className="flex flex-row justify-between flex-wrap items-end  gap-5 rounded-lg mb-6 border px-2 py-2 shadow-lg bg-white mt-3">
+            <div className={"shadow-lg bg-white rounded-lg mb-6 border px-2 py-2  mt-3 pt-3 px-3"}>
 
-                <div className=" ">
-                    <FormField title="Name" className="grow">
-                        <TextEditor value={updateSubscriptionData?.name}
-                                    onChange={(e) => onChangeSubscriptionData("name", e)}
-                        />
-                    </FormField>
+
+                <div
+                    className="flex flex-row  flex-wrap items-end  gap-5 ">
+                    <div className=" ">
+                        <FormField title="Name" className="grow">
+                            <TextEditor value={updateSubscriptionData?.name}
+                                        onChange={(e) => onChangeSubscriptionData("name", e)}
+                            />
+                        </FormField>
+                    </div>
+                    <div className=" ">
+                        <FormField title="Category" className="grow">
+                            <ChoiceEditor
+                                value={updateSubscriptionData?.categoryId?.toString()}
+                                onChange={(e) => onChangeSubscriptionData("categoryId", e)}
+                                optionTitle={(item) => item.code}
+                                optionValue={(item) => item.id}
+                                options={subscriptionCategories.data?.result ?? []}/>
+                        </FormField>
+                    </div>
+                    <div className=" ">
+                        <FormField title="Type" className="grow">
+                            <ChoiceEditor
+                                disabled={true}
+                                value={updateSubscriptionData?.type?.toString()}
+                                onChange={(e) => onChangeSubscriptionData("type", e)}
+                                optionTitle={(item: OptionType) => item.title}
+                                optionValue={(item: OptionType) => item.id}
+                                options={SubscriptionTypeOptions}/>
+                        </FormField>
+                    </div>
+
+
+                    <div className=" ">
+                        <FormField title="Document" className="grow">
+                            <DocumentSelector disabled={true}
+                                              value={updateSubscriptionData?.documentId}
+                                              onChange={(e) => onChangeSubscriptionData("documentId", e)}
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className=" ">
+                        <FormField title="Partner" className="grow">
+                            <PartnerSelector disabled={true}
+                                             value={updateSubscriptionData?.partnerId}
+                                             onChange={(e) => onChangeSubscriptionData("partnerId", e)}
+
+
+                            />
+                        </FormField>
+                    </div>
+
+
                 </div>
-
-                <div className=" ">
-                    <FormField title="Type" className="grow">
-                        <ChoiceEditor
-                            disabled={true}
-                            value={updateSubscriptionData?.type?.toString()}
-                            onChange={(e) => onChangeSubscriptionData("type", e)}
-                            optionTitle={(item: OptionType) => item.title}
-                            optionValue={(item: OptionType) => item.id}
-                            options={SubscriptionTypeOptions}/>
-                    </FormField>
-                </div>
-                <div className=" ">
-                    <FormField title="Category" className="grow">
-                        <ChoiceEditor
-                            value={updateSubscriptionData?.categoryId?.toString()}
-                            onChange={(e) => onChangeSubscriptionData("categoryId", e)}
-                            optionTitle={(item) => item.code}
-                            optionValue={(item) => item.id}
-                            options={subscriptionCategories.data?.result ?? []}/>
-                    </FormField>
-                </div>
-
-                <div className=" ">
-                    <FormField title="Document" className="grow">
-                        <DocumentSelector disabled={true}
-                                          value={updateSubscriptionData?.documentId}
-                                          onChange={(e) => onChangeSubscriptionData("documentId", e)}
-                        />
-                    </FormField>
-                </div>
-
-                <div className=" ">
-                    <FormField title="Partner" className="grow">
-                        <PartnerSelector disabled={true}
-                                         value={updateSubscriptionData?.partnerId}
-                                         onChange={(e) => onChangeSubscriptionData("partnerId", e)}
-
-
-                        />
-                    </FormField>
-                </div>
-
-
-                <div className={"flex flex-row items-end justify-end"}>
-                    <FormField title="Inactive" className="grow">
+                <div className={"flex flex-row justify-between mt-5"}>
+                    <div className={"grid grid-cols-2 flex-row  items-center w-[240px] "}
+                         key={updateSubscriptionData?.pausedOn}>
                         <CheckBoxEditor checked={updateSubscriptionData?.inactive}
+                                        label={'Inactive'}
                                         onChange={(e) => onChangeSubscriptionData("inactive", e)}
                         />
-                    </FormField>
-
-                    <Button onClick={() => {
-                        getTrails()
-                        setOpenModal("TRAIL")
-                    }}
-                    >
-                        Trail
-                    </Button>
+                        <CheckBoxEditor label={'Paused'} checked={Boolean(updateSubscriptionData?.pausedOn)}
+                                        onChange={() => onPauseSubscription()}
+                        />
+                    </div>
+                    <div>
+                        <Button onClick={() => {
+                            getTrails()
+                            setOpenModal("TRAIL")
+                        }}
+                        >
+                            Trail
+                        </Button>
+                    </div>
 
                 </div>
-
             </div>
-
 
             <div className="flex flex-col gap-6 rounded-lg mb-6 ">
 
@@ -326,20 +341,22 @@ const Component = () => {
                             </Button>
                         </Authorize>
                     }
+
+
                 </div>
                 <div className={"flex flex-row"}>
-                    <Authorize roles={["Admin", "Member"]}>
-                        <Button
-                            onClick={onClickUpdateSubscription}>
-                            Save
-                        </Button>
-                    </Authorize>
                     <Button
                         variant={"secondary"}
                         onClick={() => navigate('/subscriptions')}
                     >
                         Cancel
                     </Button>
+                    <Authorize roles={["Admin", "Member"]}>
+                        <Button
+                            onClick={onClickUpdateSubscription}>
+                            Save
+                        </Button>
+                    </Authorize>
                 </div>
 
             </div>

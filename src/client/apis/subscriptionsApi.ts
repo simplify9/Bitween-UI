@@ -57,6 +57,14 @@ export const SubscriptionApi = createApi({
                 body
             })
         }),
+        pauseSubscription: builder.mutation<{ id: number }, number>({
+            invalidatesTags: ['subscription'],
+            query: id => ({
+                url: `subscriptions/${id}/pause`,
+                method: "POST",
+                body: {}
+            })
+        }),
         aggregateSubscription: builder.mutation<number, number>({
             invalidatesTags: ['subscription'],
             query: id => ({
@@ -89,6 +97,7 @@ export const SubscriptionApi = createApi({
                 body
             })
         }),
+
         deleteSubscriptionCategory: builder.mutation<{ id: number }, DeleteSubscriptionCategoryModel>({
             invalidatesTags: ['subscriptionCategories'],
             query: body => ({
@@ -110,6 +119,7 @@ export const SubscriptionApi = createApi({
 
 
 export const {
+    usePauseSubscriptionMutation,
     useAggregateSubscriptionMutation,
     useUpdateSubscriptionMutation,
     useLazySubscriptionQuery,
