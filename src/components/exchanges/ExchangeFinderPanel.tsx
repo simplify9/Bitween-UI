@@ -59,11 +59,11 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
           <FormField title="Document">
             
             <DocumentSelector
-              value={value.documentId}
+              value={value.documentId?.toString()}
               onChange={(t) =>
                 onChange({
                     ...value,
-                    documentId:t,
+                    documentId:Number(t),
                   })
               }
             />

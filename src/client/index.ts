@@ -43,13 +43,6 @@ export const apiClient = {
     createExchange: async (body: CreateXchangeModel) => {
         return await client.post(`xchanges/`, body)
     },
-    findExchanges: async (req: ExchangeFindQuery) => {
-        const res = await client.get(`xchanges${formulateQueryString(req)}`)
-        return {
-            total: res.data.totalCount,
-            data: res.data.result
-        }
-    },
     getExchangeDocument: async (req: { documentKey: string }) => {
         const res = await client.get(`InfolinkDocs?documentKey=${req.documentKey}`)
         return {
@@ -150,20 +143,11 @@ export const apiClient = {
             })
         })
         return arr;
-
     },
     findSubscriptionTrail: async (id: number) => {
         const res: ApiResponse = await client.get(`subscriptions/trail?SubscriptionId=${id}&limit=1000`)
         return res
     },
-    // findSubscription: async (id: string) => {
-    //     const res: ApiResponse = await client.get(`subscriptions/${id}`)
-    //     return res
-    // },
-    // updateSubscription: async (id: string, req: ISubscription) => {
-    //     const res: ApiResponse = await client.post(`subscriptions/${id}`, req)
-    //     return res
-    // },
     deleteSubscription: async (id: number) => {
         const res: ApiResponse = await client.delete(`subscriptions/${id}`)
         return res

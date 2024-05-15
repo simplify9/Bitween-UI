@@ -147,8 +147,6 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                         return axiosInstance(error.config);
                     });
             }
-
-            console.log()
             if (error.response?.data) {
                 toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
             } else {
