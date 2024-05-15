@@ -6,6 +6,7 @@ import BulkRetryModal from "src/components/exchanges/BulkRetryModal";
 import CreateExchange from "src/components/exchanges/CreateExchange";
 import {useLazyXChangesQuery} from "src/client/apis/xchangeApi";
 import {ExchangeFindQuery} from "src/types/xchange";
+import ENV from "src/env";
 
 
 const defaultQuery: ExchangeFindQuery = {
@@ -18,7 +19,7 @@ const defaultQuery: ExchangeFindQuery = {
     correlationId: undefined,
     id: undefined,
     promotedProperties: undefined,
-    fetchInterval: 5000
+    fetchInterval: ENV.CONFIG.XCHANGE_REFRESH_DEFAULT_INTERVAL
 }
 
 

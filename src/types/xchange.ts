@@ -50,6 +50,7 @@ export type CreateXchangeModel = {
 
 export type ExchangeFindQuery = CommonFindQuery & {
     subscription?: string
+    partnerId?: number
     status?: string
     id?: string
     documentId?: number
