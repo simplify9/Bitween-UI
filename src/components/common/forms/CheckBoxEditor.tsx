@@ -27,7 +27,7 @@ const Component: React.FC<Props> = ({
 
     return (
 
-        <div className="flex flex-row items-center  mb-3 min-w-[500px]">
+        <div className="flex flex-row items-center  mb-3 ">
             <div>
                 <input type="checkbox" value="" checked={checked}
                        onClick={() => handleChange()}
