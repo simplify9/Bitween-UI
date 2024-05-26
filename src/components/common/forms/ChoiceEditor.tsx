@@ -75,6 +75,13 @@ export const ChoiceEditor = <TOption extends {} = any>({
                             minHeight: '42px'
                         }
                     },
+                    placeholder: (base) => {
+                        return {
+                            ...base,
+                            fontSize: '0.875rem',
+                            lineHeight: '1.25rem',
+                        }
+                    },
 
                 }}/>
         </div>

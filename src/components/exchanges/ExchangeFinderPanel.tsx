@@ -125,11 +125,11 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                             onChange={(t) => onChange({...value, promotedProperties: t})}
                         />
                     </FormField>
-                    <FormField title="ID">
+                    <FormField title="IDs">
                         <TextEditor
-                            placeholder="ID"
-                            value={value.id}
-                            onChange={(t) => onChange({...value, id: t})}
+                            placeholder="( , | \n \s ) are valid seperators."
+                            value={value.ids}
+                            onChange={(t) => onChange({...value, ids: t})}
                         />
                     </FormField>
                     <FormField title="Correlation ID">

@@ -4,7 +4,8 @@
       "ESNext",
       "dom"
     ],
-    "module": "ESNext",
+    "types": ["vite/client"],
+    "module": "esnext",
     "target": "ES6",
     "baseUrl": "./",
     "paths": {
