@@ -1,5 +1,5 @@
 const ENV = {
-    API_BASE_URL: "https://localhost:5001/api/",
+    API_BASE_URL: "/api/",
     CONFIG: {
         XCHANGE_REFRESH_DEFAULT_INTERVAL: 5000,
         XCHANGE_REFRESH_DEFAULT_INTERVAL_OPTIONS: [
