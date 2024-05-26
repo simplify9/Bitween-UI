@@ -56,8 +56,8 @@ export const ChoiceEditor = <TOption extends {} = any>({
                 }}
                 isClearable={true}
                 isDisabled={disabled}
-                options={options}
-                value={options.find(i => optionValue(i) == value)}
+                options={options ?? []}
+                value={options?.find(i => optionValue(i) == value)}
                 onChange={(newValue) => {
                     if (Boolean(newValue)) {
                         onChange(optionValue(newValue))

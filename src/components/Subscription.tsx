@@ -28,6 +28,7 @@ import {
     useUpdateSubscriptionMutation
 } from "src/client/apis/subscriptionsApi";
 import dayjs from "dayjs";
+import {useAdapterMetadataQuery} from "src/client/apis/generalApi";
 
 const Component = () => {
     let navigate = useNavigate();
@@ -41,7 +42,12 @@ const Component = () => {
     const [getSubscription] = useLazySubscriptionQuery()
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
-    ;
+    const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
+    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.handlerId})
+    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.receiverId})
+    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.validatorId})
+
+    console.log("mapper", mapperMetadata.data)
     useEffect(() => {
         if (id) {
             refreshSubscription((id));
@@ -243,15 +249,17 @@ const Component = () => {
                 {updateSubscriptionData?.type == "2" &&
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
-
-                        <AdapterEditor title={"Validator"} type={"validators"}
-                                       value={updateSubscriptionData?.validatorId}
-                                       onChange={(t) => setUpdateSubscriptionData({
-                                           ...updateSubscriptionData,
-                                           validatorId: t
-                                       })}
-                                       onPropsChange={(e) => onChangeSubscriptionData("validatorProperties", e)}
-                                       props={updateSubscriptionData?.validatorProperties}
+                        <AdapterEditor
+                            modifiedOn={validatorMetadata.data?.timestamp}
+                            title={"Validator"}
+                            type={"validators"}
+                            value={updateSubscriptionData?.validatorId}
+                            onChange={(t) => setUpdateSubscriptionData({
+                                ...updateSubscriptionData,
+                                validatorId: t
+                            })}
+                            onPropsChange={(e) => onChangeSubscriptionData("validatorProperties", e)}
+                            props={updateSubscriptionData?.validatorProperties}
                         />
 
 
@@ -259,8 +267,8 @@ const Component = () => {
                 {updateSubscriptionData?.type == "4" &&
                     <div
                         className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
-
                         <AdapterEditor title={"Receiver"} type={"receivers"}
+                                       modifiedOn={receiverMetadata.data?.timestamp}
                                        value={updateSubscriptionData?.receiverId}
                                        onChange={(t) => setUpdateSubscriptionData({
                                            ...updateSubscriptionData,
@@ -280,14 +288,17 @@ const Component = () => {
                     <div
                         className=" bg-white border rounded-lg shadow-lg px-2 py-2 w-1/2">
 
-                        <AdapterEditor title={"Mapper"} type={"mappers"}
-                                       value={updateSubscriptionData?.mapperId}
-                                       onChange={(t) => setUpdateSubscriptionData({
-                                           ...updateSubscriptionData,
-                                           mapperId: t
-                                       })}
-                                       onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
-                                       props={updateSubscriptionData?.mapperProperties}
+                        <AdapterEditor
+                            modifiedOn={mapperMetadata.data?.timestamp}
+                            title={"Mapper"}
+                            type={"mappers"}
+                            value={updateSubscriptionData?.mapperId}
+                            onChange={(t) => setUpdateSubscriptionData({
+                                ...updateSubscriptionData,
+                                mapperId: t
+                            })}
+                            onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
+                            props={updateSubscriptionData?.mapperProperties}
                         />
 
 
@@ -297,6 +308,8 @@ const Component = () => {
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
                         <AdapterEditor title={"Handler"} type={"handlers"}
+                                       modifiedOn={handlerMetadata.data?.timestamp}
+
                                        value={updateSubscriptionData?.handlerId}
                                        onChange={(t) => setUpdateSubscriptionData({
                                            ...updateSubscriptionData,

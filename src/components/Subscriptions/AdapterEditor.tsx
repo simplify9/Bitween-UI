@@ -4,10 +4,12 @@ import React, {useEffect, useState} from "react";
 import {apiClient} from "../../client";
 import {KeyValuePair, OptionType} from "../../types/common";
 import KeyValueEditor from "../common/forms/KeyValueEditor";
+import {toLocalDateTimeString} from "src/utils/DateUtils";
 
 
 interface Props {
     value?: string
+    modifiedOn?: string
     onChange: (value: string) => void
     type: 'mappers' | 'receivers' | 'handlers' | 'notifiers' | 'validators'
     props?: KeyValuePair[],
@@ -22,7 +24,8 @@ const AdapterEditor: React.FC<Props> = ({
                                             type,
                                             title,
                                             props,
-                                            onPropsChange
+                                            onPropsChange,
+                                            modifiedOn
                                         }) => {
 
 
@@ -64,7 +67,16 @@ const AdapterEditor: React.FC<Props> = ({
     return (
         <div className={""}>
             <div className={"flex flex-col gap-2"}>
-                <FormField title={title} className="grow ">
+                <div
+                    className={"flex flex-row justify-between text-sm tracking-wide text-gray-700 font-semibold uppercase"}>
+                    <h3>{title}</h3>
+                    {
+                        modifiedOn &&
+                        <p className={"text-sm font-semibold uppercase"}>Modified
+                            on: {toLocalDateTimeString(modifiedOn)}</p>
+                    }
+                </div>
+                <FormField title={""} className="grow ">
                     <AdapterSelector type={type} value={value} onChange={onChange}/>
                 </FormField>
                 <div className={"mb-1"}/>
