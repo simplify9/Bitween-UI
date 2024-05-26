@@ -1,6 +1,6 @@
 import axios from "axios";
-import {CreateXchangeModel, ExchangeFindQuery} from "../types/xchange";
-import {AdapterFindQuery, ISubscription} from "../types/subscriptions";
+import {CreateXchangeModel} from "../types/xchange";
+import {AdapterFindQuery} from "../types/subscriptions";
 import {ChangePasswordModel, CreateAccountModel, LoginRequest} from "../types/accounts";
 import {ApiResponse} from "./types";
 import {PartnerFindQuery, UpdatePartner} from "../types/partners";
@@ -169,6 +169,7 @@ interface QueryParams {
     status?: string;
     subscription?: string;
     id?: string;
+    ids?: string
     correlationId?: string;
     promotedProperties?: string;
     creationDateFrom?: string;
@@ -194,11 +195,11 @@ export const formulateQueryString = (req: QueryParams) => {
     if ('documentId' in req && req.documentId) query += `&filter=documentId:1:${req.documentId}`;
 
     if ('type' in req && req.type) query += `&filter=type:1:${req.type}`;
-    if ('inactive' in req && req.inactive!=null) query += `&filter=inactive:1:${req.inactive}`;
+    if ('inactive' in req && req.inactive != null) query += `&filter=inactive:1:${req.inactive}`;
     if ('handlerId' in req && req.handlerId) query += `&filter=handlerId:1:${req.handlerId}`;
     if ('validatorId' in req && req.validatorId) query += `&filter=validatorId:1:${req.validatorId}`;
     if ('receiverId' in req && req.receiverId) query += `&filter=receiverId:1:${req.receiverId}`;
-    if ('isRunning' in req && req.isRunning!=null) query += `&filter=isRunning:1:${req.isRunning}`;
+    if ('isRunning' in req && req.isRunning != null) query += `&filter=isRunning:1:${req.isRunning}`;
     if ('categoryId' in req && req.categoryId) query += `&filter=categoryId:1:${req.categoryId}`;
     if ('mapperId' in req && req.mapperId) query += `&filter=mapperId:1:${req.mapperId}`;
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
@@ -206,6 +207,8 @@ export const formulateQueryString = (req: QueryParams) => {
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;
     if ('subscription' in req && req.subscription && req.subscription != '') query += `&filter=SubscriptionId:1:${req.subscription}`;
     if ('id' in req && req.id && req.id != '') query += `&filter=Id:1:${req.id}`;
+    if ('ids' in req && req.ids && req.ids != '') query += `&filter=Id:4:text|${req.ids.split(/[,|\s\n]/).map(i => i.trim()).join("|")}`;
+
     if ('correlationId' in req && req.correlationId && req.correlationId != '') query += `&filter=CorrelationId:1:${req.correlationId}`;
     if ('promotedProperties' in req && req.promotedProperties && req.promotedProperties != '') query += `&filter=PromotedPropertiesRaw:1:${req.promotedProperties}`;
     if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${dayjs(req.creationDateFrom).set('h', 0).set('m', 0).toISOString()}`;

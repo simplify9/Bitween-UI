@@ -11,14 +11,15 @@ const SignInWithMsButton = () => {
     const {login} = useAuthApi();
     const [error, setError] = useState("")
     useEffect(() => {
+        
         if (config.data?.msalClientId) {
-            msalInstance = new PublicClientApplication({
+            const conf = {
                 auth: {
                     clientId: config.data.msalClientId,
-                    authority: config.data.msalTenantId ? `https://login.microsoftonline.com/${config.data.msalTenantId}` : undefined
+                    ...(config.data.msalTenantId && { authority: `https://login.microsoftonline.com/${config.data.msalTenantId}` })
                 },
-
-            });
+            };
+            msalInstance = new PublicClientApplication(conf);
             msalInstance.initialize().then()
         }
 
@@ -28,7 +29,7 @@ const SignInWithMsButton = () => {
     const onClickLoginWithMicrosoft = async () => {
         const msRes = await msalInstance.loginPopup({
             redirectUri: config.data?.msalRedirectUri,
-            scopes: ["openid", "profile", "User.Read"]
+            scopes: ["openid"]
         });
         if (msRes.idToken) {
             let res = await apiClient.login({msToken: msRes.idToken});

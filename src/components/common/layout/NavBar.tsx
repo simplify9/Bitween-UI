@@ -5,6 +5,8 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
+import {MdNotificationAdd} from "react-icons/md";
+
 import ENV from "src/env";
 
 const resolveClosedClassName = ({isActive}: any) => {
@@ -33,14 +35,14 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                     <NavLink to="/">
                         <div
                             className={`font-semibold  text-xl tracking-tight px-5 duration-300 transition-w  ease-in-out ${!isOpen ? "hidden" : "block"}`}>
-                            {ENV.THEME.BITWEEN_LOGO &&<img alt={"B I T W E E N"} className={"h-20 object-contain"}
-                                 src={`${ENV.THEME.BITWEEN_LOGO}`}/>}
+                            {ENV.THEME.BITWEEN_LOGO && <img alt={"B I T W E E N"} className={"h-20 object-contain"}
+                                                            src={`${ENV.THEME.BITWEEN_LOGO}`}/>}
                         </div>
                         <div
                             className={`font-semibold text-xl tracking-tight px-5 duration-300 transition-w h-20 w-20 ease-in-out ${isOpen ? "hidden" : "block"}`}>
                             {ENV.THEME.BTIWEEN_ICON &&
                                 <img alt={"B I T W E E N"} className={"h-20 w-10 object-contain"}
-                                 src={`${ENV.THEME.BTIWEEN_ICON}`}/>}
+                                     src={`${ENV.THEME.BTIWEEN_ICON}`}/>}
                         </div>
                     </NavLink>
                 </div>
@@ -102,18 +104,26 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>Partners</span>
 
                         </NavLink>
-                        <NavLink to="/notifiers"
+                        <NavLink to="/notifications"
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <TbBellRinging2Filled className={"w-6 h-6"}
                                                       size={27}/>
                             </div>
 
+                            <span className={isOpen ? "block" : "hidden"}>Notifications</span>
+
+                        </NavLink>
+                        <NavLink to="/notifiers"
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdNotificationAdd className={"w-6 h-6"}
+                                                   size={27}/>
+                            </div>
+
                             <span className={isOpen ? "block" : "hidden"}>Notifiers</span>
 
                         </NavLink>
-
-
                     </div>
 
                     <div className={"flex mb-5 text-primary-500 justify-center"} onClick={() => setIsOpen(!isOpen)}>

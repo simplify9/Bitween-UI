@@ -47,10 +47,9 @@ export const ExchangeList: React.FC<Props> = ({
                 <tr className={"border-l-8 border-white "}>
                     <th
                         scope="col"
-                        className="text-sm font-medium text-gray-500 px-3 py-2 text-left w-[140px]"
+                        className="text-sm font-medium text-gray-500 px-3 py-2 text-left "
                     >
                         <CheckBoxEditor
-                            label={"Select all"}
                             onChange={() => {
                                 setIsSelectAll(!isSelectAll);
                                 data.map((i) => onClickRow(i.id));

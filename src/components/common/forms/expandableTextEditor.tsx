@@ -9,7 +9,7 @@ type Props = Omit<JSX.IntrinsicElements['input'], "onChange"> & {
 
 }
 
-const TextEditor: React.FC<Props> = ({
+const ExpandableTextEditor: React.FC<Props> = ({
                                                    className = "",
                                                    placeholder,
                                                    disabled,
@@ -40,4 +40,4 @@ const TextEditor: React.FC<Props> = ({
     );
 };
 
-export default TextEditor;
+export default ExpandableTextEditor;

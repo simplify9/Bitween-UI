@@ -27,10 +27,11 @@ const Login = () => {
         }
     }
     return (
-      
+
         <div className="bg-white dark:bg-gray-900 relative">
             <ToastContainer/>
-            {ENV.THEME.LOGIN_LOGO && <img src={`${ENV.THEME.LOGIN_LOGO}`} className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>}
+            {ENV.THEME.LOGIN_LOGO &&
+                <img src={`${ENV.THEME.LOGIN_LOGO}`} className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>}
 
             <div className="flex justify-center h-screen">
                 <div className="hidden bg-cover lg:block lg:w-2/3"
@@ -40,7 +41,8 @@ const Login = () => {
                 >
                     <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
                         <div>
-                            {ENV.THEME.BITWEEN_LOGO && <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
+                            {ENV.THEME.BITWEEN_LOGO &&
+                                <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             <p className="max-w-xl mt-3 text-gray-200">
                                 {ENV.THEME.BITWEEEN_TEXT}
                             </p>
@@ -52,7 +54,8 @@ const Login = () => {
                     <div className="flex-1">
                         <div className="text-center">
                             <div className="flex justify-center mx-auto">
-                                {ENV.THEME.BITWEEN_LOGO && <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
+                                {ENV.THEME.BITWEEN_LOGO &&
+                                    <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             </div>
                             <p className="mt-3 text-gray-500 dark:text-gray-300">Sign in to access your account</p>
                         </div>
@@ -101,94 +104,6 @@ const Login = () => {
                 </div>
             </div>
         </div>)
-    {/*  <div className="p-10 pt-12 pb-16 shadow-lg backdrop-blur-2xl rounded-xl ">*/
-    }
-    {/*      <div*/
-    }
-    {/*          className="flex items-center justify-center text-4xl font-black text-sky-900 m-3">*/
-    }
-
-    {/*          <img src="/Graphics/BitweenFull.svg"/>*/
-    }
-    {/*      </div>*/
-    }
-    {/*      <div*/
-    }
-
-    {/*          className="flex flex-col justify-center mt-10">*/
-    }
-    {/*          <label className="text-sm font-medium">Username</label>*/
-    }
-    {/*          <input className="mb-3 px-2 py-1.5*/
-    }
-    {/*mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400*/
-    }
-    {/*focus:outline-none*/
-    }
-    {/*focus:border-sky-500*/
-    }
-    {/*focus:ring-1*/
-    }
-    {/*focus:ring-sky-500*/
-    }
-    {/*focus:invalid:border-red-500 focus:invalid:ring-red-500" type="email"*/
-    }
-    {/*                 name="username"*/
-    }
-    {/*                 placeholder="john@simth.com"*/
-    }
-    {/*                 value={username}*/
-    }
-    {/*                 onChange={(e) => setUsername(e.target.value)}*/
-    }
-    {/*                 required/>*/
-    }
-    {/*          <label className="text-sm font-medium">Password</label>*/
-    }
-    {/*          <input className="*/
-    }
-    {/*mb-3 mt-1 block w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400*/
-    }
-    {/*focus:outline-none*/
-    }
-    {/*focus:border-sky-500*/
-    }
-    {/*focus:ring-1*/
-    }
-    {/*focus:ring-sky-500*/
-    }
-    {/*focus:invalid:border-red-500 focus:invalid:ring-red-500"*/
-    }
-    {/*                 type="password" name="password"*/
-    }
-    {/*                 placeholder="********" required*/
-    }
-    {/*                 value={password}*/
-    }
-    {/*                 onChange={(e) => setPassword(e.target.value)}*/
-    }
-    {/*          />*/
-    }
-    {/*          {failed &&*/
-    }
-    {/*              <a className="pb-4 text-red-600">Wrong username or password</a>}*/
-    }
-    {/*          <Button*/
-    }
-
-
-    {/*              onClick={() => onSubmit()}>*/
-    }
-    {/*              <span className="hidden">Checking ...</span>*/
-    }
-    {/*              <span>Login</span></Button>*/
-    }
-    {/*      </div>*/
-    }
-    {/*  </div>*/
-    }
-
-
 }
 
 export default Login;
