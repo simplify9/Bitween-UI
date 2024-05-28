@@ -133,7 +133,7 @@ export const apiClient = {
 
     },
     findAdapterProperties: async (id: string) => {
-        const res = await client.get(`adapters/${id}/properties`)
+        const res = await client.get(`adapters/${encodeURIComponent(id)}/properties`)
         const arr: OptionType[] = [];
         if (!res.data) return [];
         Object.entries(res.data).forEach(([k, v]: any) => {
@@ -196,12 +196,14 @@ export const formulateQueryString = (req: QueryParams) => {
 
     if ('type' in req && req.type) query += `&filter=type:1:${req.type}`;
     if ('inactive' in req && req.inactive != null) query += `&filter=inactive:1:${req.inactive}`;
-    if ('handlerId' in req && req.handlerId) query += `&filter=handlerId:1:${req.handlerId}`;
-    if ('validatorId' in req && req.validatorId) query += `&filter=validatorId:1:${req.validatorId}`;
-    if ('receiverId' in req && req.receiverId) query += `&filter=receiverId:1:${req.receiverId}`;
+
+    if ('handlerId' in req && req.handlerId) query += `&filter=handlerId:3:${req.handlerId}`;
+    if ('validatorId' in req && req.validatorId) query += `&filter=validatorId:3:${req.validatorId}`;
+    if ('receiverId' in req && req.receiverId) query += `&filter=receiverId:3:${req.receiverId}`;
+    if ('mapperId' in req && req.mapperId) query += `&filter=mapperId:3:${encodeURIComponent(req.mapperId)}`;
+
     if ('isRunning' in req && req.isRunning != null) query += `&filter=isRunning:1:${req.isRunning}`;
     if ('categoryId' in req && req.categoryId) query += `&filter=categoryId:1:${req.categoryId}`;
-    if ('mapperId' in req && req.mapperId) query += `&filter=mapperId:1:${req.mapperId}`;
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;

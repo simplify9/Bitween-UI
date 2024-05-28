@@ -1,6 +1,6 @@
-import React from "react"
+import React, {useCallback, useMemo} from "react"
 import {noOp} from "./utils"
-import Select from 'react-select'
+import Select, {StylesConfig} from 'react-select'
 
 //
 // export type OptionRenderProps<TOption> = {
@@ -46,45 +46,47 @@ export const ChoiceEditor = <TOption extends {} = any>({
                                                            disabled,
                                                        }: Props): JSX.Element => {
 
-    return (
-        <div>
-            <Select
-                menuPlacement={menuPlacement}
-                getOptionLabel={optionTitle}
-                getOptionValue={(e) => {
-                    return optionValue(e)
-                }}
-                isClearable={true}
-                isDisabled={disabled}
-                options={options ?? []}
-                value={options?.find(i => optionValue(i) == value)}
-                onChange={(newValue) => {
-                    if (Boolean(newValue)) {
-                        onChange(optionValue(newValue))
-                    } else {
-                        onChange(undefined)
-                    }
-                }}
-                placeholder={placeholder}
-                className={"w-full  shadow "}
-                styles={{
-                    // @ts-ignore
-                    control: (base) => {
-                        return {
-                            ...base,
-                            minHeight: '42px'
-                        }
-                    },
-                    placeholder: (base) => {
-                        return {
-                            ...base,
-                            fontSize: '0.875rem',
-                            lineHeight: '1.25rem',
-                        }
-                    },
+    const onChangeValue = useCallback((newValue) => {
+        if (Boolean(newValue)) {
+            onChange(optionValue(newValue))
+        } else {
+            onChange(undefined)
+        }
+    }, [optionValue])
+    const styles = useMemo(() => {
+        return {
+            // @ts-ignore
+            control: (base) => {
+                return {
+                    ...base,
+                    minHeight: '42px'
+                }
+            },
+        } satisfies  StylesConfig<any, false, any>
 
-                }}/>
-        </div>
+    }, [])
+    const selectedValue = useMemo(() => {
+        if (!Array.isArray(options))
+            return ""
+        return options?.find(i => optionValue(i) == value)
+    }, [value, optionValue, options])
+    return (
+        <Select
+            id={placeholder}
+            key={`${placeholder}_select`}
+            menuPlacement={menuPlacement}
+            getOptionLabel={optionTitle}
+            getOptionValue={optionValue}
+            autoFocus={true}
+            isClearable={true}
+            isDisabled={disabled}
+            options={options ?? []}
+            value={selectedValue}
+            onChange={onChangeValue}
+            placeholder={placeholder}
+            className={"w-full  shadow text-sm  "}
+            styles={styles}
+        />
     )
 }
 

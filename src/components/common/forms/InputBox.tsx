@@ -7,7 +7,7 @@ type Props = JSX.IntrinsicElements['div'] & {
 }
 
 const ownCss = (withPopOver: boolean) => (
-    `h-[42px] overflow-hidden flex flex-nowrap relative bg-white group py-2 px-2 focus-within:drop-shadow-md  disabled:shadow-none transition border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && "focus-within:z-30 focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
+    `h-[42px] overflow-hidden flex flex-nowrap relative bg-white group py-2 px-2 focus-within:drop-shadow-md  disabled:shadow-none transition border-gray-300 rounded-t rounded-b border-x border-t border-b ${withPopOver && " focus-within:rounded-b-none focus-within:border-b-none"} drop-shadow-sm  overflow-visible`
 );
 
 const Component: React.FC<Props> = ({
@@ -17,7 +17,7 @@ const Component: React.FC<Props> = ({
                                         ...htmlProps
                                     }) => (
     <div {...htmlProps}
-         className={classes(ownCss(!!withPopOver), className || " z-10 relative")}>
+         className={classes(ownCss(!!withPopOver), className || "  relative")}>
         {children}
         {withPopOver &&
             <div

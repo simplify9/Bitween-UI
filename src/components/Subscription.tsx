@@ -264,6 +264,7 @@ const Component = () => {
 
 
                     </div>}
+                
                 {updateSubscriptionData?.type == "4" &&
                     <div
                         className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
@@ -287,7 +288,6 @@ const Component = () => {
                 <div className={" flex flex-row gap-3"}>
                     <div
                         className=" bg-white border rounded-lg shadow-lg px-2 py-2 w-1/2">
-
                         <AdapterEditor
                             modifiedOn={mapperMetadata.data?.timestamp}
                             title={"Mapper"}
@@ -300,10 +300,7 @@ const Component = () => {
                             onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
                             props={updateSubscriptionData?.mapperProperties}
                         />
-
-
                     </div>
-
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
