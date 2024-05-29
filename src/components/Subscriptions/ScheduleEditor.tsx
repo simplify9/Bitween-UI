@@ -30,19 +30,15 @@ const ScheduleEditor: React.FC<Props> = ({
         }))
     }, [setScheduleForm])
     const [visibleModal, setVisibleModal] = useState<"NONE" | "ADD_EDIT">("NONE")
-    // const [scheduleToEdit,scheduleToEditId]
     const onEdit = (i: number) => {
         setScheduleForm(schedule?.find(x => x.id == i)!)
         setVisibleModal("ADD_EDIT")
-
     }
     const onRemove = (i: number) => {
         const data = schedule?.filter(x => x.id != i) ?? []
         onChangeSchedules(data)
-
     }
     const onAdd = (i: ScheduleView) => {
-
         const old = schedule?.find(x => x.id == i.id)
         if (old) {
             let data = schedule?.filter(x => x.id != i.id) ?? []
@@ -56,20 +52,19 @@ const ScheduleEditor: React.FC<Props> = ({
     }
 
 
-    const resolveRecurrence = (r: string) => {
-
-        switch (r) {
-            case "0":
+    const resolveRecurrence = (r: number) => {
+        switch (Number(r)) {
+            case 0:
                 return "Hourly"
-            case "1":
+            case 1:
                 return "Daily"
-            case "2":
+            case 2:
                 return "Weekly"
-            case "3":
+            case 3:
                 return "Monthly"
         }
-
     }
+    
     return (
         <div className={"mt-3"}>
 
@@ -87,8 +82,6 @@ const ScheduleEditor: React.FC<Props> = ({
 
                        onClickAction={setVisibleModal.bind(this, "ADD_EDIT")}>
                 <div className={"flex flex-col gap-2"}>
-
-
                     <table className="appearance-none min-w-full">
                         <thead className="border-y bg-gray-50">
                         <tr>
@@ -107,9 +100,7 @@ const ScheduleEditor: React.FC<Props> = ({
 
                             <th scope="col"
                                 className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
-
                             </th>
-
                         </tr>
                         </thead>
                         <tbody>
@@ -131,24 +122,24 @@ const ScheduleEditor: React.FC<Props> = ({
 
                                     <td>
                                         <div className={"flex flex-row "}>
-                                            
-                                      
-                                        {
-                                            onEdit && <Button onClick={() => {
-                                                onEdit(i.id)
-                                            }}
-                                                              variant={"none"}
-                                            >
-                                                <MdModeEditOutline className={"text-yellow-300"} size={21}/>
-                                            </Button>
-                                        }
 
-                                        <Button
-                                            variant={"none"}
-                                            onClick={() => onRemove!(i.id)}
-                                        >
-                                            <MdOutlineRemoveCircle className={"text-red-600"} size={21}/>
-                                        </Button>
+
+                                            {
+                                                onEdit && <Button onClick={() => {
+                                                    onEdit(i.id)
+                                                }}
+                                                                  variant={"none"}
+                                                >
+                                                    <MdModeEditOutline className={"text-yellow-300"} size={21}/>
+                                                </Button>
+                                            }
+
+                                            <Button
+                                                variant={"none"}
+                                                onClick={() => onRemove!(i.id)}
+                                            >
+                                                <MdOutlineRemoveCircle className={"text-red-600"} size={21}/>
+                                            </Button>
                                         </div>
                                     </td>
 
