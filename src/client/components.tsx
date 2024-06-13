@@ -5,6 +5,8 @@ import {apiClient, client} from "src/client/index";
 import Ac from "src/authConfig";
 import {setAccountInfo, setTokens} from "src/state/stateSlices/user";
 import {useAppDispatch} from "src/state/ReduxSotre";
+import {useAppConfigQuery} from "src/client/apis/generalApi";
+import {setTheme} from "src/state/stateSlices/theme";
 
 const noOp = () => {
 }
@@ -21,7 +23,13 @@ export const AuthApiProvider: React.FC<{ authApp: AuthConfig, children?: React.R
                                                                                                 }) => {
 
     const [isLoggedIn, setLoggedIn] = useState<boolean | null>(null);
+    const { data, isSuccess } = useAppConfigQuery();
     const dispatch = useAppDispatch()
+    useEffect(() => {
+            if (isSuccess && data?.theme) {
+                dispatch(setTheme(data?.theme))
+            }
+    }, [isSuccess, data?.theme]);
 
     const api = useMemo(() => ({
         login: (response: AccessTokenResponse) => {

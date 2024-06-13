@@ -2,10 +2,11 @@ import {NavLink, useLocation} from "react-router-dom";
 import SubMenu from "src/components/common/layout/SubMenu";
 import React from "react";
 import {TbBellRingingFilled} from "react-icons/tb";
-import ENV from "src/env";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 const Header = () => {
     const location = useLocation()
+    const theme = useTypedSelector(i => i.theme)
 
     const pathName = location.pathname.split("/")?.[1]?.trim()
     return <nav className="relative bg-white rounded-lg shadow ">
@@ -27,10 +28,10 @@ const Header = () => {
                         <SubMenu>
 
                             <div className="p-1 border-2 border-primary-500 rounded-full">
-                                <img
-                                    src={`${ENV.THEME.BITWEEN_HEADER_ICON}`}
-                                    className=" w-6 h-6"/>
-                            </div>
+                                {theme.bitweenHeaderIcon && <img
+                                    src={`${theme.bitweenHeaderIcon}`}
+                                    className=" w-6 h-6"/>}
+                            </div>}
                         </SubMenu>
                     </div>
                 </div>
