@@ -44,11 +44,11 @@ const Component = () => {
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
-    
+
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
-    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.handlerId})
-    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.receiverId})
-    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.validatorId})
+    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
+    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
+    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
 
     console.log("mapper", mapperMetadata.data)
     useEffect(() => {
@@ -246,8 +246,8 @@ const Component = () => {
 
                             <ScheduleEditor title={"Schedule"}
                                             onChangeSchedules={(e) => onChangeSubscriptionData("schedules", e)}
-
-                                            schedule={updateSubscriptionData.schedules}/>
+                                            schedule={updateSubscriptionData.schedules}
+                            />
                         </div>
 
 
@@ -351,15 +351,14 @@ const Component = () => {
                             Delete
                         </Button>
                     </Authorize>
-                    
 
 
                 </div>
                 <div className={"flex flex-row"}>
                     {
                         updateSubscriptionData.type == '8' && <Authorize roles={["Admin", "Member"]}>
-                        
-                        
+
+
                             <Button className={"mx-8"} variant={"secondary"} onClick={onClickAggregateNow}
                             >
                                 Aggregate Now
@@ -373,7 +372,7 @@ const Component = () => {
                             </Button>
                         </Authorize>
                     }
-                    
+
                     <Button
                         variant={"secondary"}
                         onClick={() => navigate('/subscriptions')}
