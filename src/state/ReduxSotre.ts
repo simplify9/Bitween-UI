@@ -5,9 +5,11 @@ import {NotifiersApi} from "src/client/apis/notifiersApi";
 import {SubscriptionApi} from "src/client/apis/subscriptionsApi";
 import {XchangeApi} from "src/client/apis/xchangeApi";
 import {GeneralApi} from "src/client/apis/generalApi";
+import {themeSlice} from "src/state/stateSlices/theme";
 
 const reducers = combineReducers({
     user: userSlice.reducer,
+    theme: themeSlice.reducer,
     [NotifiersApi.reducerPath]: NotifiersApi.reducer,
     [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
     [XchangeApi.reducerPath]: XchangeApi.reducer,

@@ -4,11 +4,11 @@ import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
 import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
 import {ToastContainer} from "react-toastify";
-import ENV from "src/env";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 
 const Login = () => {
-
+    const theme = useTypedSelector(i => i.theme)
     const {login} = useAuthApi();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -30,8 +30,8 @@ const Login = () => {
 
         <div className="bg-white dark:bg-gray-900 relative">
             <ToastContainer/>
-            {ENV.THEME.LOGIN_LOGO &&
-                <img src={`${ENV.THEME.LOGIN_LOGO}`} className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>}
+            {theme.loginLogo &&
+                <img src={`${theme.loginLogo}`} className={"object-cover absolute mt-5 h-10 bottom-5 left-5"}/>}
 
             <div className="flex justify-center h-screen">
                 <div className="hidden bg-cover lg:block lg:w-2/3"
@@ -41,10 +41,10 @@ const Login = () => {
                 >
                     <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
                         <div>
-                            {ENV.THEME.BITWEEN_LOGO &&
-                                <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
+                            {theme.bitweenText &&
+                                <img src={`${theme.bitweenText}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             <p className="max-w-xl mt-3 text-gray-200">
-                                {ENV.THEME.BITWEEEN_TEXT}
+                                {theme.bitweenText}
                             </p>
                         </div>
                     </div>
@@ -54,8 +54,8 @@ const Login = () => {
                     <div className="flex-1">
                         <div className="text-center">
                             <div className="flex justify-center mx-auto">
-                                {ENV.THEME.BITWEEN_LOGO &&
-                                    <img src={`${ENV.THEME.BITWEEN_LOGO}`} className="w-auto h-12 sm:h-8" alt=""/>}
+                                {theme.bitweenLogo &&
+                                    <img src={`${theme.bitweenLogo}`} className="w-auto h-12 sm:h-8" alt=""/>}
                             </div>
                             <p className="mt-3 text-gray-500 dark:text-gray-300">Sign in to access your account</p>
                         </div>

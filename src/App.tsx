@@ -50,8 +50,6 @@ function App() {
                             className={"  px-2 rounded-lg md:h-[92.5vh] overflow-scroll pl-4   delay-100 duration-200 transition-w ease-in ease-out  " + (isOpen ? "md:w-[89%]" : "w-[96%]")}>
                             <Header/>
                             <div className={"pt-3 pb-5"}>
-
-
                                 <Routes>
                                     <Route path="/" element={<Dashboard/>}/>
                                     <Route path={"dashboard"} element={<Dashboard/>}/>

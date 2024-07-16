@@ -6,8 +6,7 @@ import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
 import {MdNotificationAdd} from "react-icons/md";
-
-import ENV from "src/env";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 const resolveClosedClassName = ({isActive}: any) => {
 
@@ -27,6 +26,7 @@ type Props = {
     setIsOpen: (o: boolean) => void
 }
 const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
+    const theme = useTypedSelector(i => i.theme)
     return (
         <div className={"flex h-full pl-2 "}>
             <nav
@@ -35,14 +35,14 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                     <NavLink to="/">
                         <div
                             className={`font-semibold  text-xl tracking-tight px-5 duration-300 transition-w  ease-in-out ${!isOpen ? "hidden" : "block"}`}>
-                            {ENV.THEME.BITWEEN_LOGO && <img alt={"B I T W E E N"} className={"h-20 object-contain"}
-                                                            src={`${ENV.THEME.BITWEEN_LOGO}`}/>}
+                            {theme.bitweenLogo && <img alt={"B I T W E E N"} className={"h-20 object-contain"}
+                                                            src={`${theme.bitweenLogo}`}/>}
                         </div>
                         <div
                             className={`font-semibold text-xl tracking-tight px-5 duration-300 transition-w h-20 w-20 ease-in-out ${isOpen ? "hidden" : "block"}`}>
-                            {ENV.THEME.BTIWEEN_ICON &&
+                            {theme.bitweenIcon &&
                                 <img alt={"B I T W E E N"} className={"h-20 w-10 object-contain"}
-                                     src={`${ENV.THEME.BTIWEEN_ICON}`}/>}
+                                     src={`${theme.bitweenIcon}`}/>}
                         </div>
                     </NavLink>
                 </div>
