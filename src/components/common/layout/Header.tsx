@@ -31,7 +31,7 @@ const Header = () => {
                                 {theme.bitweenHeaderIcon && <img
                                     src={`${theme.bitweenHeaderIcon}`}
                                     className=" w-6 h-6"/>}
-                            </div>}
+                            </div>
                         </SubMenu>
                     </div>
                 </div>
