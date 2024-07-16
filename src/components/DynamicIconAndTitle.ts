@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import ENV from "src/env";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
 const DynamicTitleAndIcon = () => {
@@ -24,7 +23,7 @@ const DynamicTitleAndIcon = () => {
         return () => {
             document.head.removeChild(newFavicon);
         };
-    }, []);
+    }, [theme.tabTitle, theme.tabIcon]);
 
     return null;
 };
