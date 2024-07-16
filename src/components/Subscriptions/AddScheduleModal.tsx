@@ -52,7 +52,7 @@ const AddEditScheduleModal: React.FC<Props> = ({
         <div>
             <FormField title="Type" className="grow">
                 <ChoiceEditor
-                    value={scheduleFrom.recurrence.toString()}
+                    value={scheduleFrom.recurrence?.toString()}
                     onChange={onChangeScheduleFrom.bind(this, "recurrence")}
                     optionTitle={(item: OptionType) => item.title}
                     optionValue={(item: OptionType) => item.id}

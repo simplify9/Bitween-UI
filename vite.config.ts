@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react-swc'
 import {posix} from "path";
 import mkcert from 'vite-plugin-mkcert'
 
-console.log("meta",import.meta);
 const plugins = true ? [react(), mkcert()] : [react()]
 
 const config = defineConfig({
