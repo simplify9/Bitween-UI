@@ -73,6 +73,14 @@ export const SubscriptionApi = createApi({
                 body: {}
             })
         }),
+        receiveSubscription: builder.mutation<number, number>({
+            invalidatesTags: ['subscription'],
+            query: id => ({
+                url: `subscriptions/${id}/receivenow`,
+                method: "POST",
+                body: {}
+            })
+        }),
         subscriptionCategories: builder.query<ApiPagedResponse<SubscriptionCategoryModel>, SearchSubscriptionCategoryModel>({
             providesTags: ['subscriptionCategories'],
             query: params => ({
@@ -119,6 +127,7 @@ export const SubscriptionApi = createApi({
 
 
 export const {
+    useReceiveSubscriptionMutation,
     usePauseSubscriptionMutation,
     useAggregateSubscriptionMutation,
     useUpdateSubscriptionMutation,

@@ -5,6 +5,7 @@ import {AccountModel, ChangePasswordModel, CreateAccountModel, EditModal} from "
 import {formulateQueryString} from "src/client";
 import {ApiPagedResponse} from "src/types/common";
 import {ChartPointsResponse, MainInfoResponse, XchangeMainInfo} from "src/types/dashboard";
+import {Config} from "src/types/config";
 
 export const GeneralApi = createApi({
     baseQuery: customFetchBase,
@@ -67,11 +68,7 @@ export const GeneralApi = createApi({
                 method: 'GET',
             })
         }),
-        appConfig: builder.query <{
-            msalClientId: string | null,
-            msalRedirectUri: string | null,
-            msalTenantId: string | null
-        }, void>({
+        appConfig: builder.query <Config, void>({
             query: () => ({
                 url: "Settings/config",
                 method: 'GET',

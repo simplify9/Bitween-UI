@@ -4,7 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="add update member feature" />
+    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="Removed url">
+      <change afterPath="$PROJECT_DIR$/src/state/stateSlices/theme.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/apis/generalApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/apis/generalApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/components.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DynamicIconAndTitle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DynamicIconAndTitle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Login/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Login/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/layout/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/Footer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/layout/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/state/ReduxSotre.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/ReduxSotre.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/DateUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/DateUtils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,22 +48,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/salloomzoubi/work's project/InfolinkUi",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.standard": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.standard": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "yarn",
-    "ts.external.directory.path": "/Users/salloomzoubi/work's project/InfolinkUi/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/salloomzoubi/work's project/InfolinkUi&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/omar/Downloads/Repos/bitween/BitweenUI/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/components/common/forms" />
@@ -77,6 +93,12 @@
       <workItem from="1657534866726" duration="312000" />
       <workItem from="1657699828815" duration="5578000" />
       <workItem from="1688292907914" duration="15147000" />
+      <workItem from="1713958072913" duration="572000" />
+      <workItem from="1713965587295" duration="200000" />
+      <workItem from="1714029995564" duration="592000" />
+      <workItem from="1714392483720" duration="44000" />
+      <workItem from="1718185368179" duration="3943000" />
+      <workItem from="1718274286958" duration="5522000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -190,7 +212,42 @@
       <option name="project" value="LOCAL" />
       <updated>1688313937628</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="White label login page">
+      <created>1713437226109</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1713437226109</updated>
+    </task>
+    <task id="LOCAL-00018" summary="White label footer">
+      <created>1713444590593</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1713444590593</updated>
+    </task>
+    <task id="LOCAL-00019" summary="White label">
+      <created>1713445076650</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1713445076650</updated>
+    </task>
+    <task id="LOCAL-00020" summary="White label tab title and icon">
+      <created>1713446472294</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1713446472294</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Removed url">
+      <created>1713958139832</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1713958139832</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -203,6 +260,7 @@
         <option value="Default.Author" />
         <option value="Default.Date" />
         <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
       </list>
     </option>
   </component>
@@ -227,6 +285,11 @@
     <MESSAGE value="updates" />
     <MESSAGE value="modal fix" />
     <MESSAGE value="add update member feature" />
-    <option name="LAST_COMMIT_MESSAGE" value="add update member feature" />
+    <MESSAGE value="White label login page" />
+    <MESSAGE value="White label footer" />
+    <MESSAGE value="White label" />
+    <MESSAGE value="White label tab title and icon" />
+    <MESSAGE value="Removed url" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed url" />
   </component>
 </project>

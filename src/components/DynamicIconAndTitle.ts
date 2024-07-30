@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import ENV from "src/env";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 const DynamicTitleAndIcon = () => {
+    const theme = useTypedSelector(i => i.theme)
     useEffect(() => {
-        const title = ENV.THEME.TAB_TITLE;
-        const iconPath = ENV.THEME.TAB_ICON;
+        const title = theme.tabTitle;
+        const iconPath = theme.tabIcon;
 
         document.title = title;
 
@@ -22,7 +23,7 @@ const DynamicTitleAndIcon = () => {
         return () => {
             document.head.removeChild(newFavicon);
         };
-    }, []);
+    }, [theme.tabTitle, theme.tabIcon]);
 
     return null;
 };

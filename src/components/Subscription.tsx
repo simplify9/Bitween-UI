@@ -24,6 +24,7 @@ import {
     useAggregateSubscriptionMutation,
     useLazySubscriptionQuery,
     usePauseSubscriptionMutation,
+    useReceiveSubscriptionMutation,
     useSubscriptionCategoriesQuery,
     useUpdateSubscriptionMutation
 } from "src/client/apis/subscriptionsApi";
@@ -42,10 +43,12 @@ const Component = () => {
     const [getSubscription] = useLazySubscriptionQuery()
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
+    const [receiveNow] = useReceiveSubscriptionMutation()
+
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
-    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.handlerId})
-    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.receiverId})
-    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.validatorId})
+    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
+    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
+    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
 
     console.log("mapper", mapperMetadata.data)
     useEffect(() => {
@@ -55,6 +58,9 @@ const Component = () => {
     }, [id]);
     const onClickAggregateNow = () => {
         aggregateNow((id))
+    }
+    const onClickReceiveNow = () => {
+        receiveNow((id))
     }
     const refreshSubscription = async (id: number) => {
         let res = await getSubscription(id);
@@ -240,8 +246,8 @@ const Component = () => {
 
                             <ScheduleEditor title={"Schedule"}
                                             onChangeSchedules={(e) => onChangeSubscriptionData("schedules", e)}
-
-                                            schedule={updateSubscriptionData.schedules}/>
+                                            schedule={updateSubscriptionData.schedules}
+                            />
                         </div>
 
 
@@ -280,7 +286,6 @@ const Component = () => {
                         />
                         <ScheduleEditor title={"Schedule"}
                                         onChangeSchedules={(e) => onChangeSubscriptionData("schedules", e)}
-
                                         schedule={updateSubscriptionData.schedules}/>
 
                     </div>}
@@ -343,18 +348,28 @@ const Component = () => {
                             Delete
                         </Button>
                     </Authorize>
+
+
+                </div>
+                <div className={"flex flex-row"}>
                     {
                         updateSubscriptionData.type == '8' && <Authorize roles={["Admin", "Member"]}>
-                            <Button variant={"secondary"} onClick={onClickAggregateNow}
+
+
+                            <Button className={"mx-8"} variant={"secondary"} onClick={onClickAggregateNow}
                             >
                                 Aggregate Now
                             </Button>
                         </Authorize>
                     }
+                    {
+                        updateSubscriptionData.type == '4' && <Authorize roles={["Admin", "Member"]}>
+                            <Button variant={"secondary"} onClick={onClickReceiveNow} className={"mx-8"}>
+                                Receive Now
+                            </Button>
+                        </Authorize>
+                    }
 
-
-                </div>
-                <div className={"flex flex-row"}>
                     <Button
                         variant={"secondary"}
                         onClick={() => navigate('/subscriptions')}
