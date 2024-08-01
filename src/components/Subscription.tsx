@@ -22,10 +22,13 @@ import {MdOutlineContentCopy} from "react-icons/md";
 
 import {
     useAggregateSubscriptionMutation,
+    useCreateDraftSubscriptionMutation,
+    useDraftSubscriptionQuery,
     useLazySubscriptionQuery,
     usePauseSubscriptionMutation,
     useReceiveSubscriptionMutation,
     useSubscriptionCategoriesQuery,
+    useUpdateDraftSubscriptionMutation,
     useUpdateSubscriptionMutation
 } from "src/client/apis/subscriptionsApi";
 import dayjs from "dayjs";
@@ -43,14 +46,16 @@ const Component = () => {
     const [getSubscription] = useLazySubscriptionQuery()
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
+    const [createDraftSubscription] = useCreateDraftSubscriptionMutation()
+    const [updateDraftSubscription] = useUpdateDraftSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
-
+    const [draftId, setDraftId] = useState<number | null>(null)
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
     const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
     const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
     const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
+    const drafts = useDraftSubscriptionQuery(id)
 
-    console.log("mapper", mapperMetadata.data)
     useEffect(() => {
         if (id) {
             refreshSubscription((id));
@@ -77,6 +82,11 @@ const Component = () => {
         }
     }
     const onClickUpdateSubscription = async () => {
+        await updateSubscription(updateSubscriptionData);
+        await getTrails();
+
+    }
+    const onClickSaveAsDraft = async () => {
         await updateSubscription(updateSubscriptionData);
         await getTrails();
 
@@ -128,6 +138,16 @@ const Component = () => {
                     </div>
 
                 </div>}
+            <div className={"px-1 flex gap-3"}>
+
+                <div>
+                    Editing published version
+                </div>
+                <div>
+                    Draft
+                </div>
+
+            </div>
             <div className={"shadow-lg bg-white rounded-lg mb-6 border px-2 py-2  mt-3 pt-3 px-3"}>
 
 
@@ -270,7 +290,7 @@ const Component = () => {
 
 
                     </div>}
-                
+
                 {updateSubscriptionData?.type == "4" &&
                     <div
                         className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
@@ -377,6 +397,12 @@ const Component = () => {
                         Cancel
                     </Button>
                     <Authorize roles={["Admin", "Member"]}>
+                        <Button
+                            onClick={onClickUpdateSubscription}>
+                            Save as draft
+                        </Button>
+                    </Authorize>
+                    <Authorize roles={["Admin"]}>
                         <Button
                             onClick={onClickUpdateSubscription}>
                             Save
