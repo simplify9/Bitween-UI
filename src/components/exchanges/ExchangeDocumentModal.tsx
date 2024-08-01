@@ -15,6 +15,7 @@ function isValidXML(xmlString) {
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
     return !xmlDoc.getElementsByTagName("parsererror").length;
 }
+
 const prettifyXml = (sourceXml: string) => {
     const xmlDoc = new DOMParser().parseFromString((sourceXml), 'application/xml');
     const xsltDoc = new DOMParser().parseFromString([
@@ -58,20 +59,19 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
             setData({data: resp, type: "text", raw: resp})
 
             try {
-                setData({data: JSON.parse(resp), type: "json", raw: resp})
-            } catch {
-                try {
+                if ((resp.startsWith("{") && resp.endsWith("}")) || (resp.startsWith("[") || resp.endsWith("]")))
+                    setData({data: JSON.parse(resp), type: "json", raw: resp})
+                else {
                     const xml = removeInvalidXmlChars(resp)
                     console.log(xml)
                     if (!isValidXML(xml))
                         throw new Error("PARSE_ERROR")
-                    
                     setData({data: prettifyXml(xml), type: "xml", raw: resp})
 
-                } catch {
-                    console.log("RAW")
-                    setData({data: resp, type: "text", raw: resp})
                 }
+            } catch {
+                setData({data: resp, type: "text", raw: resp})
+
             }
         }
     }
