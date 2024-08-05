@@ -34,25 +34,33 @@ export const SubscriptionApi = createApi({
                 method: "GET",
             })
         }),
-        draftSubscription: builder.query<ISubscription, number>({
+        draftSubscription: builder.query<{ result: ISubscription[] }, number>({
             providesTags: ['subscription'],
             query: id => ({
-                url: `draftsubscriptions/${id}/BySubscription`,
+                url: `SubscriptionDraft/${id}/BySubscription`,
                 method: "GET",
             })
         }),
-        createDraftSubscription: builder.mutation<{ id: number }, { id: number }>({
+        createDraftSubscription: builder.mutation<{ id: number }, { subscriptionId: number }>({
             invalidatesTags: ['subscription'],
             query: body => ({
-                url: `draftsubscriptions/`,
+                url: `SubscriptionDraft/`,
                 method: "POST",
                 body: body
+            })
+        }),
+        publishDraftSubscription: builder.mutation<{ id: number }, { id: number }>({
+            invalidatesTags: ['subscription'],
+            query: id => ({
+                url: `SubscriptionDraft/${id.id}/publish`,
+                method: "POST",
+                body: {}
             })
         }),
         updateDraftSubscription: builder.mutation<{}, ISubscription>({
             invalidatesTags: ['subscription'],
             query: body => ({
-                url: `draftsubscriptions/${body.id}/`,
+                url: `SubscriptionDraft/${body.id}/`,
                 method: "POST",
                 body: body
             })
@@ -150,6 +158,7 @@ export const SubscriptionApi = createApi({
 
 
 export const {
+    usePublishDraftSubscriptionMutation,
     useCreateDraftSubscriptionMutation,
     useUpdateDraftSubscriptionMutation,
     useDraftSubscriptionQuery,
