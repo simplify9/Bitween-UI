@@ -5,6 +5,7 @@ import {apiClient} from "../../client";
 import {KeyValuePair, OptionType} from "../../types/common";
 import KeyValueEditor from "../common/forms/KeyValueEditor";
 import {toLocalDateTimeString} from "src/utils/DateUtils";
+import AdapterVersionSelector from "src/components/Subscriptions/AdapterVersionSelector";
 
 
 interface Props {
@@ -77,7 +78,7 @@ const AdapterEditor: React.FC<Props> = ({
                     }
                 </div>
                 <FormField title={""} className="grow ">
-                    <AdapterSelector type={type} value={value} onChange={onChange}/>
+                    <AdapterVersionSelector type={type} value={value} onChange={onChange}/>
                 </FormField>
                 <div className={"mb-1"}/>
                 <KeyValueEditor values={props} title={'Properties'}

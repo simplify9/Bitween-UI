@@ -158,6 +158,15 @@ export interface AdapterFindQuery {
     prefix: string;
 }
 
+export interface Adapter {
+    key: string
+    versions: Version[]
+}
+
+export interface Version {
+    key: string
+}
+
 
 export type SubscriptionCategoryModel = {
     id: number;

@@ -22,20 +22,26 @@ import {MdOutlineContentCopy} from "react-icons/md";
 
 import {
     useAggregateSubscriptionMutation,
+    useCreateDraftSubscriptionMutation,
+    useDraftSubscriptionQuery,
     useLazySubscriptionQuery,
     usePauseSubscriptionMutation,
+    usePublishDraftSubscriptionMutation,
     useReceiveSubscriptionMutation,
     useSubscriptionCategoriesQuery,
+    useUpdateDraftSubscriptionMutation,
     useUpdateSubscriptionMutation
 } from "src/client/apis/subscriptionsApi";
 import dayjs from "dayjs";
 import {useAdapterMetadataQuery} from "src/client/apis/generalApi";
+import Dialog from "src/components/common/dialog";
 
+type EditMode = "PUBLISHED" | "DRAFT";
 const Component = () => {
     let navigate = useNavigate();
     let params = useParams();
     const id = Number(params.id)
-    const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
+    const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
@@ -43,14 +49,25 @@ const Component = () => {
     const [getSubscription] = useLazySubscriptionQuery()
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
+    const [createDraftSubscription] = useCreateDraftSubscriptionMutation()
+    const [updateDraftSubscription] = useUpdateDraftSubscriptionMutation()
+    const [publishDraft] = usePublishDraftSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
-
+    const drafts = useDraftSubscriptionQuery(id)
+    const [mode, setMode] = useState<EditMode>("PUBLISHED")
+    const [draftId, setDraftId] = useState<number | null>(null)
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
     const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
     const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
     const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
+    const draftData = drafts.data?.result?.at?.(0)
 
-    console.log("mapper", mapperMetadata.data)
+    useEffect(() => {
+        if (draftData) {
+            setDraftId(draftData.id)
+        }
+    }, [draftData]);
+
     useEffect(() => {
         if (id) {
             refreshSubscription((id));
@@ -77,9 +94,35 @@ const Component = () => {
         }
     }
     const onClickUpdateSubscription = async () => {
-        await updateSubscription(updateSubscriptionData);
+        await updateSubscription({...updateSubscriptionData, id});
         await getTrails();
-
+    }
+    const onCreateDraft = async () => {
+        if (draftId) {
+            return
+        }
+        const res = await createDraftSubscription({subscriptionId: id})
+        if ('data' in res) {
+            setDraftId(res.data.id)
+            setOpenModal("NONE")
+        }
+    }
+    const onClickSaveAsDraft = async () => {
+        if (!draftId) {
+            setOpenModal("CREATE_DRAFT")
+            return
+        }
+        await updateDraftSubscription({...updateSubscriptionData, id: draftId});
+        await getTrails();
+    }
+    const onPublishDraft = async () => {
+        if (!draftId) {
+            setOpenModal("CREATE_DRAFT")
+            return
+        }
+        await updateDraftSubscription(updateSubscriptionData);
+        await getTrails();
+        await publishDraft({id: draftId})
     }
     const deleteSubscription = async () => {
         let res = await apiClient.deleteSubscription(id!);
@@ -100,10 +143,34 @@ const Component = () => {
         pauseSubscription(updateSubscriptionData.id)
     }, [updateSubscriptionData?.id, updateSubscriptionData?.pausedOn])
 
+    const onChangeMode = async (mode: EditMode) => {
+        setMode(mode)
+        if (mode === "DRAFT") {
+
+            if (!draftId)
+                setOpenModal("CREATE_DRAFT")
+
+            if (!draftData)
+                return
+            setUpdateSubscriptionData(i => ({...i, ...draftData}))
+        }
+        if (mode === "PUBLISHED") {
+            await refreshSubscription(id)
+        }
+    }
+    
+    console.log("updateSubscriptionData", updateSubscriptionData)
+    
     if (!updateSubscriptionData) return <></>
 
     return (
         <div className="flex flex-col w-full  ">
+            {
+                openModal === "CREATE_DRAFT" &&
+                <Dialog title={"Are you sure that you want to create a draft version for this subscription"}
+                        onConfirm={onCreateDraft} onCancel={() => setOpenModal("NONE")}/>
+            }
+
             {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
@@ -128,7 +195,19 @@ const Component = () => {
                     </div>
 
                 </div>}
-            <div className={"shadow-lg bg-white rounded-lg mb-6 border px-2 py-2  mt-3 pt-3 px-3"}>
+
+            <div className={"px-1 flex text-white cursor-pointer"}>
+                <div onClick={() => onChangeMode("PUBLISHED")}
+                     className={"px-2  text-center rounded-l" + " " + (mode == "PUBLISHED" ? " bg-primary-600 " : " font-thin bg-gray-600")}>
+                    Published version
+                </div>
+                <div
+                    onClick={() => onChangeMode("DRAFT")}
+                    className={"  px-2  text-center rounded-r min-w-[100px]" + " " + (mode == "DRAFT" ? " bg-primary-600 " : "font-thin bg-gray-600")}>
+                    Draft
+                </div>
+            </div>
+            <div className={"shadow-lg bg-white rounded-lg mb-6 border  py-2  mt-3 pt-3 px-3"}>
 
 
                 <div
@@ -136,6 +215,7 @@ const Component = () => {
                     <div className=" ">
                         <FormField title="Name" className="grow">
                             <TextEditor value={updateSubscriptionData?.name}
+                                        disabled={mode == "DRAFT"}
                                         onChange={(e) => onChangeSubscriptionData("name", e)}
                             />
                         </FormField>
@@ -270,6 +350,7 @@ const Component = () => {
 
 
                     </div>}
+
                 {updateSubscriptionData?.type == "4" &&
                     <div
                         className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
@@ -292,7 +373,6 @@ const Component = () => {
                 <div className={" flex flex-row gap-3"}>
                     <div
                         className=" bg-white border rounded-lg shadow-lg px-2 py-2 w-1/2">
-
                         <AdapterEditor
                             modifiedOn={mapperMetadata.data?.timestamp}
                             title={"Mapper"}
@@ -305,10 +385,7 @@ const Component = () => {
                             onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
                             props={updateSubscriptionData?.mapperProperties}
                         />
-
-
                     </div>
-
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
 
@@ -379,12 +456,32 @@ const Component = () => {
                     >
                         Cancel
                     </Button>
-                    <Authorize roles={["Admin", "Member"]}>
-                        <Button
-                            onClick={onClickUpdateSubscription}>
-                            Save
-                        </Button>
-                    </Authorize>
+                    {
+                        mode === "DRAFT" && <Authorize roles={["Admin", "Member"]}>
+                            <Button
+                                onClick={onClickSaveAsDraft}>
+                                Save as draft
+                            </Button>
+                        </Authorize>
+                    }
+                    {
+                        mode === "DRAFT" && <Authorize roles={["Admin", "Member"]}>
+                            <Button
+                                onClick={onPublishDraft}>
+                                Publish
+                            </Button>
+                        </Authorize>
+                    }
+
+                    {
+                        mode === "PUBLISHED" && <Authorize roles={["Admin"]}>
+                            <Button
+                                onClick={onClickUpdateSubscription}>
+                                Save
+                            </Button>
+                        </Authorize>
+                    }
+
                 </div>
 
             </div>

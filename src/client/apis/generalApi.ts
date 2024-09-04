@@ -1,6 +1,6 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import customFetchBase from "src/client/apis/apiMiddleware";
-import {AdapterFindQuery} from "src/types/subscriptions";
+import {Adapter, AdapterFindQuery} from "src/types/subscriptions";
 import {AccountModel, ChangePasswordModel, CreateAccountModel, EditModal} from "src/types/accounts";
 import {formulateQueryString} from "src/client";
 import {ApiPagedResponse} from "src/types/common";
@@ -12,12 +12,22 @@ export const GeneralApi = createApi({
     reducerPath: "GeneralApi",
     tagTypes: ["account", "adapters"],
     endpoints: (builder) => ({
-        adaptersLookup: builder.query<Record<string, string>, AdapterFindQuery>({
+        adaptersLookup: builder.query<Adapter[], AdapterFindQuery>({
             providesTags: ['adapters'],
-            keepUnusedDataFor: 1,
-            query: () => ({
-                url: 'Adapters',
+            //keepUnusedDataFor: 1,
+            query: params => ({
+                url: 'Adapters/',
                 method: "GET",
+                params
+            })
+        }),
+        versionedAdapters: builder.query<Adapter[], AdapterFindQuery>({
+            providesTags: ['adapters'],
+            //keepUnusedDataFor: 1,
+            query: params => ({
+                url: 'Adapters/Versioned',
+                method: "GET",
+                params
             })
         }),
         adapterMetadata: builder.query<{ timestamp?: string }, string>({
@@ -108,6 +118,7 @@ export const GeneralApi = createApi({
 
 
 export const {
+    useVersionedAdaptersQuery,
     useAdapterMetadataQuery,
     useAppConfigQuery,
     useChartsDataPointsQuery,

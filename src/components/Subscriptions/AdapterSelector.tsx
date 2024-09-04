@@ -1,5 +1,6 @@
-import {useAdapterFinder} from "../../hooks/queryHooks";
 import {ChoiceEditor} from "../common/forms/ChoiceEditor";
+import {useAdaptersLookupQuery} from "src/client/apis/generalApi";
+import {useMemo} from "react";
 
 
 interface Props {
@@ -11,15 +12,26 @@ interface Props {
 
 const AdapterSelector: React.FC<Props> = ({value, onChange, type}) => {
 
-    const [queryState, newQuery] = useAdapterFinder({prefix: type});
+    const queryState = useAdaptersLookupQuery({prefix: type});
 
+    console.log(queryState.data)
+    const options = useMemo(() => {
+        if (!queryState.data)
+            return []
+        return Object.keys(queryState.data).map((k) => {
+            return {
+                key: k,
+                title: k
+            }
+        })
+    }, [queryState.data])
     return (
         <ChoiceEditor
             placeholder="Select Adapter"
             value={value}
             onChange={onChange}
-            options={queryState.response && queryState.response !== null ? queryState.response : []}
-            optionValue={i => i.id}
+            options={options}
+            optionValue={i => i.key}
             optionTitle={i => i.title}/>
     );
 }

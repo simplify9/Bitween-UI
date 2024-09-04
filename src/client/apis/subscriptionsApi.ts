@@ -34,6 +34,37 @@ export const SubscriptionApi = createApi({
                 method: "GET",
             })
         }),
+        draftSubscription: builder.query<{ result: ISubscription[] }, number>({
+            providesTags: ['subscription'],
+            query: id => ({
+                url: `SubscriptionDraft/${id}/BySubscription`,
+                method: "GET",
+            })
+        }),
+        createDraftSubscription: builder.mutation<{ id: number }, { subscriptionId: number }>({
+            invalidatesTags: ['subscription'],
+            query: body => ({
+                url: `SubscriptionDraft/`,
+                method: "POST",
+                body: body
+            })
+        }),
+        publishDraftSubscription: builder.mutation<{ id: number }, { id: number }>({
+            invalidatesTags: ['subscription'],
+            query: id => ({
+                url: `SubscriptionDraft/${id.id}/publish`,
+                method: "POST",
+                body: {}
+            })
+        }),
+        updateDraftSubscription: builder.mutation<{}, ISubscription>({
+            invalidatesTags: ['subscription'],
+            query: body => ({
+                url: `SubscriptionDraft/${body.id}/`,
+                method: "POST",
+                body: body
+            })
+        }),
         createSubscription: builder.mutation<number, ICreateSubscription>({
             invalidatesTags: ['subscription'],
             query: body => ({
@@ -127,6 +158,10 @@ export const SubscriptionApi = createApi({
 
 
 export const {
+    usePublishDraftSubscriptionMutation,
+    useCreateDraftSubscriptionMutation,
+    useUpdateDraftSubscriptionMutation,
+    useDraftSubscriptionQuery,
     useReceiveSubscriptionMutation,
     usePauseSubscriptionMutation,
     useAggregateSubscriptionMutation,

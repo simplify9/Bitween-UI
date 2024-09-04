@@ -80,29 +80,7 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                             }
                         />
                     </FormField>
-                    <FormField title="Creation Time From">
-                        <DateEditor
-                            onChange={(t) =>
-                                onChange({
-                                    ...value,
-                                    creationDateFrom: t,
-                                })
-                            }
-                            value={value.creationDateFrom}
-                        />
-                    </FormField>
-
-                    <FormField title="Creation Time To">
-                        <DateEditor
-                            onChange={(t) =>
-                                onChange({
-                                    ...value,
-                                    creationDateTo: t,
-                                })
-                            }
-                            value={value.creationDateTo}
-                        />
-                    </FormField>
+                  
                     <FormField title="Delivery Status">
                         <ChoiceEditor
                             placeholder="Select Status"
@@ -137,6 +115,29 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                             placeholder="Correlation ID"
                             value={value.correlationId}
                             onChange={(t) => onChange({...value, correlationId: t})}
+                        />
+                    </FormField>
+                    <FormField title="Creation Time From">
+                        <DateEditor
+                            onChange={(t) =>
+                                onChange({
+                                    ...value,
+                                    creationDateFrom: t,
+                                })
+                            }
+                            value={value.creationDateFrom}
+                        />
+                    </FormField>
+
+                    <FormField title="Creation Time To">
+                        <DateEditor
+                            onChange={(t) =>
+                                onChange({
+                                    ...value,
+                                    creationDateTo: t,
+                                })
+                            }
+                            value={value.creationDateTo}
                         />
                     </FormField>
                 </div>
