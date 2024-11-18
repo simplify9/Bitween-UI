@@ -56,11 +56,11 @@ const AdapterVersionSelector: React.FC<Props> = ({value, onChange, type}) => {
         } else {
             onChange(adapter.versions.at(-1).key)
         }
-    }, [queryState.data])
+    }, [queryState.data, onChange])
 
     const onChangeVersion = useCallback((e: string) => {
         onChange(e)
-    }, [queryState.data])
+    }, [queryState.data, onChange])
     if (!Array.isArray(queryState.data))
         return null
     return (
