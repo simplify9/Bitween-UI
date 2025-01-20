@@ -4,7 +4,7 @@ import InputBox from "./InputBox";
 import {classes, noOp} from "./utils"
 
 
-type Props = Omit<JSX.IntrinsicElements['input'], "onChange"> & {
+type Props = Omit<React.JSX.IntrinsicElements['input'], "onChange"> & {
     onChange?: (value: string) => void
 
 }

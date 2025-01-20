@@ -2,7 +2,7 @@ import {classes} from "./utils";
 import React from "react";
 
 
-type Props = JSX.IntrinsicElements['div'] & {
+type Props = React.JSX.IntrinsicElements['div'] & {
     withPopOver?: boolean
 }
 

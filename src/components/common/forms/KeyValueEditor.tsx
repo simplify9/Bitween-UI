@@ -8,7 +8,7 @@ import {ChoiceEditor} from "./ChoiceEditor";
 import {MdModeEditOutline, MdOutlineRemoveCircle} from "react-icons/md";
 import {HiPlusCircle} from "react-icons/hi"
 
-type Props = Omit<JSX.IntrinsicElements['input'], "onChange"> & {
+type Props = Omit<React.JSX.IntrinsicElements['input'], "onChange"> & {
     onAdd?: (value: KeyValuePair) => void
     onRemove?: (value: KeyValuePair) => void
     values?: KeyValuePair[]

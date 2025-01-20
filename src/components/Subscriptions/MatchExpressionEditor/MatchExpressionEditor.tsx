@@ -6,7 +6,6 @@ import ExpressionBranch from "src/components/Subscriptions/MatchExpressionEditor
 import { getDescription } from "src/components/Subscriptions/MatchExpressionEditor/util";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { xcode } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import exp from "constants";
 import LeafNode from "./LeafNode";
 const writeTerm = (expression: MatchExpression, operator: "and" | "or") => {
   return expression.type === operator

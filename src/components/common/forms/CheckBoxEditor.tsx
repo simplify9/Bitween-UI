@@ -1,8 +1,8 @@
-import React from "react";
+import React, { JSX } from "react";
 import {noOp} from "./utils"
 
 
-type Props = Omit<JSX.IntrinsicElements['input'], "onChange"> & {
+type Props = Omit<React.JSX.IntrinsicElements['input'], "onChange"> & {
     onChange?: (value: boolean) => void
     checked?: boolean
     label?: string

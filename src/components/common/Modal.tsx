@@ -3,7 +3,7 @@ import {classes} from "./forms/utils";
 import React from "react";
 
 
-type Props = JSX.IntrinsicElements['div'] & {
+type Props = React.JSX.IntrinsicElements['div'] & {
     onClose: () => void
     onSubmit?: () => void
     submitLabel?: string

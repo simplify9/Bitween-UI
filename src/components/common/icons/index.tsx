@@ -30,7 +30,7 @@ const icons = {
     </svg>
 }
 
-type Props = JSX.IntrinsicElements['input'] & {
+type Props = React.JSX.IntrinsicElements['input'] & {
     shape: keyof typeof icons
 }
 

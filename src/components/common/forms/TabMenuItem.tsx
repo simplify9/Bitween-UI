@@ -1,7 +1,7 @@
 import {classes} from "./utils"
 
 
-type Props = JSX.IntrinsicElements['div'] & {
+type Props = React.JSX.IntrinsicElements['div'] & {
     selected?: boolean
 }
 

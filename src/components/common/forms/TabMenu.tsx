@@ -2,7 +2,7 @@ import {Icon} from "../icons";
 import {classes} from "./utils"
 
 
-type Props = JSX.IntrinsicElements['div'] & {}
+type Props = React.JSX.IntrinsicElements['div'] & {}
 
 const Component: React.FC<Props> = ({className = "", title, children, ...htmlProps}) => (
     <div {...htmlProps}

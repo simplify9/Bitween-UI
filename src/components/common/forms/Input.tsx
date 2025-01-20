@@ -2,7 +2,7 @@ import {classes} from "./utils"
 import React from "react";
 
 
-type Props = JSX.IntrinsicElements['input'] & {}
+type Props = React.JSX.IntrinsicElements['input'] & {}
 
 const Component: React.FC<Props> = ({className, ...htmlProps}) => {
   return (

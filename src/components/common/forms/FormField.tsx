@@ -3,9 +3,9 @@ import React from "react";
 import Button from "src/components/common/forms/Button";
 
 
-type Props = JSX.IntrinsicElements['label'] & {
+type Props = React.JSX.IntrinsicElements['label'] & {
     title: string
-    actionTitle?: string | JSX.Element
+    actionTitle?: string | React.JSX.Element
     onClickAction?: () => void
 }
 

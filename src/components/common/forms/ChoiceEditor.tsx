@@ -44,7 +44,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
                                                            optionTitle,
                                                            optionValue,
                                                            disabled,
-                                                       }: Props): JSX.Element => {
+                                                       }: Props): React.JSX.Element => {
 
     const onChangeValue = useCallback((newValue) => {
         if (Boolean(newValue)) {
