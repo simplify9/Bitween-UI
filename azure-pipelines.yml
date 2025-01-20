@@ -10,9 +10,9 @@ variables:
   - group: Chartmuseum
   - group: S3Bucket
   - name: imageName
-    value: 'infolinkui'
+    value: 'bitweenui'
   - name: version
-    value: $[format('6.1.{0}', counter('6.1', 0))]
+    value: $[format('8.0.{0}', counter('8.0', 0))]
 
 stages:
   - stage: Build
@@ -71,10 +71,10 @@ stages:
               chartName: '$(imageName)'
               chartVersion: $(version)
               releaseName: '$(imageName)'
-              overrideValues: 'ingress.enabled=true,ingress.host=infolink.sf9.io'
+              overrideValues: 'ingress.enabled=true,ingress.host=app-dev.bitween.io'
               arguments: >
                 --repo https://charts.sf9.io
-                --set ingress.tlsSecret="infolink-tls"
+                --set ingress.tlsSecret="bitween-tls"
                 --set ingress.annotations."cert-manager\.io/cluster-issuer"="letsencrypt-nginx"
 
 
