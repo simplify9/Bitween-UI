@@ -76,8 +76,8 @@ const Notifier = () => {
                 <div className={"flex flex-col gap-3 mt-2 mb-5"}>
                     {
                         data.runOnSubscriptions?.map(i => {
-                            const sub = subscriptions.data.result.find((s: ISubscription) => s.id === i.id)
-                            return <div className={" border-b "}>
+                            const sub = subscriptions.data?.result?.find((s: ISubscription) => s.id === i.id)
+                            return <div className={" border-b "} key={`notifier-sub-${sub?.id}`}>
                                 - {sub?.id} {sub?.name}
                             </div>
                         })
