@@ -1,5 +1,5 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
-import {useState} from "react";
+import {useState, useCallback, useEffect} from "react";
 import {usePartnerFinder} from "../hooks/queryHooks";
 import {PartnerList} from "./Partners/PartnerList";
 import CreateNewPartner from "./Partners/CreateNewPartner";
@@ -7,6 +7,7 @@ import {apiClient} from "../client";
 import Authorize from "src/components/common/authorize/authorize";
 import Button from "src/components/common/forms/Button";
 import {PartnersFinderPanel} from "src/components/Subscriptions/PartnersFinder";
+import {useUrlParams} from "src/hooks/useUrlParams";
 
 
 interface Props {
@@ -34,19 +35,37 @@ export default () => {
 
     const [queryState, newQuery] = useQuery(defaultQuery);
 
-    const [findSpecs, setFindSpecs] = useState<PartnerSpecs>({
-        nameContains: queryState.lastSent.nameContains ?? "",
+    // Use URL params hook to sync filters with URL
+    const [findSpecs, updateUrlParams] = useUrlParams<PartnerSpecs>({
+        nameContains: '',
     });
 
-    const handleFindRequested = () => {
+    // Sync URL params with query state on component mount and when findSpecs change
+    useEffect(() => {
+        if (findSpecs.nameContains !== queryState.lastSent.nameContains) {
+            newQuery({
+                ...defaultQuery,
+                ...queryState.lastSent,
+                nameContains: findSpecs.nameContains,
+                offset: 0,
+            });
+        }
+    }, [findSpecs.nameContains]);
+
+    const handleFindRequested = useCallback(() => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
             offset: 0,
         });
-    }
-    const handleViewOptionsChange = (viewOptions: DataListViewSettings) => {
+    }, [findSpecs.nameContains, queryState.lastSent]);
+
+    const onChangeFindSpecs = useCallback((specs: PartnerSpecs) => {
+        updateUrlParams(specs);
+    }, [updateUrlParams]);
+
+    const handleViewOptionsChange = useCallback((viewOptions: DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
@@ -55,7 +74,8 @@ export default () => {
             orderBy: viewOptions.orderBy
 
         });
-    }
+    }, [queryState.lastSent]);
+
     const createPartner = async (name: string) => {
         let res = await apiClient.createPartner(name);
         if (res.succeeded) {
@@ -70,7 +90,7 @@ export default () => {
 
 
                 <div className="flex flex-col md:flex-row justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
-                    <PartnersFinderPanel value={findSpecs} onChange={setFindSpecs}
+                    <PartnersFinderPanel value={findSpecs} onChange={onChangeFindSpecs}
                                          onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Member"]}>
@@ -108,6 +128,3 @@ export default () => {
         </>
     )
 }
-
-
-

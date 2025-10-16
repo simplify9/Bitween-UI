@@ -19,6 +19,26 @@ import {
     useUpdateSubscriptionMutation,
 } from "src/client/apis/subscriptionsApi";
 import {BsSearch} from "react-icons/bs";
+import {useUrlParams} from "src/hooks/useUrlParams";
+
+const defaultFindSpecs: SubscriptionFindQuery = {
+    handlerId: undefined,
+    id: undefined,
+    isRunning: undefined,
+    mapperId: undefined,
+    partnerId: undefined,
+    receiverId: undefined,
+    type: undefined,
+    validatorId: undefined,
+    nameContains: "",
+    documentId: null,
+    rawsubscriptionproperties: "",
+    rawfiltersproperties: "",
+    categoryId: null,
+    limit: 20,
+    offset: 0,
+    inactive: null,
+};
 
 const Component = () => {
     const nav = useNavigate();
@@ -33,24 +53,10 @@ const Component = () => {
         null
     );
 
-    const [findSpecs, setFindSpecs] = useState<SubscriptionFindQuery>({
-        handlerId: undefined,
-        id: undefined,
-        isRunning: undefined,
-        mapperId: undefined,
-        partnerId: undefined,
-        receiverId: undefined,
-        type: undefined,
-        validatorId: undefined,
-        nameContains: "",
-        documentId: null,
-        rawsubscriptionproperties: "",
-        rawfiltersproperties: "",
-        categoryId: null,
-        limit: 20,
-        offset: 0,
-        inactive: null,
-    });
+    // Use URL params hook to sync filters with URL
+    const [findSpecs, updateUrlParams, clearUrlParams] = useUrlParams<SubscriptionFindQuery>(
+        defaultFindSpecs
+    );
 
     useEffect(() => {
         fetchData(findSpecs);
@@ -64,11 +70,24 @@ const Component = () => {
                 limit: viewOptions.limit,
                 orderBy: viewOptions.orderBy,
             };
-            setFindSpecs(newSpecs);
+            updateUrlParams(newSpecs);
             fetchData(newSpecs);
         },
-        [findSpecs]
+        [findSpecs, updateUrlParams]
     );
+
+    const onChangeFindSpecs = useCallback((spec: SubscriptionFindQuery) => {
+        const newSpecs = {
+            ...spec,
+            limit: defaultFindSpecs.limit,
+            offset: defaultFindSpecs.offset
+        };
+        updateUrlParams(newSpecs);
+    }, [updateUrlParams]);
+
+    const onFindRequested = useCallback(() => {
+        fetchData(findSpecs);
+    }, [findSpecs, fetchData]);
 
     const onClickCreateSubscription = useCallback(
         async (subscription: ICreateSubscription) => {
@@ -97,10 +116,12 @@ const Component = () => {
             }
         }
     };
+    
     const handelDuplicate = (data: ISubscription) => {
         setDataToDuplicate(data);
         setOpenModal("DUPLICATE");
     };
+
     return (
         <>
             <div className="flex flex-col w-full  ">
@@ -108,8 +129,8 @@ const Component = () => {
                     <SubscriptionFinderPanel
                         searchAdapterData
                         value={findSpecs}
-                        onChange={setFindSpecs}
-                        onFindRequested={() => fetchData(findSpecs)}
+                        onChange={onChangeFindSpecs}
+                        onFindRequested={onFindRequested}
                     />
                     <div className={"flex flex-row justify-end"}>
                         <div className={"w-[100px]"}>
@@ -128,8 +149,9 @@ const Component = () => {
                             <Authorize roles={["Admin", "Member"]}>
                                 <BsSearch
                                     onClick={() => {
-                                        fetchData({...findSpecs, offset: 0});
-                                        setFindSpecs({...findSpecs, offset: 0});
+                                        const newSpecs = {...findSpecs, offset: 0};
+                                        updateUrlParams(newSpecs);
+                                        fetchData(newSpecs);
                                     }}
                                     size={33}
                                     className={" mb-2 text-primary-600"}

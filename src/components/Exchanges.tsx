@@ -7,6 +7,7 @@ import CreateExchange from "src/components/exchanges/CreateExchange";
 import {useLazyXChangesQuery} from "src/client/apis/xchangeApi";
 import {ExchangeFindQuery} from "src/types/xchange";
 import ENV from "src/env";
+import {useUrlParams} from "src/hooks/useUrlParams";
 
 
 const defaultQuery: ExchangeFindQuery = {
@@ -27,7 +28,13 @@ const Component: React.FC = () => {
 
     const [selectedRowsIds, setSelectedRowsIds] = useState<Array<string>>([]);
     const [openModal, setOpenModal] = useState<"CREATE_XCHANGE" | "BULK_RETRY" | "NONE">("NONE");
-    const [findSpecs, setFindSpecs] = useState<ExchangeFindQuery>(defaultQuery);
+    
+    // Use URL params hook to sync filters with URL, excluding fetchInterval from URL
+    const [findSpecs, updateUrlParams, clearUrlParams] = useUrlParams<ExchangeFindQuery>(
+        defaultQuery, 
+        ['fetchInterval']
+    );
+    
     const [fetch, data] = useLazyXChangesQuery({pollingInterval: findSpecs.fetchInterval, refetchOnFocus: true})
 
     useEffect(() => {
@@ -40,24 +47,26 @@ const Component: React.FC = () => {
     }, [findSpecs])
 
     const onClear = useCallback(() => {
-        setFindSpecs(defaultQuery)
+        clearUrlParams();
         fetch(defaultQuery)
-    }, [defaultQuery])
+    }, [clearUrlParams])
 
     const onChangeFindSpecs = useCallback((spec: ExchangeFindQuery) => {
-        setFindSpecs((s) => ({
+        const newSpecs = {
             ...spec,
             limit: defaultQuery.limit,
             offset: defaultQuery.offset
-        }));
-    }, [])
+        };
+        updateUrlParams(newSpecs);
+    }, [updateUrlParams])
 
     const onChangePaging = useCallback((spec: DataListViewSettings) => {
-        setFindSpecs((s) => ({
-            ...s,
+        const newSpecs = {
+            ...findSpecs,
             ...spec,
-        }));
-    }, [])
+        };
+        updateUrlParams(newSpecs);
+    }, [findSpecs, updateUrlParams])
 
 
     return (
