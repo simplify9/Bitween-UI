@@ -14,7 +14,6 @@ const Notifiers: React.FC = () => {
     const data = useNotifiersQuery(searchState)
 
     return <div>
-        <>
             {
                 openModal === "CREATE" && <CreateNotifierModal onClose={() => setOpenModal("NONE")}/>
             }
@@ -37,7 +36,7 @@ const Notifiers: React.FC = () => {
 
                 {data.data
                     &&
-                    <div className={"shadow-lg  rounded-xl overflow-hidden mx-2 pt-5"}>
+                    <div className={"shadow-lg  rounded-xl overflow-x-scroll xl:overflow-x-hidden mx-2 pt-5 md:max-w-[1000px]"}>
                         <NotifiersList data={data.data.result}/>
                         <DataListViewSettingsEditor
                             total={data.data.totalCount}
@@ -50,9 +49,6 @@ const Notifiers: React.FC = () => {
                 }
 
             </div>
-
-
-        </>
     </div>
 }
 
