@@ -61,7 +61,7 @@ export default () => {
         <>
             <div className="flex flex-col w-full md:max-w-[1000px]">
 
-                <div className="flex justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
+                <div className="flex flex-col md:flex-row justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
                     <PartnersFinderPanel value={findSpecs} onChange={setFindSpecs}
                                              onFindRequested={handleFindRequested}/>
                     <div>
@@ -77,7 +77,7 @@ export default () => {
                 </div>
 
                 {queryState.response !== null
-                    ? <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
+                    ? <div className={"shadow-lg  rounded-xl overflow-scroll xl:overflow-hidden  "}>
 
                         <DocumentList data={queryState.response.data}/>
                         <DataListViewSettingsEditor

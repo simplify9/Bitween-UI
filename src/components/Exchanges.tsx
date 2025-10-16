@@ -86,7 +86,7 @@ const Component: React.FC = () => {
                 onFindRequested={handleFindRequested}
             />
             {data.data &&
-                <div className={"shadow-lg  rounded-xl overflow-hidden  "}>
+                <div className={"shadow-lg  rounded-xl overflow-scroll xl:overflow-hidden  "}>
                     <ExchangeList
                         selectedRowsIds={selectedRowsIds}
                         setSelectedRowsIds={setSelectedRowsIds}

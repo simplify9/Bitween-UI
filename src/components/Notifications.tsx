@@ -12,7 +12,7 @@ const Notifications: React.FC = () => {
 
         {data.data
             &&
-            <div className={"shadow-lg  rounded-xl overflow-hidden mx-2 pt-5"}>
+            <div className={"shadow-lg  rounded-xl overflow-scroll md:overflow-hidden mx-2 pt-5"}>
                 <NotificationList data={data.data.result}/>
                 <DataListViewSettingsEditor
                     total={data.data.totalCount}
