@@ -26,17 +26,17 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
 
     return (
         <>
-            <div className="flex  px-4  w-full">
-                <div className="grid grid-cols-5 gap-x-5 gap-y-2 w-full">
+            <div className="flex  md:px-4  w-full">
+                <div className="grid md:grid-cols-5 md:gap-x-5 gap-y-2 w-full">
                     {
-                        searchAdapterData && <FormField title="Name" className="grow  mr-2">
+                        searchAdapterData && <FormField title="Name" className="grow  md:mr-2">
                             <TextEditor placeholder="Name" value={value.nameContains}
                                         onChange={(t) => onChange({...value, nameContains: t})}
                             />
                         </FormField>
                     }
                     {
-                        searchAdapterData && <FormField title="Id" className="grow  mr-2">
+                        searchAdapterData && <FormField title="Id" className="grow  md:mr-2">
                             <TextEditor placeholder="Id" value={value.id}
                                         onChange={(t) => onChange({...value, id: Number(t)})}
                             />
@@ -44,7 +44,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     }
                     {
                         searchAdapterData &&
-                        <FormField title="Adapter Properties" className="grow mr-2">
+                        <FormField title="Adapter Properties" className="grow md:mr-2">
                             <TextEditor placeholder="Adapter data" value={value.rawsubscriptionproperties}
                                         onChange={(t) => onChange({...value, rawsubscriptionproperties: t})}
                             />
@@ -52,7 +52,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     }
                     {
                         searchAdapterData &&
-                        <FormField title="Filter Properties" className="grow mr-2">
+                        <FormField title="Filter Properties" className="grow md:mr-2">
                             <TextEditor placeholder="Filter data" value={value.rawfiltersproperties}
                                         onChange={(t) => onChange({...value, rawfiltersproperties: t})}
                             />

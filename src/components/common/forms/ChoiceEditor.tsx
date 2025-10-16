@@ -31,7 +31,7 @@ type Props =
         optionValue: (option: any) => string
         optionTitle: (option: any) => string
         menuPlacement?: "top" | "bottom"
-
+        isClearable?: boolean
     }
 
 
@@ -40,6 +40,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
                                                            onChange = noOp,
                                                            value = "",
                                                            options,
+                                                           isClearable,
                                                            menuPlacement = "bottom",
                                                            optionTitle,
                                                            optionValue,
@@ -78,7 +79,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
             getOptionLabel={optionTitle}
             getOptionValue={optionValue}
             autoFocus={true}
-            isClearable={true}
+            isClearable={isClearable ?? true}
             isDisabled={disabled}
             options={options ?? []}
             value={selectedValue}

@@ -123,15 +123,15 @@ const Component: React.FC<Props> = ({
                 <thead className="border-y bg-gray-50">
                 <tr>
                     <th scope="col"
-                        className="text-md font-semibold  text-slate-800 px-6 py-2 text-left">
+                        className="text-md font-semibold  text-slate-800 md:px-6 py-2 text-left">
                         {title}
                     </th>
                     <th scope="col"
-                        className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        className="text-sm font-medium text-gray-900 md:px-6 py-2 text-left">
 
                     </th>
                     <th scope="col"
-                        className="text-sm font-medium text-gray-900 px-6 py-2 text-right">
+                        className="text-sm font-medium text-gray-900 md:px-6 py-2 text-right">
                         {
                             keyOptions?.length != 0 &&
                             <div onClick={() => setMode("ADD")}
@@ -143,15 +143,15 @@ const Component: React.FC<Props> = ({
                 </tr>
                 <tr>
                     <th scope="col"
-                        className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        className="text-sm font-medium text-gray-900 md:px-6 py-2 text-left">
                         {keyLabel}
                     </th>
                     <th scope="col"
-                        className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        className="text-sm font-medium text-gray-900 md:px-6 py-2 text-left">
                         {valueLabel}
                     </th>
                     <th scope="col"
-                        className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        className="text-sm font-medium text-gray-900 md:px-6 py-2 text-left">
 
                     </th>
                 </tr>
@@ -162,15 +162,15 @@ const Component: React.FC<Props> = ({
                         values?.map((i) => (
                             <tr key={`${i.key}_${i.value}`} className="bg-white border-b">
                                 <td
-                                    className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                                    className="text-sm text-gray-900 font-light md:px-6 py-4 whitespace-nowrap">
                                     {i.key}
                                 </td>
                                 <td
-                                    className="text-sm w-100 text-gray-900 font-light px-4 py-4 break-all">
+                                    className="text-sm w-100 text-gray-900 font-light md:px-4 py-4 break-all">
                                     {i.value}
                                 </td>
                                 <td
-                                    className="text-sm text-gray-900 flex items-center font-light px-6 py-4 ">
+                                    className="text-sm text-gray-900 flex items-center font-light md:px-6 py-4 ">
                                     {
                                         onEdit && <Button variant={"none"} onClick={() => {
                                             onPressEdit(i)
@@ -190,7 +190,7 @@ const Component: React.FC<Props> = ({
 
                             </tr>
                         )) : <tr>{((!hideEmptyLabel) &&
-                            <td colSpan={3} className={"px-4 py-3"}>No {title}</td>)}
+                            <td colSpan={3} className={"md:px-4 py-3"}>No {title}</td>)}
                         </tr>
                 }
                 </tbody>

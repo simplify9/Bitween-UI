@@ -41,10 +41,10 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
 
     return (
         <div
-            className={"shadow px-2 mb-2  rounded-lg bg-white"}
+            className={"shadow md:px-2 mb-2  rounded-lg bg-white"}
             style={{zIndex: 1000}}
         >
-            <div className="flex flex-row justify-between items-start w-100 pb-4 pt-3 z-50 gap-x-5">
+            <div className="flex flex-col md:flex-row justify-between items-start md:w-100 pb-4 pt-3 z-50 gap-x-5">
                 <div
                     className={
                         "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3"
@@ -141,7 +141,7 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                         />
                     </FormField>
                 </div>
-                <div className={"w-[300px] items-end justify-end flex flex-col"}>
+                <div className={"md:w-[300px] items-end justify-end flex flex-col"}>
                     <div className={" flex w-full items-end justify-end mx-1 "}>
                         <FormField title="Refresh every" className={"w-full"}>
                             <ChoiceEditor

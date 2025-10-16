@@ -21,15 +21,15 @@ export const PartnersFinderPanel: React.FC<Props> = ({
 
     return (
         <>
-            <div className="flex  px-4  w-full">
-                <div className="grid grid-cols-2 gap-x-5  justify-between gap-y-2 w-full">
-                    <FormField title="Name" className="grow  mr-2">
+            <div className="flex  md:px-4  w-full">
+                <div className="grid md:grid-cols-2 md:gap-x-5  justify-between gap-y-2 w-full">
+                    <FormField title="Name" className="grow  md:mr-2">
                         <TextEditor placeholder="Name" value={value.nameContains}
                                     onChange={(t) => onChange({...value, nameContains: t})}
                         />
                     </FormField>
                     <Button
-                        className={'mx-5'}
+                        className={'md:mx-5'}
                         variant={"none"}
                         onClick={onFindRequested}
                     >

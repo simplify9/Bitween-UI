@@ -64,10 +64,10 @@ const Component = () => {
 
     return (
         <div className="flex flex-col w-full gap-10 ">
-            <div className={"w-1/3 bg-white flex flex-col h-fit p-2 rounded-lg shadow-lg"}>
+            <div className={"md:w-1/3 bg-white flex flex-col h-fit p-2 rounded-lg shadow-lg"}>
 
 
-                <div className="  flex flex-row justify-between items-end">
+                <div className="  flex flex-col md:flex-row justify-between items-end">
                     <FormField title="Name" className="w-3/4">
                         <TextEditor value={updatePartnerData?.name} onChange={(t) => setUpdatePartnerData({
                             ...updatePartnerData,
@@ -113,7 +113,7 @@ const Component = () => {
             </div>
             {
                 (partner?.subscriptions && partner.subscriptions?.length > 0) &&
-                <div className="  w-1/3   flex  justify-between">
+                <div className="  md:w-1/3   flex  justify-between">
 
 
                     <div className="w-full shadow-lg  bg-white  rounded-xl overflow-hidden  pt-2">

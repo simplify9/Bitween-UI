@@ -62,9 +62,10 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             }
         })
     }
+    const limitOptions = [10,20, 100, 200, 500].map(n => ({ key: n.toString(), value: n }));
 
     return (
-        <div className="w-full flex py-1 my-3 px-3 items-center">
+        <div className="w-full flex py-1 my-3 px-3 items-center overflow-scroll">
             <div className="text-sm py-1">Total&nbsp;
                 <strong>{total}</strong>
                 {" "}records
@@ -107,6 +108,18 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
                     />
                 </div>
             }
+            <div className={"mx-3"}>
+                <ChoiceEditor
+                    value={limit}
+                    onChange={newLimit => onChange({ limit: newLimit, offset: 0, orderBy })}
+                    menuPlacement={"top"}
+                    placeholder={"Limit"}
+                    isClearable={false}
+                    options={limitOptions}
+                    optionValue={option => option.value}
+                    optionTitle={option => option.key}
+                />
+            </div>
 
 
         </div>

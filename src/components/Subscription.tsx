@@ -53,20 +53,12 @@ const Component = () => {
     const [updateDraftSubscription] = useUpdateDraftSubscriptionMutation()
     const [publishDraft] = usePublishDraftSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
-    const drafts = useDraftSubscriptionQuery(id)
     const [mode, setMode] = useState<EditMode>("PUBLISHED")
-    const [draftId, setDraftId] = useState<number | null>(null)
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
     const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
     const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
     const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
-    const draftData = drafts.data?.result?.at?.(0)
-
-    useEffect(() => {
-        if (draftData) {
-            setDraftId(draftData.id)
-        }
-    }, [draftData]);
+    
 
     useEffect(() => {
         if (id) {
@@ -98,31 +90,20 @@ const Component = () => {
         await getTrails();
     }
     const onCreateDraft = async () => {
-        if (draftId) {
-            return
-        }
+        
         const res = await createDraftSubscription({subscriptionId: id})
         if ('data' in res) {
-            setDraftId(res.data.id)
             setOpenModal("NONE")
         }
     }
     const onClickSaveAsDraft = async () => {
-        if (!draftId) {
-            setOpenModal("CREATE_DRAFT")
-            return
-        }
-        await updateDraftSubscription({...updateSubscriptionData, id: draftId});
+        //await updateDraftSubscription({...updateSubscriptionData, id: draftId});
         await getTrails();
     }
     const onPublishDraft = async () => {
-        if (!draftId) {
-            setOpenModal("CREATE_DRAFT")
-            return
-        }
         await updateDraftSubscription(updateSubscriptionData);
         await getTrails();
-        await publishDraft({id: draftId})
+        //await publishDraft({id: draftId})
     }
     const deleteSubscription = async () => {
         let res = await apiClient.deleteSubscription(id!);
@@ -145,15 +126,6 @@ const Component = () => {
 
     const onChangeMode = async (mode: EditMode) => {
         setMode(mode)
-        if (mode === "DRAFT") {
-
-            if (!draftId)
-                setOpenModal("CREATE_DRAFT")
-
-            if (!draftData)
-                return
-            setUpdateSubscriptionData(i => ({...i, ...draftData}))
-        }
         if (mode === "PUBLISHED") {
             await refreshSubscription(id)
         }
@@ -301,7 +273,7 @@ const Component = () => {
                 }
                 {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1") &&
                     <div
-                        className="bg-white  border shadow-lg rounded-lg px-2 py-2 w-1/2">
+                        className="bg-white  border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <FormField title="Filters" className="grow">
                             <SubscriptionFilter
                                 documentId={updateSubscriptionData.documentId}
@@ -311,7 +283,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "8" &&
                     <div
-                        className="bg-white border shadow-lg px-2 py-2 rounded-lg w-1/2">
+                        className="bg-white border shadow-lg px-2 py-2 rounded-lg md:w-1/2">
 
                         <FormField title="Aggregation">
                             <SubscriptionSelector
@@ -334,7 +306,7 @@ const Component = () => {
                     </div>}
                 {updateSubscriptionData?.type == "2" &&
                     <div
-                        className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
+                        className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
                             modifiedOn={validatorMetadata.data?.timestamp}
                             title={"Validator"}
@@ -353,7 +325,7 @@ const Component = () => {
 
                 {updateSubscriptionData?.type == "4" &&
                     <div
-                        className=" bg-white w-1/2 border shadow-lg rounded-lg px-2 py-2">
+                        className=" bg-white md:w-1/2 border shadow-lg rounded-lg px-2 py-2">
                         <AdapterEditor title={"Receiver"} type={"receivers"}
                                        modifiedOn={receiverMetadata.data?.timestamp}
                                        value={updateSubscriptionData?.receiverId}
@@ -370,9 +342,9 @@ const Component = () => {
 
                     </div>}
 
-                <div className={" flex flex-row gap-3"}>
+                <div className={" flex flex-col md:flex-row gap-3"}>
                     <div
-                        className=" bg-white border rounded-lg shadow-lg px-2 py-2 w-1/2">
+                        className=" bg-white border rounded-lg shadow-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
                             modifiedOn={mapperMetadata.data?.timestamp}
                             title={"Mapper"}
@@ -387,7 +359,7 @@ const Component = () => {
                         />
                     </div>
                     <div
-                        className="bg-white border shadow-lg rounded-lg px-2 py-2 w-1/2">
+                        className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
 
                         <AdapterEditor title={"Handler"} type={"handlers"}
                                        modifiedOn={handlerMetadata.data?.timestamp}
@@ -431,7 +403,7 @@ const Component = () => {
 
 
                 </div>
-                <div className={"flex flex-row"}>
+                <div className={"flex flex-col md:flex-row"}>
                     {
                         updateSubscriptionData.type == '8' && <Authorize roles={["Admin", "Member"]}>
 

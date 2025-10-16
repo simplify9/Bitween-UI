@@ -142,7 +142,7 @@ const Component = () => {
                 {data.data ? (
                     <div
                         className={
-                            "shadow-lg  rounded-xl overflow-hidden  md:max-w-[1000px]"
+                            "shadow-lg  rounded-xl overflow-x-scroll xl:overflow-x-hidden  md:max-w-[1000px]"
                         }
                     >
                         <SubscriptionList
