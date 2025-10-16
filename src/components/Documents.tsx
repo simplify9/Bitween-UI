@@ -1,5 +1,5 @@
 import {DataListViewSettings, DataListViewSettingsEditor} from "./common/DataListViewSettingsEditor";
-import {useState} from "react";
+import {useState, useCallback, useEffect} from "react";
 import {useDocumentFinder} from "../hooks/queryHooks";
 import {DocumentList} from "./Documents/DocumentList";
 import {apiClient} from "../client";
@@ -9,6 +9,7 @@ import Button from "./common/forms/Button";
 import Authorize from "src/components/common/authorize/authorize";
 import {SubscriptionFinderPanel} from "src/components/Subscriptions/SubscriptionFinder";
 import {PartnersFinderPanel} from "src/components/Subscriptions/PartnersFinder";
+import {useUrlParams} from "src/hooks/useUrlParams";
 
 const defaultQuery = {
     nameContains: '',
@@ -23,31 +24,50 @@ const useQuery = useDocumentFinder;
 
 export type DocumentSpecs = {
     nameContains: string
-
 }
+
 export default () => {
     const [queryState, newQuery] = useQuery(defaultQuery);
     const [creatingOn, setCreatingOn] = useState(false);
-    const [findSpecs, setFindSpecs] = useState<DocumentSpecs>({
-        nameContains: queryState.lastSent.nameContains,
+    
+    // Use URL params hook to sync filters with URL
+    const [findSpecs, updateUrlParams, clearUrlParams] = useUrlParams<DocumentSpecs>({
+        nameContains: '',
     });
 
-    const handleFindRequested = () => {
+    // Sync URL params with query state on component mount and when findSpecs change
+    useEffect(() => {
+        if (findSpecs.nameContains !== queryState.lastSent.nameContains) {
+            newQuery({
+                ...defaultQuery,
+                ...queryState.lastSent,
+                nameContains: findSpecs.nameContains,
+                offset: 0,
+            });
+        }
+    }, [findSpecs.nameContains]);
+
+    const handleFindRequested = useCallback(() => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
             nameContains: findSpecs.nameContains,
             offset: 0,
         });
-    }
-    const handleViewOptionsChange = (viewOptions: DataListViewSettings) => {
+    }, [findSpecs.nameContains, queryState.lastSent]);
+
+    const onChangeFindSpecs = useCallback((specs: DocumentSpecs) => {
+        updateUrlParams(specs);
+    }, [updateUrlParams]);
+
+    const handleViewOptionsChange = useCallback((viewOptions: DataListViewSettings) => {
         newQuery({
             ...defaultQuery,
             ...queryState.lastSent,
             offset: viewOptions.offset,
             limit: viewOptions.limit
         });
-    }
+    }, [queryState.lastSent]);
 
     const createDocument = async (document: CreateDocument) => {
         let res = await apiClient.createDocument(document);
@@ -62,7 +82,7 @@ export default () => {
             <div className="flex flex-col w-full md:max-w-[1000px]">
 
                 <div className="flex flex-col md:flex-row justify-between w-full items-center shadow p-2 my-2  rounded-lg bg-white ">
-                    <PartnersFinderPanel value={findSpecs} onChange={setFindSpecs}
+                    <PartnersFinderPanel value={findSpecs} onChange={onChangeFindSpecs}
                                              onFindRequested={handleFindRequested}/>
                     <div>
                         <Authorize roles={["Admin", "Member"]}>
@@ -98,6 +118,3 @@ export default () => {
         </>
     )
 }
-
-
-
