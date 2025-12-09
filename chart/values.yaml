@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repo: 'simplify9'
+  repo: 'docker.io/simplify9'
 
 probes:
   enabled: false
