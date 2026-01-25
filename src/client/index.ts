@@ -182,6 +182,7 @@ interface QueryParams {
     receiverId?: string | null
     isRunning?: boolean | null
     categoryId?: number | null
+    workGroupId?: number | null
     documentId?: number | null
 }
 
@@ -204,6 +205,7 @@ export const formulateQueryString = (req: QueryParams) => {
 
     if ('isRunning' in req && req.isRunning != null) query += `&filter=isRunning:1:${req.isRunning}`;
     if ('categoryId' in req && req.categoryId) query += `&filter=categoryId:1:${req.categoryId}`;
+    if ('workGroupId' in req && req.workGroupId) query += `&filter=workGroupId:1:${req.workGroupId}`;
     if ('rawsubscriptionproperties' in req && req.rawsubscriptionproperties) query += `&filter=rawsubscriptionproperties:4:${req.rawsubscriptionproperties}`;
     if ('nameContains' in req && req.nameContains) query += `&filter=name:4:${req.nameContains}`;
     if ('status' in req && req.status && req.status != '') query += `&filter=StatusFilter:1:${req.status}`;

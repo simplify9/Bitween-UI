@@ -5,8 +5,9 @@ import PartnerSelector from "src/components/Partners/PartnerSelector";
 import {SubscriptionFindQuery, SubscriptionTypes} from "src/types/subscriptions";
 import AdapterSelector from "src/components/Subscriptions/AdapterSelector";
 import ChoiceEditor from "src/components/common/forms/ChoiceEditor";
-import {useSubscriptionCategoriesQuery} from "src/client/apis/subscriptionsApi";
+import {useSubscriptionCategoriesQuery, useWorkGroupsQuery} from "src/client/apis/subscriptionsApi";
 import DocumentSelector from "src/components/Documents/DocumentSelector";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 interface Props {
     value: SubscriptionFindQuery
@@ -22,7 +23,9 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                                                              searchAdapterData
                                                          }) => {
 
+    const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
+    const workGroups = useWorkGroupsQuery({limit: 1000, offset: 0}, {skip: !workGroupsAvailable})
 
     return (
         <>
@@ -117,11 +120,24 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData &&
                         <FormField title="Category" className="grow">
                             <ChoiceEditor
-                                value={value?.categoryId?.toString()}
-                                onChange={(val) => onChange({...value, categoryId: Number(val)})}
+                                value={value?.categoryId != null && value.categoryId !== undefined ? value.categoryId.toString() : ""}
+                                onChange={(val) => onChange({...value, categoryId: val ? Number(val) : undefined})}
                                 optionTitle={(item) => item.code}
-                                optionValue={(item) => item.id}
+                                optionValue={(item) => item.id?.toString()}
                                 options={subscriptionCategories.data?.result ?? []}/>
+                        </FormField>
+                    }
+                    {
+                        searchAdapterData && workGroupsAvailable &&
+                        <FormField title="Work Group" className="grow">
+                            <ChoiceEditor
+                                value={value?.workGroupId != null && value.workGroupId !== undefined ? value.workGroupId.toString() : ""}
+                                onChange={(val) => onChange({...value, workGroupId: val ? Number(val) : undefined})}
+                                optionTitle={(item) => item.name}
+                                optionValue={(item) => item.id?.toString()}
+                                options={Array.isArray(workGroups.data?.result) 
+                                    ? workGroups.data.result.map(wg => ({id: wg.id, name: wg.name})) 
+                                    : []}/>
                         </FormField>
                     }
                     {

@@ -30,11 +30,13 @@ import {
     useReceiveSubscriptionMutation,
     useSubscriptionCategoriesQuery,
     useUpdateDraftSubscriptionMutation,
-    useUpdateSubscriptionMutation
+    useUpdateSubscriptionMutation,
+    useWorkGroupsQuery
 } from "src/client/apis/subscriptionsApi";
 import dayjs from "dayjs";
 import {useAdapterMetadataQuery} from "src/client/apis/generalApi";
 import Dialog from "src/components/common/dialog";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 type EditMode = "PUBLISHED" | "DRAFT";
 const Component = () => {
@@ -44,7 +46,9 @@ const Component = () => {
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
+    const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
+    const workGroups = useWorkGroupsQuery({limit: 1000, offset: 0}, {skip: !workGroupsAvailable})
     const [aggregateNow] = useAggregateSubscriptionMutation()
     const [getSubscription] = useLazySubscriptionQuery()
     const [pauseSubscription] = usePauseSubscriptionMutation()
@@ -59,6 +63,7 @@ const Component = () => {
     const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
     const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
     
+
 
     useEffect(() => {
         if (id) {
@@ -202,6 +207,20 @@ const Component = () => {
                                 options={subscriptionCategories.data?.result ?? []}/>
                         </FormField>
                     </div>
+                    {workGroupsAvailable && !workGroups.isLoading && workGroups.isSuccess && (
+                        <div className=" ">
+                            <FormField title="Work Group" className="grow">
+                                <ChoiceEditor
+                                    value={updateSubscriptionData?.workGroupId?.toString()}
+                                    onChange={(e) => onChangeSubscriptionData("workGroupId", e)}
+                                    optionTitle={(item) => item?.name || ''}
+                                    optionValue={(item) => item?.id?.toString() || ''}
+                                    options={Array.isArray(workGroups.data?.result) 
+                                        ? workGroups.data.result.map(wg => ({id: wg.id, name: wg.name})) 
+                                        : []}/>
+                            </FormField>
+                        </div>
+                    )}
                     <div className=" ">
                         <FormField title="Type" className="grow">
                             <ChoiceEditor

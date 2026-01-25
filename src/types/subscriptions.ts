@@ -28,7 +28,8 @@ export type SubscriptionFindQuery = CommonFindQuery & {
     validatorId: string | null
     receiverId: string | null
     isRunning: boolean | null
-    categoryId: number | null
+    categoryId: number | null | undefined
+    workGroupId: number | null | undefined
     inactive: boolean | null
     documentId: number | null
 }
@@ -44,6 +45,7 @@ export interface ISubscription {
     categoryId?: number
     categoryCode?: string
     categoryDescription?: string
+    workGroupId?: number
     id?: number
     name?: string;
     documentId?: string;
@@ -188,3 +190,44 @@ export type SearchSubscriptionCategoryModel = {
 export type UpdateSubscriptionCategoryModel = { id: number } & CreateSubscriptionCategoryModel;
 
 export type DeleteSubscriptionCategoryModel = { id: number };
+
+// WorkGroup Types
+export type ConsumerSettings = {
+    prefetch?: number;
+    priority?: number;
+};
+
+export type WorkGroupOptions = {
+    rabbitMqOptions?: ConsumerSettings;
+};
+
+export type WorkGroupModel = {
+    id: number;
+    name: string;
+    busMessageName: string;
+    options?: WorkGroupOptions;
+    processorAckRate?: number;
+    processorIncomingRate?: number;
+    processorProcessingCount?: number;
+    processorQueueCount?: number;
+    notifierAckRate?: number;
+    notifierIncomingRate?: number;
+    notifierProcessingCount?: number;
+    notifierQueueCount?: number;
+};
+
+export type CreateWorkGroupModel = {
+    name: string;
+    busMessageName: string;
+    options?: WorkGroupOptions;
+};
+
+export type SearchWorkGroupModel = {
+    limit?: number;
+    offset?: number;
+};
+
+export type UpdateWorkGroupModel = { id: number } & CreateWorkGroupModel;
+
+export type DeleteWorkGroupModel = { id: number };
+
