@@ -110,13 +110,13 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
             }
             <div className={"mx-3"}>
                 <ChoiceEditor
-                    value={limit}
-                    onChange={newLimit => onChange({ limit: newLimit, offset: 0, orderBy })}
+                    value={limit.toString()}
+                    onChange={newLimit => onChange({ limit: parseInt(newLimit), offset: 0, orderBy })}
                     menuPlacement={"top"}
                     placeholder={"Limit"}
                     isClearable={false}
                     options={limitOptions}
-                    optionValue={option => option.value}
+                    optionValue={option => option.value.toString()}
                     optionTitle={option => option.key}
                 />
             </div>
