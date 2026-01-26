@@ -7,7 +7,12 @@ import {
     ISubscription,
     SearchSubscriptionCategoryModel,
     SubscriptionCategoryModel,
-    UpdateSubscriptionCategoryModel
+    UpdateSubscriptionCategoryModel,
+    WorkGroupModel,
+    CreateWorkGroupModel,
+    SearchWorkGroupModel,
+    UpdateWorkGroupModel,
+    DeleteWorkGroupModel
 } from "src/types/subscriptions";
 import {ApiPagedResponse} from "src/types/common";
 import {formulateQueryString} from "src/client";
@@ -15,7 +20,7 @@ import {formulateQueryString} from "src/client";
 export const SubscriptionApi = createApi({
     baseQuery: customFetchBase,
     reducerPath: "SubscriptionApi",
-    tagTypes: ["subscription", "subscriptionCategories"],
+    tagTypes: ["subscription", "subscriptionCategories", "workGroups"],
     endpoints: (builder) => ({
         subscriptions: builder.query<ApiPagedResponse<ISubscription>, {
             offset: number,
@@ -145,6 +150,56 @@ export const SubscriptionApi = createApi({
                 body
             })
         }),
+        workGroups: builder.query<ApiPagedResponse<WorkGroupModel>, SearchWorkGroupModel>({
+            providesTags: ['workGroups'],
+            query: params => ({
+                url: 'WorkGroups',
+                method: "GET",
+                params
+            }),
+            transformResponse: (response: any) => {
+                // Extract the result array from either camelCase or PascalCase
+                let resultArray = response?.result || response?.Result || [];
+                
+                // Ensure it's an array
+                if (!Array.isArray(resultArray)) {
+                    resultArray = [];
+                }
+                
+                // Sort by id descending
+                const sortedArray = [...resultArray].sort((a, b) => b.id - a.id);
+                
+                // Return properly formatted response with sorted data
+                return {
+                    result: sortedArray,
+                    totalCount: response?.totalCount || response?.TotalCount || 0
+                };
+            }
+        }),
+        createWorkGroup: builder.mutation<{ id: number }, CreateWorkGroupModel>({
+            invalidatesTags: ['workGroups'],
+            query: body => ({
+                url: 'WorkGroups',
+                method: "POST",
+                body
+            })
+        }),
+        updateWorkGroup: builder.mutation<{ id: number }, UpdateWorkGroupModel>({
+            invalidatesTags: ['workGroups'],
+            query: body => ({
+                url: `WorkGroups/${body.id}`,
+                method: "POST",
+                body
+            })
+        }),
+        deleteWorkGroup: builder.mutation<{ id: number }, DeleteWorkGroupModel>({
+            invalidatesTags: ['workGroups'],
+            query: body => ({
+                url: `WorkGroups/${body.id}/delete`,
+                method: "POST",
+                body
+            })
+        }),
         subscriptionsLookup: builder.query<Record<string, string>, void>({
             providesTags: ['subscription'],
             query: () => ({
@@ -173,6 +228,11 @@ export const {
     useUpdateSubscriptionCategoryMutation,
     useSubscriptionCategoriesQuery,
     useDeleteSubscriptionCategoryMutation,
+    useWorkGroupsQuery,
+    useCreateWorkGroupMutation,
+    useUpdateWorkGroupMutation,
+    useDeleteWorkGroupMutation,
     useSubscriptionsQuery,
     useLazySubscriptionsQuery,
 } = SubscriptionApi
+

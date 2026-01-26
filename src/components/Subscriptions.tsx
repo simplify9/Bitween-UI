@@ -20,6 +20,7 @@ import {
 } from "src/client/apis/subscriptionsApi";
 import {BsSearch} from "react-icons/bs";
 import {useUrlParams} from "src/hooks/useUrlParams";
+import {useTypedSelector} from "src/state/ReduxSotre";
 
 const defaultFindSpecs: SubscriptionFindQuery = {
     handlerId: undefined,
@@ -34,7 +35,8 @@ const defaultFindSpecs: SubscriptionFindQuery = {
     documentId: null,
     rawsubscriptionproperties: "",
     rawfiltersproperties: "",
-    categoryId: null,
+    categoryId: undefined,
+    workGroupId: undefined,
     limit: 20,
     offset: 0,
     inactive: null,
@@ -52,6 +54,9 @@ const Component = () => {
     const [dataToDuplicate, setDataToDuplicate] = useState<ISubscription | null>(
         null
     );
+
+    // Get workGroups availability from Redux store
+    const { workGroupsAvailable } = useTypedSelector(state => state.features);
 
     // Use URL params hook to sync filters with URL
     const [findSpecs, updateUrlParams, clearUrlParams] = useUrlParams<SubscriptionFindQuery>(
@@ -145,6 +150,15 @@ const Component = () => {
                                 </Button>
                             </Authorize>
                         </div>
+                        {workGroupsAvailable && (
+                            <div className={"w-[200px]"}>
+                                <Authorize roles={["Admin"]}>
+                                    <Button onClick={() => nav("manage-workgroups")}>
+                                        Manage Work Groups
+                                    </Button>
+                                </Authorize>
+                            </div>
+                        )}
                         <div className={"w-[50px] mx-3"}>
                             <Authorize roles={["Admin", "Member"]}>
                                 <BsSearch

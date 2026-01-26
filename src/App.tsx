@@ -11,7 +11,7 @@ import Subscription from "./components/Subscription";
 import Document from "./components/Document";
 import {ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Settings from "src/components/Settings";
 import Notifier from "src/components/Notifier";
 import Notifiers from "src/components/Notifiers";
@@ -22,12 +22,42 @@ import Team from "src/components/Team";
 import Footer from "src/components/common/layout/Footer";
 import LoadingIndicator from "src/components/common/LoadingIndicator";
 import ManageCategories from "src/components/ManageCategories";
+import ManageWorkGroups from "src/components/ManageWorkGroups";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
+import {useAppDispatch} from "src/state/ReduxSotre";
+import {setWorkGroupsAvailable} from "src/state/stateSlices/features";
+import {client} from "./client";
 
 function App() {
     const [isOpen, setIsOpen] = useState(false);
+    const dispatch = useAppDispatch();
 
     const {isLoggedIn} = useAuthApi();
+
+    useEffect(() => {
+        // Check if WorkGroups API is available
+        const checkWorkGroupsAvailability = async () => {
+            try {
+                await client.get('WorkGroups', {
+                    params: { limit: 1, offset: 0 }
+                });
+                // If successful (not 404), WorkGroups is available
+                dispatch(setWorkGroupsAvailable(true));
+            } catch (error: any) {
+                // If 404 or any error, WorkGroups is not available
+                if (error?.response?.status === 404) {
+                    dispatch(setWorkGroupsAvailable(false));
+                } else {
+                    // For other errors, also assume not available
+                    dispatch(setWorkGroupsAvailable(false));
+                }
+            }
+        };
+
+        if (isLoggedIn) {
+            checkWorkGroupsAvailability();
+        }
+    }, [isLoggedIn, dispatch]);
 
 
     if (!isLoggedIn) return <Login/>;
@@ -58,6 +88,7 @@ function App() {
                                     <Route path="/Xchanges" element={<Exchanges/>}/>
                                     <Route path="/subscriptions" element={<Subscriptions/>}/>
                                     <Route path="/subscriptions/manage-categories" element={<ManageCategories/>}/>
+                                    <Route path="/subscriptions/manage-workgroups" element={<ManageWorkGroups/>}/>
                                     <Route path="/documents" element={<Documents/>}/>
                                     <Route path="/partners" element={<Partners/>}/>
                                     <Route path="/partners/:id" element={<Partner/>}/>
