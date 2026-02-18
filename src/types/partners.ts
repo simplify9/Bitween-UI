@@ -7,7 +7,8 @@ export interface IPartner {
     subscriptionsCount?: number;
     keys?: number
     apiCredentials?: any[];
-    subscriptions?: any[]
+    subscriptions?: any[];
+    adapterProperties?: { [key: string]: string };
 
 }
 
@@ -18,5 +19,6 @@ export type PartnerFindQuery = CommonFindQuery & {
 
 export type UpdatePartner = {
     name?: string;
-    apiCredentials?: KeyValuePair[]
+    apiCredentials?: KeyValuePair[];
+    adapterProperties?: { [key: string]: string };
 }
