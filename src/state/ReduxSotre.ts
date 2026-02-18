@@ -5,6 +5,7 @@ import {NotifiersApi} from "src/client/apis/notifiersApi";
 import {SubscriptionApi} from "src/client/apis/subscriptionsApi";
 import {XchangeApi} from "src/client/apis/xchangeApi";
 import {GeneralApi} from "src/client/apis/generalApi";
+import {GlobalAdapterValuesSetsApi} from "src/client/apis/globalAdapterValuesSetsApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
 
@@ -15,7 +16,8 @@ const reducers = combineReducers({
     [NotifiersApi.reducerPath]: NotifiersApi.reducer,
     [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
     [XchangeApi.reducerPath]: XchangeApi.reducer,
-    [GeneralApi.reducerPath]:GeneralApi.reducer
+    [GeneralApi.reducerPath]:GeneralApi.reducer,
+    [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer
 
 });
 
@@ -27,7 +29,8 @@ export const store = configureStore({
             NotifiersApi.middleware,
             SubscriptionApi.middleware,
             XchangeApi.middleware,
-            GeneralApi.middleware
+            GeneralApi.middleware,
+            GlobalAdapterValuesSetsApi.middleware
         ])
 });
 

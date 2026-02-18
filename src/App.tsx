@@ -23,6 +23,8 @@ import Footer from "src/components/common/layout/Footer";
 import LoadingIndicator from "src/components/common/LoadingIndicator";
 import ManageCategories from "src/components/ManageCategories";
 import ManageWorkGroups from "src/components/ManageWorkGroups";
+import GlobalAdapterValuesSets from "src/components/GlobalAdapterValuesSets";
+import GlobalAdapterValuesSet from "src/components/GlobalAdapterValuesSet";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
 import {useAppDispatch} from "src/state/ReduxSotre";
 import {setWorkGroupsAvailable} from "src/state/stateSlices/features";
@@ -95,6 +97,8 @@ function App() {
                                     <Route path="/documents/:id" element={<Document/>}/>
                                     <Route path="/subscriptions/:id" element={<Subscription/>}/>
                                     <Route path="/notifiers/:id" element={<Notifier/>}/>
+                                    <Route path="/global-adapter-values-sets" element={<GlobalAdapterValuesSets/>}/>
+                                    <Route path="/global-adapter-values-sets/:id" element={<GlobalAdapterValuesSet/>}/>
                                     <Route path={"/notifications"} element={<Notifications/>}/>
                                     <Route path={"/team"} element={<Team/>}/>
                                 </Routes>

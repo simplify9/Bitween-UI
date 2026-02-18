@@ -5,7 +5,7 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
-import {MdNotificationAdd} from "react-icons/md";
+import {MdNotificationAdd, MdDataObject} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
 const resolveClosedClassName = ({isActive}: any) => {
@@ -122,6 +122,16 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             </div>
 
                             <span className={isOpen ? "block" : "hidden"}>Notifiers</span>
+
+                        </NavLink>
+                        <NavLink to="/global-adapter-values-sets"
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdDataObject className={"w-6 h-6"}
+                                              size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Global Values</span>
 
                         </NavLink>
                     </div>
