@@ -2,7 +2,7 @@ import TextEditor from "../common/forms/TextEditor";
 import FormField from "../common/forms/FormField";
 import React, {useState} from "react";
 import Modal from "../common/Modal";
-import {ICreateSubscription, IDuplicateSubscription, SubscriptionTypeOptions} from "../../types/subscriptions";
+import {ICreateSubscription, IDuplicateSubscription, SubscriptionType, SubscriptionTypeOptions} from "../../types/subscriptions";
 import {ChoiceEditor} from "../common/forms/ChoiceEditor";
 import {OptionType} from "../../types/common";
 import DocumentSelector from "../Documents/DocumentSelector";
@@ -37,7 +37,7 @@ const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
                             disabled={Boolean(initialState?.type)}
                             placeholder="Select Subscription Type"
                             value={newSubscription.type}
-                            onChange={val => setNewSubscription({...newSubscription, type: val.toString()})}
+                            onChange={val => setNewSubscription({...newSubscription, type: val.toString(), partnerId: val.toString() === String(SubscriptionType.GatewayApiCall) ? undefined : newSubscription.partnerId})}
                             optionTitle={(item: OptionType) => item.title}
                             optionValue={(item: OptionType) => item.id}
                             options={SubscriptionTypeOptions}/>
@@ -50,7 +50,7 @@ const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
                                           onChange={val => setNewSubscription({...newSubscription, documentId: val})}/>
                     </FormField>
                 </div>}
-                {newSubscription.type != "4" && <div className="mt-4">
+                {newSubscription.type != String(SubscriptionType.Receiving) && newSubscription.type != String(SubscriptionType.GatewayApiCall) && <div className="mt-4">
                     <FormField title="Partner" className="grow">
                         <PartnerSelector value={newSubscription.partnerId}
                                          onChange={val => setNewSubscription({...newSubscription, partnerId: val})}/>

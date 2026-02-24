@@ -6,6 +6,7 @@ import {SubscriptionApi} from "src/client/apis/subscriptionsApi";
 import {XchangeApi} from "src/client/apis/xchangeApi";
 import {GeneralApi} from "src/client/apis/generalApi";
 import {GlobalAdapterValuesSetsApi} from "src/client/apis/globalAdapterValuesSetsApi";
+import {ApiGatewaysApi} from "src/client/apis/apiGatewaysApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
 
@@ -17,7 +18,8 @@ const reducers = combineReducers({
     [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
     [XchangeApi.reducerPath]: XchangeApi.reducer,
     [GeneralApi.reducerPath]:GeneralApi.reducer,
-    [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer
+    [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer,
+    [ApiGatewaysApi.reducerPath]: ApiGatewaysApi.reducer
 
 });
 
@@ -30,7 +32,8 @@ export const store = configureStore({
             SubscriptionApi.middleware,
             XchangeApi.middleware,
             GeneralApi.middleware,
-            GlobalAdapterValuesSetsApi.middleware
+            GlobalAdapterValuesSetsApi.middleware,
+            ApiGatewaysApi.middleware
         ])
 });
 

@@ -44,7 +44,7 @@ export const apiClient = {
         return await client.post(`xchanges/`, body)
     },
     getExchangeDocument: async (req: { documentKey: string }) => {
-        const res = await client.get(`InfolinkDocs?documentKey=${req.documentKey}`)
+        const res = await client.get(`BitweenDocs?documentKey=${req.documentKey}`)
         return {
             data: res.data
         }

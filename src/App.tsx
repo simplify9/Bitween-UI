@@ -25,6 +25,8 @@ import ManageCategories from "src/components/ManageCategories";
 import ManageWorkGroups from "src/components/ManageWorkGroups";
 import GlobalAdapterValuesSets from "src/components/GlobalAdapterValuesSets";
 import GlobalAdapterValuesSet from "src/components/GlobalAdapterValuesSet";
+import ApiGateways from "src/components/ApiGateways";
+import ApiGateway from "src/components/ApiGateway";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
 import {useAppDispatch} from "src/state/ReduxSotre";
 import {setWorkGroupsAvailable} from "src/state/stateSlices/features";
@@ -99,6 +101,8 @@ function App() {
                                     <Route path="/notifiers/:id" element={<Notifier/>}/>
                                     <Route path="/global-adapter-values-sets" element={<GlobalAdapterValuesSets/>}/>
                                     <Route path="/global-adapter-values-sets/:id" element={<GlobalAdapterValuesSet/>}/>
+                                    <Route path="/api-gateways" element={<ApiGateways/>}/>
+                                    <Route path="/api-gateways/:id" element={<ApiGateway/>}/>
                                     <Route path={"/notifications"} element={<Notifications/>}/>
                                     <Route path={"/team"} element={<Team/>}/>
                                 </Routes>

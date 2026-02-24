@@ -1,18 +1,20 @@
 import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
 
-enum SubscriptionType {
+export enum SubscriptionType {
     Unknown = 0,
     Internal = 1,
     ApiCall = 2,
     Receiving = 4,
-    Aggregation = 8
+    Aggregation = 8,
+    GatewayApiCall = 16,
 }
 
 export const SubscriptionTypes = [
-    {label: 'Internal', value: 1},
-    {label: 'ApiCall', value: 2},
-    {label: 'Receiving', value: 4},
-    {label: 'Aggregation', value: 8}
+    {label: 'Internal', value: SubscriptionType.Internal},
+    {label: 'ApiCall', value: SubscriptionType.ApiCall},
+    {label: 'Receiving', value: SubscriptionType.Receiving},
+    {label: 'Aggregation', value: SubscriptionType.Aggregation},
+    {label: 'GatewayApiCall', value: SubscriptionType.GatewayApiCall},
 ]
 
 
@@ -151,10 +153,12 @@ export type MatchExpression =
     | MatchExpressionValue
 
 export const SubscriptionTypeOptions: OptionType[] = [
-    {id: "1", title: "Internal"},
-    {id: "2", title: "ApiCall"},
-    {id: "4", title: "Receiving"},
-    {id: "8", title: "Aggregation"}]
+    {id: String(SubscriptionType.Internal), title: "Internal"},
+    {id: String(SubscriptionType.ApiCall), title: "ApiCall"},
+    {id: String(SubscriptionType.Receiving), title: "Receiving"},
+    {id: String(SubscriptionType.Aggregation), title: "Aggregation"},
+    {id: String(SubscriptionType.GatewayApiCall), title: "GatewayApiCall"},
+]
 
 export interface AdapterFindQuery {
     prefix: string;

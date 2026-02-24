@@ -5,10 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/client/apis/apiGatewaysApi.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateway.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways/ApiGatewaysList.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways/CreateApiGatewayModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/apiGateways.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Partner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Partner.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/apis/subscriptionsApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/apis/subscriptionsApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/AdapterEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/AdapterEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/CreateNewSubscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/CreateNewSubscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/partners.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/partners.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/state/ReduxSotre.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/ReduxSotre.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +60,10 @@
     "url": "https://github.com/simplify9/Bitween-UI.git",
     "accountId": "73560df5-930e-4b57-8a43-7838359a8727"
   }
+}]]></component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
 }]]></component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -122,7 +141,7 @@
       <workItem from="1714392483720" duration="44000" />
       <workItem from="1718185368179" duration="3943000" />
       <workItem from="1718274286958" duration="5522000" />
-      <workItem from="1771414644077" duration="2314000" />
+      <workItem from="1771414644077" duration="8800000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -279,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771422607198</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="feat: add adapter properties management to Partner component">
+      <option name="closed" value="true" />
+      <created>1771424736544</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1771424736544</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -326,7 +353,8 @@
     <MESSAGE value="White label tab title and icon" />
     <MESSAGE value="Removed url" />
     <MESSAGE value="feat: add Global Adapter Values Sets management components and routes" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: add Global Adapter Values Sets management components and routes" />
+    <MESSAGE value="feat: add adapter properties management to Partner component" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add adapter properties management to Partner component" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -7,6 +7,7 @@ import {
     ISubscription,
     SearchSubscriptionCategoryModel,
     SubscriptionCategoryModel,
+    SubscriptionFindQuery,
     UpdateSubscriptionCategoryModel,
     WorkGroupModel,
     CreateWorkGroupModel,
@@ -22,13 +23,10 @@ export const SubscriptionApi = createApi({
     reducerPath: "SubscriptionApi",
     tagTypes: ["subscription", "subscriptionCategories", "workGroups"],
     endpoints: (builder) => ({
-        subscriptions: builder.query<ApiPagedResponse<ISubscription>, {
-            offset: number,
-            limit: number
-        }>({
+        subscriptions: builder.query<ApiPagedResponse<ISubscription>, Partial<SubscriptionFindQuery> & { offset: number; limit: number }>({
             providesTags: ['subscription'],
             query: params => ({
-                url: `subscriptions${formulateQueryString(params)}`,
+                url: `subscriptions${formulateQueryString(params as any)}`,
                 method: "GET",
             })
         }),

@@ -5,7 +5,7 @@ import TextEditor from "./common/forms/TextEditor";
 import React, {useCallback, useEffect, useState} from "react";
 import {apiClient} from "../client";
 import {OptionType} from "../types/common";
-import {ISubscription, ScheduleView, SubscriptionTypeOptions} from "../types/subscriptions";
+import {ISubscription, ScheduleView, SubscriptionType, SubscriptionTypeOptions} from "../types/subscriptions";
 import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
@@ -323,7 +323,7 @@ const Component = () => {
 
 
                     </div>}
-                {updateSubscriptionData?.type == "2" &&
+                {(updateSubscriptionData?.type == String(SubscriptionType.ApiCall) || updateSubscriptionData?.type == String(SubscriptionType.GatewayApiCall)) &&
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
