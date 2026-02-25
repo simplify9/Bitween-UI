@@ -4,31 +4,49 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="Removed url">
-      <change afterPath="$PROJECT_DIR$/src/state/stateSlices/theme.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/config.ts" afterDir="false" />
+    <list default="true" id="686e0c0b-b604-4fff-8bf5-1df0ab7122ae" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/client/apis/apiGatewaysApi.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateway.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways/ApiGatewaysList.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ApiGateways/CreateApiGatewayModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/apiGateways.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/apis/generalApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/apis/generalApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/components.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/components.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/DynamicIconAndTitle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DynamicIconAndTitle.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Login/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Login/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/layout/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/common/layout/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/apis/subscriptionsApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/apis/subscriptionsApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/AdapterEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/AdapterEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Subscriptions/CreateNewSubscription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Subscriptions/CreateNewSubscription.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/ChoiceEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/forms/KeyValueEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/layout/NavBar.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/env.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/state/ReduxSotre.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/ReduxSotre.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/DateUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/DateUtils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/subscriptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/subscriptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/Users/ahmadabuhussen/RiderProjects/Bitween-UI" value="23dzL3h4ULHx9auupKx30V48OOs" />
+    </persistenceIdMap>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="186" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "AhmadRAbuhussein"
+  }
+}]]></component>
   <component name="GitSEFilterConfiguration">
     <file-type-list>
       <filtered-out-file-type name="LOCAL_BRANCH" />
@@ -37,9 +55,27 @@
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
   </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/simplify9/Bitween-UI.git",
+    "accountId": "73560df5-930e-4b57-8a43-7838359a8727"
+  }
+}]]></component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
   <component name="ProjectId" id="23dzL3h4ULHx9auupKx30V48OOs" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -48,22 +84,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/salloomzoubi/work's project/InfolinkUi&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/omar/Downloads/Repos/bitween/BitweenUI/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/salloomzoubi/work's project/InfolinkUi",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "yarn",
+    "ts.external.directory.path": "/Users/ahmadabuhussen/RiderProjects/Bitween-UI/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/components/common/forms" />
@@ -99,6 +141,7 @@
       <workItem from="1714392483720" duration="44000" />
       <workItem from="1718185368179" duration="3943000" />
       <workItem from="1718274286958" duration="5522000" />
+      <workItem from="1771414644077" duration="8800000" />
     </task>
     <task id="LOCAL-00001" summary="updates">
       <created>1655632268732</created>
@@ -247,12 +290,30 @@
       <option name="project" value="LOCAL" />
       <updated>1713958139832</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="feat: add Global Adapter Values Sets management components and routes">
+      <option name="closed" value="true" />
+      <created>1771422607198</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1771422607198</updated>
+    </task>
+    <task id="LOCAL-00023" summary="feat: add adapter properties management to Partner component">
+      <option name="closed" value="true" />
+      <created>1771424736544</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1771424736544</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="Vcs.Log.History.Properties">
     <option name="COLUMN_ID_ORDER">
       <list>
@@ -276,6 +337,7 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="selectors" />
     <MESSAGE value="Pagination" />
     <MESSAGE value="pipeline" />
@@ -290,6 +352,34 @@
     <MESSAGE value="White label" />
     <MESSAGE value="White label tab title and icon" />
     <MESSAGE value="Removed url" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed url" />
+    <MESSAGE value="feat: add Global Adapter Values Sets management components and routes" />
+    <MESSAGE value="feat: add adapter properties management to Partner component" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add adapter properties management to Partner component" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

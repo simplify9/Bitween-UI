@@ -32,9 +32,10 @@ type Props =
         optionTitle: (option: any) => string
         menuPlacement?: "top" | "bottom"
         isClearable?: boolean
+        autoFocus?: boolean
     }
 
-
+ 
 export const ChoiceEditor = <TOption extends {} = any>({
                                                            placeholder,
                                                            onChange = noOp,
@@ -45,6 +46,7 @@ export const ChoiceEditor = <TOption extends {} = any>({
                                                            optionTitle,
                                                            optionValue,
                                                            disabled,
+                                                           autoFocus = false,
                                                        }: Props): React.JSX.Element => {
 
     const onChangeValue = useCallback((newValue) => {
@@ -63,6 +65,10 @@ export const ChoiceEditor = <TOption extends {} = any>({
                     minHeight: '42px'
                 }
             },
+            menuPortal: (base) => ({
+                ...base,
+                zIndex: 900000000000,
+            }),
         } satisfies  StylesConfig<any, false, any>
 
     }, [])
@@ -76,9 +82,11 @@ export const ChoiceEditor = <TOption extends {} = any>({
             id={placeholder}
             key={`${placeholder}_select`}
             menuPlacement={menuPlacement}
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
             getOptionLabel={optionTitle}
             getOptionValue={optionValue}
-            autoFocus={true}
+            autoFocus={autoFocus}
             isClearable={isClearable ?? true}
             isDisabled={disabled}
             options={options ?? []}

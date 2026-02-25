@@ -5,7 +5,7 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
-import {MdNotificationAdd} from "react-icons/md";
+import {MdNotificationAdd, MdDataObject, MdApi} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
 const resolveClosedClassName = ({isActive}: any) => {
@@ -81,6 +81,16 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
 
                             <span className={isOpen ? "block" : "hidden"}>Subscriptions</span>
                         </NavLink>
+                        <NavLink to="/api-gateways"
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdApi className={"w-6 h-6"}
+                                       size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>API Gateways</span>
+
+                        </NavLink>
                         <NavLink to="/documents"
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             {/*<img src={"/Icons/document-white.svg"}/>*/}
@@ -122,6 +132,16 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             </div>
 
                             <span className={isOpen ? "block" : "hidden"}>Notifiers</span>
+
+                        </NavLink>
+                        <NavLink to="/global-adapter-values-sets"
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdDataObject className={"w-6 h-6"}
+                                              size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Global Values</span>
 
                         </NavLink>
                     </div>
