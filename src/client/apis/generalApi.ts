@@ -30,10 +30,11 @@ export const GeneralApi = createApi({
                 params
             })
         }),
-        adapterMetadata: builder.query<{ timestamp?: string }, string>({
+        adapterMetadata: builder.mutation<{ timestamp?: string }, { key: string } >({
             query: (m) => ({
-                url: `Adapters/${m}/metadata`,
-                method: "GET",
+                url: `Adapters/metadata`,
+                method: "POST",
+                body: m
             })
         }),
         profile: builder.query<AccountModel, void>({
@@ -119,7 +120,7 @@ export const GeneralApi = createApi({
 
 export const {
     useVersionedAdaptersQuery,
-    useAdapterMetadataQuery,
+    useAdapterMetadataMutation,
     useAppConfigQuery,
     useChartsDataPointsQuery,
     useDashboardXchangesInfoQuery,

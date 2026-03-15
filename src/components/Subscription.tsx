@@ -34,7 +34,7 @@ import {
     useWorkGroupsQuery
 } from "src/client/apis/subscriptionsApi";
 import dayjs from "dayjs";
-import {useAdapterMetadataQuery} from "src/client/apis/generalApi";
+import {useAdapterMetadataMutation} from "src/client/apis/generalApi";
 import Dialog from "src/components/common/dialog";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
@@ -58,12 +58,10 @@ const Component = () => {
     const [publishDraft] = usePublishDraftSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
     const [mode, setMode] = useState<EditMode>("PUBLISHED")
-    const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
-    const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
-    const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
-    const validatorMetadata = useAdapterMetadataQuery(updateSubscriptionData.validatorId, {skip: !updateSubscriptionData.validatorId})
-    
-
+    const [mapperMetadataTrigger, mapperMetadataRes] = useAdapterMetadataMutation()
+    const [handlerMetadataTrigger, handlerMetadataRes] = useAdapterMetadataMutation()
+    const [receiverMetadataTrigger, receiverMetadataRes] = useAdapterMetadataMutation()
+    const [validatorMetadataTrigger, validatorMetadataRes] = useAdapterMetadataMutation()
 
     useEffect(() => {
         if (id) {
@@ -95,7 +93,7 @@ const Component = () => {
         await getTrails();
     }
     const onCreateDraft = async () => {
-        
+
         const res = await createDraftSubscription({subscriptionId: id})
         if ('data' in res) {
             setOpenModal("NONE")
@@ -135,9 +133,9 @@ const Component = () => {
             await refreshSubscription(id)
         }
     }
-    
+
     console.log("updateSubscriptionData", updateSubscriptionData)
-    
+
     if (!updateSubscriptionData) return <></>
 
     return (
@@ -215,8 +213,8 @@ const Component = () => {
                                     onChange={(e) => onChangeSubscriptionData("workGroupId", e)}
                                     optionTitle={(item) => item?.name || ''}
                                     optionValue={(item) => item?.id?.toString() || ''}
-                                    options={Array.isArray(workGroups.data?.result) 
-                                        ? workGroups.data.result.map(wg => ({id: wg.id, name: wg.name})) 
+                                    options={Array.isArray(workGroups.data?.result)
+                                        ? workGroups.data.result.map(wg => ({id: wg.id, name: wg.name}))
                                         : []}/>
                             </FormField>
                         </div>
@@ -327,14 +325,17 @@ const Component = () => {
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
-                            modifiedOn={validatorMetadata.data?.timestamp}
+                            modifiedOn={validatorMetadataRes.data?.timestamp}
                             title={"Validator"}
                             type={"validators"}
                             value={updateSubscriptionData?.validatorId}
-                            onChange={(t) => setUpdateSubscriptionData({
-                                ...updateSubscriptionData,
-                                validatorId: t
-                            })}
+                            onChange={(t) => {
+                                validatorMetadataTrigger({key: updateSubscriptionData.validatorId})
+                                setUpdateSubscriptionData({
+                                    ...updateSubscriptionData,
+                                    validatorId: t
+                                })
+                            }}
                             onPropsChange={(e) => onChangeSubscriptionData("validatorProperties", e)}
                             props={updateSubscriptionData?.validatorProperties}
                         />
@@ -346,12 +347,15 @@ const Component = () => {
                     <div
                         className=" bg-white md:w-1/2 border shadow-lg rounded-lg px-2 py-2">
                         <AdapterEditor title={"Receiver"} type={"receivers"}
-                                       modifiedOn={receiverMetadata.data?.timestamp}
+                                       modifiedOn={receiverMetadataRes.data?.timestamp}
                                        value={updateSubscriptionData?.receiverId}
-                                       onChange={(t) => setUpdateSubscriptionData({
-                                           ...updateSubscriptionData,
-                                           receiverId: t
-                                       })}
+                                       onChange={(t) => {
+                                           receiverMetadataTrigger({key: updateSubscriptionData.receiverId})
+                                           setUpdateSubscriptionData({
+                                               ...updateSubscriptionData,
+                                               receiverId: t
+                                           })
+                                       }}
                                        onPropsChange={(e) => onChangeSubscriptionData("receiverProperties", e)}
                                        props={updateSubscriptionData?.receiverProperties}
                         />
@@ -365,14 +369,17 @@ const Component = () => {
                     <div
                         className=" bg-white border rounded-lg shadow-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
-                            modifiedOn={mapperMetadata.data?.timestamp}
+                            modifiedOn={mapperMetadataRes.data?.timestamp}
                             title={"Mapper"}
                             type={"mappers"}
                             value={updateSubscriptionData?.mapperId}
-                            onChange={(t) => setUpdateSubscriptionData({
-                                ...updateSubscriptionData,
-                                mapperId: t
-                            })}
+                            onChange={(t) => {
+                                mapperMetadataTrigger({key: updateSubscriptionData.mapperId})
+                                setUpdateSubscriptionData({
+                                    ...updateSubscriptionData,
+                                    mapperId: t
+                                })
+                            }}
                             onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
                             props={updateSubscriptionData?.mapperProperties}
                         />
@@ -381,13 +388,16 @@ const Component = () => {
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
 
                         <AdapterEditor title={"Handler"} type={"handlers"}
-                                       modifiedOn={handlerMetadata.data?.timestamp}
+                                       modifiedOn={handlerMetadataRes.data?.timestamp}
 
                                        value={updateSubscriptionData?.handlerId}
-                                       onChange={(t) => setUpdateSubscriptionData({
-                                           ...updateSubscriptionData,
-                                           handlerId: t
-                                       })}
+                                       onChange={(t) => {
+                                           handlerMetadataTrigger({key: updateSubscriptionData.handlerId})
+                                           setUpdateSubscriptionData({
+                                               ...updateSubscriptionData,
+                                               handlerId: t
+                                           })
+                                       }}
                                        onPropsChange={(e) => onChangeSubscriptionData("handlerProperties", e)}
                                        props={updateSubscriptionData?.handlerProperties}
                         />
