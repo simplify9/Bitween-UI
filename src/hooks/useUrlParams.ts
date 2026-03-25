@@ -29,6 +29,18 @@ export const useUrlParams = <T extends Record<string, any>>(
           (params as any)[key] = value === 'true';
         } else if (typeof defaultValue === 'string' || defaultValue === undefined) {
           (params as any)[key] = value;
+        } else if (defaultValue === null) {
+          // For nullable fields, infer primitive value from URL text.
+          if (value === 'true' || value === 'false') {
+            (params as any)[key] = value === 'true';
+          } else {
+            const numValue = Number(value);
+            if (!isNaN(numValue) && value.trim() !== '') {
+              (params as any)[key] = numValue;
+            } else {
+              (params as any)[key] = value;
+            }
+          }
         }
       }
     });
