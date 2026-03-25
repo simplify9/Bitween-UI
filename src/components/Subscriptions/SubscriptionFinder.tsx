@@ -168,7 +168,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                                           ]}
                                           optionValue={o => o.value}
                                           optionTitle={i => i.label}
-                                          onChange={(val) => onChange({...value, inactive: val === 'Inactive'})}
+                                          onChange={(val) => onChange({...value, inactive: val === undefined ? null : val === 'Inactive'})}
                             />
                         </FormField>
                     }
