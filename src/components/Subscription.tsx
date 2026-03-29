@@ -10,6 +10,7 @@ import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
 import AdapterEditor from "./Subscriptions/AdapterEditor";
+import MappingEditor, { NATIVE_JSON_MAPPER_ID } from "./Subscriptions/MappingEditor";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
@@ -44,6 +45,7 @@ const Component = () => {
     let params = useParams();
     const id = Number(params.id)
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
+    const [showFieldMapper, setShowFieldMapper] = useState(false);
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
@@ -152,6 +154,17 @@ const Component = () => {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
+
+            {showFieldMapper && (
+                <MappingEditor
+                    mapperId={updateSubscriptionData?.mapperId}
+                    mapperProperties={updateSubscriptionData?.mapperProperties}
+                    onSave={(mapperId, mapperProperties) => {
+                        setUpdateSubscriptionData(s => ({ ...s, mapperId, mapperProperties }));
+                    }}
+                    onClose={() => setShowFieldMapper(false)}
+                />
+            )}
 
             {Boolean(updateSubscriptionData?.lastException) &&
                 <div className={"shadow-xl bg-white  p-2 rounded-lg border-rose-500 border-2 mb-5"}>
@@ -362,8 +375,7 @@ const Component = () => {
                     </div>}
 
                 <div className={" flex flex-col md:flex-row gap-3"}>
-                    <div
-                        className=" bg-white border rounded-lg shadow-lg px-2 py-2 md:w-1/2">
+                    <div className=" bg-white border rounded-lg shadow-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
                             modifiedOn={mapperMetadata.data?.timestamp}
                             title={"Mapper"}
@@ -375,7 +387,15 @@ const Component = () => {
                             })}
                             onPropsChange={(e) => onChangeSubscriptionData("mapperProperties", e)}
                             props={updateSubscriptionData?.mapperProperties}
+                            suppressProps={updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID}
                         />
+                        {updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID && (
+                            <button type="button"
+                                onClick={() => setShowFieldMapper(true)}
+                                className="mt-2 px-3 py-1.5 text-sm border border-primary-400 text-primary-600 rounded hover:bg-primary-50 transition">
+                                Configure Field Mapping →
+                            </button>
+                        )}
                     </div>
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">

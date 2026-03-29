@@ -147,6 +147,7 @@ interface Props {
     props?: KeyValuePair[],
     onPropsChange?: (p: KeyValuePair[]) => void
     title: string;
+    suppressProps?: boolean;
 }
 
 const AdapterEditor: React.FC<Props> = ({
@@ -156,7 +157,8 @@ const AdapterEditor: React.FC<Props> = ({
                                             title,
                                             props,
                                             onPropsChange,
-                                            modifiedOn
+                                            modifiedOn,
+                                            suppressProps
                                         }) => {
 
     const [adapterPropsOptions, setAdapterPropsOptions] = useState<OptionType[]>();
@@ -208,14 +210,14 @@ const AdapterEditor: React.FC<Props> = ({
                     <AdapterVersionSelector type={type} value={value} onChange={onChange}/>
                 </FormField>
                 <div className={"mb-1"}/>
-                <KeyValueEditor values={props} title={'Properties'}
+                {!suppressProps && <KeyValueEditor values={props} title={'Properties'}
                                 keyLabel={"Name"} valueLabel={"Value"}
                                 onAdd={onAdd} onRemove={onRemove}
                                 addLabel={"Add or edit"}
                                 onEdit={onEdit}
                                 keyOptions={availableOptions()}
                                 valueRenderer={(v, onVChange) => <ValueEditor value={v} onChange={onVChange}/>}
-                />
+                />}
             </div>
         </div>
     );
