@@ -41,7 +41,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     {
                         searchAdapterData && <FormField title="Id" className="grow  md:mr-2">
                             <TextEditor placeholder="Id" value={value.id}
-                                        onChange={(t) => onChange({...value, id: Number(t)})}
+                                        onChange={(t) => onChange({ ...value, id: t !== '' ? Number(t) : undefined })}
                             />
                         </FormField>
                     }
