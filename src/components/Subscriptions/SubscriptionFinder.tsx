@@ -12,16 +12,18 @@ import {useTypedSelector} from "src/state/ReduxSotre";
 interface Props {
     value: SubscriptionFindQuery
     onChange: (value: SubscriptionFindQuery) => void
+    onSearch?: (value: SubscriptionFindQuery) => void
     onFindRequested: () => void
     searchAdapterData?: boolean
 }
 
 export const SubscriptionFinderPanel: React.FC<Props> = ({
-                                                             value,
-                                                             onChange,
-                                                             onFindRequested,
-                                                             searchAdapterData
-                                                         }) => {
+                                                            value,
+                                                            onChange,
+                                                            onSearch = onChange,
+                                                            onFindRequested,
+                                                            searchAdapterData
+                                                        }) => {
 
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
@@ -35,6 +37,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData && <FormField title="Name" className="grow  md:mr-2">
                             <TextEditor placeholder="Name" value={value.nameContains}
                                         onChange={(t) => onChange({...value, nameContains: t})}
+                                        onKeyDown={(e) => e.key === 'Enter' && onFindRequested()}
                             />
                         </FormField>
                     }
@@ -42,6 +45,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData && <FormField title="Id" className="grow  md:mr-2">
                             <TextEditor placeholder="Id" value={value.id}
                                         onChange={(t) => onChange({ ...value, id: t !== '' ? Number(t) : undefined })}
+                                        onKeyDown={(e) => e.key === 'Enter' && onFindRequested()}
                             />
                         </FormField>
                     }
@@ -50,6 +54,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         <FormField title="Adapter Properties" className="grow md:mr-2">
                             <TextEditor placeholder="Adapter data" value={value.rawsubscriptionproperties}
                                         onChange={(t) => onChange({...value, rawsubscriptionproperties: t})}
+                                        onKeyDown={(e) => e.key === 'Enter' && onFindRequested()}
                             />
                         </FormField>
                     }
@@ -58,6 +63,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         <FormField title="Filter Properties" className="grow md:mr-2">
                             <TextEditor placeholder="Filter data" value={value.rawfiltersproperties}
                                         onChange={(t) => onChange({...value, rawfiltersproperties: t})}
+                                        onKeyDown={(e) => e.key === 'Enter' && onFindRequested()}
                             />
                         </FormField>
                     }
@@ -65,7 +71,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData &&
                         <FormField title="Partner" className="grow ">
                             <PartnerSelector value={value.partnerId}
-                                             onChange={val => onChange({...value, partnerId: val})}/>
+                                            onChange={val => onSearch({...value, partnerId: val})}/>
 
                         </FormField>
                     }
@@ -73,7 +79,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData &&
                         <FormField title="Document" className="grow ">
                             <DocumentSelector value={value.documentId?.toString()}
-                                              onChange={val => onChange({...value, documentId: Number(val)})}/>
+                                            onChange={(val) => onSearch({...value, documentId: val ? Number(val) : undefined})}/>
 
                         </FormField>
                     }
@@ -81,38 +87,38 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         searchAdapterData &&
                         <FormField title="Validator" className=" grow ">
                             <AdapterSelector type={'validators'} value={value.validatorId}
-                                             onChange={(val) => onChange({...value, validatorId: val})}/>
+                                            onChange={(val) => onSearch({...value, validatorId: val})}/>
                         </FormField>
                     }
                     {
                         searchAdapterData &&
                         <FormField title="Receiver" className="grow">
                             <AdapterSelector type={'receivers'} value={value.receiverId}
-                                             onChange={(val) => onChange({...value, receiverId: val})}/>
+                                            onChange={(val) => onSearch({...value, receiverId: val})}/>
                         </FormField>
                     }
                     {
                         searchAdapterData &&
                         <FormField title="Mapper" className="grow">
                             <AdapterSelector type={'mappers'} value={value.mapperId}
-                                             onChange={(val) => onChange({...value, mapperId: val})}/>
+                                            onChange={(val) => onSearch({...value, mapperId: val})}/>
                         </FormField>
                     }
                     {
                         searchAdapterData &&
                         <FormField title="Handler" className="grow">
                             <AdapterSelector type={'handlers'} value={value.handlerId}
-                                             onChange={(val) => onChange({...value, handlerId: val})}/>
+                                            onChange={(val) => onSearch({...value, handlerId: val})}/>
                         </FormField>
                     }
                     {
                         searchAdapterData &&
                         <FormField title="Type" className="grow">
                             <ChoiceEditor value={value.type?.toString()}
-                                          options={SubscriptionTypes}
-                                          optionValue={o => o.value}
-                                          optionTitle={i => i.label}
-                                          onChange={(val) => onChange({...value, type: Number(val)})}
+                                        options={SubscriptionTypes}
+                                        optionValue={o => o.value}
+                                        optionTitle={i => i.label}
+                                        onChange={(val) => onSearch({...value, type: val ? Number(val) : undefined})}
                             />
                         </FormField>
                     }
@@ -121,7 +127,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         <FormField title="Category" className="grow">
                             <ChoiceEditor
                                 value={value?.categoryId != null && value.categoryId !== undefined ? value.categoryId.toString() : ""}
-                                onChange={(val) => onChange({...value, categoryId: val ? Number(val) : undefined})}
+                                onChange={(val) => onSearch({...value, categoryId: val ? Number(val) : undefined})}
                                 optionTitle={(item) => item.code}
                                 optionValue={(item) => item.id?.toString()}
                                 options={subscriptionCategories.data?.result ?? []}/>
@@ -132,7 +138,7 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                         <FormField title="Work Group" className="grow">
                             <ChoiceEditor
                                 value={value?.workGroupId != null && value.workGroupId !== undefined ? value.workGroupId.toString() : ""}
-                                onChange={(val) => onChange({...value, workGroupId: val ? Number(val) : undefined})}
+                                onChange={(val) => onSearch({...value, workGroupId: val ? Number(val) : undefined})}
                                 optionTitle={(item) => item.name}
                                 optionValue={(item) => item.id?.toString()}
                                 options={Array.isArray(workGroups.data?.result) 
@@ -143,32 +149,32 @@ export const SubscriptionFinderPanel: React.FC<Props> = ({
                     {
                         searchAdapterData &&
                         <FormField title="State" className="grow">
-                            <ChoiceEditor value={value.type?.toString()}
-                                          options={[
-                                              {value: undefined, label: 'All'},
-                                              {value: 'Idle', label: 'Idle'},
-                                              {value: 'Running', label: 'Running'},
+                            <ChoiceEditor value={value.isRunning == null ? '' : value.isRunning ? 'Running' : 'Idle'}
+                                        options={[
+                                            {value: undefined, label: 'All'},
+                                            {value: 'Idle', label: 'Idle'},
+                                            {value: 'Running', label: 'Running'},
 
-                                          ]}
-                                          optionValue={o => o.value}
-                                          optionTitle={i => i.label}
-                                          onChange={(val) => onChange({...value, isRunning: val === 'Running'})}
+                                        ]}
+                                        optionValue={o => o.value}
+                                        optionTitle={i => i.label}
+                                        onChange={(val) => onSearch({...value, isRunning: !val ? null : val === 'Running'})}
                             />
                         </FormField>
                     }
                     {
                         searchAdapterData &&
                         <FormField title="Status" className="grow">
-                            <ChoiceEditor value={value.inactive?.toString()}
-                                          options={[
-                                              {value: undefined, label: 'All'},
-                                              {value: 'Active', label: 'Active'},
-                                              {value: 'Inactive', label: 'Inactive'},
+                            <ChoiceEditor value={value.inactive == null ? '' : value.inactive ? 'Inactive' : 'Active'}
+                                        options={[
+                                            {value: undefined, label: 'All'},
+                                            {value: 'Active', label: 'Active'},
+                                            {value: 'Inactive', label: 'Inactive'},
 
-                                          ]}
-                                          optionValue={o => o.value}
-                                          optionTitle={i => i.label}
-                                          onChange={(val) => onChange({...value, inactive: val === undefined ? null : val === 'Inactive'})}
+                                        ]}
+                                        optionValue={o => o.value}
+                                        optionTitle={i => i.label}
+                                        onChange={(val) => onSearch({...value, inactive: val === undefined ? null : val === 'Inactive'})}
                             />
                         </FormField>
                     }
