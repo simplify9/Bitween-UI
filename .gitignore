@@ -4,8 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-.xml
-.idea
+.idea/
 /src/config.ts
 # testing
 /coverage
