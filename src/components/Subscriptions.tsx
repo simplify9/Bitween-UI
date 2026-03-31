@@ -25,7 +25,7 @@ import {useTypedSelector} from "src/state/ReduxSotre";
 const defaultFindSpecs: SubscriptionFindQuery = {
     handlerId: undefined,
     id: undefined,
-    isRunning: undefined,
+    isRunning: null,
     mapperId: undefined,
     partnerId: undefined,
     receiverId: undefined,
@@ -94,6 +94,12 @@ const Component = () => {
         fetchData(findSpecs);
     }, [findSpecs, fetchData]);
 
+    const onDropdownSearch = useCallback((spec: SubscriptionFindQuery) => {
+        const newSpecs = {...spec, limit: defaultFindSpecs.limit, offset: 0};
+        updateUrlParams(newSpecs);
+        fetchData(newSpecs);
+    }, [updateUrlParams, fetchData]);
+
     const onClickCreateSubscription = useCallback(
         async (subscription: ICreateSubscription) => {
             const res = await createSubscription(subscription);
@@ -127,6 +133,13 @@ const Component = () => {
         setOpenModal("DUPLICATE");
     };
 
+    const hasActiveFilters =
+        findSpecs.id != null || !!findSpecs.nameContains || findSpecs.inactive != null ||
+        findSpecs.isRunning != null || findSpecs.type != null || findSpecs.categoryId != null ||
+        findSpecs.workGroupId != null || findSpecs.partnerId != null || findSpecs.documentId != null ||
+        !!findSpecs.handlerId || !!findSpecs.mapperId || !!findSpecs.validatorId ||
+        !!findSpecs.receiverId || !!findSpecs.rawsubscriptionproperties || !!findSpecs.rawfiltersproperties;
+
     return (
         <>
             <div className="flex flex-col w-full  ">
@@ -135,9 +148,18 @@ const Component = () => {
                         searchAdapterData
                         value={findSpecs}
                         onChange={onChangeFindSpecs}
+                        onSearch={onDropdownSearch}
                         onFindRequested={onFindRequested}
                     />
-                    <div className={"flex flex-row justify-end"}>
+                    <div className={"flex flex-row justify-end items-center"}>
+                        {hasActiveFilters && (
+                            <button
+                                onClick={() => { clearUrlParams(); fetchData(defaultFindSpecs); }}
+                                className="mr-auto ml-2 text-xs text-red-500 hover:text-red-700 font-medium whitespace-nowrap"
+                            >
+                                Clear all filters
+                            </button>
+                        )}
                         <div className={"w-[100px]"}>
                             <Authorize roles={["Admin", "Member"]}>
                                 <Button onClick={() => setOpenModal("ADD")}>Add</Button>
@@ -168,7 +190,7 @@ const Component = () => {
                                         fetchData(newSpecs);
                                     }}
                                     size={33}
-                                    className={" mb-2 text-primary-600"}
+                                    className={"mb-2 text-primary-600 cursor-pointer"}
                                 />
                             </Authorize>
                         </div>
@@ -181,10 +203,16 @@ const Component = () => {
                             "shadow-lg  rounded-xl overflow-x-scroll xl:overflow-x-hidden  md:max-w-[1000px]"
                         }
                     >
-                        <SubscriptionList
-                            handelDuplicate={handelDuplicate}
-                            data={data.data.result}
-                        />
+                        {data.isFetching ? (
+                            <div className="flex justify-center py-8 text-sm text-gray-400">Searching...</div>
+                        ) : data.data.result.length === 0 ? (
+                            <div className="flex justify-center py-8 text-sm text-gray-400">No subscriptions match the current filters.</div>
+                        ) : (
+                            <SubscriptionList
+                                handelDuplicate={handelDuplicate}
+                                data={data.data.result}
+                            />
+                        )}
                         <DataListViewSettingsEditor
                             orderByFields={[
                                 {value: "Name", key: "Name"},

@@ -37,17 +37,17 @@ type Props =
 
  
 export const ChoiceEditor = <TOption extends {} = any>({
-                                                           placeholder,
-                                                           onChange = noOp,
-                                                           value = "",
-                                                           options,
-                                                           isClearable,
-                                                           menuPlacement = "bottom",
-                                                           optionTitle,
-                                                           optionValue,
-                                                           disabled,
-                                                           autoFocus = false,
-                                                       }: Props): React.JSX.Element => {
+                                                        placeholder,
+                                                        onChange = noOp,
+                                                        value = "",
+                                                        options,
+                                                        isClearable,
+                                                        menuPlacement = "bottom",
+                                                        optionTitle,
+                                                        optionValue,
+                                                        disabled,
+                                                        autoFocus = false,
+                                                    }: Props): React.JSX.Element => {
 
     const onChangeValue = useCallback((newValue) => {
         if (Boolean(newValue)) {
@@ -72,11 +72,11 @@ export const ChoiceEditor = <TOption extends {} = any>({
         } satisfies  StylesConfig<any, false, any>
 
     }, [])
-    const selectedValue = useMemo(() => {
-        if (!Array.isArray(options))
-            return ""
-        return options?.find(i => optionValue(i) == value)
-    }, [value, optionValue, options])
+const selectedValue = useMemo(() => {
+    if (!Array.isArray(options))
+        return null
+    return options?.find(i => optionValue(i) == value) ?? null
+}, [value, optionValue, options])
     return (
         <Select
             id={placeholder}
