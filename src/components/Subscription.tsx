@@ -1,4 +1,4 @@
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, Link} from "react-router-dom";
 import Button from "./common/forms/Button";
 import FormField from "./common/forms/FormField";
 import TextEditor from "./common/forms/TextEditor";
@@ -390,11 +390,18 @@ const Component = () => {
                             suppressProps={updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID}
                         />
                         {updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID && (
-                            <button type="button"
-                                onClick={() => setShowFieldMapper(true)}
-                                className="mt-2 px-3 py-1.5 text-sm border border-primary-400 text-primary-600 rounded hover:bg-primary-50 transition">
-                                Configure Field Mapping →
-                            </button>
+                            <div className="flex items-center gap-2 mt-2">
+                                <button type="button"
+                                    onClick={() => setShowFieldMapper(true)}
+                                    className="px-3 py-1.5 text-sm border border-primary-400 text-primary-600 rounded hover:bg-primary-50 transition">
+                                    Configure Field Mapping →
+                                </button>
+                                <Link
+                                    to={`/subscriptions/${id}/mapping-editor`}
+                                    className="px-3 py-1.5 text-sm border border-blue-500 text-blue-600 rounded hover:bg-blue-50 transition font-medium">
+                                    ⛶ Advanced Mapping Editor
+                                </Link>
+                            </div>
                         )}
                     </div>
                     <div
