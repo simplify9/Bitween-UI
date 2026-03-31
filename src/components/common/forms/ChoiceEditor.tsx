@@ -74,8 +74,6 @@ export const ChoiceEditor = <TOption extends {} = any>({
     }, [])
 const selectedValue = useMemo(() => {
     if (!Array.isArray(options))
-                return ""
-    return options?.find(i => optionValue(i) == value)
         return null
     return options?.find(i => optionValue(i) == value) ?? null
 }, [value, optionValue, options])
