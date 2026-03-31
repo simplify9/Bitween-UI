@@ -14,7 +14,7 @@ variables:
   - name: version
     value: $[format('8.0.{0}', counter('8.0', 0))]
 
-stages: 
+stages:
   - stage: Build
     displayName: Build and push image
 
@@ -30,7 +30,7 @@ stages:
               command: buildAndPush
               repository: simplify9/$(imageName)
               dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-              containerRegistry:  
+              containerRegistry: simplify9cr
               tags: |
                 $(version)
                 latest
