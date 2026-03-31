@@ -31,7 +31,7 @@ jobs:
       image-name: 'simplify9/bitweenui'
       helm-set-values: 'image.repo=docker.io/simplify9,ingress.enabled=true,ingress.host=app-dev.bitween.io,ingress.tlsSecret=bitween-tls,ingress.annotations.cert-manager\.io/cluster-issuer=letsencrypt-nginx'
     secrets:
-      registry-username: ${{ github.actor }}
+      registry-username: ${{ secrets.github.actor }}
       registry-password: ${{ secrets.GITHUB_TOKEN }}
       kubeconfig: ${{ secrets.S9DEV_KUBECONFIG }}
       github-token: ${{ secrets.GITHUB_TOKEN }}
