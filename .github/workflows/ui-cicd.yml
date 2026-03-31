@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   deploy-main:
-    if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+    if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || github.event_name == 'workflow_dispatch' }}
     uses: simplify9/.github/.github/workflows/sw-cicd.yml@main
     with:
       major-version: '8'
