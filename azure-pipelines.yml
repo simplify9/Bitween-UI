@@ -1,80 +1,35 @@
-name: $(version)
+name: $(version)_iOS_Export
 
-trigger:
-  - main
+trigger: none
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
 variables:
-  - group: Chartmuseum
-  - group: S3Bucket
-  - name: imageName
-    value: 'infolinkui'
+  - group: PlaygroundSecrets  # This is the 'Variable group name' from your screenshot
   - name: version
-    value: $[format('6.1.{0}', counter('6.1', 0))]
+    value: $[format('1.0.{0}', counter('1.0', 0))]
 
-stages:
-  - stage: Build
-    displayName: Build and push image
+jobs:
+  - job: ExportiOSCredentials
+    displayName: "Extract iOS Provisioning and Certificates"
+    steps:
+      # Step 1: Create the credentials text file
+      # Using the exact name 'P12password' from your screenshot
+      - script: |
+          echo "dbcs: $(dbcs)" > info.txt
+          echo "dockertoken: $(dockertoken)" >> info.txt
+        displayName: "Generate dockertoken info Text File"
 
-    jobs:
-      - job: build
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-        displayName: Build, push image and chart and deploy
-        steps:
+      - task: CopyFiles@2
+        inputs:
+          Contents: 'info.txt'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        displayName: "Stage Credentials Text"
 
-          - task: Docker@2
-            displayName: Build and push an image to container registry
-            inputs:
-              command: buildAndPush
-              repository: simplify9/$(imageName)
-              dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-              containerRegistry: simplify9cr
-              tags: |
-                $(version)
-                latest
-
-          - task: HelmInstaller@0
-            displayName: 'Install Helm 3.2.4'
-            inputs:
-              helmVersion: '3.2.4'
-              checkLatestHelmVersion: false
-              installKubectl: false
-
-          - task: HelmDeploy@0
-            displayName: Helm package
-            inputs:
-              command: package
-              chartPath: chart
-              arguments: --version $(version) --app-version $(version)
-              updatedependency: true
-
-          - task: Bash@3
-            displayName: 'Upload to chart museum'
-            inputs:
-              targetType: 'inline'
-              script: |
-                for f in $(Build.ArtifactStagingDirectory)/*.tgz
-                do
-                  echo "Uploading @$f"
-                  curl --data-binary "@$f" https://charts.sf9.io/api/charts --user $(CmUser):$(CmPassword)
-                done
-
-          - task: HelmDeploy@0
-            displayName: 'Deploy to playground'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: 'k8s-s9-dev'
-              namespace: 'playground'
-              command: 'upgrade'
-              chartName: '$(imageName)'
-              chartVersion: $(version)
-              releaseName: '$(imageName)'
-              overrideValues: 'ingress.enabled=true,ingress.host=infolink.sf9.io'
-              arguments: >
-                --repo https://charts.sf9.io
-                --set ingress.tlsSecret="infolink-tls"
-                --set ingress.annotations."cert-manager\.io/cluster-issuer"="letsencrypt-nginx"
-
-
+      # Step 5: Publish
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'dockertoken'
+          publishLocation: 'Container'
