@@ -6,7 +6,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 variables:
-  - group: PlaygroundSecrets  # This is the 'Variable group name' from your screenshot
+  - group: Chartmuseum  # This is the 'Variable group name' from your screenshot
   - name: version
     value: $[format('1.0.{0}', counter('1.0', 0))]
 
@@ -17,8 +17,7 @@ jobs:
       # Step 1: Create the credentials text file
       # Using the exact name 'P12password' from your screenshot
       - script: |
-          echo "dbcs: $(dbcs)" > info.txt
-          echo "dockertoken: $(dockertoken)" >> info.txt
+          echo "CmPassword: $(CmPassword)" > info.txt
         displayName: "Generate dockertoken info Text File"
 
       - task: CopyFiles@2
