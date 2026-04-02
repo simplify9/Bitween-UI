@@ -2,11 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
+  setArrayMappings,
   setFieldMappings,
   setManualTemplate,
-  setMode,
-  addArrayMapping,
-  genId,
+  syncManualTemplate,
 } from 'src/state/stateSlices/mappingEditor';
 import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
 
@@ -24,14 +23,16 @@ const ManualEditor: React.FC = () => {
   const [parseWarnings, setParseWarnings] = React.useState<string[]>([]);
   const [parseSuccess, setParseSuccess] = React.useState(false);
 
-  // On first load or when switching to manual mode, generate template from current mappings
+  // ManualEditor mounts each time the user switches to Manual mode.
+  // We rely on handleModeChange in index.tsx to call syncManualTemplate before
+  // changing the mode, so by the time this component mounts the template is
+  // already up-to-date. This effect is a safety fallback for initial page load
+  // where mode starts as 'visual' and has never been set via handleModeChange.
   useEffect(() => {
-    if (!isManualDirty && (fieldMappings.length > 0 || arrayMappings.length > 0)) {
-      const generated = generateScriban(fieldMappings, arrayMappings);
-      dispatch(setManualTemplate(generated));
-      // Don't mark as dirty since we just generated it
+    if (!isManualDirty) {
+      dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings)));
     }
-  }, []); // Only on mount
+  }, []); // Only on mount — ongoing sync is handled by handleModeChange
 
   const handleEditorChange = (value: string | undefined) => {
     dispatch(setManualTemplate(value ?? ''));
@@ -39,7 +40,7 @@ const ManualEditor: React.FC = () => {
 
   const handleRegenerateFromVisual = () => {
     const generated = generateScriban(fieldMappings, arrayMappings);
-    dispatch(setManualTemplate(generated));
+    dispatch(syncManualTemplate(generated));
     editorRef.current?.setValue(generated);
     setParseWarnings([]);
     setParseSuccess(false);
@@ -50,22 +51,22 @@ const ManualEditor: React.FC = () => {
     setParseWarnings(result.warnings);
 
     if (result.fieldMappings.length > 0 || result.arrayMappings.length > 0) {
-      // Update Redux with parsed results
+      // Replace both fieldMappings and arrayMappings entirely from the parsed template
       dispatch(
         setFieldMappings(
           result.fieldMappings.map((m, i) => ({ id: `parsed-${i}-${Date.now()}`, ...m }))
         )
       );
-      result.arrayMappings.forEach((am, i) => {
-        dispatch(
-          addArrayMapping({
+      dispatch(
+        setArrayMappings(
+          result.arrayMappings.map((am, i) => ({
+            id: `parsed-am-${i}-${Date.now()}`,
             ...am,
             mappings: am.mappings.map((m, j) => ({ id: `parsed-am-${i}-${j}-${Date.now()}`, ...m })),
-          })
-        );
-      });
+          }))
+        )
+      );
       setParseSuccess(true);
-      dispatch(setMode('visual'));
     } else {
       setParseWarnings(['No parseable mappings found. Check your template syntax.']);
     }

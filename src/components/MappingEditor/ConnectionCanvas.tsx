@@ -24,12 +24,14 @@ interface ConnectionLine {
   y2: number;
   isSelected: boolean;
   isHovered: boolean;
+  isArrayConnection?: boolean;
 }
 
 const CONNECTION_COLORS = {
   default: '#94a3b8',   // slate-400
   selected: '#3b82f6',  // blue-500
   hovered: '#10b981',   // emerald-500
+  array: '#8b5cf6',     // violet-500 — for array loop connections
 };
 
 const ConnectionCanvas: React.FC<Props> = ({
@@ -41,6 +43,7 @@ const ConnectionCanvas: React.FC<Props> = ({
 }) => {
   const dispatch = useAppDispatch();
   const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
+  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
   const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
   const hoveredPath = useTypedSelector((s) => s.mappingEditor.hoveredPath);
   const [lines, setLines] = useState<ConnectionLine[]>([]);
@@ -53,43 +56,71 @@ const ConnectionCanvas: React.FC<Props> = ({
     const svgRect = svgRef.current.getBoundingClientRect();
     const newLines: ConnectionLine[] = [];
 
-    for (const m of fieldMappings) {
-      if (!m.source || !m.target) continue;
-      const srcEl = sourceRefs.get(m.source);
-      const tgtEl = targetRefs.get(m.target);
-      if (!srcEl || !tgtEl) continue;
-
+    const addLine = (
+      id: string,
+      srcEl: HTMLElement,
+      tgtEl: HTMLElement,
+      isSelected: boolean,
+      isHovered: boolean,
+      isArrayConnection = false
+    ) => {
       const srcRect = srcEl.getBoundingClientRect();
       const tgtRect = tgtEl.getBoundingClientRect();
-
-      const x1 = srcRect.right - svgRect.left;
-      const y1 = srcRect.top + srcRect.height / 2 - svgRect.top;
-      const x2 = tgtRect.left - svgRect.left;
-      const y2 = tgtRect.top + tgtRect.height / 2 - svgRect.top;
-
-      // Only draw if both ends are visible in viewport
       if (
         srcRect.bottom < svgRect.top - 20 ||
         srcRect.top > svgRect.bottom + 20 ||
         tgtRect.bottom < svgRect.top - 20 ||
         tgtRect.top > svgRect.bottom + 20
-      ) {
-        continue;
-      }
-
+      ) return;
       newLines.push({
-        id: m.id,
-        x1,
-        y1,
-        x2,
-        y2,
-        isSelected: selectedId === m.id,
-        isHovered: hoveredPath === m.source || hoveredPath === m.target,
+        id,
+        x1: srcRect.right - svgRect.left,
+        y1: srcRect.top + srcRect.height / 2 - svgRect.top,
+        x2: tgtRect.left - svgRect.left,
+        y2: tgtRect.top + tgtRect.height / 2 - svgRect.top,
+        isSelected,
+        isHovered,
+        isArrayConnection,
       });
+    };
+
+    // ── Regular field mappings ──────────────────────────────────────────────────
+    for (const m of fieldMappings) {
+      if (!m.source || !m.target) continue;
+      const srcEl = sourceRefs.get(m.source);
+      const tgtEl = targetRefs.get(m.target);
+      if (!srcEl || !tgtEl) continue;
+      addLine(
+        m.id,
+        srcEl,
+        tgtEl,
+        selectedId === m.id,
+        hoveredPath === m.source || hoveredPath === m.target
+      );
+    }
+
+    // ── Array mapping inner-field connections (violet) ─────────────────────────
+    for (const am of arrayMappings) {
+      for (const m of am.mappings) {
+        if (!m.source || !m.target) continue;
+        const srcPath = `${am.source}[*].${m.source}`;
+        const tgtPath = `${am.target}[*].${m.target}`;
+        const srcEl = sourceRefs.get(srcPath);
+        const tgtEl = targetRefs.get(tgtPath);
+        if (!srcEl || !tgtEl) continue;
+        addLine(
+          `${am.id}-${m.id}`,
+          srcEl,
+          tgtEl,
+          false,
+          hoveredPath === srcPath || hoveredPath === tgtPath,
+          true
+        );
+      }
     }
 
     setLines(newLines);
-  }, [fieldMappings, selectedId, hoveredPath, sourceRefs, targetRefs]);
+  }, [fieldMappings, arrayMappings, selectedId, hoveredPath, sourceRefs, targetRefs]);
 
   // Recompute on scroll / resize
   useEffect(() => {
@@ -132,15 +163,22 @@ const ConnectionCanvas: React.FC<Props> = ({
         <marker id="arrowhead-hovered" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
           <path d="M0,0 L0,6 L6,3 z" fill={CONNECTION_COLORS.hovered} />
         </marker>
+        <marker id="arrowhead-array" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill={CONNECTION_COLORS.array} />
+        </marker>
       </defs>
       {lines.map((line) => {
         const isHighlighted = line.isSelected || line.isHovered || hoveredLineId === line.id;
-        const color = line.isSelected
+        const color = line.isArrayConnection
+          ? CONNECTION_COLORS.array
+          : line.isSelected
           ? CONNECTION_COLORS.selected
           : line.isHovered || hoveredLineId === line.id
           ? CONNECTION_COLORS.hovered
           : CONNECTION_COLORS.default;
-        const markerId = line.isSelected
+        const markerId = line.isArrayConnection
+          ? 'arrowhead-array'
+          : line.isSelected
           ? 'arrowhead-selected'
           : line.isHovered || hoveredLineId === line.id
           ? 'arrowhead-hovered'

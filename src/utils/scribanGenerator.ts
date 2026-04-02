@@ -1,5 +1,8 @@
 import { ArrayMapping, FieldMapping, FilterOperator } from 'src/state/stateSlices/mappingEditor';
 
+/** Map of valuesSetId → (key → value) for enum lookups */
+export type ValuesSetMap = Record<string, Record<string, string>>;
+
 // ─── Scriban template generator ───────────────────────────────────────────────
 
 const OPERATOR_MAP: Record<FilterOperator, string> = {
@@ -18,7 +21,7 @@ function renderFilter(alias: string, filter: ArrayMapping['filter']): string {
   return `${alias}.${filter.field} ${op} ${val}`;
 }
 
-function renderFieldValue(mapping: FieldMapping, alias?: string): string {
+function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: ValuesSetMap): string {
   if (mapping.fixedValue !== undefined) {
     const num = Number(mapping.fixedValue);
     if (!isNaN(num) && mapping.fixedValue.trim() !== '') return String(num);
@@ -28,17 +31,33 @@ function renderFieldValue(mapping: FieldMapping, alias?: string): string {
   const src = mapping.source;
   if (!src) return 'null';
 
+  // enum / values-set lookup — bake the dictionary inline
+  if (mapping.valuesSetId) {
+    const path = alias
+      ? `${alias}.${src}`
+      : src.replace(/\[?\*\]?/g, '');
+    const dict = valuesSetMap?.[mapping.valuesSetId];
+    if (dict && Object.keys(dict).length > 0) {
+      const entries = Object.entries(dict)
+        .map(([k, v]) => `"${k}": "${v}"`)
+        .join(', ');
+      return `{{ $__e = { ${entries} }; ($__e[${path}] ?? ${path}) | json }}{{# enum:${mapping.valuesSetId} #}}`;
+    }
+    // values set not available locally — emit passthrough + annotation so parseScriban can restore
+    return `{{ ${path} | json }}{{# enum:${mapping.valuesSetId} #}}`;
+  }
+
   // transform expression — replace "value" with the actual path
   if (mapping.transform) {
     const path = alias ? `${alias}.${src.split('.').pop()}` : src.replace(/\./g, '.');
-    return `{{ ${mapping.transform.replace(/\bvalue\b/g, path)} }}`;
+    return `{{ ${mapping.transform.replace(/\bvalue\b/g, path)} | json }}`;
   }
 
   // plain path
   const path = alias
     ? `${alias}.${src}` // within array context, src is already relative
     : src.replace(/\[?\*\]?/g, '');
-  return `{{ ${path} }}`;
+  return `{{ ${path} | json }}`;
 }
 
 function indent(lines: string, spaces: number): string {
@@ -51,10 +70,12 @@ function indent(lines: string, spaces: number): string {
 
 /**
  * Generate a Scriban template from field + array mappings.
+ * Pass valuesSetMap to bake enum dictionaries inline; omit for degraded passthrough.
  */
 export function generateScriban(
   fieldMappings: FieldMapping[],
-  arrayMappings: ArrayMapping[]
+  arrayMappings: ArrayMapping[],
+  valuesSetMap?: ValuesSetMap
 ): string {
   const rootLines: string[] = ['{'];
 
@@ -64,7 +85,7 @@ export function generateScriban(
   );
 
   for (const m of validFields) {
-    rootLines.push(`  "${m.target}": ${renderFieldValue(m)},`);
+    rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap)},`);
   }
 
   // ── Array mappings ────────────────────────────────────────────────────────
@@ -80,7 +101,7 @@ export function generateScriban(
     innerLines.push('  {');
     for (const m of am.mappings) {
       if (!m.target.trim()) continue;
-      innerLines.push(`    "${m.target}": ${renderFieldValue(m, alias)},`);
+      innerLines.push(`    "${m.target}": ${renderFieldValue(m, alias, valuesSetMap)},`);
     }
     innerLines.push('  },');
     if (am.filter) {
@@ -113,6 +134,43 @@ export interface ParsedMappings {
   fieldMappings: ParsedFieldMapping[];
   arrayMappings: ParsedArrayMapping[];
   warnings: string[];
+}
+
+/** Strip `| json` suffix from a Scriban expression */
+function stripJsonPipe(expr: string): string {
+  return expr.replace(/\s*\|\s*json\s*$/, '').trim();
+}
+
+/** Parse a Scriban expression body into source/transform/valuesSetId */
+function parseExpr(
+  raw: string,
+  valuesSetId: string | undefined,
+  alias?: string,
+): Pick<ParsedFieldMapping, 'source' | 'transform' | 'valuesSetId'> {
+  const expr = stripJsonPipe(raw.trim());
+
+  // Enum: $__e = { ... }; ($__e[path] ?? path)
+  if (valuesSetId || expr.startsWith('$__e')) {
+    const fallback = expr.match(/\?\?\s*([\w.]+)\s*\)/);
+    const src = fallback ? fallback[1] : expr;
+    const source = alias && src.startsWith(`${alias}.`) ? src.slice(alias.length + 1) : src;
+    return { source, valuesSetId };
+  }
+
+  // Simple path — only word chars and dots
+  if (/^[\w.]+$/.test(expr)) {
+    const source = alias && expr.startsWith(`${alias}.`) ? expr.slice(alias.length + 1) : expr;
+    return { source };
+  }
+
+  // Transform — convert alias.field references to `value`
+  const transformExpr = alias
+    ? expr.replace(new RegExp(`\\b${alias}\\.(\\w+)`, 'g'), 'value')
+    : expr;
+  const srcMatch = expr.match(/^([\w.]+)\s*[^\w.]/);
+  const rawSrc = srcMatch ? srcMatch[1] : '';
+  const source = alias && rawSrc.startsWith(`${alias}.`) ? rawSrc.slice(alias.length + 1) : rawSrc;
+  return { source, transform: transformExpr };
 }
 
 export function parseScriban(template: string): ParsedMappings {
@@ -157,13 +215,20 @@ export function parseScriban(template: string): ParsedMappings {
           i++; continue;
         }
 
-        const fieldMatch = innerLine.match(/"([\w.]+)"\s*:\s*\{\{\s*([\w.]+)\s*\}\}/);
+        const fieldMatch = innerLine.match(/"([\w.]+)"\s*:\s*(.*),?$/);
         if (fieldMatch) {
           const tgt = fieldMatch[1];
-          const src = fieldMatch[2].startsWith(`${alias}.`)
-            ? fieldMatch[2].slice(alias.length + 1)
-            : fieldMatch[2];
-          innerMappings.push({ source: src, target: tgt });
+          const rawVal = fieldMatch[2].replace(/,$/, '').trim();
+          const enumAnn = rawVal.match(/\{\{#\s*enum:([\w-]+)\s*#\}\}/);
+          const innerValuesSetId = enumAnn ? enumAnn[1] : undefined;
+          const cleanVal = rawVal.replace(/\{\{#\s*enum:[\w-]+\s*#\}\}/, '').trim();
+          const exprMatch = cleanVal.match(/\{\{-?\s*([\s\S]+?)\s*-?\}\}/);
+          if (exprMatch) {
+            const parsed = parseExpr(exprMatch[1], innerValuesSetId, alias);
+            innerMappings.push({ target: tgt, source: '', ...parsed });
+          } else if (!cleanVal.includes('{{')) {
+            innerMappings.push({ source: '', target: tgt, fixedValue: cleanVal.replace(/^"|"$/g, '') });
+          }
         }
         i++;
       }
@@ -181,13 +246,20 @@ export function parseScriban(template: string): ParsedMappings {
     if (simpleMatch && !line.includes('{{- for') && !line.startsWith('[') && !line.startsWith(']')) {
       const target = simpleMatch[1];
       const valueRaw = simpleMatch[2].replace(/,$/, '').trim();
-      const dynMatch = valueRaw.match(/\{\{[- ]*([\w. *]+)[- ]*\}\}/);
-      if (dynMatch) {
-        fieldMappings.push({ source: dynMatch[1].trim(), target });
-      } else if (!valueRaw.includes('{{')) {
-        // fixed value
-        const fixed = valueRaw.replace(/^"|"$/g, '');
-        fieldMappings.push({ source: '', target, fixedValue: fixed });
+
+      // enum annotation: {{# enum:setId #}} anywhere on the line
+      const enumAnnotation = valueRaw.match(/\{\{#\s*enum:([\w-]+)\s*#\}\}/);
+      const valuesSetId = enumAnnotation ? enumAnnotation[1] : undefined;
+
+      // strip the annotation before further parsing
+      const valueClean = valueRaw.replace(/\{\{#\s*enum:[\w-]+\s*#\}\}/, '').trim();
+
+      const exprMatch = valueClean.match(/\{\{-?\s*([\s\S]+?)\s*-?\}\}/);
+      if (exprMatch) {
+        const parsed = parseExpr(exprMatch[1], valuesSetId);
+        fieldMappings.push({ target, source: '', ...parsed });
+      } else if (!valueClean.includes('{{')) {
+        fieldMappings.push({ source: '', target, fixedValue: valueClean.replace(/^"|"$/g, '') });
       } else {
         warnings.push(`Could not parse: ${line}`);
       }

@@ -219,6 +219,7 @@ export const {
     usePauseSubscriptionMutation,
     useAggregateSubscriptionMutation,
     useUpdateSubscriptionMutation,
+    useSubscriptionQuery,
     useLazySubscriptionQuery,
     useCreateSubscriptionMutation,
     useSubscriptionsLookupQuery,

@@ -1,4 +1,5 @@
 import { ArrayMapping, FieldMapping, FilterCondition } from 'src/state/stateSlices/mappingEditor';
+import { ValuesSetMap } from 'src/utils/scribanGenerator';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -71,7 +72,8 @@ export interface PreviewResult {
 export function evaluateMappings(
   inputJson: string,
   fieldMappings: FieldMapping[],
-  arrayMappings: ArrayMapping[]
+  arrayMappings: ArrayMapping[],
+  valuesSetMap?: ValuesSetMap
 ): PreviewResult {
   const warnings: string[] = [];
   let inputObj: any = null;
@@ -106,7 +108,10 @@ export function evaluateMappings(
         warnings.push(`Source path not found: ${mapping.source}`);
         value = null;
       }
-      if (mapping.transform) {
+      if (mapping.valuesSetId) {
+        const dict = valuesSetMap?.[mapping.valuesSetId];
+        value = dict ? (dict[String(value)] ?? value) : value;
+      } else if (mapping.transform) {
         value = applyTransform(value, mapping.transform);
       }
     } else {
@@ -118,8 +123,6 @@ export function evaluateMappings(
       setByDotPath(result, mapping.target, value);
     }
   }
-
-  // ── Inline array field mappings (paths containing [*]) ────────────────────
   // Group by "sourceArrayPrefix|||targetArrayPrefix"
   const inlineGroups = new Map<string, FieldMapping[]>();
   for (const m of inlineArrayMappings) {
@@ -154,7 +157,12 @@ export function evaluateMappings(
         } else if (srcAfter) {
           val = getByDotPath(item, srcAfter);
           if (val === undefined) val = null;
-          if (m.transform) val = applyTransform(val, m.transform);
+          if (m.valuesSetId) {
+            const dict = valuesSetMap?.[m.valuesSetId];
+            val = dict ? (dict[String(val)] ?? val) : val;
+          } else if (m.transform) {
+            val = applyTransform(val, m.transform);
+          }
         } else {
           continue;
         }
@@ -193,7 +201,12 @@ export function evaluateMappings(
         } else if (m.source) {
           val = getByDotPath(item, m.source);
           if (val === undefined) val = null;
-          if (m.transform) val = applyTransform(val, m.transform);
+          if (m.valuesSetId) {
+            const dict = valuesSetMap?.[m.valuesSetId];
+            val = dict ? (dict[String(val)] ?? val) : val;
+          } else if (m.transform) {
+            val = applyTransform(val, m.transform);
+          }
         } else {
           continue;
         }

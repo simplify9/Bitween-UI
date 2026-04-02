@@ -12,6 +12,7 @@ import {
   updateArrayFieldMapping,
   updateArrayMapping,
 } from 'src/state/stateSlices/mappingEditor';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,7 +66,22 @@ const ArrayMappingModal: React.FC = () => {
   const [filterField, setFilterField] = useState('');
   const [filterOp, setFilterOp] = useState<FilterOperator>('!=');
   const [filterValue, setFilterValue] = useState('');
-  const [pendingMappings, setPendingMappings] = useState<Array<{ id: string; source: string; target: string; transform?: string }>>([]);
+  const [pendingMappings, setPendingMappings] = useState<Array<{ id: string; source: string; target: string; transform?: string; valuesSetId?: string; fixedValue?: string }>>([]);
+  // Which secondary panel is open for each mapping row: 'transform' | 'enum' | 'fixed' | null
+  const [openPanels, setOpenPanels] = useState<Record<string, 'transform' | 'enum' | 'fixed' | null>>({});
+
+  // Global adapter values sets for enum lookup
+  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const valuesSets = setsData?.result ?? [];
+
+  // Derive which secondary panel should be shown for a given row (data-driven fallback)
+  const getPanel = (m: { id: string; transform?: string; valuesSetId?: string; fixedValue?: string }): 'transform' | 'enum' | 'fixed' | null => {
+    if (m.id in openPanels) return openPanels[m.id];
+    if (('fixedValue' in m) && (m as any).fixedValue !== undefined) return 'fixed';
+    if (('valuesSetId' in m) && (m as any).valuesSetId) return 'enum';
+    if (m.transform) return 'transform';
+    return null;
+  };
 
   // Dropdown suggestions for source item fields (relative names from array items)
   const sourceItemProps = React.useMemo(() => getItemProperties(inputJson, source), [inputJson, source]);
@@ -120,6 +136,7 @@ const ArrayMappingModal: React.FC = () => {
       setFilterValue('');
       setPendingMappings([]);
     }
+    setOpenPanels({});
   }, [am, newArrayPresetTarget]);
 
   if (editingArrayId === null) return null;
@@ -317,82 +334,206 @@ const ArrayMappingModal: React.FC = () => {
                 Field mappings will be saved along with the array mapping.
               </p>
             )}
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {(isCreating ? pendingMappings : (am?.mappings ?? [])).map((m) => (
-                  <div key={m.id} className="flex items-center gap-2">
-                    <input
-                      list={`src-props-${m.id}`}
-                      className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400"
-                      placeholder="source field (relative)"
-                      value={m.source}
-                      onChange={(e) => {
-                        if (isCreating) {
-                          setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: e.target.value } : p));
-                        } else {
-                          am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, source: e.target.value } }));
-                        }
-                      }}
-                    />
-                    <datalist id={`src-props-${m.id}`}>
-                      {sourceItemProps.map((prop) => (
-                        <option key={prop} value={prop} />
-                      ))}
-                    </datalist>
-                    <span className="text-gray-400 flex-shrink-0 text-xs">→</span>
-                    <input
-                      list={`tgt-props-${m.id}`}
-                      className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400"
-                      placeholder="target field"
-                      value={m.target}
-                      onChange={(e) => {
-                        if (isCreating) {
-                          setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, target: e.target.value } : p));
-                        } else {
-                          am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, target: e.target.value } }));
-                        }
-                      }}
-                    />
-                    <datalist id={`tgt-props-${m.id}`}>
-                      {[
-                        ...new Set([
-                          ...targetItemProps,
-                          // also include targets from other rows in the same session
-                          ...(isCreating ? pendingMappings : (am?.mappings ?? []))
-                            .filter((p) => p.id !== m.id)
-                            .map((p) => p.target)
-                            .filter(Boolean),
-                        ]),
-                      ].map((prop) => (
-                        <option key={prop} value={prop} />
-                      ))}
-                    </datalist>
-                    <input
-                      className="w-24 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400"
-                      placeholder="transform"
-                      value={m.transform ?? ''}
-                      onChange={(e) => {
-                        if (isCreating) {
-                          setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: e.target.value || undefined } : p));
-                        } else {
-                          am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, transform: e.target.value || undefined } }));
-                        }
-                      }}
-                      title="Expression using 'value', e.g. value * 1.2"
-                    />
-                    <button
-                      className="text-gray-300 hover:text-rose-500 transition flex-shrink-0"
-                      onClick={() => {
-                        if (isCreating) {
-                          setPendingMappings((prev) => prev.filter((p) => p.id !== m.id));
-                        } else {
-                          am && dispatch(removeArrayFieldMapping({ arrayId: am.id, mappingId: m.id }));
-                        }
-                      }}
-                    >
-                      <HiOutlineTrash size={13} />
-                    </button>
+            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-0.5">
+              {(isCreating ? pendingMappings : (am?.mappings ?? [])).map((m) => {
+                const panel = getPanel(m);
+                const hasTransform = Boolean(m.transform);
+                const hasEnum = Boolean(('valuesSetId' in m) && (m as any).valuesSetId);
+                const hasFixed = ('fixedValue' in m) && (m as any).fixedValue !== undefined;
+
+                const clearExtras = (except: 'transform' | 'enum' | 'fixed') => {
+                  const patch: Record<string, undefined> = {};
+                  if (except !== 'transform' && hasTransform) patch.transform = undefined;
+                  if (except !== 'enum' && hasEnum) patch.valuesSetId = undefined;
+                  if (except !== 'fixed' && hasFixed) patch.fixedValue = undefined;
+                  if (Object.keys(patch).length === 0) return;
+                  if (isCreating) {
+                    setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, ...patch } : p));
+                  } else {
+                    am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, ...patch } }));
+                  }
+                };
+
+                const openTransform = () => {
+                  setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'transform' ? null : 'transform' }));
+                  clearExtras('transform');
+                };
+
+                const openEnum = () => {
+                  setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'enum' ? null : 'enum' }));
+                  clearExtras('enum');
+                };
+
+                const openFixed = () => {
+                  setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'fixed' ? null : 'fixed' }));
+                  clearExtras('fixed');
+                };
+
+                return (
+                  <div key={m.id} className="rounded border border-gray-100 bg-gray-50 px-2 py-1.5 space-y-1">
+                    {/* Row 1: source → target + toggle buttons + delete */}
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        list={`src-props-${m.id}`}
+                        className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
+                        placeholder="source"
+                        value={m.source}
+                        onChange={(e) => {
+                          if (isCreating) {
+                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: e.target.value } : p));
+                          } else {
+                            am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, source: e.target.value } }));
+                          }
+                        }}
+                      />
+                      <datalist id={`src-props-${m.id}`}>
+                        {sourceItemProps.map((prop) => <option key={prop} value={prop} />)}
+                      </datalist>
+                      <span className="text-gray-300 flex-shrink-0 text-xs select-none">→</span>
+                      <input
+                        list={`tgt-props-${m.id}`}
+                        className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
+                        placeholder="target"
+                        value={m.target}
+                        onChange={(e) => {
+                          if (isCreating) {
+                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, target: e.target.value } : p));
+                          } else {
+                            am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, target: e.target.value } }));
+                          }
+                        }}
+                      />
+                      <datalist id={`tgt-props-${m.id}`}>
+                        {[
+                          ...new Set([
+                            ...targetItemProps,
+                            ...(isCreating ? pendingMappings : (am?.mappings ?? []))
+                              .filter((p) => p.id !== m.id)
+                              .map((p) => p.target)
+                              .filter(Boolean),
+                          ]),
+                        ].map((prop) => <option key={prop} value={prop} />)}
+                      </datalist>
+                      {/* ƒ toggle */}
+                      <button
+                        title={hasTransform ? `Expression: ${m.transform}` : 'Add expression transform'}
+                        onClick={openTransform}
+                        className={[
+                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          panel === 'transform'
+                            ? 'bg-violet-100 border-violet-300 text-violet-700'
+                            : hasTransform
+                            ? 'bg-violet-50 border-violet-200 text-violet-400'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
+                        ].join(' ')}
+                      >ƒ</button>
+                      {/* ≡ toggle */}
+                      <button
+                        title={hasEnum ? `Enum: ${valuesSets.find((s) => s.id === (m as any).valuesSetId)?.name ?? (m as any).valuesSetId}` : 'Add enum / values-set lookup'}
+                        onClick={openEnum}
+                        className={[
+                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          panel === 'enum'
+                            ? 'bg-violet-100 border-violet-300 text-violet-700'
+                            : hasEnum
+                            ? 'bg-violet-50 border-violet-200 text-violet-400'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
+                        ].join(' ')}
+                      >≡</button>
+                      {/* " fixed-value toggle */}
+                      <button
+                        title={hasFixed ? `Fixed: "${(m as any).fixedValue}"` : 'Set fixed value'}
+                        onClick={openFixed}
+                        className={[
+                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          panel === 'fixed'
+                            ? 'bg-orange-100 border-orange-300 text-orange-700'
+                            : hasFixed
+                            ? 'bg-orange-50 border-orange-200 text-orange-400'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-orange-300 hover:text-orange-500',
+                        ].join(' ')}
+                      >"</button>
+                      {/* delete */}
+                      <button
+                        className="flex-shrink-0 text-gray-300 hover:text-rose-500 transition"
+                        onClick={() => {
+                          if (isCreating) {
+                            setPendingMappings((prev) => prev.filter((p) => p.id !== m.id));
+                          } else {
+                            am && dispatch(removeArrayFieldMapping({ arrayId: am.id, mappingId: m.id }));
+                          }
+                          setOpenPanels((prev) => { const next = { ...prev }; delete next[m.id]; return next; });
+                        }}
+                      >
+                        <HiOutlineTrash size={13} />
+                      </button>
+                    </div>
+
+                    {/* Secondary row — only when panel is open */}
+                    {panel === 'transform' && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-violet-400 font-mono flex-shrink-0 w-4 text-center select-none">ƒ</span>
+                        <input
+                          autoFocus
+                          className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+                          placeholder="e.g. value * 1.1  — 'value' = source field"
+                          value={m.transform ?? ''}
+                          onChange={(e) => {
+                            if (isCreating) {
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: e.target.value || undefined } : p));
+                            } else {
+                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, transform: e.target.value || undefined } }));
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {panel === 'enum' && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-violet-400 font-mono flex-shrink-0 w-4 text-center select-none">≡</span>
+                        <select
+                          className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+                          value={('valuesSetId' in m ? (m as any).valuesSetId : undefined) ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value || undefined;
+                            if (isCreating) {
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, valuesSetId: val } : p));
+                            } else {
+                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, valuesSetId: val } }));
+                            }
+                          }}
+                        >
+                          <option value="">— pick values set —</option>
+                          {valuesSets.map((s) => (
+                            <option key={s.id} value={s.id}>{s.name} ({s.id})</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {panel === 'fixed' && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-orange-400 font-mono flex-shrink-0 w-4 text-center select-none">"</span>
+                        <input
+                          autoFocus
+                          className="flex-1 border border-orange-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-orange-400 placeholder-gray-300 text-orange-700"
+                          placeholder="fixed constant value"
+                          value={('fixedValue' in m ? (m as any).fixedValue : undefined) ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (isCreating) {
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: val, source: '' } : p));
+                            } else {
+                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, fixedValue: val, source: '' } }));
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
-                ))}
+                );
+              })}
               </div>
               <button
                 className="mt-2 flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition"

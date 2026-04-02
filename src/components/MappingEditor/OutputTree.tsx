@@ -4,13 +4,13 @@ import { TreeNode } from 'src/utils/mappingPreview';
 import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
   addFieldMapping,
-  genId,
   openArrayModal,
   removeFieldMapping,
   selectMapping,
   toggleNodeCollapsed,
   updateFieldMapping,
 } from 'src/state/stateSlices/mappingEditor';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,11 +38,32 @@ interface OutputBranchProps {
 const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef }) => {
   const dispatch = useAppDispatch();
   const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
+  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
   const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
 
-  const mapping = fieldMappings.find((m) => m.target === node.path);
-  const isMapped = Boolean(mapping?.source || mapping?.fixedValue !== undefined);
+  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const valuesSets = setsData?.result ?? [];
+
+  // ── Detect if this leaf is an inner field of an array mapping ─────────────
+  // Paths from buildTree for array items look like "products[*].sku"
+  const isArrayField = node.path.includes('[*].');
+  const arrayParentTarget = isArrayField ? node.path.split('[*].')[0] : '';
+  const relativeKey = isArrayField ? node.path.split('[*].').slice(1).join('.') : '';
+  const arrayOwner = isArrayField
+    ? arrayMappings.find((am) => am.target === arrayParentTarget)
+    : undefined;
+  const innerMapping = arrayOwner?.mappings.find((m) => m.target === relativeKey);
+
+  // ── Normal field mapping lookup ───────────────────────────────────────────
+  const mapping = !isArrayField ? fieldMappings.find((m) => m.target === node.path) : undefined;
+  const isMapped = isArrayField
+    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined)
+    : Boolean(mapping?.source || mapping?.fixedValue !== undefined || mapping?.valuesSetId);
   const isSelected = mapping ? selectedId === mapping.id : false;
+
+  // Derived mode: 'fixed' | 'enum' | 'source'
+  const currentMode =
+    mapping?.fixedValue !== undefined ? 'fixed' : mapping?.valuesSetId ? 'enum' : 'source';
 
   const ref = useCallback(
     (el: HTMLElement | null) => {
@@ -52,40 +73,88 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
   );
 
   const handleDrop = (e: React.DragEvent) => {
+    if (isArrayField) return;
     e.preventDefault();
     const sourcePath = e.dataTransfer.getData('text/plain');
     if (!sourcePath) return;
     if (mapping) {
-      dispatch(updateFieldMapping({ id: mapping.id, source: sourcePath, fixedValue: undefined }));
+      dispatch(updateFieldMapping({ id: mapping.id, source: sourcePath, fixedValue: undefined, valuesSetId: undefined }));
     } else {
       dispatch(addFieldMapping({ source: sourcePath, target: node.path }));
     }
   };
 
-  const toggleFixed = (e: React.MouseEvent) => {
+  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'enum') => {
+    if (isArrayField) return;
     e.stopPropagation();
-    if (!mapping) {
-      dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: '' }));
-      return;
-    }
-    if (mapping.fixedValue !== undefined) {
-      dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined }));
+    if (next === 'fixed') {
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: '' }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: '', valuesSetId: undefined, transform: undefined }));
+      }
+    } else if (next === 'enum') {
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path, valuesSetId: valuesSets[0]?.id ?? '' }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: valuesSets[0]?.id ?? '', transform: undefined }));
+      }
     } else {
-      dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: '' }));
+      // source mode
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined }));
+      }
     }
   };
 
   const handleSelect = () => {
+    if (isArrayField) {
+      dispatch(openArrayModal({ id: arrayOwner?.id ?? '__new__', presetTarget: `${arrayParentTarget}[*]` }));
+      return;
+    }
     if (mapping) {
       dispatch(selectMapping(isSelected ? null : mapping.id));
     } else {
-      // create an unassigned mapping and select it
-      const id = genId();
       dispatch(addFieldMapping({ source: '', target: node.path }));
-      // The created mapping's id is generated inside the slice, so find it after
     }
   };
 
+  // ── Array inner field: read-only — managed via the array loop modal ───────
+  if (isArrayField) {
+    const displaySource = innerMapping?.source
+      ? innerMapping.source
+      : innerMapping?.fixedValue !== undefined
+      ? `"${innerMapping.fixedValue}"`
+      : null;
+
+    return (
+      <div
+        ref={ref}
+        onClick={handleSelect}
+        title="Managed by array mapping — click to open loop editor"
+        className="flex items-center gap-1.5 px-2 py-[3px] rounded border border-transparent text-xs cursor-pointer transition-all select-none hover:border-purple-200 hover:bg-purple-50"
+      >
+        <span
+          className={[
+            'w-2 h-2 rounded-full flex-shrink-0',
+            isMapped ? 'bg-emerald-400' : 'bg-rose-300',
+          ].join(' ')}
+        />
+        <span className="font-mono text-gray-700 truncate">{node.key}</span>
+        <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
+        <span className={['font-mono text-xs truncate flex-1', displaySource ? 'text-purple-600' : 'text-gray-400'].join(' ')}>
+          {displaySource ?? '— unassigned —'}
+        </span>
+        <span className="text-[10px] text-purple-400 border border-purple-200 rounded px-1 flex-shrink-0 bg-purple-50">
+          loop
+        </span>
+      </div>
+    );
+  }
+
+  // ── Normal (non-array) leaf ───────────────────────────────────────────────
   return (
     <div
       ref={ref}
@@ -93,7 +162,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
       onDrop={handleDrop}
       onClick={handleSelect}
       className={[
-        'flex items-center gap-1.5 px-2 py-[3px] rounded border text-xs cursor-pointer transition-all select-none',
+        'rounded border text-xs cursor-pointer transition-all select-none',
         isSelected
           ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-200'
           : 'border-transparent hover:border-gray-200 hover:bg-gray-50',
@@ -101,84 +170,148 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
         .filter(Boolean)
         .join(' ')}
     >
-      <span
-        className={[
-          'w-2 h-2 rounded-full flex-shrink-0',
-          isMapped ? 'bg-emerald-400' : 'bg-rose-300',
-        ].join(' ')}
-      />
-      <span className="font-mono text-gray-700 truncate">{node.key}</span>
-      <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
-
-      {/* Mode button: src vs fixed */}
-      <button
-        onClick={toggleFixed}
-        title={mapping?.fixedValue !== undefined ? 'Switch to source binding' : 'Switch to fixed value'}
-        className={[
-          'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
-          mapping?.fixedValue !== undefined
-            ? 'border-amber-300 bg-amber-50 text-amber-600'
-            : 'border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500',
-        ].join(' ')}
-      >
-        {mapping?.fixedValue !== undefined ? 'fx' : 'src'}
-      </button>
-
-      {/* Value/path display + inline edit */}
-      {mapping?.fixedValue !== undefined ? (
-        <input
-          className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
-          placeholder="fixed value…"
-          value={mapping.fixedValue ?? ''}
-          onChange={(e) => dispatch(updateFieldMapping({ id: mapping.id, fixedValue: e.target.value }))}
-          onClick={(e) => e.stopPropagation()}
+      {/* ── Main row ── */}
+      <div className="flex items-center gap-1.5 px-2 py-[3px]">
+        <span
+          className={[
+            'w-2 h-2 rounded-full flex-shrink-0',
+            isMapped ? 'bg-emerald-400' : 'bg-rose-300',
+          ].join(' ')}
         />
-      ) : (
-        <select
-          className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
-          value={mapping?.source ?? ''}
-          onChange={(e) => {
-            if (mapping) {
-              dispatch(updateFieldMapping({ id: mapping.id, source: e.target.value }));
-            } else {
-              dispatch(addFieldMapping({ source: e.target.value, target: node.path }));
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <option value="">— unassigned —</option>
-          {sourcePaths.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </select>
-      )}
+        <span className="font-mono text-gray-700 truncate">{node.key}</span>
+        <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
 
-      {/* Transform input (visible when selected + source assigned) */}
-      {isSelected && mapping?.source && mapping.fixedValue === undefined && (
-        <input
-          className="w-24 flex-shrink-0 border border-gray-200 rounded px-1 text-xs font-mono bg-white focus:outline-none focus:border-blue-400"
-          placeholder="e.g. value*1.2"
-          value={mapping.transform ?? ''}
-          onChange={(e) =>
-            dispatch(updateFieldMapping({ id: mapping.id, transform: e.target.value || undefined }))
-          }
-          onClick={(e) => e.stopPropagation()}
-          title="Transform expression: use 'value' to reference the source value"
-        />
-      )}
-
-      {mapping && (
+        {/* Mode buttons: src | fx | ≡ */}
         <button
-          className="flex-shrink-0 text-gray-300 hover:text-rose-500 transition"
-          onClick={(e) => {
-            e.stopPropagation();
-            dispatch(removeFieldMapping(mapping.id));
-          }}
+          onClick={(e) => switchMode(e, currentMode === 'source' ? 'fixed' : 'source')}
+          title={currentMode === 'fixed' ? 'Switch to source binding' : 'Switch to fixed value'}
+          className={[
+            'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
+            currentMode === 'fixed'
+              ? 'border-amber-300 bg-amber-50 text-amber-600'
+              : 'border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500',
+          ].join(' ')}
         >
-          <HiOutlineTrash size={12} />
+          {currentMode === 'fixed' ? 'fx' : 'src'}
         </button>
+        <button
+          onClick={(e) => switchMode(e, currentMode === 'enum' ? 'source' : 'enum')}
+          title={currentMode === 'enum' ? 'Switch to source binding' : 'Use enum / values set lookup'}
+          className={[
+            'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
+            currentMode === 'enum'
+              ? 'border-violet-400 bg-violet-50 text-violet-600'
+              : 'border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
+          ].join(' ')}
+        >
+          ≡
+        </button>
+
+        {/* Value / path display based on current mode */}
+        {currentMode === 'fixed' ? (
+          <input
+            className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
+            placeholder="fixed value…"
+            value={mapping?.fixedValue ?? ''}
+            onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, fixedValue: e.target.value }))}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : currentMode === 'enum' ? (
+          <span
+            title={`Enum lookup: ${valuesSets.find((s) => s.id === mapping?.valuesSetId)?.name ?? mapping?.valuesSetId ?? ''}`}
+            className="flex-shrink-0 text-[10px] font-mono text-violet-600 border border-violet-200 bg-violet-50 rounded px-1 truncate max-w-[8rem]"
+          >
+            ≡ {valuesSets.find((s) => s.id === mapping?.valuesSetId)?.name ?? mapping?.valuesSetId ?? ''}
+          </span>
+        ) : (
+          <select
+            className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
+            value={mapping?.source ?? ''}
+            onChange={(e) => {
+              if (mapping) {
+                dispatch(updateFieldMapping({ id: mapping.id, source: e.target.value }));
+              } else {
+                dispatch(addFieldMapping({ source: e.target.value, target: node.path }));
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <option value="">— unassigned —</option>
+            {sourcePaths.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Transform badge — shown when NOT selected but transform exists */}
+        {!isSelected && mapping?.transform && currentMode === 'source' && (
+          <span
+            title={`Expression: ${mapping.transform}`}
+            className="flex-shrink-0 text-[10px] font-mono text-violet-600 border border-violet-200 bg-violet-50 rounded px-1 cursor-default"
+          >
+            ƒ
+          </span>
+        )}
+
+        {mapping && (
+          <button
+            className="flex-shrink-0 text-gray-300 hover:text-rose-500 transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(removeFieldMapping(mapping.id));
+            }}
+          >
+            <HiOutlineTrash size={12} />
+          </button>
+        )}
+      </div>
+
+      {/* ── Enum mode: source path selector + values set selector ── */}
+      {isSelected && currentMode === 'enum' && (
+        <div className="flex flex-col gap-1 px-2 pb-1.5" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-gray-400 font-mono flex-shrink-0 w-14 select-none">source</span>
+            <select
+              className="flex-1 border border-gray-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400"
+              value={mapping?.source ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, source: e.target.value }))}
+            >
+              <option value="">— pick source field —</option>
+              {sourcePaths.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-violet-500 font-mono flex-shrink-0 w-14 select-none">≡ set</span>
+            <select
+              className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+              value={mapping?.valuesSetId ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, valuesSetId: e.target.value || undefined }))}
+            >
+              <option value="">— pick values set —</option>
+              {valuesSets.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.id})</option>)}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ── Expression row — full width, only when selected + source mode + source assigned ── */}
+      {isSelected && currentMode === 'source' && mapping?.source && (
+        <div
+          className="flex items-center gap-1.5 px-2 pb-1.5"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-[10px] text-violet-500 font-mono flex-shrink-0 w-5 text-center select-none">ƒ</span>
+          <input
+            className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+            placeholder="e.g. value * 1.2  or  value + ' suffix'  — 'value' = source field"
+            value={mapping.transform ?? ''}
+            onChange={(e) =>
+              dispatch(updateFieldMapping({ id: mapping.id, transform: e.target.value || undefined }))
+            }
+          />
+        </div>
       )}
     </div>
   );

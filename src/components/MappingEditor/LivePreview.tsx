@@ -1,20 +1,69 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MdOutlineContentCopy } from 'react-icons/md';
 import { useTypedSelector } from 'src/state/ReduxSotre';
-import { evaluateMappings } from 'src/utils/mappingPreview';
+import { usePreviewMappingMutation } from 'src/client/apis/mappersApi';
+import { generateScriban } from 'src/utils/scribanGenerator';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
+
+const DEBOUNCE_MS = 600;
 
 const LivePreview: React.FC = () => {
   const inputJson = useTypedSelector((s) => s.mappingEditor.inputJson);
   const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
   const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
+  const manualTemplate = useTypedSelector((s) => s.mappingEditor.manualTemplate);
+  const mode = useTypedSelector((s) => s.mappingEditor.mode);
   const validationErrors = useTypedSelector((s) => s.mappingEditor.validationErrors);
 
-  const { output, warnings } = useMemo(
-    () => evaluateMappings(inputJson, fieldMappings, arrayMappings),
-    [inputJson, fieldMappings, arrayMappings]
-  );
+  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
 
-  const formatted = output !== null ? JSON.stringify(output, null, 2) : null;
+  const [previewMapping] = usePreviewMappingMutation();
+  const [outputJson, setOutputJson] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      if (!inputJson.trim()) {
+        setOutputJson(null);
+        setPreviewError(null);
+        return;
+      }
+
+      // Build valuesSetMap for enum baking
+      const valuesSetMap: Record<string, Record<string, string>> = {};
+      for (const s of setsData?.result ?? []) {
+        valuesSetMap[s.id] = s.values;
+      }
+
+      // Use manual template if in manual mode, otherwise generate from state
+      const template =
+        mode === 'manual' && manualTemplate
+          ? manualTemplate
+          : generateScriban(fieldMappings, arrayMappings, valuesSetMap);
+
+      try {
+        const result = await previewMapping({
+          scribanTemplate: template,
+          inputJson,
+        }).unwrap();
+        setOutputJson(result.outputJson ?? null);
+        setPreviewError(result.error ?? null);
+      } catch {
+        setPreviewError('Failed to reach preview API');
+        setOutputJson(null);
+      }
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [inputJson, fieldMappings, arrayMappings, manualTemplate, mode, setsData]);
+
+  const formatted = outputJson !== null ? outputJson : null;
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -34,14 +83,10 @@ const LivePreview: React.FC = () => {
         )}
       </div>
 
-      {/* Warnings */}
-      {warnings.length > 0 && (
+      {/* Preview error */}
+      {previewError && (
         <div className="flex-shrink-0 px-4 py-2 bg-amber-50 border-b border-amber-100">
-          {warnings.map((w, i) => (
-            <p key={i} className="text-xs text-amber-600 font-mono">
-              ⚠ {w}
-            </p>
-          ))}
+          <p className="text-xs text-amber-600 font-mono">⚠ {previewError}</p>
         </div>
       )}
 

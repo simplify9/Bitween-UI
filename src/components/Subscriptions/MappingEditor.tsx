@@ -32,7 +32,7 @@ type OutputNode = {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export const NATIVE_JSON_MAPPER_ID = "NativeJsonFieldMapper";
+export const NATIVE_JSON_MAPPER_ID = "NativeJSONMapper";
 
 type MappingRow = { id: string; outputField: string; sourcePath: string; fixedValue?: string };
 

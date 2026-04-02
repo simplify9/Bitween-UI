@@ -102,6 +102,7 @@ const FlowCanvas: React.FC = () => {
   const inputJson = useTypedSelector((s) => s.mappingEditor.inputJson);
   const outputJson = useTypedSelector((s) => s.mappingEditor.outputJson);
   const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
+  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
   const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState([]);
@@ -119,6 +120,16 @@ const FlowCanvas: React.FC = () => {
 
     const mappedSources = new Set(fieldMappings.map((m) => m.source));
     const mappedTargets = new Set(fieldMappings.map((m) => m.target));
+
+    // Also mark array mapping source/target paths as mapped
+    for (const am of arrayMappings) {
+      mappedSources.add(am.source);
+      mappedTargets.add(am.target);
+      for (const m of am.mappings) {
+        if (m.source) mappedSources.add(`${am.source}[*].${m.source}`);
+        if (m.target) mappedTargets.add(`${am.target}[*].${m.target}`);
+      }
+    }
 
     const sourceNodes: Node[] = sourceFlatList.map(({ node, depth }, idx) => ({
       id: `src::${node.path}`,
@@ -146,26 +157,61 @@ const FlowCanvas: React.FC = () => {
       draggable: true,
     }));
 
-    const edges: Edge[] = fieldMappings
-      .filter((m) => m.source && m.target)
-      .map((m) => ({
-        id: m.id,
-        source: `src::${m.source}`,
-        target: `tgt::${m.target}`,
-        type: 'smoothstep',
-        animated: false,
-        selected: selectedId === m.id,
-        style: {
-          stroke: selectedId === m.id ? '#3b82f6' : '#94a3b8',
-          strokeWidth: selectedId === m.id ? 2 : 1.5,
-        },
-        markerEnd: { type: MarkerType.ArrowClosed, color: selectedId === m.id ? '#3b82f6' : '#94a3b8' },
-        data: { mappingId: m.id },
-      }));
+    const edges: Edge[] = [
+      // ── Regular field mapping edges ───────────────────────────────────────
+      ...fieldMappings
+        .filter((m) => m.source && m.target)
+        .map((m) => ({
+          id: m.id,
+          source: `src::${m.source}`,
+          target: `tgt::${m.target}`,
+          type: 'smoothstep',
+          animated: false,
+          selected: selectedId === m.id,
+          style: {
+            stroke: selectedId === m.id ? '#3b82f6' : '#94a3b8',
+            strokeWidth: selectedId === m.id ? 2 : 1.5,
+          },
+          markerEnd: { type: MarkerType.ArrowClosed, color: selectedId === m.id ? '#3b82f6' : '#94a3b8' },
+          data: { mappingId: m.id },
+        })),
+
+      // ── Array mapping edges (violet) ──────────────────────────────────────
+      ...arrayMappings.flatMap((am) => [
+        // Container-level: items → products
+        ...(am.source && am.target
+          ? [{
+              id: `am-container-${am.id}`,
+              source: `src::${am.source}`,
+              target: `tgt::${am.target}`,
+              type: 'smoothstep',
+              animated: true,
+              style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '6 3' },
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+              label: am.alias ?? 'loop',
+              labelStyle: { fontSize: 10, fill: '#8b5cf6' },
+              data: {},
+            }]
+          : []),
+        // Inner field edges: items[*].productId → products[*].sku
+        ...am.mappings
+          .filter((m) => m.source && m.target)
+          .map((m) => ({
+            id: `am-field-${am.id}-${m.id}`,
+            source: `src::${am.source}[*].${m.source}`,
+            target: `tgt::${am.target}[*].${m.target}`,
+            type: 'smoothstep',
+            animated: false,
+            style: { stroke: '#8b5cf6', strokeWidth: 1.5 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+            data: {},
+          })),
+      ]),
+    ];
 
     setFlowNodes([...sourceNodes, ...targetNodes]);
     setFlowEdges(edges);
-  }, [inputJson, outputJson, fieldMappings, selectedId]);
+  }, [inputJson, outputJson, fieldMappings, arrayMappings, selectedId]);
 
   const onConnect = useCallback(
     (connection: Connection) => {

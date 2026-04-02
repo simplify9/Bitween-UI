@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { KeyValuePair } from 'src/types/common';
+import { parseScriban } from 'src/utils/scribanGenerator';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,9 @@ export interface FieldMapping {
   transform?: string;
   /** When set, ignore source and use a fixed constant value */
   fixedValue?: string;
+  /** When set, perform a dictionary lookup via this GlobalAdapterValuesSet id.
+   *  Priority: fixedValue > valuesSetId > source+transform */
+  valuesSetId?: string;
 }
 
 export interface ArrayMapping {
@@ -98,10 +102,11 @@ function pushHistory(state: MappingEditorState) {
   state.future = [];
 }
 
-export const NATIVE_JSON_MAPPER_ID = 'NativeJsonFieldMapper';
+export const NATIVE_JSON_MAPPER_ID = 'NativeJSONMapper';
 
 function loadFromProps(props: KeyValuePair[]): CoreState {
   const rulesEntry = props.find((p) => p.key === 'Rules');
+  const scribanEntry = props.find((p) => p.key === 'ScribanTemplate');
   const arrayEntry = props.find((p) => p.key === 'ArrayRules');
   const fieldMappings: FieldMapping[] = [];
   const arrayMappings: ArrayMapping[] = [];
@@ -117,6 +122,25 @@ function loadFromProps(props: KeyValuePair[]): CoreState {
             target: r.outputField ?? r.OutputField ?? '',
             transform: r.transform ?? r.Transform ?? undefined,
             fixedValue: r.fixedValue ?? r.FixedValue ?? undefined,
+            valuesSetId: r.valuesSetId ?? r.ValuesSetId ?? undefined,
+          });
+        });
+      }
+    } catch {}
+  } else if (scribanEntry?.value && scribanEntry.value !== '{}') {
+    // New mapper — parse the Scriban template back to field mappings
+    try {
+      const parsed = parseScriban(scribanEntry.value);
+      parsed.fieldMappings.forEach((m, i) => {
+        fieldMappings.push({ id: `loaded-${i}`, ...m });
+      });
+      // Array mappings from Scriban are less complete than ArrayRules — only use as fallback
+      if (!arrayEntry?.value) {
+        parsed.arrayMappings.forEach((am, i) => {
+          arrayMappings.push({
+            id: `arr-loaded-${i}`,
+            ...am,
+            mappings: am.mappings.map((m, j) => ({ id: `arr-loaded-${i}-${j}`, ...m })),
           });
         });
       }
@@ -140,6 +164,7 @@ function loadFromProps(props: KeyValuePair[]): CoreState {
               target: m.target ?? '',
               transform: m.transform,
               fixedValue: m.fixedValue,
+              valuesSetId: m.valuesSetId ?? undefined,
             })),
           });
         });
@@ -230,6 +255,11 @@ export const mappingEditorSlice = createSlice({
       state.manualTemplate = action.payload;
       state.isManualDirty = true;
     },
+    /** Set template without marking it dirty — used when auto-generating on mode switch */
+    syncManualTemplate(state, action: PayloadAction<string>) {
+      state.manualTemplate = action.payload;
+      state.isManualDirty = false;
+    },
     clearManualDirty(state) {
       state.isManualDirty = false;
     },
@@ -252,6 +282,10 @@ export const mappingEditorSlice = createSlice({
     setFieldMappings(state, action: PayloadAction<FieldMapping[]>) {
       pushHistory(state);
       state.fieldMappings = action.payload;
+    },
+    setArrayMappings(state, action: PayloadAction<ArrayMapping[]>) {
+      pushHistory(state);
+      state.arrayMappings = action.payload;
     },
 
     // ── Array mappings ────────────────────────────────────────────────────────
@@ -358,20 +392,53 @@ export const mappingEditorSlice = createSlice({
     },
     autoMatch(state) {
       pushHistory(state);
-      // Normalize name → strip dots/brackets/case
       const norm = (s: string) =>
         (s.split('.').pop() ?? s).toLowerCase().replace(/[_\-\[\]\*]/g, '');
       let inputPaths: string[] = [];
-      try {
-        const inp = JSON.parse(state.inputJson);
-        inputPaths = flatPathsFromObj(inp);
-      } catch {}
-      state.fieldMappings = state.fieldMappings.map((m) => {
-        if (m.source || m.fixedValue !== undefined) return m;
-        const normTarget = norm(m.target);
-        const match = inputPaths.find((p) => norm(p) === normTarget);
-        return match ? { ...m, source: match } : m;
-      });
+      let outputPaths: string[] = [];
+      try { inputPaths = flatPathsFromObj(JSON.parse(state.inputJson)); } catch {}
+      try { outputPaths = flatPathsFromObj(JSON.parse(state.outputJson)); } catch {}
+
+      // Array-mapped target prefixes so we can skip their inner paths
+      const arrayTargets = new Set(state.arrayMappings.map((am) => am.target));
+
+      // Paths to process: scalar leaf paths from outputJson (preferred) or from
+      // existing fieldMappings targets (fallback when no outputJson is pasted).
+      const targetsToProcess = outputPaths.length > 0
+        ? outputPaths.filter((p) => {
+            // Skip array-item paths (managed by arrayMappings)
+            if (p.includes('[*]')) return false;
+            // Skip paths that belong under a known array target
+            const parts = p.split('.');
+            return !parts.some((_, i) => arrayTargets.has(parts.slice(0, i + 1).join('.')));
+          })
+        : state.fieldMappings.map((m) => m.target);
+
+      const existingByTarget = new Map(state.fieldMappings.map((m) => [m.target, m]));
+      const result: FieldMapping[] = [];
+
+      for (const target of targetsToProcess) {
+        const existing = existingByTarget.get(target);
+        // Already fully mapped → keep as-is
+        if (existing?.source || existing?.fixedValue !== undefined) {
+          result.push(existing);
+          continue;
+        }
+        const match = inputPaths.find((p) => norm(p) === norm(target));
+        if (existing) {
+          result.push(match ? { ...existing, source: match } : existing);
+        } else if (match) {
+          // Create a new field mapping for this target
+          result.push({ id: genId(), source: match, target });
+        }
+      }
+
+      // Preserve any manually-added mappings whose targets weren't in the processed list
+      for (const m of state.fieldMappings) {
+        if (!result.find((r) => r.target === m.target)) result.push(m);
+      }
+
+      state.fieldMappings = result;
     },
     generateFromTargetJson(state) {
       pushHistory(state);
@@ -412,11 +479,13 @@ export const {
   setOutputJson,
   setMode,
   setManualTemplate,
+  syncManualTemplate,
   clearManualDirty,
   addFieldMapping,
   removeFieldMapping,
   updateFieldMapping,
   setFieldMappings,
+  setArrayMappings,
   addArrayMapping,
   removeArrayMapping,
   updateArrayMapping,

@@ -18,12 +18,15 @@ import {
   NATIVE_JSON_MAPPER_ID,
   openArrayModal,
   redo,
+  setArrayMappings,
+  setFieldMappings,
   setInputJson,
   setMode,
   setOutputJson,
   setSearchInput,
   setSearchOutput,
   setValidationErrors,
+  syncManualTemplate,
   undo,
   ValidationError,
 } from 'src/state/stateSlices/mappingEditor';
@@ -36,13 +39,13 @@ import {
 import SourceTree from './SourceTree';
 import OutputTree from './OutputTree';
 import ConnectionCanvas from './ConnectionCanvas';
-import FlowCanvas from './FlowCanvas';
 import ManualEditor from './ManualEditor';
 import LivePreview from './LivePreview';
 import ArrayMappingModal from './ArrayMappingModal';
-import { useLazySubscriptionQuery, useUpdateSubscriptionMutation } from 'src/client/apis/subscriptionsApi';
+import { useSubscriptionQuery, useLazySubscriptionQuery, useUpdateSubscriptionMutation } from 'src/client/apis/subscriptionsApi';
 import { KeyValuePair } from 'src/types/common';
-import { generateScriban } from 'src/utils/scribanGenerator';
+import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Mode toggle button ───────────────────────────────────────────────────────
 
@@ -84,30 +87,58 @@ const MappingEditorPage: React.FC = () => {
   const future = useTypedSelector((s) => s.mappingEditor.future);
   const editingArrayId = useTypedSelector((s) => s.mappingEditor.editingArrayId);
   const manualTemplate = useTypedSelector((s) => s.mappingEditor.manualTemplate);
+  const isManualDirty = useTypedSelector((s) => s.mappingEditor.isManualDirty);
   const searchInput = useTypedSelector((s) => s.mappingEditor.searchInput);
   const searchOutput = useTypedSelector((s) => s.mappingEditor.searchOutput);
 
   // ── Data loading ────────────────────────────────────────────────────────────
+  const { data: subscriptionData } = useSubscriptionQuery(subscriptionId, { skip: !subscriptionId, refetchOnMountOrArgChange: true });
   const [getSubscription] = useLazySubscriptionQuery();
   const [updateSubscription, { isLoading: isSaving }] = useUpdateSubscriptionMutation();
   const [loaded, setLoaded] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [jsonAreaHeight, setJsonAreaHeight] = useState(96); // px — both panels share this
+  const srcTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const tgtTextareaRef = useRef<HTMLTextAreaElement>(null);
+  // Global adapter values sets — used for enum lookup in live preview + template generation
+  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const valuesSetMap = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+    for (const s of setsData?.result ?? []) {
+      map[s.id] = s.values;
+    }
+    return map;
+  }, [setsData]);
+  // Sync both textareas to the height of whichever was just resized
+  const syncHeight = useCallback((from: 'src' | 'tgt') => {
+    const el = from === 'src' ? srcTextareaRef.current : tgtTextareaRef.current;
+    if (!el) return;
+    const h = el.offsetHeight;
+    setJsonAreaHeight(h);
+  }, []);
 
   useEffect(() => {
-    if (!subscriptionId || loaded) return;
-    getSubscription(subscriptionId).then((res) => {
-      if (res.data) {
-        dispatch(
-          loadEditorContext({
-            subscriptionId,
-            mapperId: res.data.mapperId,
-            mapperProperties: res.data.mapperProperties,
-          })
-        );
-        setLoaded(true);
-      }
-    });
+    if (!subscriptionId) {
+      dispatch(loadEditorContext({ subscriptionId: 0, mapperProperties: [] }));
+      return;
+    }
+    // Clear immediately whenever subscriptionId changes
+    dispatch(loadEditorContext({ subscriptionId, mapperProperties: [] }));
+    setLoaded(false);
   }, [subscriptionId]);
+
+  useEffect(() => {
+    if (!subscriptionData || loaded) return;
+    dispatch(
+      loadEditorContext({
+        subscriptionId,
+        mapperId: subscriptionData.mapperId,
+        mapperProperties: subscriptionData.mapperProperties,
+      })
+    );
+    dispatch(autoMatch());
+    setLoaded(true);
+  }, [subscriptionData]);
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -129,6 +160,38 @@ const MappingEditorPage: React.FC = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [fieldMappings, arrayMappings, manualTemplate]);
 
+  // ── Mode change with Manual ↔ Visual/Canvas sync ─────────────────────────────
+  const handleModeChange = useCallback(
+    (newMode: 'visual' | 'manual') => {
+      if (mode === 'manual' && newMode !== 'manual' && isManualDirty && manualTemplate) {
+        // Leaving Manual with dirty edits — parse template back into Redux state
+        const parsed = parseScriban(manualTemplate);
+        dispatch(
+          setFieldMappings(
+            parsed.fieldMappings.map((m, i) => ({ id: `parsed-${i}-${Date.now()}`, ...m }))
+          )
+        );
+        dispatch(
+          setArrayMappings(
+            parsed.arrayMappings.map((am, i) => ({
+              id: `parsed-am-${i}-${Date.now()}`,
+              ...am,
+              mappings: am.mappings.map((m, j) => ({
+                id: `parsed-am-${i}-${j}-${Date.now()}`,
+                ...m,
+              })),
+            }))
+          )
+        );
+      } else if (newMode === 'manual') {
+        // Entering Manual — always regenerate template from current Redux state
+        dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings, valuesSetMap)));
+      }
+      dispatch(setMode(newMode));
+    },
+    [mode, isManualDirty, manualTemplate, fieldMappings, arrayMappings, valuesSetMap, dispatch]
+  );
+
   // ── Trees ───────────────────────────────────────────────────────────────────
   const inputObj = useMemo(() => tryParseJson(inputJson), [inputJson]);
   // outputObj is only used for "Generate from JSON" — the live tree is always driven by fieldMappings
@@ -138,22 +201,23 @@ const MappingEditorPage: React.FC = () => {
     [inputObj]
   );
   const outputTree: TreeNode[] = useMemo(() => {
-    const paths: string[] = fieldMappings.map((m) => m.target).filter(Boolean);
+    // Use target JSON as the structure source when available — mirrors how
+    // the source tree is driven by inputObj. This is the single source of truth
+    // for what fields exist in the output.
+    if (outputObj) return buildTree(outputObj);
 
-    // Contribute array mapping targets so they appear in the output tree
+    // Fallback: derive tree from current mappings when no target JSON is pasted
+    const paths: string[] = fieldMappings.map((m) => m.target).filter(Boolean);
     for (const am of arrayMappings) {
       if (!am.target) continue;
-      // Add the array container node itself (as array type placeholder)
       const containerPath = `${am.target}[*]`;
       if (!paths.includes(containerPath)) paths.push(containerPath);
-      // Add each child field mapping
       for (const m of am.mappings) {
         if (m.target) paths.push(`${am.target}[*].${m.target}`);
       }
     }
-
     return buildMappingTree(paths);
-  }, [fieldMappings, arrayMappings]);
+  }, [outputObj, fieldMappings, arrayMappings]);
 
   const sourcePaths = useMemo(
     () => sourceTree.flatMap(flattenLeafPaths),
@@ -211,17 +275,16 @@ const MappingEditorPage: React.FC = () => {
   // ── Save ─────────────────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     handleValidate();
-    const rules = fieldMappings
-      .filter((m) => m.target.trim())
-      .map((m) => ({
-        outputField: m.target,
-        sourcePath: m.source,
-        ...(m.fixedValue !== undefined ? { fixedValue: m.fixedValue } : {}),
-        ...(m.transform ? { transform: m.transform } : {}),
-      }));
+
+    // Always generate the Scriban template — use the manual template if in manual mode
+    // and it hasn't been modified since last sync, otherwise regenerate from state
+    const templateToSave =
+      mode === 'manual' && manualTemplate
+        ? manualTemplate
+        : generateScriban(fieldMappings, arrayMappings, valuesSetMap);
 
     const mapperProperties: KeyValuePair[] = [
-      { key: 'Rules', value: JSON.stringify(rules) },
+      { key: 'ScribanTemplate', value: templateToSave },
     ];
     if (arrayMappings.length > 0) {
       mapperProperties.push({ key: 'ArrayRules', value: JSON.stringify(arrayMappings) });
@@ -232,18 +295,22 @@ const MappingEditorPage: React.FC = () => {
     if (outputJson.trim()) {
       mapperProperties.push({ key: 'TargetJson', value: outputJson });
     }
-    if (mode === 'manual' && manualTemplate) {
-      mapperProperties.push({ key: 'ScribanTemplate', value: manualTemplate });
-    }
 
-    await updateSubscription({
+    // Use the reactive subscriptionData already in memory — no extra fetch needed
+    if (!subscriptionData) return;
+
+    const result = await updateSubscription({
+      ...subscriptionData,
       id: subscriptionId,
       mapperId: NATIVE_JSON_MAPPER_ID,
       mapperProperties,
-    } as any);
+    });
 
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    if ('data' in result) {
+      localStorage.removeItem(`mapper_draft_${subscriptionId}`);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    }
   }, [
     fieldMappings,
     arrayMappings,
@@ -251,15 +318,16 @@ const MappingEditorPage: React.FC = () => {
     outputJson,
     mode,
     manualTemplate,
+    valuesSetMap,
     subscriptionId,
-    updateSubscription,
+    subscriptionData,
     handleValidate,
+    updateSubscription,
   ]);
 
   // ─────────────────────────────────────────────────────────────────────────────
 
   const isVisualMode = mode === 'visual';
-  const isCanvasMode = mode === 'canvas';
   const isManualMode = mode === 'manual';
 
   return (
@@ -291,19 +359,13 @@ const MappingEditorPage: React.FC = () => {
         <div className="flex items-center gap-1">
           <ModeTab
             active={isVisualMode}
-            onClick={() => dispatch(setMode('visual'))}
+            onClick={() => handleModeChange('visual')}
             label="Visual"
             icon={<span className="text-[10px]">⛶</span>}
           />
           <ModeTab
-            active={isCanvasMode}
-            onClick={() => dispatch(setMode('canvas'))}
-            label="Canvas"
-            icon={<span className="text-[10px]">◈</span>}
-          />
-          <ModeTab
             active={isManualMode}
-            onClick={() => dispatch(setMode('manual'))}
+            onClick={() => handleModeChange('manual')}
             label="Manual"
             icon={<span className="text-[10px]">{'{}'}</span>}
           />
@@ -389,10 +451,6 @@ const MappingEditorPage: React.FC = () => {
         <div className="flex-1 overflow-hidden">
           <ManualEditor />
         </div>
-      ) : isCanvasMode ? (
-        <div className="flex-1 overflow-hidden relative">
-          <FlowCanvas />
-        </div>
       ) : (
         /* Visual mode: 3-panel layout */
         <div className="flex flex-1 overflow-hidden">
@@ -418,10 +476,14 @@ const MappingEditorPage: React.FC = () => {
             {/* Source JSON input */}
             <div className="px-3 py-2 border-b border-gray-100 flex-shrink-0">
               <textarea
-                className="w-full h-24 border border-gray-200 rounded px-2 py-1.5 text-[11px] font-mono resize-none focus:outline-none focus:border-blue-400 bg-gray-50"
+                ref={srcTextareaRef}
+                className="w-full min-h-[60px] border border-gray-200 rounded px-2 py-1.5 text-[11px] font-mono resize-y focus:outline-none focus:border-blue-400 bg-gray-50"
+                style={{ height: jsonAreaHeight }}
                 placeholder='{ "paste": "source JSON here" }'
                 value={inputJson}
                 onChange={(e) => dispatch(setInputJson(e.target.value))}
+                onMouseUp={() => syncHeight('src')}
+                onTouchEnd={() => syncHeight('src')}
               />
               {inputJson && !inputObj && (
                 <p className="text-[10px] text-rose-500 mt-0.5">Invalid JSON</p>
@@ -488,10 +550,14 @@ const MappingEditorPage: React.FC = () => {
             {/* Target JSON input (optional) */}
             <div className="px-3 py-2 border-b border-gray-100 flex-shrink-0">
               <textarea
-                className="w-full h-16 border border-gray-200 rounded px-2 py-1.5 text-[11px] font-mono resize-none focus:outline-none focus:border-blue-400 bg-gray-50"
+                ref={tgtTextareaRef}
+                className="w-full min-h-[40px] border border-gray-200 rounded px-2 py-1.5 text-[11px] font-mono resize-y focus:outline-none focus:border-blue-400 bg-gray-50"
+                style={{ height: jsonAreaHeight }}
                 placeholder='{ "desired": "output shape" }  (optional — used to generate structure)'
                 value={outputJson}
                 onChange={(e) => dispatch(setOutputJson(e.target.value))}
+                onMouseUp={() => syncHeight('tgt')}
+                onTouchEnd={() => syncHeight('tgt')}
               />
             </div>
 
