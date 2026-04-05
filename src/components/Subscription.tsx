@@ -1,4 +1,4 @@
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, Link} from "react-router-dom";
 import Button from "./common/forms/Button";
 import FormField from "./common/forms/FormField";
 import TextEditor from "./common/forms/TextEditor";
@@ -10,7 +10,7 @@ import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
 import AdapterEditor from "./Subscriptions/AdapterEditor";
-import MappingEditor, { NATIVE_JSON_MAPPER_ID } from "./Subscriptions/MappingEditor";
+import { NATIVE_JSON_MAPPER_ID } from "src/components/MappingEditor/types";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
@@ -25,6 +25,7 @@ import {
     useAggregateSubscriptionMutation,
     useCreateDraftSubscriptionMutation,
     useDraftSubscriptionQuery,
+    useSubscriptionQuery,
     useLazySubscriptionQuery,
     usePauseSubscriptionMutation,
     usePublishDraftSubscriptionMutation,
@@ -45,14 +46,13 @@ const Component = () => {
     let params = useParams();
     const id = Number(params.id)
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
-    const [showFieldMapper, setShowFieldMapper] = useState(false);
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
     const workGroups = useWorkGroupsQuery({limit: 1000, offset: 0}, {skip: !workGroupsAvailable})
     const [aggregateNow] = useAggregateSubscriptionMutation()
-    const [getSubscription] = useLazySubscriptionQuery()
+    const { data: subscriptionData } = useSubscriptionQuery(id, { skip: !id, refetchOnMountOrArgChange: true })
     const [pauseSubscription] = usePauseSubscriptionMutation()
     const [updateSubscription] = useUpdateSubscriptionMutation()
     const [createDraftSubscription] = useCreateDraftSubscriptionMutation()
@@ -68,30 +68,26 @@ const Component = () => {
 
 
     useEffect(() => {
-        if (id) {
-            refreshSubscription((id));
+        if (subscriptionData) {
+            setUpdateSubscriptionData(structuredClone({
+                id,
+                ...subscriptionData,
+                schedules: subscriptionData.schedules.map((s: ScheduleView, index: number) => ({
+                    ...s,
+                    id: index
+                }))
+            }));
+        } else {
+            setUpdateSubscriptionData({});
         }
-    }, [id]);
+    }, [subscriptionData, id]);
     const onClickAggregateNow = () => {
         aggregateNow((id))
     }
     const onClickReceiveNow = () => {
         receiveNow((id))
     }
-    const refreshSubscription = async (id: number) => {
-        let res = await getSubscription(id);
-        if (res.data) {
-            const data = structuredClone({
-                id,
-                ...res.data,
-                schedules: res.data.schedules.map((s: ScheduleView, index: number) => ({
-                    ...s,
-                    id: index
-                }))
-            })
-            setUpdateSubscriptionData(data)
-        }
-    }
+
     const onClickUpdateSubscription = async () => {
         await updateSubscription({...updateSubscriptionData, id});
         await getTrails();
@@ -131,11 +127,8 @@ const Component = () => {
         pauseSubscription(updateSubscriptionData.id)
     }, [updateSubscriptionData?.id, updateSubscriptionData?.pausedOn])
 
-    const onChangeMode = async (mode: EditMode) => {
+    const onChangeMode = (mode: EditMode) => {
         setMode(mode)
-        if (mode === "PUBLISHED") {
-            await refreshSubscription(id)
-        }
     }
     
     console.log("updateSubscriptionData", updateSubscriptionData)
@@ -154,17 +147,6 @@ const Component = () => {
                 openModal === "TRAIL" &&
                 <TrialsViewModal data={subscriptionTrail} onClose={() => setOpenModal("NONE")}/>
             }
-
-            {showFieldMapper && (
-                <MappingEditor
-                    mapperId={updateSubscriptionData?.mapperId}
-                    mapperProperties={updateSubscriptionData?.mapperProperties}
-                    onSave={(mapperId, mapperProperties) => {
-                        setUpdateSubscriptionData(s => ({ ...s, mapperId, mapperProperties }));
-                    }}
-                    onClose={() => setShowFieldMapper(false)}
-                />
-            )}
 
             {Boolean(updateSubscriptionData?.lastException) &&
                 <div className={"shadow-xl bg-white  p-2 rounded-lg border-rose-500 border-2 mb-5"}>
@@ -390,11 +372,20 @@ const Component = () => {
                             suppressProps={updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID}
                         />
                         {updateSubscriptionData?.mapperId === NATIVE_JSON_MAPPER_ID && (
-                            <button type="button"
-                                onClick={() => setShowFieldMapper(true)}
-                                className="mt-2 px-3 py-1.5 text-sm border border-primary-400 text-primary-600 rounded hover:bg-primary-50 transition">
-                                Configure Field Mapping →
-                            </button>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {subscriptionData?.mapperProperties?.some(
+                                    (p: any) => p.key === 'ScribanTemplate' && p.value && p.value !== '{}'
+                                ) && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full border border-green-300">
+                                        ✓ Template configured
+                                    </span>
+                                )}
+                                <Link
+                                    to={`/subscriptions/${id}/mapping-editor`}
+                                    className="px-3 py-1.5 text-sm border border-blue-500 text-blue-600 rounded hover:bg-blue-50 transition font-medium">
+                                    ⛶ Open Mapping Editor
+                                </Link>
+                            </div>
                         )}
                     </div>
                     <div

@@ -28,6 +28,7 @@ import GlobalAdapterValuesSet from "src/components/GlobalAdapterValuesSet";
 import ApiGateways from "src/components/ApiGateways";
 import ApiGateway from "src/components/ApiGateway";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
+import MappingEditorPage from "src/components/MappingEditor";
 import {useAppDispatch} from "src/state/ReduxSotre";
 import {setWorkGroupsAvailable} from "src/state/stateSlices/features";
 import {client} from "./client";
@@ -98,6 +99,7 @@ function App() {
                                     <Route path="/partners/:id" element={<Partner/>}/>
                                     <Route path="/documents/:id" element={<Document/>}/>
                                     <Route path="/subscriptions/:id" element={<Subscription/>}/>
+                                    <Route path="/subscriptions/:id/mapping-editor" element={<MappingEditorPage/>}/>
                                     <Route path="/notifiers/:id" element={<Notifier/>}/>
                                     <Route path="/global-adapter-values-sets" element={<GlobalAdapterValuesSets/>}/>
                                     <Route path="/global-adapter-values-sets/:id" element={<GlobalAdapterValuesSet/>}/>

@@ -7,6 +7,7 @@ import {XchangeApi} from "src/client/apis/xchangeApi";
 import {GeneralApi} from "src/client/apis/generalApi";
 import {GlobalAdapterValuesSetsApi} from "src/client/apis/globalAdapterValuesSetsApi";
 import {ApiGatewaysApi} from "src/client/apis/apiGatewaysApi";
+import {MappersApi} from "src/client/apis/mappersApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
 
@@ -19,7 +20,8 @@ const reducers = combineReducers({
     [XchangeApi.reducerPath]: XchangeApi.reducer,
     [GeneralApi.reducerPath]:GeneralApi.reducer,
     [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer,
-    [ApiGatewaysApi.reducerPath]: ApiGatewaysApi.reducer
+    [ApiGatewaysApi.reducerPath]: ApiGatewaysApi.reducer,
+    [MappersApi.reducerPath]: MappersApi.reducer
 
 });
 
@@ -33,7 +35,8 @@ export const store = configureStore({
             XchangeApi.middleware,
             GeneralApi.middleware,
             GlobalAdapterValuesSetsApi.middleware,
-            ApiGatewaysApi.middleware
+            ApiGatewaysApi.middleware,
+            MappersApi.middleware
         ])
 });
 

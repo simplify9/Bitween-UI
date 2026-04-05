@@ -15,7 +15,7 @@ import {
     UpdateWorkGroupModel,
     DeleteWorkGroupModel
 } from "src/types/subscriptions";
-import {ApiPagedResponse} from "src/types/common";
+import {ApiPagedResponse, KeyValuePair} from "src/types/common";
 import {formulateQueryString} from "src/client";
 
 export const SubscriptionApi = createApi({
@@ -89,6 +89,14 @@ export const SubscriptionApi = createApi({
                 url: `subscriptions/${body.id}`,
                 method: "POST",
                 body
+            })
+        }),
+        saveMapper: builder.mutation<null, { id: number; mapperId: string; mapperProperties: KeyValuePair[] }>({
+            invalidatesTags: ['subscription'],
+            query: ({ id, ...body }) => ({
+                url: `subscriptions/${id}/savemapper`,
+                method: 'POST',
+                body,
             })
         }),
         pauseSubscription: builder.mutation<{ id: number }, number>({
@@ -219,6 +227,7 @@ export const {
     usePauseSubscriptionMutation,
     useAggregateSubscriptionMutation,
     useUpdateSubscriptionMutation,
+    useSubscriptionQuery,
     useLazySubscriptionQuery,
     useCreateSubscriptionMutation,
     useSubscriptionsLookupQuery,
@@ -232,5 +241,6 @@ export const {
     useDeleteWorkGroupMutation,
     useSubscriptionsQuery,
     useLazySubscriptionsQuery,
+    useSaveMapperMutation,
 } = SubscriptionApi
 
