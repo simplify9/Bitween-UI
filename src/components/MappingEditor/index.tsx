@@ -7,15 +7,15 @@ import {
   HiOutlineTrash,
   HiPlusCircle,
 } from 'react-icons/hi';
-import { MdOutlineContentCopy, MdOutlineUndo, MdOutlineRedo } from 'react-icons/md';
-import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
+import { MdOutlineUndo, MdOutlineRedo } from 'react-icons/md';
 import {
-  addArrayMapping,
+  MappingEditorProvider,
+  useMappingEditorState,
+  useMappingEditorDispatch,
   autoMatch,
   clearAll,
   generateFromTargetJson,
   loadEditorContext,
-  NATIVE_JSON_MAPPER_ID,
   openArrayModal,
   redo,
   setArrayMappings,
@@ -27,9 +27,10 @@ import {
   setSearchOutput,
   setValidationErrors,
   syncManualTemplate,
+  togglePreview,
   undo,
-  ValidationError,
-} from 'src/state/stateSlices/mappingEditor';
+} from './MappingEditorContext';
+import { NATIVE_JSON_MAPPER_ID, ValidationError } from './types';
 import {
   buildTree,
   flattenLeafPaths,
@@ -42,7 +43,7 @@ import ConnectionCanvas from './ConnectionCanvas';
 import ManualEditor from './ManualEditor';
 import LivePreview from './LivePreview';
 import ArrayMappingModal from './ArrayMappingModal';
-import { useSubscriptionQuery, useLazySubscriptionQuery, useUpdateSubscriptionMutation } from 'src/client/apis/subscriptionsApi';
+import { useSubscriptionQuery, useSaveMapperMutation } from 'src/client/apis/subscriptionsApi';
 import { KeyValuePair } from 'src/types/common';
 import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
 import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
@@ -69,34 +70,44 @@ const ModeTab: React.FC<{
   </button>
 );
 
-// ─── MappingEditorPage ────────────────────────────────────────────────────────
+// ─── MappingEditorPage (provider wrapper) ────────────────────────────────────
 
-const MappingEditorPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+const MappingEditorPage: React.FC = () => (
+  <MappingEditorProvider>
+    <MappingEditorInner />
+  </MappingEditorProvider>
+);
+
+// ─── MappingEditorInner ───────────────────────────────────────────────────────
+
+const MappingEditorInner: React.FC = () => {
+  const dispatch = useMappingEditorDispatch();
+  const {
+    mode,
+    fieldMappings,
+    arrayMappings,
+    inputJson,
+    outputJson,
+    showPreview,
+    past,
+    future,
+    editingArrayId,
+    manualTemplate,
+    isManualDirty,
+    searchInput,
+    searchOutput,
+  } = useMappingEditorState();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
 
-  const mode = useTypedSelector((s) => s.mappingEditor.mode);
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const inputJson = useTypedSelector((s) => s.mappingEditor.inputJson);
-  const outputJson = useTypedSelector((s) => s.mappingEditor.outputJson);
-  const showPreview = useTypedSelector((s) => s.mappingEditor.showPreview);
-  const past = useTypedSelector((s) => s.mappingEditor.past);
-  const future = useTypedSelector((s) => s.mappingEditor.future);
-  const editingArrayId = useTypedSelector((s) => s.mappingEditor.editingArrayId);
-  const manualTemplate = useTypedSelector((s) => s.mappingEditor.manualTemplate);
-  const isManualDirty = useTypedSelector((s) => s.mappingEditor.isManualDirty);
-  const searchInput = useTypedSelector((s) => s.mappingEditor.searchInput);
-  const searchOutput = useTypedSelector((s) => s.mappingEditor.searchOutput);
-
   // ── Data loading ────────────────────────────────────────────────────────────
   const { data: subscriptionData } = useSubscriptionQuery(subscriptionId, { skip: !subscriptionId, refetchOnMountOrArgChange: true });
-  const [getSubscription] = useLazySubscriptionQuery();
-  const [updateSubscription, { isLoading: isSaving }] = useUpdateSubscriptionMutation();
-  const [loaded, setLoaded] = useState(false);
+  const [saveMapper, { isLoading: isSaving }] = useSaveMapperMutation();
+  const [loadedForId, setLoadedForId] = useState<number | null>(null);
+  const pendingIdRef = useRef<number | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showNullWarning, setShowNullWarning] = useState(false);
   const [jsonAreaHeight, setJsonAreaHeight] = useState(96); // px — both panels share this
   const srcTextareaRef = useRef<HTMLTextAreaElement>(null);
   const tgtTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -118,17 +129,16 @@ const MappingEditorPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!subscriptionId) {
-      dispatch(loadEditorContext({ subscriptionId: 0, mapperProperties: [] }));
-      return;
-    }
-    // Clear immediately whenever subscriptionId changes
-    dispatch(loadEditorContext({ subscriptionId, mapperProperties: [] }));
-    setLoaded(false);
+    // Whenever subscriptionId changes, clear Redux state immediately and record which ID we're waiting for
+    pendingIdRef.current = subscriptionId || null;
+    dispatch(loadEditorContext({ subscriptionId: subscriptionId || 0, mapperProperties: [] }));
+    setLoadedForId(null);
   }, [subscriptionId]);
 
   useEffect(() => {
-    if (!subscriptionData || loaded) return;
+    // Only load when the data arriving is for the subscription we are currently on
+    if (!subscriptionData || !pendingIdRef.current) return;
+    if (pendingIdRef.current !== subscriptionId) return;
     dispatch(
       loadEditorContext({
         subscriptionId,
@@ -137,7 +147,7 @@ const MappingEditorPage: React.FC = () => {
       })
     );
     dispatch(autoMatch());
-    setLoaded(true);
+    setLoadedForId(subscriptionId);
   }, [subscriptionData]);
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────────────
@@ -200,14 +210,38 @@ const MappingEditorPage: React.FC = () => {
     () => (inputObj ? buildTree(inputObj) : []),
     [inputObj]
   );
-  const outputTree: TreeNode[] = useMemo(() => {
-    // Use target JSON as the structure source when available — mirrors how
-    // the source tree is driven by inputObj. This is the single source of truth
-    // for what fields exist in the output.
-    if (outputObj) return buildTree(outputObj);
 
-    // Fallback: derive tree from current mappings when no target JSON is pasted
-    const paths: string[] = fieldMappings.map((m) => m.target).filter(Boolean);
+  // When target JSON is first provided, initialize fields to explicit null defaults.
+  // Track which outputJson value has already been auto-generated so we only fire
+  // once per distinct JSON string, regardless of fieldMappings changes.
+  const autoGeneratedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!outputObj) return;
+    if (autoGeneratedForRef.current === outputJson) return;
+    if (fieldMappings.length > 0 || arrayMappings.length > 0) return;
+    autoGeneratedForRef.current = outputJson;
+    dispatch(generateFromTargetJson());
+  }, [outputObj, outputJson, fieldMappings.length, arrayMappings.length, dispatch]);
+
+  const outputTree: TreeNode[] = useMemo(() => {
+    // Use target JSON as the base structure when available, then merge in any
+    // manually-added fields from fieldMappings that aren't already in the JSON.
+    const basePaths: string[] = outputObj
+      ? buildTree(outputObj).flatMap(flattenLeafPaths)
+      : fieldMappings.map((m) => m.target).filter(Boolean);
+
+    // Merge manually-added mapping targets that aren't already in the base set
+    if (outputObj) {
+      const pathSet = new Set(basePaths);
+      for (const m of fieldMappings) {
+        if (m.target && !pathSet.has(m.target)) {
+          basePaths.push(m.target);
+          pathSet.add(m.target);
+        }
+      }
+    }
+
+    const paths = basePaths;
     for (const am of arrayMappings) {
       if (!am.target) continue;
       const containerPath = `${am.target}[*]`;
@@ -223,6 +257,62 @@ const MappingEditorPage: React.FC = () => {
     () => sourceTree.flatMap(flattenLeafPaths),
     [sourceTree]
   );
+
+  const outputTargets = useMemo(
+    () => outputTree.flatMap(flattenLeafPaths),
+    [outputTree]
+  );
+
+  const assignedFieldCount = useMemo(
+    () =>
+      fieldMappings.filter(
+        (m) =>
+          m.target &&
+          (Boolean(m.source) || m.fixedValue !== undefined || Boolean(m.isNullValue))
+      ).length,
+    [fieldMappings]
+  );
+
+  const nullAssignedTargets = useMemo(() => {
+    const rootNulls = fieldMappings
+      .filter((m) => m.target.trim() && m.isNullValue)
+      .map((m) => m.target.trim());
+    const arrayNulls = arrayMappings.flatMap((am) =>
+      (am.mappings ?? [])
+        .filter((m) => m.target.trim() && m.isNullValue)
+        .map((m) => `${am.target}[*].${m.target.trim()}`)
+    );
+    return Array.from(new Set([...rootNulls, ...arrayNulls]));
+  }, [fieldMappings, arrayMappings]);
+
+  const unassignedTargets = useMemo(() => {
+    const isAssigned = (m?: { source?: string; fixedValue?: string; isNullValue?: boolean }) =>
+      Boolean(m && (m.source || m.fixedValue !== undefined || m.isNullValue));
+
+    const result: string[] = [];
+    for (const target of outputTargets) {
+      if (target.includes('[*].')) {
+        const [arrayTarget, ...rest] = target.split('[*].');
+        const innerTarget = rest.join('[*].');
+        const am = arrayMappings.find((x) => x.target === arrayTarget);
+        const inner = am?.mappings.find((m) => m.target === innerTarget);
+        if (!isAssigned(inner)) result.push(target);
+        continue;
+      }
+
+      if (target.endsWith('[*]')) {
+        const arrayTarget = target.slice(0, -3);
+        const am = arrayMappings.find((x) => x.target === arrayTarget);
+        if (!am?.source) result.push(target);
+        continue;
+      }
+
+      const mapping = fieldMappings.find((m) => m.target === target);
+      if (!isAssigned(mapping)) result.push(target);
+    }
+
+    return Array.from(new Set(result));
+  }, [outputTargets, fieldMappings, arrayMappings]);
 
   // ── Refs for connection canvas ──────────────────────────────────────────────
   const sourceRefsMap = useRef<Map<string, HTMLElement>>(new Map());
@@ -251,10 +341,10 @@ const MappingEditorPage: React.FC = () => {
       if (!m.target.trim()) {
         errors.push({ type: 'error', message: `Mapping has no target field`, path: m.id });
       }
-      if (!m.source && m.fixedValue === undefined) {
+      if (!m.source && m.fixedValue === undefined && !m.isNullValue) {
         errors.push({
           type: 'warning',
-          message: `"${m.target}" has no source or fixed value`,
+          message: `"${m.target}" has no assigned source/fixed/null value`,
           path: m.target,
         });
       }
@@ -273,9 +363,7 @@ const MappingEditorPage: React.FC = () => {
   }, [fieldMappings, arrayMappings, dispatch]);
 
   // ── Save ─────────────────────────────────────────────────────────────────────
-  const handleSave = useCallback(async () => {
-    handleValidate();
-
+  const persistSave = useCallback(async () => {
     // Always generate the Scriban template — use the manual template if in manual mode
     // and it hasn't been modified since last sync, otherwise regenerate from state
     const templateToSave =
@@ -296,18 +384,13 @@ const MappingEditorPage: React.FC = () => {
       mapperProperties.push({ key: 'TargetJson', value: outputJson });
     }
 
-    // Use the reactive subscriptionData already in memory — no extra fetch needed
-    if (!subscriptionData) return;
-
-    const result = await updateSubscription({
-      ...subscriptionData,
+    const result = await saveMapper({
       id: subscriptionId,
       mapperId: NATIVE_JSON_MAPPER_ID,
       mapperProperties,
     });
 
     if ('data' in result) {
-      localStorage.removeItem(`mapper_draft_${subscriptionId}`);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
     }
@@ -320,10 +403,22 @@ const MappingEditorPage: React.FC = () => {
     manualTemplate,
     valuesSetMap,
     subscriptionId,
-    subscriptionData,
-    handleValidate,
-    updateSubscription,
+    saveMapper,
   ]);
+
+  const handleSave = useCallback(async (force = false) => {
+    handleValidate();
+    if (unassignedTargets.length > 0) {
+      setShowNullWarning(true);
+      return;
+    }
+    if (!force && nullAssignedTargets.length > 0) {
+      setShowNullWarning(true);
+      return;
+    }
+    setShowNullWarning(false);
+    await persistSave();
+  }, [handleValidate, nullAssignedTargets.length, unassignedTargets.length, persistSave]);
 
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -349,7 +444,7 @@ const MappingEditorPage: React.FC = () => {
           Mapping Editor
         </span>
         <span className="text-xs text-gray-400">
-          {fieldMappings.filter((m) => m.target && m.source).length} mappings ·{' '}
+          {assignedFieldCount} mappings ·{' '}
           {arrayMappings.length} array loops
         </span>
 
@@ -437,7 +532,7 @@ const MappingEditorPage: React.FC = () => {
             </span>
           )}
           <button
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             disabled={isSaving}
             className="text-xs bg-blue-600 text-white rounded px-4 py-1.5 hover:bg-blue-700 transition font-medium disabled:opacity-50"
           >
@@ -525,7 +620,7 @@ const MappingEditorPage: React.FC = () => {
                 </span>
                 <span className="text-xs text-gray-400">
                   {fieldMappings.filter((m) => m.target).length} fields ·{' '}
-                  {fieldMappings.filter((m) => m.target && m.source).length} assigned
+                  {assignedFieldCount} assigned
                 </span>
                 <button
                   onClick={() => dispatch(generateFromTargetJson())}
@@ -580,13 +675,13 @@ const MappingEditorPage: React.FC = () => {
             {/* Preview toggle */}
             <div className="flex-shrink-0 border-t border-gray-200">
               <button
-                onClick={() => dispatch({ type: 'mappingEditor/togglePreview' })}
+                onClick={() => dispatch(togglePreview())}
                 className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 transition"
               >
                 {showPreview ? '▾ Hide Preview' : '▸ Show Live Preview'}
                 {!showPreview && fieldMappings.length > 0 && (
                   <span className="ml-auto text-gray-400">
-                    {fieldMappings.filter((m) => m.target && m.source).length} mapped
+                    {assignedFieldCount} mapped
                   </span>
                 )}
               </button>
@@ -597,6 +692,64 @@ const MappingEditorPage: React.FC = () => {
 
       {/* Array mapping modal */}
       {editingArrayId !== undefined && <ArrayMappingModal />}
+
+      {showNullWarning && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNullWarning(false)} />
+          <div className="relative bg-white rounded-lg shadow-xl w-[640px] max-w-[92vw] max-h-[80vh] p-5 flex flex-col gap-3">
+            <h3 className="text-base font-semibold text-rose-600">Warning: Null/Unassigned Values Detected</h3>
+            <p className="text-sm text-gray-700">
+              You are about to save with {nullAssignedTargets.length + unassignedTargets.length} field
+              {nullAssignedTargets.length + unassignedTargets.length === 1 ? '' : 's'} that are null or unassigned.
+            </p>
+            {unassignedTargets.length > 0 && (
+              <p className="text-sm text-amber-700 font-medium">
+                You cannot continue saving while unassigned targets exist. Assign them to source/fixed value or set them to null.
+              </p>
+            )}
+            <div className="border border-rose-100 rounded bg-rose-50/40 px-3 py-2 space-y-2">
+              <div className="max-h-56 overflow-y-auto pr-1">
+                {nullAssignedTargets.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-rose-700 mb-1">Null-assigned targets ({nullAssignedTargets.length})</p>
+                    <ul className="list-disc pl-5 space-y-0.5 text-xs font-mono text-rose-800 mb-2">
+                      {nullAssignedTargets.map((path) => (
+                        <li key={`null-${path}`}>{path}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {unassignedTargets.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-amber-700 mb-1">Unassigned targets ({unassignedTargets.length})</p>
+                    <ul className="list-disc pl-5 space-y-0.5 text-xs font-mono text-amber-800">
+                      {unassignedTargets.map((path) => (
+                        <li key={`unassigned-${path}`}>{path}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                onClick={() => setShowNullWarning(false)}
+                className="text-sm border border-gray-300 text-gray-700 rounded px-4 py-1.5 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              {unassignedTargets.length === 0 && (
+                <button
+                  onClick={() => void handleSave(true)}
+                  className="text-sm bg-rose-600 text-white rounded px-4 py-1.5 hover:bg-rose-700 transition"
+                >
+                  Continue Save
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

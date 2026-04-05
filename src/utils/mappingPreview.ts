@@ -1,4 +1,4 @@
-import { ArrayMapping, FieldMapping, FilterCondition } from 'src/state/stateSlices/mappingEditor';
+import { ArrayMapping, FieldMapping, FilterCondition } from 'src/components/MappingEditor/types';
 import { ValuesSetMap } from 'src/utils/scribanGenerator';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

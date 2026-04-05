@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useTypedSelector } from 'src/state/ReduxSotre';
-import { useAppDispatch } from 'src/state/ReduxSotre';
-import { removeFieldMapping, selectMapping } from 'src/state/stateSlices/mappingEditor';
+import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
+  removeFieldMapping,
+  selectMapping,
+} from './MappingEditorContext';
 
 interface Props {
   /** Map of path → DOM element for source leaves */
@@ -41,11 +44,8 @@ const ConnectionCanvas: React.FC<Props> = ({
   targetScroll,
   width,
 }) => {
-  const dispatch = useAppDispatch();
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
-  const hoveredPath = useTypedSelector((s) => s.mappingEditor.hoveredPath);
+  const dispatch = useMappingEditorDispatch();
+  const { fieldMappings, arrayMappings, selectedMappingId: selectedId, hoveredPath } = useMappingEditorState();
   const [lines, setLines] = useState<ConnectionLine[]>([]);
   const [hoveredLineId, setHoveredLineId] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);

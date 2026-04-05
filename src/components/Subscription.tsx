@@ -10,7 +10,7 @@ import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
 import AdapterEditor from "./Subscriptions/AdapterEditor";
-import { NATIVE_JSON_MAPPER_ID } from "src/state/stateSlices/mappingEditor";
+import { NATIVE_JSON_MAPPER_ID } from "src/components/MappingEditor/types";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";

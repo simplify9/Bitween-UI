@@ -1,12 +1,13 @@
 import React, { useRef, useCallback } from 'react';
 import { TreeNode, flattenLeafPaths } from 'src/utils/mappingPreview';
-import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
   addFieldMapping,
-  genId,
   setHoveredPath,
   toggleNodeCollapsed,
-} from 'src/state/stateSlices/mappingEditor';
+} from './MappingEditorContext';
+import { genId } from './types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,8 +36,8 @@ interface BranchProps {
 // ─── SourceLeaf ───────────────────────────────────────────────────────────────
 
 const SourceLeaf: React.FC<LeafProps> = ({ node, isAssigned, isHovered, isSearchMatch, onLeafRef }) => {
-  const dispatch = useAppDispatch();
-  const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
+  const dispatch = useMappingEditorDispatch();
+  const { selectedMappingId: selectedId } = useMappingEditorState();
 
   const ref = useCallback(
     (el: HTMLElement | null) => {
@@ -101,8 +102,9 @@ const SourceLeaf: React.FC<LeafProps> = ({ node, isAssigned, isHovered, isSearch
 // ─── SourceBranch ─────────────────────────────────────────────────────────────
 
 const SourceBranch: React.FC<BranchProps> = ({ node, depth = 0, assignedPaths, search, onLeafRef }) => {
-  const dispatch = useAppDispatch();
-  const collapsed = useTypedSelector((s) => s.mappingEditor.collapsedNodes.includes(node.path));
+  const dispatch = useMappingEditorDispatch();
+  const { collapsedNodes } = useMappingEditorState();
+  const collapsed = collapsedNodes.includes(node.path);
   const isOpen = !collapsed;
 
   const leaves = flattenLeafPaths(node);
@@ -165,8 +167,7 @@ const SourceBranch: React.FC<BranchProps> = ({ node, depth = 0, assignedPaths, s
 // ─── SourceTree ───────────────────────────────────────────────────────────────
 
 const SourceTree: React.FC<SourceTreeProps> = ({ nodes, onLeafRef }) => {
-  const search = useTypedSelector((s) => s.mappingEditor.searchInput);
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
+  const { searchInput: search, fieldMappings } = useMappingEditorState();
   const assignedPaths = new Set(fieldMappings.map((m) => m.source).filter(Boolean));
 
   if (nodes.length === 0) {

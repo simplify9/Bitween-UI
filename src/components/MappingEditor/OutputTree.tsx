@@ -1,15 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { HiOutlineTrash, HiPlusCircle } from 'react-icons/hi';
 import { TreeNode } from 'src/utils/mappingPreview';
-import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
   addFieldMapping,
   openArrayModal,
   removeFieldMapping,
   selectMapping,
   toggleNodeCollapsed,
   updateFieldMapping,
-} from 'src/state/stateSlices/mappingEditor';
+} from './MappingEditorContext';
 import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,6 +25,7 @@ interface OutputLeafProps {
   node: TreeNode;
   sourcePaths: string[];
   onLeafRef?: (path: string, el: HTMLElement | null) => void;
+  isSearchMatch?: boolean;
 }
 
 interface OutputBranchProps {
@@ -31,15 +33,14 @@ interface OutputBranchProps {
   depth?: number;
   sourcePaths: string[];
   onLeafRef?: (path: string, el: HTMLElement | null) => void;
+  search?: string;
 }
 
 // ─── OutputLeaf ───────────────────────────────────────────────────────────────
 
-const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef }) => {
-  const dispatch = useAppDispatch();
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const selectedId = useTypedSelector((s) => s.mappingEditor.selectedMappingId);
+const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, isSearchMatch }) => {
+  const dispatch = useMappingEditorDispatch();
+  const { fieldMappings, arrayMappings, selectedMappingId: selectedId } = useMappingEditorState();
 
   const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
   const valuesSets = setsData?.result ?? [];
@@ -57,13 +58,19 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
   // ── Normal field mapping lookup ───────────────────────────────────────────
   const mapping = !isArrayField ? fieldMappings.find((m) => m.target === node.path) : undefined;
   const isMapped = isArrayField
-    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined)
-    : Boolean(mapping?.source || mapping?.fixedValue !== undefined || mapping?.valuesSetId);
+    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined || innerMapping?.isNullValue)
+    : Boolean(mapping?.source || mapping?.fixedValue !== undefined || mapping?.valuesSetId || mapping?.isNullValue);
   const isSelected = mapping ? selectedId === mapping.id : false;
 
-  // Derived mode: 'fixed' | 'enum' | 'source'
+  // Derived mode: 'fixed' | 'enum' | 'null' | 'source'
   const currentMode =
-    mapping?.fixedValue !== undefined ? 'fixed' : mapping?.valuesSetId ? 'enum' : 'source';
+    mapping?.fixedValue !== undefined
+      ? 'fixed'
+      : mapping?.valuesSetId
+      ? 'enum'
+      : mapping?.isNullValue
+      ? 'null'
+      : 'source';
 
   const ref = useCallback(
     (el: HTMLElement | null) => {
@@ -78,33 +85,45 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
     const sourcePath = e.dataTransfer.getData('text/plain');
     if (!sourcePath) return;
     if (mapping) {
-      dispatch(updateFieldMapping({ id: mapping.id, source: sourcePath, fixedValue: undefined, valuesSetId: undefined }));
+      dispatch(updateFieldMapping({
+        id: mapping.id,
+        source: sourcePath,
+        fixedValue: undefined,
+        valuesSetId: undefined,
+        isNullValue: undefined,
+      }));
     } else {
       dispatch(addFieldMapping({ source: sourcePath, target: node.path }));
     }
   };
 
-  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'enum') => {
+  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'enum' | 'null') => {
     if (isArrayField) return;
     e.stopPropagation();
     if (next === 'fixed') {
       if (!mapping) {
-        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: '' }));
+        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: '', isNullValue: undefined }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: '', valuesSetId: undefined, transform: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: '', valuesSetId: undefined, transform: undefined, isNullValue: undefined }));
       }
     } else if (next === 'enum') {
       if (!mapping) {
-        dispatch(addFieldMapping({ source: '', target: node.path, valuesSetId: valuesSets[0]?.id ?? '' }));
+        dispatch(addFieldMapping({ source: '', target: node.path, valuesSetId: valuesSets[0]?.id ?? '', isNullValue: undefined }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: valuesSets[0]?.id ?? '', transform: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, valuesSetId: valuesSets[0]?.id ?? '', transform: undefined, isNullValue: undefined }));
+      }
+    } else if (next === 'null') {
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: undefined, valuesSetId: undefined, transform: undefined, isNullValue: true }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, valuesSetId: undefined, transform: undefined, isNullValue: true }));
       }
     } else {
       // source mode
       if (!mapping) {
         dispatch(addFieldMapping({ source: '', target: node.path }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined, isNullValue: undefined }));
       }
     }
   };
@@ -117,7 +136,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
     if (mapping) {
       dispatch(selectMapping(isSelected ? null : mapping.id));
     } else {
-      dispatch(addFieldMapping({ source: '', target: node.path }));
+      dispatch(addFieldMapping({ source: '', target: node.path, isNullValue: true }));
     }
   };
 
@@ -134,7 +153,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
         ref={ref}
         onClick={handleSelect}
         title="Managed by array mapping — click to open loop editor"
-        className="flex items-center gap-1.5 px-2 py-[3px] rounded border border-transparent text-xs cursor-pointer transition-all select-none hover:border-purple-200 hover:bg-purple-50"
+        className={['flex items-center gap-1.5 px-2 py-[3px] rounded border border-transparent text-xs cursor-pointer transition-all select-none hover:border-purple-200 hover:bg-purple-50', isSearchMatch ? 'bg-yellow-50 ring-1 ring-yellow-300' : ''].filter(Boolean).join(' ')}
       >
         <span
           className={[
@@ -165,6 +184,8 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
         'rounded border text-xs cursor-pointer transition-all select-none',
         isSelected
           ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-200'
+          : isSearchMatch
+          ? 'bg-yellow-50 ring-1 ring-yellow-300'
           : 'border-transparent hover:border-gray-200 hover:bg-gray-50',
       ]
         .filter(Boolean)
@@ -181,7 +202,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
         <span className="font-mono text-gray-700 truncate">{node.key}</span>
         <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
 
-        {/* Mode buttons: src | fx | ≡ */}
+        {/* Mode buttons: src | fx | ≡ | null */}
         <button
           onClick={(e) => switchMode(e, currentMode === 'source' ? 'fixed' : 'source')}
           title={currentMode === 'fixed' ? 'Switch to source binding' : 'Switch to fixed value'}
@@ -206,6 +227,18 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
         >
           ≡
         </button>
+        <button
+          onClick={(e) => switchMode(e, currentMode === 'null' ? 'source' : 'null')}
+          title={currentMode === 'null' ? 'Switch to source binding' : 'Assign explicit null'}
+          className={[
+            'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
+            currentMode === 'null'
+              ? 'border-rose-300 bg-rose-50 text-rose-600'
+              : 'border-gray-200 text-gray-400 hover:border-rose-300 hover:text-rose-500',
+          ].join(' ')}
+        >
+          null
+        </button>
 
         {/* Value / path display based on current mode */}
         {currentMode === 'fixed' ? (
@@ -223,13 +256,21 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
           >
             ≡ {valuesSets.find((s) => s.id === mapping?.valuesSetId)?.name ?? mapping?.valuesSetId ?? ''}
           </span>
+        ) : currentMode === 'null' ? (
+          <span className="flex-1 font-mono text-xs text-rose-600 min-w-0">null</span>
         ) : (
           <select
             className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
             value={mapping?.source ?? ''}
             onChange={(e) => {
               if (mapping) {
-                dispatch(updateFieldMapping({ id: mapping.id, source: e.target.value }));
+                dispatch(updateFieldMapping({
+                  id: mapping.id,
+                  source: e.target.value,
+                  fixedValue: undefined,
+                  valuesSetId: undefined,
+                  isNullValue: undefined,
+                }));
               } else {
                 dispatch(addFieldMapping({ source: e.target.value, target: node.path }));
               }
@@ -276,7 +317,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
             <select
               className="flex-1 border border-gray-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400"
               value={mapping?.source ?? ''}
-              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, source: e.target.value }))}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, source: e.target.value, isNullValue: undefined }))}
             >
               <option value="">— pick source field —</option>
               {sourcePaths.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -319,10 +360,10 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef })
 
 // ─── OutputBranch ─────────────────────────────────────────────────────────────
 
-const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePaths, onLeafRef }) => {
-  const dispatch = useAppDispatch();
-  const collapsed = useTypedSelector((s) => s.mappingEditor.collapsedNodes.includes(`out:${node.path}`));
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
+const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePaths, onLeafRef, search }) => {
+  const dispatch = useMappingEditorDispatch();
+  const { collapsedNodes, arrayMappings } = useMappingEditorState();
+  const collapsed = collapsedNodes.includes(`out:${node.path}`);
   const isOpen = !collapsed;
   const [adding, setAdding] = useState(false);
   const [newFieldName, setNewFieldName] = useState('');
@@ -337,6 +378,7 @@ const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePath
       addFieldMapping({
         source: '',
         target: `${basePath}.${newFieldName.trim()}`,
+        isNullValue: true,
       })
     );
     setNewFieldName('');
@@ -410,6 +452,7 @@ const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePath
                 node={child}
                 sourcePaths={sourcePaths}
                 onLeafRef={onLeafRef}
+                isSearchMatch={Boolean(search && child.key.toLowerCase().includes(search.toLowerCase()))}
               />
             ) : (
               <OutputBranch
@@ -418,6 +461,7 @@ const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePath
                 depth={depth + 1}
                 sourcePaths={sourcePaths}
                 onLeafRef={onLeafRef}
+                search={search}
               />
             )
           )}
@@ -430,14 +474,14 @@ const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePath
 // ─── OutputTree ───────────────────────────────────────────────────────────────
 
 const OutputTree: React.FC<OutputTreeProps> = ({ nodes, sourcePaths, onLeafRef }) => {
-  const dispatch = useAppDispatch();
+  const dispatch = useMappingEditorDispatch();
   const [rootAdding, setRootAdding] = useState(false);
   const [rootName, setRootName] = useState('');
-  const search = useTypedSelector((s) => s.mappingEditor.searchOutput);
+  const { searchOutput: search } = useMappingEditorState();
 
   const handleAddRoot = () => {
     if (!rootName.trim()) return;
-    dispatch(addFieldMapping({ source: '', target: rootName.trim() }));
+    dispatch(addFieldMapping({ source: '', target: rootName.trim(), isNullValue: true }));
     setRootName('');
     setRootAdding(false);
   };
@@ -461,9 +505,15 @@ const OutputTree: React.FC<OutputTreeProps> = ({ nodes, sourcePaths, onLeafRef }
     <div className="px-2 py-1 space-y-0.5">
       {nodes.map((node) =>
         node.type === 'leaf' ? (
-          <OutputLeaf key={node.path} node={node} sourcePaths={sourcePaths} onLeafRef={onLeafRef} />
+          <OutputLeaf
+            key={node.path}
+            node={node}
+            sourcePaths={sourcePaths}
+            onLeafRef={onLeafRef}
+            isSearchMatch={Boolean(search && node.key.toLowerCase().includes(search.toLowerCase()))}
+          />
         ) : (
-          <OutputBranch key={node.path} node={node} sourcePaths={sourcePaths} onLeafRef={onLeafRef} />
+          <OutputBranch key={node.path} node={node} sourcePaths={sourcePaths} onLeafRef={onLeafRef} search={search} />
         )
       )}
 

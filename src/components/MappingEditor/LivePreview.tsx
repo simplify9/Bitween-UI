@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MdOutlineContentCopy } from 'react-icons/md';
-import { useTypedSelector } from 'src/state/ReduxSotre';
+import { useMappingEditorState } from './MappingEditorContext';
 import { usePreviewMappingMutation } from 'src/client/apis/mappersApi';
 import { generateScriban } from 'src/utils/scribanGenerator';
 import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
@@ -8,12 +8,7 @@ import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterVa
 const DEBOUNCE_MS = 600;
 
 const LivePreview: React.FC = () => {
-  const inputJson = useTypedSelector((s) => s.mappingEditor.inputJson);
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const manualTemplate = useTypedSelector((s) => s.mappingEditor.manualTemplate);
-  const mode = useTypedSelector((s) => s.mappingEditor.mode);
-  const validationErrors = useTypedSelector((s) => s.mappingEditor.validationErrors);
+  const { inputJson, fieldMappings, arrayMappings, manualTemplate, mode, validationErrors } = useMappingEditorState();
 
   const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
 

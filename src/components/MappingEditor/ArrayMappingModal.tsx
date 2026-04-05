@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { HiOutlineTrash, HiPlusCircle, HiX } from 'react-icons/hi';
-import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
   addArrayFieldMapping,
   addArrayMapping,
-  FilterOperator,
-  genId,
   openArrayModal,
   removeArrayFieldMapping,
   removeArrayMapping,
   updateArrayFieldMapping,
   updateArrayMapping,
-} from 'src/state/stateSlices/mappingEditor';
+} from './MappingEditorContext';
+import { FilterOperator, genId } from './types';
 import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -28,13 +28,8 @@ const OPERATORS: { label: string; value: FilterOperator }[] = [
 // ─── ArrayMappingModal ────────────────────────────────────────────────────────
 
 const ArrayMappingModal: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const editingArrayId = useTypedSelector((s) => s.mappingEditor.editingArrayId);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const inputJson = useTypedSelector((s) => s.mappingEditor.inputJson);
-  const outputJson = useTypedSelector((s) => s.mappingEditor.outputJson);
-  const newArrayPresetTarget = useTypedSelector((s) => s.mappingEditor.newArrayPresetTarget);
+  const dispatch = useMappingEditorDispatch();
+  const { editingArrayId, arrayMappings, fieldMappings, inputJson, outputJson, newArrayPresetTarget } = useMappingEditorState();
 
   // Derive source array paths from input JSON
   const sourceArrayPaths: string[] = React.useMemo(() => {

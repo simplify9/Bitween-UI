@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { useAppDispatch, useTypedSelector } from 'src/state/ReduxSotre';
 import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
   setArrayMappings,
   setFieldMappings,
   setManualTemplate,
   syncManualTemplate,
-} from 'src/state/stateSlices/mappingEditor';
+} from './MappingEditorContext';
 import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
 
 const SCRIBAN_HINT = `{{- # Scriban template — edit freely -}}
@@ -14,11 +15,8 @@ const SCRIBAN_HINT = `{{- # Scriban template — edit freely -}}
 `;
 
 const ManualEditor: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const fieldMappings = useTypedSelector((s) => s.mappingEditor.fieldMappings);
-  const arrayMappings = useTypedSelector((s) => s.mappingEditor.arrayMappings);
-  const manualTemplate = useTypedSelector((s) => s.mappingEditor.manualTemplate);
-  const isManualDirty = useTypedSelector((s) => s.mappingEditor.isManualDirty);
+  const dispatch = useMappingEditorDispatch();
+  const { fieldMappings, arrayMappings, manualTemplate, isManualDirty } = useMappingEditorState();
   const editorRef = useRef<any>(null);
   const [parseWarnings, setParseWarnings] = React.useState<string[]>([]);
   const [parseSuccess, setParseSuccess] = React.useState(false);

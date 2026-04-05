@@ -9,6 +9,7 @@ const Header = () => {
     const theme = useTypedSelector(i => i.theme)
 
     const pathName = location.pathname.split("/")?.[1]?.trim()
+    if (location.pathname.includes('mapping-editor')) return null;
     return <nav className="relative bg-white rounded-lg shadow ">
         <div className=" px-5  py-4 mx-auto">
             <div className="lg:flex lg:items-center lg:justify-between">

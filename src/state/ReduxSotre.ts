@@ -10,13 +10,11 @@ import {ApiGatewaysApi} from "src/client/apis/apiGatewaysApi";
 import {MappersApi} from "src/client/apis/mappersApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
-import mappingEditorReducer from "src/state/stateSlices/mappingEditor";
 
 const reducers = combineReducers({
     user: userSlice.reducer,
     theme: themeSlice.reducer,
     features: featuresSlice.reducer,
-    mappingEditor: mappingEditorReducer,
     [NotifiersApi.reducerPath]: NotifiersApi.reducer,
     [SubscriptionApi.reducerPath]: SubscriptionApi.reducer,
     [XchangeApi.reducerPath]: XchangeApi.reducer,
