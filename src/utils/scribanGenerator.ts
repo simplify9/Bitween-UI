@@ -22,8 +22,6 @@ function renderFilter(alias: string, filter: ArrayMapping['filter']): string {
 }
 
 function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: ValuesSetMap): string {
-  if (mapping.isNullValue) return 'null';
-
   if (mapping.fixedValue !== undefined) {
     const num = Number(mapping.fixedValue);
     if (!isNaN(num) && mapping.fixedValue.trim() !== '') return String(num);
@@ -83,7 +81,7 @@ export function generateScriban(
 
   // ── Simple field mappings ──────────────────────────────────────────────────
   const validFields = fieldMappings.filter(
-    (m) => m.target.trim() && (m.source.trim() || m.fixedValue !== undefined || m.isNullValue)
+    (m) => m.target.trim() && (m.source.trim() || m.fixedValue !== undefined)
   );
 
   for (const m of validFields) {
@@ -228,12 +226,8 @@ export function parseScriban(template: string): ParsedMappings {
           if (exprMatch) {
             const parsed = parseExpr(exprMatch[1], innerValuesSetId, alias);
             innerMappings.push({ target: tgt, source: '', ...parsed });
-          } else if (!cleanVal.includes('{{')) {
-            if (cleanVal === 'null') {
-              innerMappings.push({ source: '', target: tgt, isNullValue: true });
-            } else {
-              innerMappings.push({ source: '', target: tgt, fixedValue: cleanVal.replace(/^"|"$/g, '') });
-            }
+          } else if (!cleanVal.includes('{{') && cleanVal !== 'null') {
+            innerMappings.push({ source: '', target: tgt, fixedValue: cleanVal.replace(/^"|"$/g, '') });
           }
         }
         i++;
@@ -264,13 +258,9 @@ export function parseScriban(template: string): ParsedMappings {
       if (exprMatch) {
         const parsed = parseExpr(exprMatch[1], valuesSetId);
         fieldMappings.push({ target, source: '', ...parsed });
-      } else if (!valueClean.includes('{{')) {
-        if (valueClean === 'null') {
-          fieldMappings.push({ source: '', target, isNullValue: true });
-        } else {
-          fieldMappings.push({ source: '', target, fixedValue: valueClean.replace(/^"|"$/g, '') });
-        }
-      } else {
+      } else if (!valueClean.includes('{{') && valueClean !== 'null') {
+        fieldMappings.push({ source: '', target, fixedValue: valueClean.replace(/^"|"$/g, '') });
+      } else if (valueClean.includes('{{')) {
         warnings.push(`Could not parse: ${line}`);
       }
     }
