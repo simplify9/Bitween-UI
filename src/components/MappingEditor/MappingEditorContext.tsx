@@ -155,7 +155,6 @@ export function loadFromProps(props: KeyValuePair[]): CoreState {
             transform: r.transform ?? r.Transform ?? undefined,
             fixedValue: r.fixedValue ?? r.FixedValue ?? undefined,
             valuesSetId: r.valuesSetId ?? r.ValuesSetId ?? undefined,
-            isNullValue: r.isNullValue ?? r.IsNullValue ?? undefined,
           });
         });
       }
@@ -196,7 +195,6 @@ export function loadFromProps(props: KeyValuePair[]): CoreState {
               transform: m.transform,
               fixedValue: m.fixedValue,
               valuesSetId: m.valuesSetId ?? undefined,
-              isNullValue: m.isNullValue ?? undefined,
             })),
           });
         });
@@ -449,7 +447,6 @@ export function mappingEditorReducer(
                     fixedValue: undefined,
                     valuesSetId: undefined,
                     transform: undefined,
-                    isNullValue: undefined,
                   }
                 : existing
             );

@@ -15,7 +15,6 @@ export interface FieldMapping {
   transform?: string;
   fixedValue?: string;
   valuesSetId?: string;
-  isNullValue?: boolean;
 }
 
 export interface ArrayMapping {

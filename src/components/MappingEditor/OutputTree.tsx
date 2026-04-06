@@ -36,11 +36,25 @@ interface OutputBranchProps {
   search?: string;
 }
 
+// ─── Helper: resolve a dot-path value from a parsed JSON object ───────────────
+
+function getValueAtPath(obj: unknown, path: string): string {
+  const parts = path.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') return '';
+    current = (current as Record<string, unknown>)[part];
+  }
+  if (current === null || current === undefined) return '';
+  if (typeof current === 'object') return '';
+  return String(current);
+}
+
 // ─── OutputLeaf ───────────────────────────────────────────────────────────────
 
 const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, isSearchMatch }) => {
   const dispatch = useMappingEditorDispatch();
-  const { fieldMappings, arrayMappings, selectedMappingId: selectedId } = useMappingEditorState();
+  const { fieldMappings, arrayMappings, selectedMappingId: selectedId, outputJson } = useMappingEditorState();
 
   const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
   const valuesSets = setsData?.result ?? [];
@@ -58,18 +72,16 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
   // ── Normal field mapping lookup ───────────────────────────────────────────
   const mapping = !isArrayField ? fieldMappings.find((m) => m.target === node.path) : undefined;
   const isMapped = isArrayField
-    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined || innerMapping?.isNullValue)
-    : Boolean(mapping?.source || mapping?.fixedValue !== undefined || mapping?.valuesSetId || mapping?.isNullValue);
+    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined)
+    : Boolean(mapping?.source || mapping?.fixedValue !== undefined || mapping?.valuesSetId);
   const isSelected = mapping ? selectedId === mapping.id : false;
 
-  // Derived mode: 'fixed' | 'enum' | 'null' | 'source'
+  // Derived mode: 'fixed' | 'enum' | 'source'
   const currentMode =
     mapping?.fixedValue !== undefined
       ? 'fixed'
       : mapping?.valuesSetId
       ? 'enum'
-      : mapping?.isNullValue
-      ? 'null'
       : 'source';
 
   const ref = useCallback(
@@ -90,40 +102,38 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
         source: sourcePath,
         fixedValue: undefined,
         valuesSetId: undefined,
-        isNullValue: undefined,
       }));
     } else {
       dispatch(addFieldMapping({ source: sourcePath, target: node.path }));
     }
   };
 
-  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'enum' | 'null') => {
+  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'enum') => {
     if (isArrayField) return;
     e.stopPropagation();
     if (next === 'fixed') {
+      let sampleValue = '';
+      try {
+        const outputObj = JSON.parse(outputJson);
+        sampleValue = getValueAtPath(outputObj, node.path);
+      } catch { /* ignore parse errors */ }
       if (!mapping) {
-        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: '', isNullValue: undefined }));
+        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: sampleValue }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: '', valuesSetId: undefined, transform: undefined, isNullValue: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: sampleValue, valuesSetId: undefined, transform: undefined }));
       }
     } else if (next === 'enum') {
       if (!mapping) {
-        dispatch(addFieldMapping({ source: '', target: node.path, valuesSetId: valuesSets[0]?.id ?? '', isNullValue: undefined }));
+        dispatch(addFieldMapping({ source: '', target: node.path, valuesSetId: valuesSets[0]?.id ?? '' }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, valuesSetId: valuesSets[0]?.id ?? '', transform: undefined, isNullValue: undefined }));
-      }
-    } else if (next === 'null') {
-      if (!mapping) {
-        dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: undefined, valuesSetId: undefined, transform: undefined, isNullValue: true }));
-      } else {
-        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, valuesSetId: undefined, transform: undefined, isNullValue: true }));
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, valuesSetId: valuesSets[0]?.id ?? '', transform: undefined }));
       }
     } else {
       // source mode
       if (!mapping) {
         dispatch(addFieldMapping({ source: '', target: node.path }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined, isNullValue: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined }));
       }
     }
   };
@@ -136,7 +146,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
     if (mapping) {
       dispatch(selectMapping(isSelected ? null : mapping.id));
     } else {
-      dispatch(addFieldMapping({ source: '', target: node.path, isNullValue: true }));
+      dispatch(addFieldMapping({ source: '', target: node.path }));
     }
   };
 
@@ -227,18 +237,6 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
         >
           ≡
         </button>
-        <button
-          onClick={(e) => switchMode(e, currentMode === 'null' ? 'source' : 'null')}
-          title={currentMode === 'null' ? 'Switch to source binding' : 'Assign explicit null'}
-          className={[
-            'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
-            currentMode === 'null'
-              ? 'border-rose-300 bg-rose-50 text-rose-600'
-              : 'border-gray-200 text-gray-400 hover:border-rose-300 hover:text-rose-500',
-          ].join(' ')}
-        >
-          null
-        </button>
 
         {/* Value / path display based on current mode */}
         {currentMode === 'fixed' ? (
@@ -256,8 +254,6 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
           >
             ≡ {valuesSets.find((s) => s.id === mapping?.valuesSetId)?.name ?? mapping?.valuesSetId ?? ''}
           </span>
-        ) : currentMode === 'null' ? (
-          <span className="flex-1 font-mono text-xs text-rose-600 min-w-0">null</span>
         ) : (
           <select
             className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
@@ -269,7 +265,6 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
                   source: e.target.value,
                   fixedValue: undefined,
                   valuesSetId: undefined,
-                  isNullValue: undefined,
                 }));
               } else {
                 dispatch(addFieldMapping({ source: e.target.value, target: node.path }));
@@ -317,7 +312,7 @@ const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, onLeafRef, i
             <select
               className="flex-1 border border-gray-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400"
               value={mapping?.source ?? ''}
-              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, source: e.target.value, isNullValue: undefined }))}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, source: e.target.value }))}
             >
               <option value="">— pick source field —</option>
               {sourcePaths.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -378,7 +373,6 @@ const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePath
       addFieldMapping({
         source: '',
         target: `${basePath}.${newFieldName.trim()}`,
-        isNullValue: true,
       })
     );
     setNewFieldName('');
@@ -481,7 +475,7 @@ const OutputTree: React.FC<OutputTreeProps> = ({ nodes, sourcePaths, onLeafRef }
 
   const handleAddRoot = () => {
     if (!rootName.trim()) return;
-    dispatch(addFieldMapping({ source: '', target: rootName.trim(), isNullValue: true }));
+    dispatch(addFieldMapping({ source: '', target: rootName.trim() }));
     setRootName('');
     setRootAdding(false);
   };
