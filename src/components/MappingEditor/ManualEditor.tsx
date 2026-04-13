@@ -28,7 +28,7 @@ const ManualEditor: React.FC = () => {
   // where mode starts as 'visual' and has never been set via handleModeChange.
   useEffect(() => {
     if (!isManualDirty) {
-      dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings)));
+      dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings, undefined, undefined)));
     }
   }, []); // Only on mount — ongoing sync is handled by handleModeChange
 
@@ -37,7 +37,7 @@ const ManualEditor: React.FC = () => {
   };
 
   const handleRegenerateFromVisual = () => {
-    const generated = generateScriban(fieldMappings, arrayMappings);
+    const generated = generateScriban(fieldMappings, arrayMappings, undefined, undefined);
     dispatch(syncManualTemplate(generated));
     editorRef.current?.setValue(generated);
     setParseWarnings([]);
@@ -73,7 +73,7 @@ const ManualEditor: React.FC = () => {
   const templateToShow =
     manualTemplate ||
     (fieldMappings.length > 0 || arrayMappings.length > 0
-      ? generateScriban(fieldMappings, arrayMappings)
+      ? generateScriban(fieldMappings, arrayMappings, undefined, undefined)
       : SCRIBAN_HINT);
 
   return (

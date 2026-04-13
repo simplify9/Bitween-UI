@@ -1,13 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  HiArrowLeft,
-  HiOutlineSearch,
-  HiOutlineRefresh,
-  HiOutlineTrash,
-  HiPlusCircle,
-} from 'react-icons/hi';
-import { MdOutlineUndo, MdOutlineRedo } from 'react-icons/md';
+import { useParams } from 'react-router-dom';
+import { HiOutlineSearch } from 'react-icons/hi';
 import {
   MappingEditorProvider,
   useMappingEditorState,
@@ -30,7 +23,7 @@ import {
   togglePreview,
   undo,
 } from './MappingEditorContext';
-import { NATIVE_JSON_MAPPER_ID, ValidationError } from './types';
+import { ArrayMapping, NATIVE_JSON_MAPPER_ID, ValidationError } from './types';
 import {
   buildTree,
   flattenLeafPaths,
@@ -45,30 +38,10 @@ import LivePreview from './LivePreview';
 import ArrayMappingModal from './ArrayMappingModal';
 import { useSubscriptionQuery, useSaveMapperMutation } from 'src/client/apis/subscriptionsApi';
 import { KeyValuePair } from 'src/types/common';
-import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
-import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
-
-// ─── Mode toggle button ───────────────────────────────────────────────────────
-
-const ModeTab: React.FC<{
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  icon?: React.ReactNode;
-}> = ({ active, onClick, label, icon }) => (
-  <button
-    onClick={onClick}
-    className={[
-      'flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition border',
-      active
-        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-        : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400 hover:text-blue-600',
-    ].join(' ')}
-  >
-    {icon}
-    {label}
-  </button>
-);
+import { generateScriban, parseScriban, resolveParentArrayIds } from 'src/utils/scribanGenerator';
+import { useValuesSetMap } from 'src/hooks/useValuesSetMap';
+import MappingEditorToolbar from './MappingEditorToolbar';
+import { buildMappingTree, getFullTargetPrefix } from './mappingTreeUtils';
 
 // ─── MappingEditorPage (provider wrapper) ────────────────────────────────────
 
@@ -89,15 +62,12 @@ const MappingEditorInner: React.FC = () => {
     inputJson,
     outputJson,
     showPreview,
-    past,
-    future,
     editingArrayId,
     manualTemplate,
     isManualDirty,
     searchInput,
     searchOutput,
   } = useMappingEditorState();
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
 
@@ -111,14 +81,7 @@ const MappingEditorInner: React.FC = () => {
   const srcTextareaRef = useRef<HTMLTextAreaElement>(null);
   const tgtTextareaRef = useRef<HTMLTextAreaElement>(null);
   // Global adapter values sets — used for enum lookup in live preview + template generation
-  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
-  const valuesSetMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    for (const s of setsData?.result ?? []) {
-      map[s.id] = s.values;
-    }
-    return map;
-  }, [setsData]);
+  const valuesSetMap = useValuesSetMap();
   // Sync both textareas to the height of whichever was just resized
   const syncHeight = useCallback((from: 'src' | 'tgt') => {
     const el = from === 'src' ? srcTextareaRef.current : tgtTextareaRef.current;
@@ -180,21 +143,19 @@ const MappingEditorInner: React.FC = () => {
             parsed.fieldMappings.map((m, i) => ({ id: `parsed-${i}-${Date.now()}`, ...m }))
           )
         );
-        dispatch(
-          setArrayMappings(
-            parsed.arrayMappings.map((am, i) => ({
-              id: `parsed-am-${i}-${Date.now()}`,
-              ...am,
-              mappings: am.mappings.map((m, j) => ({
-                id: `parsed-am-${i}-${j}-${Date.now()}`,
-                ...m,
-              })),
-            }))
-          )
-        );
+        const now = Date.now();
+        const rawAMs = parsed.arrayMappings.map((am, i) => ({
+          id: `parsed-am-${i}-${now}`,
+          ...am,
+          mappings: am.mappings.map((m, j) => ({
+            id: `parsed-am-${i}-${j}-${now}`,
+            ...m,
+          })),
+        }));
+        dispatch(setArrayMappings(resolveParentArrayIds(rawAMs)));
       } else if (newMode === 'manual') {
         // Entering Manual — always regenerate template from current Redux state
-        dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings, valuesSetMap)));
+        dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings, valuesSetMap, outputJson)));
       }
       dispatch(setMode(newMode));
     },
@@ -231,10 +192,11 @@ const MappingEditorInner: React.FC = () => {
     const paths = basePaths;
     for (const am of arrayMappings) {
       if (!am.target) continue;
-      const containerPath = `${am.target}[*]`;
+      const fullPrefix = getFullTargetPrefix(am.id, arrayMappings);
+      const containerPath = `${fullPrefix}[*]`;
       if (!paths.includes(containerPath)) paths.push(containerPath);
       for (const m of am.mappings) {
-        if (m.target) paths.push(`${am.target}[*].${m.target}`);
+        if (m.target) paths.push(`${fullPrefix}[*].${m.target}`);
       }
     }
     return buildMappingTree(paths);
@@ -294,9 +256,9 @@ const MappingEditorInner: React.FC = () => {
       }
     }
     for (const am of arrayMappings) {
-      if (!am.source) errors.push({ type: 'error', message: `Array mapping missing source path` });
+      if (!am.source && !am.fixedItems?.length) errors.push({ type: 'error', message: `Array mapping missing source path` });
       if (!am.target) errors.push({ type: 'error', message: `Array mapping missing target path` });
-      if (am.mappings.length === 0) {
+      if (am.mappings.length === 0 && !am.fixedItems?.length) {
         errors.push({
           type: 'warning',
           message: `Array mapping "${am.source} → ${am.target}" has no field mappings`,
@@ -313,7 +275,7 @@ const MappingEditorInner: React.FC = () => {
     const templateToSave =
       mode === 'manual' && manualTemplate
         ? manualTemplate
-        : generateScriban(fieldMappings, arrayMappings, valuesSetMap);
+        : generateScriban(fieldMappings, arrayMappings, valuesSetMap, outputJson, inputJson);
 
     const mapperProperties: KeyValuePair[] = [
       { key: 'ScribanTemplate', value: templateToSave },
@@ -362,119 +324,14 @@ const MappingEditorInner: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[40] bg-white flex flex-col overflow-hidden">
-      {/* ── Top Bar ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-200 bg-white flex-shrink-0 shadow-sm">
-        {/* Back */}
-        <button
-          onClick={() => navigate(`/subscriptions/${subscriptionId}`)}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 rounded px-2 py-1 transition mr-1"
-        >
-          <HiArrowLeft size={13} /> Back
-        </button>
-
-        <div className="h-5 w-px bg-gray-200" />
-
-        {/* Title */}
-        <span className="font-bold text-gray-800 text-sm tracking-tight">
-          Mapping Editor
-        </span>
-        <span className="text-xs text-gray-400">
-          {assignedFieldCount} mappings ·{' '}
-          {arrayMappings.length} array loops
-        </span>
-
-        <div className="h-5 w-px bg-gray-200" />
-
-        {/* Mode toggle */}
-        <div className="flex items-center gap-1">
-          <ModeTab
-            active={isVisualMode}
-            onClick={() => handleModeChange('visual')}
-            label="Visual"
-            icon={<span className="text-[10px]">⛶</span>}
-          />
-          <ModeTab
-            active={isManualMode}
-            onClick={() => handleModeChange('manual')}
-            label="Manual"
-            icon={<span className="text-[10px]">{'{}'}</span>}
-          />
-        </div>
-
-        <div className="h-5 w-px bg-gray-200" />
-
-        {/* Undo / redo */}
-        <button
-          onClick={() => dispatch(undo())}
-          disabled={past.length === 0}
-          className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30 transition text-gray-600"
-          title="Undo (Ctrl+Z)"
-        >
-          <MdOutlineUndo size={16} />
-        </button>
-        <button
-          onClick={() => dispatch(redo())}
-          disabled={future.length === 0}
-          className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30 transition text-gray-600"
-          title="Redo (Ctrl+Y)"
-        >
-          <MdOutlineRedo size={16} />
-        </button>
-
-        <div className="h-5 w-px bg-gray-200" />
-
-        {/* Actions */}
-        {isVisualMode && (
-          <>
-            <button
-              onClick={() => dispatch(autoMatch())}
-              className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 transition"
-              title="Auto-match fields by name similarity"
-            >
-              <HiOutlineRefresh className="inline mr-1" size={11} />
-              Auto-match
-            </button>
-            <button
-              onClick={() => dispatch(openArrayModal({ id: '__new__' }))}
-              className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 transition"
-              title="Add new array mapping"
-            >
-              <HiPlusCircle className="inline mr-1" size={11} />
-              Array loop
-            </button>
-            <button
-              onClick={() => dispatch(clearAll())}
-              className="text-xs border border-rose-200 text-rose-500 rounded px-2.5 py-1 hover:bg-rose-50 transition"
-              title="Clear all mappings"
-            >
-              <HiOutlineTrash className="inline mr-1" size={11} />
-              Clear
-            </button>
-          </>
-        )}
-
-        <button
-          onClick={handleValidate}
-          className="text-xs border border-amber-300 text-amber-600 rounded px-2.5 py-1 hover:bg-amber-50 transition"
-        >
-          Validate
-        </button>
-
-        <div className="ml-auto flex items-center gap-2">
-          {saveSuccess && (
-            <span className="text-xs text-emerald-600 font-medium animate-pulse">
-              ✓ Saved
-            </span>
-          )}
-          <button
-            onClick={() => void handleSave()}
-            disabled={isSaving}
-            className="text-xs bg-blue-600 text-white rounded px-4 py-1.5 hover:bg-blue-700 transition font-medium disabled:opacity-50"
-          >
-            {isSaving ? 'Saving…' : 'Save'}
-          </button>
-        </div>
-      </div>
+      <MappingEditorToolbar
+        subscriptionId={subscriptionId}
+        isSaving={isSaving}
+        saveSuccess={saveSuccess}
+        handleModeChange={handleModeChange}
+        handleValidate={handleValidate}
+        handleSave={() => void handleSave()}
+      />
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
       {isManualMode ? (
@@ -630,45 +487,5 @@ const MappingEditorInner: React.FC = () => {
     </div>
   );
 };
-
-// ─── Helper: build tree from flat target paths ────────────────────────────────
-
-function buildMappingTree(targetPaths: string[]): TreeNode[] {
-  const root: TreeNode[] = [];
-
-  for (const path of targetPaths) {
-    const parts = path.split('.');
-    insertNode(root, parts, 0, '');
-  }
-
-  return root;
-}
-
-function insertNode(
-  nodes: TreeNode[],
-  parts: string[],
-  depth: number,
-  parentPath: string
-): void {
-  if (parts.length === 0) return;
-  const rawPart = parts[0];
-  const isArray = rawPart.includes('[*]') || rawPart.includes('[]');
-  const key = rawPart.replace(/\[\*\]|\[\]/g, '');
-  const currentPath = parentPath ? `${parentPath}.${rawPart}` : rawPart;
-
-  let existing = nodes.find((n) => n.key === key);
-  if (parts.length === 1) {
-    if (!existing) {
-      nodes.push({ key, path: currentPath, type: 'leaf', children: [] });
-    }
-    return;
-  }
-
-  if (!existing) {
-    existing = { key, path: currentPath, type: isArray ? 'array' : 'object', children: [] };
-    nodes.push(existing);
-  }
-  insertNode(existing.children, parts.slice(1), depth + 1, currentPath);
-}
 
 export default MappingEditorPage;

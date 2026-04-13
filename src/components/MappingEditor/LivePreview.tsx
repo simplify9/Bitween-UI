@@ -3,15 +3,14 @@ import { MdOutlineContentCopy } from 'react-icons/md';
 import { useMappingEditorState } from './MappingEditorContext';
 import { usePreviewMappingMutation } from 'src/client/apis/mappersApi';
 import { generateScriban } from 'src/utils/scribanGenerator';
-import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
+import { useValuesSetMap } from 'src/hooks/useValuesSetMap';
 
 const DEBOUNCE_MS = 600;
 
 const LivePreview: React.FC = () => {
-  const { inputJson, fieldMappings, arrayMappings, manualTemplate, mode, validationErrors } = useMappingEditorState();
+  const { inputJson, outputJson: targetSchemaJson, fieldMappings, arrayMappings, manualTemplate, mode, validationErrors } = useMappingEditorState();
 
-  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
-
+  const valuesSetMap = useValuesSetMap();
   const [previewMapping] = usePreviewMappingMutation();
   const [outputJson, setOutputJson] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -28,17 +27,11 @@ const LivePreview: React.FC = () => {
         return;
       }
 
-      // Build valuesSetMap for enum baking
-      const valuesSetMap: Record<string, Record<string, string>> = {};
-      for (const s of setsData?.result ?? []) {
-        valuesSetMap[s.id] = s.values;
-      }
-
       // Use manual template if in manual mode, otherwise generate from state
       const template =
         mode === 'manual' && manualTemplate
           ? manualTemplate
-          : generateScriban(fieldMappings, arrayMappings, valuesSetMap);
+          : generateScriban(fieldMappings, arrayMappings, valuesSetMap, targetSchemaJson || undefined, inputJson || undefined);
 
       try {
         const result = await previewMapping({
@@ -56,7 +49,7 @@ const LivePreview: React.FC = () => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [inputJson, fieldMappings, arrayMappings, manualTemplate, mode, setsData]);
+  }, [inputJson, fieldMappings, arrayMappings, manualTemplate, mode, valuesSetMap]);
 
   const formatted = outputJson !== null ? outputJson : null;
 

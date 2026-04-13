@@ -3,16 +3,14 @@ import { HiOutlineTrash, HiPlusCircle, HiX } from 'react-icons/hi';
 import {
   useMappingEditorDispatch,
   useMappingEditorState,
-  addArrayFieldMapping,
   addArrayMapping,
   openArrayModal,
-  removeArrayFieldMapping,
   removeArrayMapping,
-  updateArrayFieldMapping,
   updateArrayMapping,
 } from './MappingEditorContext';
-import { FilterOperator, genId } from './types';
-import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
+import { ArrayMapping, FilterOperator, LookupDictionary, LookupEntry, genId } from './types';
+import { buildTypeMap } from 'src/utils/scribanGenerator';
+import { getFullSourcePath, getFullTargetBase, getItemArrayPaths, collectArrayPaths, getItemProperties, generateExample } from './arrayMappingHelpers';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,29 +27,30 @@ const OPERATORS: { label: string; value: FilterOperator }[] = [
 
 const ArrayMappingModal: React.FC = () => {
   const dispatch = useMappingEditorDispatch();
-  const { editingArrayId, arrayMappings, fieldMappings, inputJson, outputJson, newArrayPresetTarget } = useMappingEditorState();
+  const { editingArrayId, arrayMappings, fieldMappings, inputJson, outputJson, newArrayPresetTarget, newArrayParentId } = useMappingEditorState();
 
-  // Derive source array paths from input JSON
+  const am = arrayMappings.find((m) => m.id === editingArrayId);
+  const parentAm = newArrayParentId ? arrayMappings.find((m) => m.id === newArrayParentId) : undefined;
+
+  // Full source path for the parent AM (e.g. 'orders' for L1, 'orders.items' for L2 items' parent)
+  const parentFullSource = React.useMemo(() => {
+    if (!parentAm) return '';
+    return getFullSourcePath(parentAm.id, arrayMappings);
+  }, [parentAm, arrayMappings]);
+
+  // Source array options depend on whether this is a nested modal or top-level
   const sourceArrayPaths: string[] = React.useMemo(() => {
     try {
       const obj = JSON.parse(inputJson);
+      if (parentAm) {
+        // For nested: sub-arrays of the parent array's items
+        return getItemArrayPaths(obj, parentFullSource);
+      }
       return collectArrayPaths(obj);
     } catch {
       return [];
     }
-  }, [inputJson]);
-
-  // Derive target array paths from output JSON
-  const targetArrayPaths: string[] = React.useMemo(() => {
-    try {
-      const obj = JSON.parse(outputJson);
-      return collectArrayPaths(obj);
-    } catch {
-      return [];
-    }
-  }, [outputJson]);
-
-  const am = arrayMappings.find((m) => m.id === editingArrayId);
+  }, [inputJson, parentAm, parentFullSource]);
 
   // Local editable state (synced from Redux on open)
   const [source, setSource] = useState('');
@@ -61,30 +60,74 @@ const ArrayMappingModal: React.FC = () => {
   const [filterField, setFilterField] = useState('');
   const [filterOp, setFilterOp] = useState<FilterOperator>('!=');
   const [filterValue, setFilterValue] = useState('');
-  const [pendingMappings, setPendingMappings] = useState<Array<{ id: string; source: string; target: string; transform?: string; valuesSetId?: string; fixedValue?: string }>>([]);
-  // Which secondary panel is open for each mapping row: 'transform' | 'enum' | 'fixed' | null
-  const [openPanels, setOpenPanels] = useState<Record<string, 'transform' | 'enum' | 'fixed' | null>>({});
-
-  // Global adapter values sets for enum lookup
-  const { data: setsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
-  const valuesSets = setsData?.result ?? [];
+const [pendingMappings, setPendingMappings] = useState<Array<{
+    id: string; source: string; target: string;
+    transform?: string; fixedValue?: string;
+    lookupDictionary?: LookupDictionary;
+    isRootSource?: boolean;
+  }>>([]);
+  // Which secondary panel is open for each mapping row: 'transform' | 'lookup' | 'fixed' | null
+  const [openPanels, setOpenPanels] = useState<Record<string, 'transform' | 'lookup' | 'fixed' | null>>({});
 
   // Derive which secondary panel should be shown for a given row (data-driven fallback)
-  const getPanel = (m: { id: string; transform?: string; valuesSetId?: string; fixedValue?: string }): 'transform' | 'enum' | 'fixed' | null => {
+  const getPanel = (m: { id: string; transform?: string; fixedValue?: string; lookupDictionary?: LookupDictionary }): 'transform' | 'lookup' | 'fixed' | null => {
     if (m.id in openPanels) return openPanels[m.id];
-    if (('fixedValue' in m) && (m as any).fixedValue !== undefined) return 'fixed';
-    if (('valuesSetId' in m) && (m as any).valuesSetId) return 'enum';
+    if (m.fixedValue !== undefined) return 'fixed';
+    if ((m.lookupDictionary?.entries?.length ?? 0) > 0) return 'lookup';
     if (m.transform) return 'transform';
     return null;
   };
 
-  // Dropdown suggestions for source item fields (relative names from array items)
-  const sourceItemProps = React.useMemo(() => getItemProperties(inputJson, source), [inputJson, source]);
+  // Flat scalar leaf paths from the root input JSON (for fixed-item value suggestions).
+  // Stops at any array-valued key — only paths through plain objects are included.
+  const inputScalarProps = React.useMemo(() => {
+    try {
+      const root = JSON.parse(inputJson);
+      const collect = (obj: any, prefix: string): string[] => {
+        if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+          return prefix ? [prefix] : [];
+        }
+        return Object.entries(obj).flatMap(([k, v]) => {
+          const path = prefix ? `${prefix}.${k}` : k;
+          if (Array.isArray(v)) return []; // stop — don't traverse into arrays
+          if (v && typeof v === 'object') return collect(v, path);
+          return [path];
+        });
+      };
+      return collect(root, '');
+    } catch {
+      return [];
+    }
+  }, [inputJson]);
+
+  // Dropdown suggestions for source item fields (relative names from array items, excluding arrays)
+  const fullSourcePath = React.useMemo(() => {
+    if (!source) return '';
+    return parentFullSource ? `${parentFullSource}.${source}` : source;
+  }, [source, parentFullSource]);
+  const sourceItemProps = React.useMemo(() => getItemProperties(inputJson, fullSourcePath), [inputJson, fullSourcePath]);
+
+  // Child array mappings of the currently edited AM (shown as read-only)
+  const childArrayMappings = React.useMemo(
+    () => (am ? arrayMappings.filter((c) => c.parentArrayId === am.id) : []),
+    [am, arrayMappings]
+  );
+
+  // Used targets (to exclude from target field dropdown suggestions)
+  const usedTargets = React.useMemo(() => {
+    return new Set(pendingMappings.map((m) => m.target).filter(Boolean));
+  }, [pendingMappings]);
 
   // Dropdown suggestions for target item fields (from outputJson at target path)
+  const fullTargetBase = React.useMemo(() => {
+    if (!target) return '';
+    if (!newArrayParentId) return target;
+    const parentBase = getFullTargetBase(newArrayParentId, arrayMappings);
+    return parentBase ? `${parentBase}.${target}` : target;
+  }, [target, newArrayParentId, arrayMappings]);
+
   const targetItemProps = React.useMemo(() => {
-    // Strip trailing [*] — am.target is stored as "products[*]" from the output tree preset
-    const baseTarget = target.replace(/\[\*\]$/, '');
+    const baseTarget = fullTargetBase;
     if (!baseTarget) return [];
 
     const results: string[] = [];
@@ -101,15 +144,20 @@ const ArrayMappingModal: React.FC = () => {
       .filter(Boolean)
       .forEach((t) => results.push(t));
 
-    // 3. Mine ALL array mappings with the same base target (including current am)
+    // 3. Mine AM mappings with the same target (scoped by parentArrayId for nested)
     arrayMappings
-      .filter((a) => a.target.replace(/\[\*\]$/, '') === baseTarget)
+      .filter((a) => a.target.replace(/\[\*\]$/, '') === target && a.parentArrayId === (newArrayParentId ?? undefined))
       .flatMap((a) => a.mappings.map((m) => m.target))
       .filter(Boolean)
       .forEach((t) => results.push(t));
 
     return [...new Set(results)];
-  }, [outputJson, target, fieldMappings, arrayMappings]);
+  }, [outputJson, fullTargetBase, target, newArrayParentId, fieldMappings, arrayMappings]);
+
+  // TypeMap for the output JSON — used to constrain lookup output values
+  const outputTypeMap = React.useMemo(() => {
+    try { return buildTypeMap(outputJson); } catch { return {}; }
+  }, [outputJson]);
 
   useEffect(() => {
     if (am) {
@@ -120,7 +168,13 @@ const ArrayMappingModal: React.FC = () => {
       setFilterField(am.filter?.field ?? '');
       setFilterOp(am.filter?.operator ?? '!=');
       setFilterValue(String(am.filter?.value ?? ''));
-      setPendingMappings([]);
+      // Pre-populate local pending mappings; auto-detect isRootSource for old data
+      // that was saved before the flag existed.
+      const scalarSet = new Set(inputScalarProps);
+      setPendingMappings(am.mappings.map((m) => ({
+        ...m,
+        isRootSource: m.isRootSource ?? ((Boolean(m.source) && scalarSet.has(m.source)) || undefined),
+      })));
     } else {
       setSource('');
       setTarget(newArrayPresetTarget);
@@ -132,16 +186,23 @@ const ArrayMappingModal: React.FC = () => {
       setPendingMappings([]);
     }
     setOpenPanels({});
-  }, [am, newArrayPresetTarget]);
+  }, [am, newArrayPresetTarget, inputScalarProps]);
 
   if (editingArrayId === null) return null;
 
   const isCreating = !am || editingArrayId === '__new__';
+  const isNested = Boolean(newArrayParentId);
 
   const handleSave = () => {
     const filter = hasFilter && filterField
       ? { field: filterField, operator: filterOp, value: filterValue }
       : undefined;
+
+    // Strip lookupDictionary when it has no valid entries (both from and to must be filled)
+    const cleanMappings = (maps: typeof pendingMappings) => maps.map((m) => {
+      const hasValidEntries = (m.lookupDictionary?.entries ?? []).some(e => e.from.trim() !== '' && e.to.trim() !== '');
+      return hasValidEntries ? { ...m } : { ...m, lookupDictionary: undefined };
+    });
 
     if (isCreating) {
       dispatch(
@@ -150,7 +211,8 @@ const ArrayMappingModal: React.FC = () => {
           target,
           alias: alias || 'item',
           filter,
-          mappings: pendingMappings.map((m) => ({ ...m })),
+          mappings: cleanMappings(pendingMappings),
+          parentArrayId: newArrayParentId ?? undefined,
         })
       );
     } else {
@@ -161,6 +223,7 @@ const ArrayMappingModal: React.FC = () => {
           target,
           alias: alias || 'item',
           filter,
+          mappings: cleanMappings(pendingMappings),
         })
       );
     }
@@ -177,6 +240,11 @@ const ArrayMappingModal: React.FC = () => {
           <div>
             <h2 className="font-bold text-gray-800 text-sm">
               {isCreating ? 'New Array Mapping' : 'Edit Array Mapping'}
+              {isNested && (
+                <span className="ml-2 text-[10px] font-normal bg-amber-100 text-amber-700 border border-amber-200 rounded px-1.5 py-0.5">
+                  nested inside {parentAm?.target ?? ''}
+                </span>
+              )}
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
               Configure a loop over a source array with optional filters
@@ -192,13 +260,25 @@ const ArrayMappingModal: React.FC = () => {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1">
+                Target Array Path
+              </label>
+              <input
+                className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono bg-gray-50 text-gray-500 cursor-not-allowed"
+                value={target}
+                readOnly
+                disabled
+                title="Target is determined by the array you clicked in the output tree"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">
                 Source Array Path
               </label>
               {sourceArrayPaths.length > 0 ? (
                 <select
                   className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
                   value={source}
-                  onChange={(e) => setSource(e.target.value)}
+                  onChange={(e) => { setSource(e.target.value); setPendingMappings([]); setOpenPanels({}); }}
                 >
                   <option value="">— select array —</option>
                   {sourceArrayPaths.map((p) => (
@@ -212,33 +292,7 @@ const ArrayMappingModal: React.FC = () => {
                   className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-blue-400"
                   placeholder="e.g. order.items"
                   value={source}
-                  onChange={(e) => setSource(e.target.value)}
-                />
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">
-                Target Array Path
-              </label>
-              {targetArrayPaths.length > 0 ? (
-                <select
-                  className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
-                >
-                  <option value="">— select array —</option>
-                  {targetArrayPaths.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-blue-400"
-                  placeholder="e.g. products"
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
+                  onChange={(e) => { setSource(e.target.value); setPendingMappings([]); setOpenPanels({}); }}
                 />
               )}
             </div>
@@ -330,87 +384,150 @@ const ArrayMappingModal: React.FC = () => {
               </p>
             )}
             <div className="space-y-1.5 max-h-56 overflow-y-auto pr-0.5">
-              {(isCreating ? pendingMappings : (am?.mappings ?? [])).map((m) => {
+              {pendingMappings.map((m) => {
                 const panel = getPanel(m);
                 const hasTransform = Boolean(m.transform);
-                const hasEnum = Boolean(('valuesSetId' in m) && (m as any).valuesSetId);
-                const hasFixed = ('fixedValue' in m) && (m as any).fixedValue !== undefined;
+                const hasLookup = (m.lookupDictionary?.entries?.length ?? 0) > 0;
+                const hasFixed = m.fixedValue !== undefined;
 
-                const clearExtras = (except: 'transform' | 'enum' | 'fixed') => {
-                  const patch: Record<string, undefined> = {};
-                  if (except !== 'transform' && hasTransform) patch.transform = undefined;
-                  if (except !== 'enum' && hasEnum) patch.valuesSetId = undefined;
-                  if (except !== 'fixed' && hasFixed) patch.fixedValue = undefined;
-                  if (Object.keys(patch).length === 0) return;
-                  if (isCreating) {
-                    setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, ...patch } : p));
-                  } else {
-                    am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, ...patch } }));
-                  }
-                };
+                // Type of this specific target field from outputJson
+                const targetFieldType = m.target && fullTargetBase
+                  ? outputTypeMap[`${fullTargetBase}[*].${m.target}`]
+                  : undefined;
 
                 const openTransform = () => {
                   setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'transform' ? null : 'transform' }));
-                  clearExtras('transform');
+                  // clear lookup when switching to transform
+                  if (hasLookup) setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, lookupDictionary: undefined } : p));
                 };
 
-                const openEnum = () => {
-                  setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'enum' ? null : 'enum' }));
-                  clearExtras('enum');
+                const openLookup = () => {
+                  const isOpen = openPanels[m.id] === 'lookup';
+                  if (!isOpen) {
+                    // clear transform when opening lookup
+                    if (hasTransform) setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: undefined } : p));
+                  } else {
+                    // closing — clear dict if no valid entries (both from and to filled)
+                    const entries = m.lookupDictionary?.entries ?? [];
+                    const hasValid = entries.some(e => e.from.trim() !== '' && e.to.trim() !== '');
+                    if (!hasValid) {
+                      setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, lookupDictionary: undefined } : p));
+                    }
+                  }
+                  setOpenPanels((prev) => ({ ...prev, [m.id]: isOpen ? null : 'lookup' }));
                 };
 
-                const openFixed = () => {
-                  setOpenPanels((prev) => ({ ...prev, [m.id]: prev[m.id] === 'fixed' ? null : 'fixed' }));
-                  clearExtras('fixed');
-                };
+                const rowMode = hasFixed ? 'fixed' : 'source';
 
                 return (
-                  <div key={m.id} className="rounded border border-gray-100 bg-gray-50 px-2 py-1.5 space-y-1">
-                    {/* Row 1: source → target + toggle buttons + delete */}
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        list={`src-props-${m.id}`}
-                        className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
-                        placeholder="source"
-                        value={m.source}
-                        onChange={(e) => {
-                          if (isCreating) {
-                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: e.target.value } : p));
-                          } else {
-                            am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, source: e.target.value } }));
-                          }
-                        }}
-                      />
-                      <datalist id={`src-props-${m.id}`}>
-                        {sourceItemProps.map((prop) => <option key={prop} value={prop} />)}
-                      </datalist>
-                      <span className="text-gray-300 flex-shrink-0 text-xs select-none">→</span>
-                      <input
-                        list={`tgt-props-${m.id}`}
-                        className="flex-1 min-w-0 border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
-                        placeholder="target"
-                        value={m.target}
-                        onChange={(e) => {
-                          if (isCreating) {
-                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, target: e.target.value } : p));
-                          } else {
-                            am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, target: e.target.value } }));
-                          }
-                        }}
-                      />
-                      <datalist id={`tgt-props-${m.id}`}>
-                        {[
-                          ...new Set([
-                            ...targetItemProps,
-                            ...(isCreating ? pendingMappings : (am?.mappings ?? []))
-                              .filter((p) => p.id !== m.id)
-                              .map((p) => p.target)
-                              .filter(Boolean),
-                          ]),
-                        ].map((prop) => <option key={prop} value={prop} />)}
-                      </datalist>
-                      {/* ƒ toggle */}
+                  <div key={m.id} className="rounded border border-gray-100 bg-white px-2 py-1.5 space-y-1">
+                    {/* Row: target ← [src|≡|"] source-selector [ƒ] [trash] */}
+                    <div className="flex items-center gap-1">
+                      {/* mapped indicator dot */}
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${m.source || hasFixed ? 'bg-emerald-400' : 'bg-rose-300'}`} />
+
+                      {/* target field — dropdown if known, otherwise free-text */}
+                      {targetItemProps.length > 0 ? (
+                        <select
+                          className="font-mono text-xs text-gray-700 bg-transparent border-0 focus:outline-none min-w-0 max-w-[7rem] truncate"
+                          value={m.target}
+                          onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, target: e.target.value } : p))}
+                        >
+                          <option value="">— target —</option>
+                          {[...new Set([...targetItemProps, m.target].filter(Boolean))]
+                            .filter((prop) => !usedTargets.has(prop) || prop === m.target)
+                            .map((prop) => <option key={prop} value={prop}>{prop}</option>)}
+                        </select>
+                      ) : (
+                        <input
+                          className="font-mono text-xs text-gray-700 bg-transparent border-0 focus:outline-none min-w-0 w-24"
+                          placeholder="target"
+                          value={m.target}
+                          onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, target: e.target.value } : p))}
+                        />
+                      )}
+
+                      <span className="text-gray-300 flex-shrink-0 text-xs select-none">←</span>
+
+                      {/* src/fx toggle button — disabled until a target is chosen */}
                       <button
+                        disabled={!m.target}
+                        title={!m.target ? 'Select a target field first' : rowMode === 'fixed' ? 'Switch to source binding' : 'Switch to fixed value'}
+                        onClick={() => {
+                          if (rowMode === 'fixed') {
+                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: undefined, lookupDictionary: undefined } : p));
+                            setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                          } else {
+                            setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: '', fixedValue: '', lookupDictionary: undefined } : p));
+                          }
+                        }}
+                        className={[
+                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          !m.target ? 'opacity-30 cursor-not-allowed bg-white border-gray-200 text-gray-400'
+                            : rowMode === 'fixed' ? 'bg-amber-50 border-amber-300 text-amber-600'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500',
+                        ].join(' ')}
+                      >{rowMode === 'fixed' ? 'fx' : 'src'}</button>
+
+                      {/* ≡ lookup dictionary button — requires source */}
+                      <button
+                        disabled={!m.source}
+                        title={!m.source ? 'Select a source field first' : hasLookup ? `Lookup: ${m.lookupDictionary!.entries.length} entries` : 'Add value lookup dictionary'}
+                        onClick={openLookup}
+                        className={[
+                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          !m.source ? 'opacity-30 cursor-not-allowed bg-white border-gray-200 text-gray-400'
+                            : hasLookup ? 'bg-violet-100 border-violet-300 text-violet-700'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
+                        ].join(' ')}
+                      >≡</button>
+
+                      {/* source selector or fixed value input */}
+                      {rowMode === 'fixed' ? (
+                        <input
+                          className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs text-amber-600 focus:outline-none placeholder-amber-300"
+                          placeholder="fixed value…"
+                          value={m.fixedValue ?? ''}
+                          onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: e.target.value, source: '' } : p))}
+                        />
+                      ) : (
+                        <select
+                          disabled={!m.target}
+                          className={`flex-1 min-w-0 border-0 bg-transparent font-mono text-xs focus:outline-none ${
+                            !m.target ? 'opacity-30 cursor-not-allowed text-gray-400' : 'text-gray-500'
+                          }`}
+                          value={m.source}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const isRoot = inputScalarProps.includes(val);
+                            setPendingMappings((prev) => prev.map((p) =>
+                              p.id === m.id
+                                ? { ...p, source: val, fixedValue: undefined, lookupDictionary: undefined, isRootSource: isRoot || undefined }
+                                : p
+                            ));
+                          }}
+                        >
+                          <option value="">— unassigned —</option>
+                          {sourceItemProps.length > 0 && (
+                            <optgroup label={`${alias} fields`}>
+                              {sourceItemProps.map((prop) => (
+                                <option key={prop} value={prop}>{prop}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {inputScalarProps.length > 0 && (
+                            <optgroup label="root fields">
+                              {inputScalarProps.map((prop) => (
+                                <option key={prop} value={prop}>{prop}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                      )}
+
+                      {/* ƒ transform toggle — only when source selected and no lookup active */}
+                      {rowMode === 'source' && Boolean(m.source) && !hasLookup && <button
                         title={hasTransform ? `Expression: ${m.transform}` : 'Add expression transform'}
                         onClick={openTransform}
                         className={[
@@ -421,42 +538,13 @@ const ArrayMappingModal: React.FC = () => {
                             ? 'bg-violet-50 border-violet-200 text-violet-400'
                             : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
                         ].join(' ')}
-                      >ƒ</button>
-                      {/* ≡ toggle */}
-                      <button
-                        title={hasEnum ? `Enum: ${valuesSets.find((s) => s.id === (m as any).valuesSetId)?.name ?? (m as any).valuesSetId}` : 'Add enum / values-set lookup'}
-                        onClick={openEnum}
-                        className={[
-                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
-                          panel === 'enum'
-                            ? 'bg-violet-100 border-violet-300 text-violet-700'
-                            : hasEnum
-                            ? 'bg-violet-50 border-violet-200 text-violet-400'
-                            : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
-                        ].join(' ')}
-                      >≡</button>
-                      {/* " fixed-value toggle */}
-                      <button
-                        title={hasFixed ? `Fixed: "${(m as any).fixedValue}"` : 'Set fixed value'}
-                        onClick={openFixed}
-                        className={[
-                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
-                          panel === 'fixed'
-                            ? 'bg-orange-100 border-orange-300 text-orange-700'
-                            : hasFixed
-                            ? 'bg-orange-50 border-orange-200 text-orange-400'
-                            : 'bg-white border-gray-200 text-gray-400 hover:border-orange-300 hover:text-orange-500',
-                        ].join(' ')}
-                      >"</button>
+                      >ƒ</button>}
+
                       {/* delete */}
                       <button
                         className="flex-shrink-0 text-gray-300 hover:text-rose-500 transition"
                         onClick={() => {
-                          if (isCreating) {
-                            setPendingMappings((prev) => prev.filter((p) => p.id !== m.id));
-                          } else {
-                            am && dispatch(removeArrayFieldMapping({ arrayId: am.id, mappingId: m.id }));
-                          }
+                          setPendingMappings((prev) => prev.filter((p) => p.id !== m.id));
                           setOpenPanels((prev) => { const next = { ...prev }; delete next[m.id]; return next; });
                         }}
                       >
@@ -474,58 +562,156 @@ const ArrayMappingModal: React.FC = () => {
                           placeholder="e.g. value * 1.1  — 'value' = source field"
                           value={m.transform ?? ''}
                           onChange={(e) => {
-                            if (isCreating) {
-                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: e.target.value || undefined } : p));
-                            } else {
-                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, transform: e.target.value || undefined } }));
-                            }
+                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: e.target.value || undefined } : p));
                           }}
                         />
                       </div>
                     )}
 
-                    {panel === 'enum' && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-violet-400 font-mono flex-shrink-0 w-4 text-center select-none">≡</span>
-                        <select
-                          className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 text-violet-700"
-                          value={('valuesSetId' in m ? (m as any).valuesSetId : undefined) ?? ''}
-                          onChange={(e) => {
-                            const val = e.target.value || undefined;
-                            if (isCreating) {
-                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, valuesSetId: val } : p));
-                            } else {
-                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, valuesSetId: val } }));
-                            }
-                          }}
-                        >
-                          <option value="">— pick values set —</option>
-                          {valuesSets.map((s) => (
-                            <option key={s.id} value={s.id}>{s.name} ({s.id})</option>
+                    {/* Lookup dictionary panel */}
+                    {panel === 'lookup' && (
+                      <div className="mt-0.5 rounded-lg border border-violet-200 bg-violet-50 p-2 space-y-1.5">
+                        {/* Entry rows */}
+                        <div className="space-y-1 max-h-36 overflow-y-auto">
+                          {(m.lookupDictionary?.entries ?? []).length === 0 && (
+                            <p className="text-[10px] text-violet-400 italic px-1">No entries yet — add one below.</p>
+                          )}
+                          {(m.lookupDictionary?.entries ?? []).map((entry: LookupEntry, idx: number) => (
+                            <div key={idx} className="flex items-center gap-1">
+                              <input
+                                autoFocus={idx === 0}
+                                className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
+                                placeholder="source value"
+                                value={entry.from}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                    ...p,
+                                    lookupDictionary: {
+                                      ...p.lookupDictionary!,
+                                      entries: p.lookupDictionary!.entries.map((ee, i) => i === idx ? { ...ee, from: val } : ee),
+                                    },
+                                  }));
+                                }}
+                              />
+                              <span className="text-gray-300 text-[10px] flex-shrink-0 select-none">→</span>
+                              {/* output value — type-constrained by targetFieldType */}
+                              {targetFieldType === 'boolean' ? (
+                                <select
+                                  className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+                                  value={entry.to}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                      ...p,
+                                      lookupDictionary: {
+                                        ...p.lookupDictionary!,
+                                        entries: p.lookupDictionary!.entries.map((ee, i) => i === idx ? { ...ee, to: val } : ee),
+                                      },
+                                    }));
+                                  }}
+                                >
+                                  <option value="">— pick —</option>
+                                  <option value="true">true</option>
+                                  <option value="false">false</option>
+                                </select>
+                              ) : (
+                                <input
+                                  type={targetFieldType === 'number' ? 'number' : 'text'}
+                                  className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
+                                  placeholder={targetFieldType === 'number' ? '0' : 'output value'}
+                                  value={entry.to}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                      ...p,
+                                      lookupDictionary: {
+                                        ...p.lookupDictionary!,
+                                        entries: p.lookupDictionary!.entries.map((ee, i) => i === idx ? { ...ee, to: val } : ee),
+                                      },
+                                    }));
+                                  }}
+                                />
+                              )}
+                              <button
+                                className="flex-shrink-0 text-gray-300 hover:text-rose-400 transition"
+                                onClick={() => setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                  ...p,
+                                  lookupDictionary: { ...p.lookupDictionary!, entries: p.lookupDictionary!.entries.filter((_, i) => i !== idx) },
+                                }))}
+                              >
+                                <HiOutlineTrash size={11} />
+                              </button>
+                            </div>
                           ))}
-                        </select>
+                        </div>
+                        {/* Add entry */}
+                        <button
+                          className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-700 transition font-medium"
+                          onClick={() => setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                            ...p,
+                            lookupDictionary: {
+                              ...p.lookupDictionary ?? { fallback: 'passthrough' as const },
+                              entries: [...(p.lookupDictionary?.entries ?? []), { from: '', to: '' }],
+                            },
+                          }))}
+                        >
+                          <HiPlusCircle size={11} /> Add entry
+                        </button>
+                        {/* Fallback — only shown once at least one entry exists */}
+                        {(m.lookupDictionary?.entries?.length ?? 0) > 0 && (
+                        <div className="flex items-center gap-2 pt-1 border-t border-violet-200">
+                          <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
+                          <select
+                            className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+                            value={m.lookupDictionary?.fallback ?? 'passthrough'}
+                            onChange={(e) => {
+                              const val = e.target.value as LookupDictionary['fallback'];
+                              setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                ...p,
+                                lookupDictionary: { ...p.lookupDictionary!, fallback: val },
+                              }));
+                            }}
+                          >
+                            <option value="passthrough">keep original value</option>
+                            <option value="null">output null</option>
+                            <option value="custom">use custom fallback</option>
+                          </select>
+                          {m.lookupDictionary?.fallback === 'custom' && (
+                            targetFieldType === 'boolean' ? (
+                              <select
+                                className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+                                value={m.lookupDictionary.fallbackValue ?? ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                    ...p, lookupDictionary: { ...p.lookupDictionary!, fallbackValue: val },
+                                  }));
+                                }}
+                              >
+                                <option value="">— pick —</option>
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                              </select>
+                            ) : (
+                              <input
+                                type={targetFieldType === 'number' ? 'number' : 'text'}
+                                className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+                                placeholder={targetFieldType === 'number' ? '0' : 'fallback value'}
+                                value={m.lookupDictionary.fallbackValue ?? ''}
+                                onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
+                                  ...p,
+                                  lookupDictionary: { ...p.lookupDictionary!, fallbackValue: e.target.value },
+                                }))}
+                              />
+                            )
+                          )}
+                        </div>
+                        )}
                       </div>
                     )}
 
-                    {panel === 'fixed' && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-orange-400 font-mono flex-shrink-0 w-4 text-center select-none">"</span>
-                        <input
-                          autoFocus
-                          className="flex-1 border border-orange-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-orange-400 placeholder-gray-300 text-orange-700"
-                          placeholder="fixed constant value"
-                          value={('fixedValue' in m ? (m as any).fixedValue : undefined) ?? ''}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (isCreating) {
-                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: val, source: '' } : p));
-                            } else {
-                              am && dispatch(updateArrayFieldMapping({ arrayId: am.id, mapping: { id: m.id, fixedValue: val, source: '' } }));
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
+
                   </div>
                 );
               })}
@@ -533,16 +719,51 @@ const ArrayMappingModal: React.FC = () => {
               <button
                 className="mt-2 flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition"
                 onClick={() => {
-                  if (isCreating) {
-                    setPendingMappings((prev) => [...prev, { id: `pending-${Date.now()}`, source: '', target: '' }]);
-                  } else {
-                    am && dispatch(addArrayFieldMapping({ arrayId: am.id, mapping: { source: '', target: '' } }));
-                  }
+                  setPendingMappings((prev) => [...prev, { id: `pending-${Date.now()}`, source: '', target: '' }]);
                 }}
               >
                 <HiPlusCircle size={13} /> Add field mapping
               </button>
           </div>
+
+          {/* Child Array Mappings — read-only, shown when editing an existing mapping */}
+          {!isCreating && childArrayMappings.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold text-gray-700">Nested Array Mappings</span>
+                <span className="text-xs text-gray-400">configured via their own loop buttons</span>
+              </div>
+              <div className="space-y-1.5">
+                {childArrayMappings.map((child) => (
+                  <div key={child.id} className="rounded border border-amber-100 bg-amber-50 px-3 py-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 rounded px-1.5">loop</span>
+                      <span className="text-xs font-mono text-gray-700">
+                        {child.source} <span className="text-gray-400">{'→'}</span> {child.target}
+                        <span className="text-gray-400 ml-1">as {child.alias}</span>
+                      </span>
+                      {child.filter && (
+                        <span className="text-[10px] text-gray-500 font-mono border border-gray-200 rounded px-1 bg-white">
+                          if {child.alias}.{child.filter.field} {child.filter.operator} {child.filter.value}
+                        </span>
+                      )}
+                    </div>
+                    {child.mappings.length > 0 && (
+                      <div className="space-y-0.5 pl-2 border-l border-amber-200">
+                        {child.mappings.map((m) => (
+                          <div key={m.id} className="text-[10px] font-mono text-gray-500">
+                            {m.source || (m.fixedValue !== undefined ? `"${m.fixedValue}"` : '—')}
+                            {' '}<span className="text-gray-300">{'→'}</span>{' '}
+                            {m.target}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Example preview */}
           {source && target && (
@@ -576,7 +797,13 @@ const ArrayMappingModal: React.FC = () => {
             </button>
             <button
               onClick={handleSave}
-              disabled={!source || !target}
+              disabled={
+                !target ||
+                (hasFilter && !source) ||
+                pendingMappings.some(
+                  (m) => m.target && !m.source && m.fixedValue === undefined && !m.lookupDictionary
+                )
+              }
               className="text-xs bg-blue-600 text-white rounded px-4 py-1.5 hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isCreating ? 'Create' : 'Save'}
@@ -587,101 +814,5 @@ const ArrayMappingModal: React.FC = () => {
     </div>
   );
 };
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function collectArrayPaths(obj: any, prefix = ''): string[] {
-  if (!obj || typeof obj !== 'object') return [];
-  if (Array.isArray(obj)) {
-    return prefix ? [prefix] : [];
-  }
-  return Object.entries(obj).flatMap(([k, v]) => {
-    const path = prefix ? `${prefix}.${k}` : k;
-    return collectArrayPaths(v, path);
-  });
-}
-
-/** Navigate a dot-separated path in an object, returning the value at that path. */
-function navigatePath(obj: any, path: string): any {
-  if (!path) return obj;
-  return path.split('.').reduce((cur, key) => (cur != null && typeof cur === 'object' ? cur[key] : undefined), obj);
-}
-
-/** Get the flat leaf-property names of items inside an array at `arrayPath`. */
-function getItemProperties(jsonStr: string, arrayPath: string): string[] {
-  try {
-    const root = JSON.parse(jsonStr);
-    // First try: direct navigation to the path
-    const arr = navigatePath(root, arrayPath);
-    if (Array.isArray(arr) && arr.length > 0) {
-      const first = arr[0];
-      if (first && typeof first === 'object' && !Array.isArray(first)) {
-        return flattenObjectKeys(first);
-      }
-    }
-    // Second try: scan ALL leaf paths in the JSON and filter to those under arrayPath
-    // This handles cases where the path traversal goes through intermediate arrays
-    const allPaths = getAllLeafPaths(root);
-    const prefix = `${arrayPath}.`;
-    const nested = allPaths
-      .filter((p) => p.startsWith(prefix))
-      .map((p) => p.slice(prefix.length))
-      .filter((p) => p.length > 0 && !p.includes('.'));
-    return [...new Set(nested)];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Collect all leaf paths in an object, traversing through arrays by using the first element.
- * E.g. {a: {b: [{c: 1}]}} → ['a.b.c']
- */
-function getAllLeafPaths(obj: any, prefix = ''): string[] {
-  if (!obj || typeof obj !== 'object') return prefix ? [prefix] : [];
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) return [];
-    return getAllLeafPaths(obj[0], prefix);
-  }
-  return Object.entries(obj).flatMap(([k, v]) => {
-    const path = prefix ? `${prefix}.${k}` : k;
-    return getAllLeafPaths(v, path);
-  });
-}
-
-/** Recursively flatten object keys using dot notation. */
-function flattenObjectKeys(obj: any, prefix = ''): string[] {
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return prefix ? [prefix] : [];
-  return Object.entries(obj).flatMap(([k, v]) => {
-    const path = prefix ? `${prefix}.${k}` : k;
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      return [path, ...flattenObjectKeys(v, path)];
-    }
-    return [path];
-  });
-}
-
-function generateExample(
-  source: string,
-  target: string,
-  alias: string,
-  hasFilter: boolean,
-  filterField: string,
-  filterOp: string,
-  filterValue: string
-): string {
-  const lines = [`"${target}": [`];
-  lines.push(`  {{- for ${alias} in ${source} -}}`);
-  if (hasFilter && filterField) {
-    lines.push(`  {{- if ${alias}.${filterField} ${filterOp} ${filterValue} -}}`);
-  }
-  lines.push('  {');
-  lines.push('    // ... field mappings ...');
-  lines.push('  },');
-  if (hasFilter && filterField) lines.push('  {{- end -}}');
-  lines.push('  {{- end -}}');
-  lines.push(']');
-  return lines.join('\n');
-}
 
 export default ArrayMappingModal;
