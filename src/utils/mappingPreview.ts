@@ -1,5 +1,5 @@
 import { ArrayMapping, FieldMapping, FilterCondition } from 'src/components/MappingEditor/types';
-import { ValuesSetMap } from 'src/utils/scribanGenerator';
+import { ValuesSetMap, TypeMap, buildTypeMap } from 'src/utils/scribanGenerator';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,123 @@ function matchesFilter(item: any, filter: FilterCondition): boolean {
   }
 }
 
+/** Coerce a runtime value to match the declared target type from the output JSON schema. */
+function coerceToType(value: any, targetType: 'string' | 'number' | 'boolean' | undefined): any {
+  if (value === null || value === undefined || targetType === undefined) return value;
+  if (targetType === 'number') {
+    const n = Number(value);
+    return isNaN(n) ? value : n;
+  }
+  if (targetType === 'boolean') {
+    if (typeof value === 'boolean') return value;
+    const s = String(value).toLowerCase();
+    return s === 'true' || s === '1';
+  }
+  if (targetType === 'string') {
+    return typeof value === 'string' ? value : String(value);
+  }
+  return value;
+}
+
+// ─── Recursive array mapping evaluator ───────────────────────────────────────
+
+function mapArrayItems(
+  sourceItems: any[],
+  am: ArrayMapping,
+  allAMs: ArrayMapping[],
+  valuesSetMap: ValuesSetMap | undefined,
+  warnings: string[],
+  typeMap: TypeMap,
+  fullTargetPrefix: string
+): any[] {
+  const items = am.filter ? sourceItems.filter((item) => matchesFilter(item, am.filter!)) : sourceItems;
+  const mapped = items.map((item: any) => {
+    const outputItem: any = {};
+    for (const m of am.mappings) {
+      if (!m.target.trim()) continue;
+      const targetType = typeMap[`${fullTargetPrefix}[*].${m.target}`];
+      let val: any;
+      if (m.fixedValue !== undefined) {
+        val = m.fixedValue;
+      } else if (m.source) {
+        val = getByDotPath(item, m.source);
+        if (val === undefined) val = null;
+        if (m.valuesSetId) {
+          const dict = valuesSetMap?.[m.valuesSetId];
+          val = dict ? (dict[String(val)] ?? val) : val;
+        } else if (m.transform) {
+          val = applyTransform(val, m.transform);
+        }
+      } else {
+        continue;
+      }
+      setByDotPath(outputItem, m.target, coerceToType(val, targetType));
+    }
+    // Recursively map child AMs (nested arrays)
+    const children = allAMs.filter((c) => c.parentArrayId === am.id && c.source && c.target);
+    for (const child of children) {
+      const childSrc = getByDotPath(item, child.source);
+      if (!Array.isArray(childSrc)) {
+        warnings.push(`Source path "${child.source}" on parent item is not an array`);
+        continue;
+      }
+      const childPrefix = `${fullTargetPrefix}[*].${child.target}`;
+      outputItem[child.target] = mapArrayItems(childSrc, child, allAMs, valuesSetMap, warnings, typeMap, childPrefix);
+    }
+    return outputItem;
+  });
+  return mapped;
+}
+
 // ─── Preview evaluation ───────────────────────────────────────────────────────
+
+/** Recursively resolve {{path}} references in any value. */
+function resolveValue(v: unknown, inputObj: any): unknown {
+  if (typeof v === 'string') {
+    const m = v.match(/^\{\{([^}]+)\}\}$/);
+    if (m) {
+      const r = getByDotPath(inputObj, m[1].trim());
+      return r !== undefined ? r : v;
+    }
+    return v;
+  }
+  if (Array.isArray(v)) {
+    return v.map((item) =>
+      item && typeof item === 'object' && !Array.isArray(item)
+        ? Object.fromEntries(Object.entries(item as Record<string, unknown>).map(([k, sv]) => [k, resolveValue(sv, inputObj)]))
+        : resolveValue(item, inputObj)
+    );
+  }
+  return v;
+}
+
+/** Resolve {{path}} references and recursively embed child AMs' fixed items (skipping keys already present). */
+function resolveAndEnrichFixedItems(
+  fixedItems: Record<string, unknown>[],
+  am: ArrayMapping,
+  allAMs: ArrayMapping[],
+  inputObj: any,
+  typeMap: TypeMap,
+  itemPrefix: string // e.g. "labels[*]" or "orders[*].items[*]"
+): any[] {
+  const children = allAMs.filter((c) => c.parentArrayId === am.id && c.fixedItems?.length && c.target);
+  return fixedItems.map((item) => {
+    const resolved: any = {};
+    for (const [k, v] of Object.entries(item)) {
+      const fieldPath = `${itemPrefix}.${k}`;
+      const raw = resolveValue(v, inputObj);
+      resolved[k] = coerceToType(raw, typeMap[fieldPath]);
+    }
+    // Enrich from child AMs only for keys NOT already embedded inline
+    for (const child of children) {
+      if (!(child.target in resolved)) {
+        const childPrefix = `${itemPrefix}.${child.target}[*]`;
+        resolved[child.target] = resolveAndEnrichFixedItems(child.fixedItems!, child, allAMs, inputObj, typeMap, childPrefix);
+      }
+    }
+    return resolved;
+  });
+}
 
 export interface PreviewResult {
   output: any;
@@ -73,9 +189,11 @@ export function evaluateMappings(
   inputJson: string,
   fieldMappings: FieldMapping[],
   arrayMappings: ArrayMapping[],
-  valuesSetMap?: ValuesSetMap
+  valuesSetMap?: ValuesSetMap,
+  outputJson?: string
 ): PreviewResult {
   const warnings: string[] = [];
+  const typeMap: TypeMap = outputJson ? buildTypeMap(outputJson) : {};
   let inputObj: any = null;
 
   try {
@@ -120,7 +238,7 @@ export function evaluateMappings(
 
     // Only write to target if it doesn't contain [*] (can't write scalar to array path)
     if (!mapping.target.includes('[*]')) {
-      setByDotPath(result, mapping.target, value);
+      setByDotPath(result, mapping.target, coerceToType(value, typeMap[mapping.target]));
     }
   }
   // Group by "sourceArrayPrefix|||targetArrayPrefix"
@@ -166,7 +284,7 @@ export function evaluateMappings(
         } else {
           continue;
         }
-        setByDotPath(outputItem, tgtAfter, val);
+        setByDotPath(outputItem, tgtAfter, coerceToType(val, typeMap[m.target]));
       }
       return outputItem;
     });
@@ -175,8 +293,26 @@ export function evaluateMappings(
   }
 
   // ── Array mappings ────────────────────────────────────────────────────────
-  for (const am of arrayMappings) {
-    if (!am.source || !am.target) continue;
+  for (const am of arrayMappings.filter((am) => !am.parentArrayId)) {
+    if (!am.target) continue;
+
+    // Resolve {{path}} references and embed child AMs' fixed items recursively
+    function resolvePrefix(id: string): string {
+      const m = arrayMappings.find((a) => a.id === id);
+      if (!m) return '';
+      if (!m.parentArrayId) return `${m.target}[*]`;
+      return `${resolvePrefix(m.parentArrayId)}.${m.target}[*]`;
+    }
+    const itemPrefix = resolvePrefix(am.id);
+    const resolvedFixedItems = resolveAndEnrichFixedItems(am.fixedItems ?? [], am, arrayMappings, inputObj, typeMap, itemPrefix);
+
+    if (!am.source) {
+      // No source array — just emit fixed items as the entire array
+      if (resolvedFixedItems.length > 0) {
+        setByDotPath(result, am.target, resolvedFixedItems);
+      }
+      continue;
+    }
 
     const sourceArray = getByDotPath(inputObj, am.source);
     if (!Array.isArray(sourceArray)) {
@@ -184,38 +320,9 @@ export function evaluateMappings(
       continue;
     }
 
-    let items = sourceArray;
-
-    // Apply filter
-    if (am.filter) {
-      items = items.filter((item) => matchesFilter(item, am.filter!));
-    }
-
-    const mapped = items.map((item: any) => {
-      const outputItem: any = {};
-      for (const m of am.mappings) {
-        if (!m.target.trim()) continue;
-        let val: any;
-        if (m.fixedValue !== undefined) {
-          val = m.fixedValue;
-        } else if (m.source) {
-          val = getByDotPath(item, m.source);
-          if (val === undefined) val = null;
-          if (m.valuesSetId) {
-            const dict = valuesSetMap?.[m.valuesSetId];
-            val = dict ? (dict[String(val)] ?? val) : val;
-          } else if (m.transform) {
-            val = applyTransform(val, m.transform);
-          }
-        } else {
-          continue;
-        }
-        setByDotPath(outputItem, m.target, val);
-      }
-      return outputItem;
-    });
-
-    setByDotPath(result, am.target, mapped);
+    const mapped = mapArrayItems(sourceArray, am, arrayMappings, valuesSetMap, warnings, typeMap, am.target);
+    const combined = resolvedFixedItems.length ? [...resolvedFixedItems, ...mapped] : mapped;
+    setByDotPath(result, am.target, combined);
   }
 
   return { output: result, warnings };

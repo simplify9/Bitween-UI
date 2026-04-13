@@ -1,7 +1,62 @@
-import { ArrayMapping, FieldMapping, FilterOperator } from 'src/components/MappingEditor/types';
+import { ArrayMapping, FieldMapping, FilterOperator, LookupDictionary, LookupEntry } from 'src/components/MappingEditor/types';
 
 /** Map of valuesSetId → (key → value) for enum lookups */
 export type ValuesSetMap = Record<string, Record<string, string>>;
+
+/** Map of dot-path → primitive type inferred from a JSON sample */
+export type TypeMap = Record<string, 'string' | 'number' | 'boolean'>;
+
+/**
+ * Build a TypeMap by walking every leaf in a JSON sample.
+ * Array items are represented with [*] in the path, e.g. "orders[*].price".
+ */
+export function buildTypeMap(json: string): TypeMap {
+  try {
+    return walkTypeMap(JSON.parse(json), '');
+  } catch {
+    return {};
+  }
+}
+
+function walkTypeMap(node: any, prefix: string): TypeMap {
+  if (node === null || node === undefined) return {};
+  if (Array.isArray(node)) {
+    if (node.length === 0 || typeof node[0] !== 'object') return {};
+    return walkTypeMap(node[0], prefix); // use first element as representative
+  }
+  if (typeof node === 'object') {
+    const result: TypeMap = {};
+    for (const [k, v] of Object.entries(node)) {
+      const path = prefix ? `${prefix}.${k}` : k;
+      if (Array.isArray(v)) {
+        // descend into array items using [*] notation
+        const inner = walkTypeMap(v, `${path}[*]`);
+        Object.assign(result, inner);
+      } else if (v !== null && typeof v === 'object') {
+        Object.assign(result, walkTypeMap(v, path));
+      } else if (typeof v === 'string') {
+        result[path] = 'string';
+      } else if (typeof v === 'number') {
+        result[path] = 'number';
+      } else if (typeof v === 'boolean') {
+        result[path] = 'boolean';
+      }
+    }
+    return result;
+  }
+  return {};
+}
+
+/**
+ * Return a Scriban-safe inline cast expression when source and target types differ.
+ * to_float is registered as a custom function in ScribanJsonHelper.cs.
+ */
+function castExpr(path: string, targetType: 'string' | 'number' | 'boolean'): string {
+  if (targetType === 'number') return `(${path} | to_float)`;
+  if (targetType === 'boolean') return `(${path} != null && ${path} != '' && ${path} != 'false' && ${path} != '0')`;
+  // string: concatenate with "" to force coercion of any type (number/bool → string)
+  return `("" + ${path})`;
+}
 
 // ─── Scriban template generator ───────────────────────────────────────────────
 
@@ -21,7 +76,12 @@ function renderFilter(alias: string, filter: ArrayMapping['filter']): string {
   return `${alias}.${filter.field} ${op} ${val}`;
 }
 
-function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: ValuesSetMap): string {
+function renderFieldValue(
+  mapping: FieldMapping,
+  alias?: string,
+  valuesSetMap?: ValuesSetMap,
+  targetType?: 'string' | 'number' | 'boolean'
+): string {
   if (mapping.fixedValue !== undefined) {
     const num = Number(mapping.fixedValue);
     if (!isNaN(num) && mapping.fixedValue.trim() !== '') return String(num);
@@ -30,6 +90,37 @@ function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: 
   }
   const src = mapping.source;
   if (!src) return 'null';
+
+  // inline dictionary lookup — user-defined key→value map (takes precedence over valuesSetId)
+  if (mapping.lookupDictionary?.entries && mapping.lookupDictionary.entries.length > 0) {
+    const path = alias ? `${alias}.${src}` : src.replace(/\[?\*\]?/g, '');
+
+    // Format a single output value with the correct type for the Scriban dict literal
+    const fmtVal = (v: string): string => {
+      if (targetType === 'number') {
+        const n = Number(v);
+        return isNaN(n) ? `"${v}"` : String(n);
+      }
+      if (targetType === 'boolean') {
+        return v === 'true' || v === '1' ? 'true' : 'false';
+      }
+      return `"${v}"`; // string (default)
+    };
+
+    const entries = mapping.lookupDictionary.entries
+      .filter(({ from, to }) => from.trim() !== '' && to.trim() !== '')
+      .map(({ from, to }) => `"${from}": ${fmtVal(to)}`)
+      .join(', ');
+    if (!entries) return `{{ ${path} | json }}`;
+    const lkp = mapping.lookupDictionary;
+    if (lkp.fallback === 'null') {
+      return `{{ $__e = { ${entries} }; $__e[${path}] | json }}`;
+    }
+    const fb = lkp.fallback === 'custom'
+      ? fmtVal(lkp.fallbackValue ?? '')
+      : path; // passthrough — keep original value
+    return `{{ $__e = { ${entries} }; ($__e[${path}] ?? ${fb}) | json }}`;
+  }
 
   // enum / values-set lookup — bake the dictionary inline
   if (mapping.valuesSetId) {
@@ -43,7 +134,6 @@ function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: 
         .join(', ');
       return `{{ $__e = { ${entries} }; ($__e[${path}] ?? ${path}) | json }}{{# enum:${mapping.valuesSetId} #}}`;
     }
-    // values set not available locally — emit passthrough + annotation so parseScriban can restore
     return `{{ ${path} | json }}{{# enum:${mapping.valuesSetId} #}}`;
   }
 
@@ -53,10 +143,14 @@ function renderFieldValue(mapping: FieldMapping, alias?: string, valuesSetMap?: 
     return `{{ ${mapping.transform.replace(/\bvalue\b/g, path)} | json }}`;
   }
 
-  // plain path
+  // plain path — apply type cast when target type is known
   const path = alias
-    ? `${alias}.${src}` // within array context, src is already relative
+    ? `${alias}.${src}`
     : src.replace(/\[?\*\]?/g, '');
+
+  if (targetType) {
+    return `{{ ${castExpr(path, targetType)} | json }}`;
+  }
   return `{{ ${path} | json }}`;
 }
 
@@ -71,12 +165,16 @@ function indent(lines: string, spaces: number): string {
 /**
  * Generate a Scriban template from field + array mappings.
  * Pass valuesSetMap to bake enum dictionaries inline; omit for degraded passthrough.
+ * Pass outputJson to enable automatic type-cast filters when source/target types differ.
  */
 export function generateScriban(
   fieldMappings: FieldMapping[],
   arrayMappings: ArrayMapping[],
-  valuesSetMap?: ValuesSetMap
+  valuesSetMap?: ValuesSetMap,
+  outputJson?: string,
+  inputJson?: string
 ): string {
+  const typeMap: TypeMap = outputJson ? buildTypeMap(outputJson) : {};
   const rootLines: string[] = ['{'];
 
   // ── Simple field mappings ──────────────────────────────────────────────────
@@ -85,188 +183,239 @@ export function generateScriban(
   );
 
   for (const m of validFields) {
-    rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap)},`);
+    const targetType = typeMap[m.target];
+    rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap, targetType)},`);
   }
 
-  // ── Array mappings ────────────────────────────────────────────────────────
-  for (const am of arrayMappings) {
-    if (!am.source || !am.target) continue;
-    const alias = am.alias || 'item';
-    const filterExpr = renderFilter(alias, am.filter ?? undefined);
-
-    const innerLines: string[] = [];
-    if (am.filter) {
-      innerLines.push(`  {{- if ${filterExpr} -}}`);
-    }
-    innerLines.push('  {');
-    for (const m of am.mappings) {
-      if (!m.target.trim()) continue;
-      innerLines.push(`    "${m.target}": ${renderFieldValue(m, alias, valuesSetMap)},`);
-    }
-    innerLines.push('  },');
-    if (am.filter) {
-      innerLines.push('  {{- end -}}');
-    }
-
-    rootLines.push(`  "${am.target}": [`);
-    rootLines.push(`  {{- for ${alias} in ${am.source} -}}`);
-    rootLines.push(...innerLines);
-    rootLines.push('  {{- end -}}');
-    rootLines.push('  ],');
+  // ── Array mappings (top-level only; children are rendered recursively inside parent loops) ─
+  for (const am of arrayMappings.filter((am) => !am.parentArrayId)) {
+    if (!am.target) continue;
+    rootLines.push(...renderArrayMapping(am, arrayMappings, undefined, 0, valuesSetMap, typeMap, inputJson));
   }
 
   rootLines.push('}');
   return rootLines.join('\n');
 }
 
-// ─── Parse Scriban back to mappings (best-effort) ──────────────────────────────
-
-export type ParsedFieldMapping = Omit<FieldMapping, 'id'>;
-export type ParsedArrayMapping = {
-  source: string;
-  target: string;
-  alias: string;
-  filter?: ArrayMapping['filter'];
-  mappings: ParsedFieldMapping[];
-};
-
-export interface ParsedMappings {
-  fieldMappings: ParsedFieldMapping[];
-  arrayMappings: ParsedArrayMapping[];
-  warnings: string[];
-}
-
-/** Strip `| json` suffix from a Scriban expression */
-function stripJsonPipe(expr: string): string {
-  return expr.replace(/\s*\|\s*json\s*$/, '').trim();
-}
-
-/** Parse a Scriban expression body into source/transform/valuesSetId */
-function parseExpr(
-  raw: string,
-  valuesSetId: string | undefined,
-  alias?: string,
-): Pick<ParsedFieldMapping, 'source' | 'transform' | 'valuesSetId'> {
-  const expr = stripJsonPipe(raw.trim());
-
-  // Enum: $__e = { ... }; ($__e[path] ?? path)
-  if (valuesSetId || expr.startsWith('$__e')) {
-    const fallback = expr.match(/\?\?\s*([\w.]+)\s*\)/);
-    const src = fallback ? fallback[1] : expr;
-    const source = alias && src.startsWith(`${alias}.`) ? src.slice(alias.length + 1) : src;
-    return { source, valuesSetId };
+/** Recursively embed child AMs' fixedItems — skip keys already present inline. */
+function enrichFixedItem(
+  item: Record<string, unknown>,
+  am: ArrayMapping,
+  allAMs: ArrayMapping[]
+): Record<string, unknown> {
+  const children = allAMs.filter((c) => c.parentArrayId === am.id && c.fixedItems?.length && c.target);
+  if (children.length === 0) return item;
+  const enriched: Record<string, unknown> = { ...item };
+  for (const child of children) {
+    if (!(child.target in enriched)) {
+      enriched[child.target] = child.fixedItems!.map((fi) =>
+        enrichFixedItem(fi as Record<string, unknown>, child, allAMs)
+      );
+    }
   }
-
-  // Simple path — only word chars and dots
-  if (/^[\w.]+$/.test(expr)) {
-    const source = alias && expr.startsWith(`${alias}.`) ? expr.slice(alias.length + 1) : expr;
-    return { source };
-  }
-
-  // Transform — convert alias.field references to `value`
-  const transformExpr = alias
-    ? expr.replace(new RegExp(`\\b${alias}\\.(\\w+)`, 'g'), 'value')
-    : expr;
-  const srcMatch = expr.match(/^([\w.]+)\s*[^\w.]/);
-  const rawSrc = srcMatch ? srcMatch[1] : '';
-  const source = alias && rawSrc.startsWith(`${alias}.`) ? rawSrc.slice(alias.length + 1) : rawSrc;
-  return { source, transform: transformExpr };
+  return enriched;
 }
 
-export function parseScriban(template: string): ParsedMappings {
-  const warnings: string[] = [];
-  const fieldMappings: ParsedFieldMapping[] = [];
-  const arrayMappings: ParsedArrayMapping[] = [];
+/** Recursively check whether any value in a tree contains a {{dynamic}} reference. */
+function hasDynamicDeep(v: unknown): boolean {
+  if (typeof v === 'string') return /^\{\{.+\}\}$/.test(v);
+  if (Array.isArray(v)) return v.some(hasDynamicDeep);
+  if (v && typeof v === 'object') return Object.values(v as object).some(hasDynamicDeep);
+  return false;
+}
 
-  const lines = template.split('\n');
-  let i = 0;
+/** Coerce a fixed value to the target type for JSON emission. */
+function coerceFixedValue(v: unknown, targetType: 'string' | 'number' | 'boolean' | undefined): unknown {
+  if (targetType === 'number') {
+    const n = Number(v);
+    return isNaN(n) ? v : n;
+  }
+  if (targetType === 'boolean') {
+    if (v === true || v === 'true') return true;
+    if (v === false || v === 'false') return false;
+    return v;
+  }
+  if (targetType === 'string') {
+    return String(v);
+  }
+  return v; // unknown target type — keep as-is
+}
 
-  while (i < lines.length) {
-    const line = lines[i].trim();
-
-    // detect "for" loop block
-    const forMatch = line.match(/\{\{-?\s*for\s+(\w+)\s+in\s+([\w.[\]*]+)\s*-?\}\}/);
-    if (forMatch) {
-      const alias = forMatch[1];
-      const source = forMatch[2];
-      let target = '';
-      let filter: ArrayMapping['filter'] | undefined;
-      const innerMappings: ParsedFieldMapping[] = [];
-
-      // look for target array key just before the for line
-      if (i > 0) {
-        const prevLine = lines[i - 1].trim();
-        const tMatch = prevLine.match(/"([\w.]+)"\s*:\s*\[/);
-        if (tMatch) target = tMatch[1];
-      }
-
-      i++;
-      while (i < lines.length) {
-        const innerLine = lines[i].trim();
-        if (innerLine.match(/\{\{-?\s*end\s*-?\}\}/)) { i++; break; }
-
-        const ifMatch = innerLine.match(/\{\{-?\s*if\s+(\w+)\.([\w.]+)\s*([!=<>]+)\s*([^}]+)-?\}\}/);
-        if (ifMatch) {
-          filter = {
-            field: ifMatch[2],
-            operator: ifMatch[3].trim() as FilterOperator,
-            value: ifMatch[4].trim().replace(/^"|"$/g, ''),
-          };
-          i++; continue;
+/** Recursively emit a fixed-item value as Scriban-safe line(s), expanding {{expr}} references. */
+function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPath?: string): string[] {
+  if (Array.isArray(v)) {
+    if (!v.some(hasDynamicDeep)) return [JSON.stringify(v)];
+    const subPad = pad + '  ';
+    const result: string[] = ['['];
+    for (const item of v) {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        result.push(`${subPad}{`);
+        const kPad = subPad + '  ';
+        for (const [k, sv] of Object.entries(item as Record<string, unknown>)) {
+          const childPath = fieldPath ? `${fieldPath}.${k}` : k;
+          const vLines = emitFixedValueLines(sv, kPad, typeMap, childPath);
+          result.push(`${kPad}"${k}": ${vLines[0]}${vLines.length === 1 ? ',' : ''}`);
+          for (let li = 1; li < vLines.length - 1; li++) result.push(vLines[li]);
+          if (vLines.length > 1) result.push(`${vLines[vLines.length - 1]},`);
         }
-
-        const fieldMatch = innerLine.match(/"([\w.]+)"\s*:\s*(.*),?$/);
-        if (fieldMatch) {
-          const tgt = fieldMatch[1];
-          const rawVal = fieldMatch[2].replace(/,$/, '').trim();
-          const enumAnn = rawVal.match(/\{\{#\s*enum:([\w-]+)\s*#\}\}/);
-          const innerValuesSetId = enumAnn ? enumAnn[1] : undefined;
-          const cleanVal = rawVal.replace(/\{\{#\s*enum:[\w-]+\s*#\}\}/, '').trim();
-          const exprMatch = cleanVal.match(/\{\{-?\s*([\s\S]+?)\s*-?\}\}/);
-          if (exprMatch) {
-            const parsed = parseExpr(exprMatch[1], innerValuesSetId, alias);
-            innerMappings.push({ target: tgt, source: '', ...parsed });
-          } else if (!cleanVal.includes('{{') && cleanVal !== 'null') {
-            innerMappings.push({ source: '', target: tgt, fixedValue: cleanVal.replace(/^"|"$/g, '') });
-          }
-        }
-        i++;
-      }
-
-      if (source && target) {
-        arrayMappings.push({ source, target, alias, filter, mappings: innerMappings });
+        result.push(`${subPad}},`);
       } else {
-        warnings.push(`Could not determine target array for "for ${alias} in ${source}"`);
-      }
-      continue;
-    }
-
-    // detect simple field mapping: "field": {{ path }} or "field": "value"
-    const simpleMatch = line.match(/"([\w.]+)"\s*:\s*(.*),?$/);
-    if (simpleMatch && !line.includes('{{- for') && !line.startsWith('[') && !line.startsWith(']')) {
-      const target = simpleMatch[1];
-      const valueRaw = simpleMatch[2].replace(/,$/, '').trim();
-
-      // enum annotation: {{# enum:setId #}} anywhere on the line
-      const enumAnnotation = valueRaw.match(/\{\{#\s*enum:([\w-]+)\s*#\}\}/);
-      const valuesSetId = enumAnnotation ? enumAnnotation[1] : undefined;
-
-      // strip the annotation before further parsing
-      const valueClean = valueRaw.replace(/\{\{#\s*enum:[\w-]+\s*#\}\}/, '').trim();
-
-      const exprMatch = valueClean.match(/\{\{-?\s*([\s\S]+?)\s*-?\}\}/);
-      if (exprMatch) {
-        const parsed = parseExpr(exprMatch[1], valuesSetId);
-        fieldMappings.push({ target, source: '', ...parsed });
-      } else if (!valueClean.includes('{{') && valueClean !== 'null') {
-        fieldMappings.push({ source: '', target, fixedValue: valueClean.replace(/^"|"$/g, '') });
-      } else if (valueClean.includes('{{')) {
-        warnings.push(`Could not parse: ${line}`);
+        const vLines = emitFixedValueLines(item, subPad, typeMap, fieldPath);
+        result.push(`${subPad}${vLines.join('\n')},`);
       }
     }
+    result.push(`${pad}]`);
+    return result;
+  }
+  if (typeof v === 'string') {
+    const m = v.match(/^\{\{(.+)\}\}$/);
+    if (m) {
+      const expr = m[1].trim();
+      const targetType = fieldPath ? typeMap?.[fieldPath] : undefined;
+      return targetType
+        ? [`{{ ${castExpr(expr, targetType)} | json }}`]
+        : [`{{ ${expr} | json }}`];
+    }
+    const targetType = fieldPath ? typeMap?.[fieldPath] : undefined;
+    return [JSON.stringify(coerceFixedValue(v, targetType))];
+  }
+  // Non-string primitives (number, boolean) — apply target type coercion if known
+  const primitiveTargetType = fieldPath ? typeMap?.[fieldPath] : undefined;
+  if (primitiveTargetType !== undefined) return [JSON.stringify(coerceFixedValue(v, primitiveTargetType))];
+  return [JSON.stringify(v)];
+}
 
-    i++;
+/**
+ * Recursively render a single ArrayMapping block (and its children) at a given nesting depth.
+ * depth=0 → 2-space indent (root-level); depth=1 → 4-space indent (inside a loop), etc.
+ */
+function renderArrayMapping(
+  am: ArrayMapping,
+  allAMs: ArrayMapping[],
+  outerAlias: string | undefined,
+  depth: number,
+  valuesSetMap?: ValuesSetMap,
+  typeMap?: TypeMap,
+  inputJson?: string
+): string[] {
+  const pad = ' '.repeat(2 * (depth + 1));
+  const fieldPad = ' '.repeat(2 * (depth + 2));
+  const alias = am.alias || 'item';
+  const source = outerAlias ? `${outerAlias}.${am.source}` : am.source;
+  const filterExpr = renderFilter(alias, am.filter ?? undefined);
+
+  // Build the full item prefix for typeMap lookups, e.g. "labels[*]" or "orders[*].items[*]"
+  function resolvePrefix(id: string): string {
+    const m = allAMs.find((a) => a.id === id);
+    if (!m) return '';
+    if (!m.parentArrayId) return `${m.target}[*]`;
+    return `${resolvePrefix(m.parentArrayId)}.${m.target}[*]`;
+  }
+  const itemPrefix = resolvePrefix(am.id);
+
+  // Build a set of ALL dot-paths that exist within an array item — used as fallback
+  // for old mappings that predate the isRootSource flag.
+  const itemPathSet = new Set<string>();
+  if (inputJson && am.source) {
+    try {
+      const root = JSON.parse(inputJson);
+      const buildFullSrcPath = (id: string): string => {
+        const a = allAMs.find((x) => x.id === id);
+        if (!a) return '';
+        if (!a.parentArrayId) return a.source;
+        return `${buildFullSrcPath(a.parentArrayId)}.${a.source}`;
+      };
+      let node: any = root;
+      for (const part of buildFullSrcPath(am.id).split('.')) {
+        if (node == null) break;
+        if (Array.isArray(node)) node = node[0];
+        if (typeof node !== 'object' || node == null) break;
+        node = node[part];
+      }
+      if (Array.isArray(node) && node.length > 0 && node[0] && typeof node[0] === 'object') {
+        const collectPaths = (obj: any, prefix: string) => {
+          if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { if (prefix) itemPathSet.add(prefix); return; }
+          for (const [k, v] of Object.entries(obj)) {
+            const p = prefix ? `${prefix}.${k}` : k;
+            itemPathSet.add(p);
+            collectPaths(v, p);
+          }
+        };
+        collectPaths(node[0], '');
+      }
+    } catch { /* ignore */ }
   }
 
-  return { fieldMappings, arrayMappings, warnings };
+  const lines: string[] = [];
+  lines.push(`${pad}"${am.target}": [`);
+  if (am.fixedItems?.length) {
+    for (const rawItem of am.fixedItems) {
+      const enriched = enrichFixedItem(rawItem as Record<string, unknown>, am, allAMs);
+      if (!hasDynamicDeep(enriched)) {
+        // Coerce each top-level field to the correct target type
+        const coerced: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(enriched)) {
+          const targetType = typeMap?.[`${itemPrefix}.${k}`];
+          coerced[k] = targetType !== undefined ? coerceFixedValue(v, targetType) : v;
+        }
+        lines.push(`${pad}${JSON.stringify(coerced)},`);
+      } else {
+        lines.push(`${pad}{`);
+        for (const [k, v] of Object.entries(enriched)) {
+          const fieldPath = `${itemPrefix}.${k}`;
+          const vLines = emitFixedValueLines(v, fieldPad, typeMap, fieldPath);
+          lines.push(`${fieldPad}"${k}": ${vLines[0]}${vLines.length === 1 ? ',' : ''}`);
+          for (let li = 1; li < vLines.length - 1; li++) lines.push(vLines[li]);
+          if (vLines.length > 1) lines.push(`${vLines[vLines.length - 1]},`);
+        }
+        lines.push(`${pad}},`);
+      }
+    }
+  }
+  if (!am.source) {
+    // Fixed-items-only array — no loop needed
+    lines.push(`${pad}],`);
+    return lines;
+  }
+  lines.push(`${pad}{{- for ${alias} in ${source} -}}`);
+  if (am.filter) {
+    lines.push(`${pad}{{- if ${filterExpr} -}}`);
+  }
+  lines.push(`${pad}{`);
+  for (const m of am.mappings) {
+    if (!m.target.trim()) continue;
+    const targetType = typeMap?.[`${itemPrefix}.${m.target}`];
+    // isRootSource is set explicitly by the modal when user picks from root fields group.
+    // For old mappings without the flag, fall back to checking itemPathSet from inputJson:
+    // if the source is not a known item path, it must be a root field.
+    const isRoot = m.isRootSource === true ||
+      (m.isRootSource === undefined && itemPathSet.size > 0 && Boolean(m.source) && !itemPathSet.has(m.source));
+    lines.push(`${fieldPad}"${m.target}": ${renderFieldValue(m, isRoot ? undefined : alias, valuesSetMap, targetType)},`);
+  }
+  // Render child AMs recursively inside this loop body
+  const children = allAMs.filter((c) => c.parentArrayId === am.id && c.source && c.target);
+  for (const child of children) {
+    lines.push(...renderArrayMapping(child, allAMs, alias, depth + 1, valuesSetMap, typeMap, inputJson));
+  }
+  lines.push(`${pad}},`);
+  if (am.filter) {
+    lines.push(`${pad}{{- end -}}`);
+  }
+  lines.push(`${pad}{{- end -}}`);
+  lines.push(`${pad}],`);
+  return lines;
 }
+
+// ─── Re-exported from scribanParser.ts ───────────────────────────────────────
+
+export type { ParsedFieldMapping, ParsedArrayMapping, ParsedMappings } from './scribanParser';
+export { resolveParentArrayIds, parseScriban } from './scribanParser';
+
+
+
+
+
+
+
+
+

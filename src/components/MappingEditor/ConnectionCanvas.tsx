@@ -5,6 +5,23 @@ import {
   removeFieldMapping,
   selectMapping,
 } from './MappingEditorContext';
+import { ArrayMapping } from './types';
+
+// ─── Path helpers (mirrors OutputTree / ArrayMappingModal) ────────────────────
+
+function getFullSourcePath(amId: string, allMappings: ArrayMapping[]): string {
+  const am = allMappings.find((m) => m.id === amId);
+  if (!am) return '';
+  if (!am.parentArrayId) return am.source;
+  return `${getFullSourcePath(am.parentArrayId, allMappings)}[*].${am.source}`;
+}
+
+function getFullTargetPrefix(amId: string, allMappings: ArrayMapping[]): string {
+  const am = allMappings.find((m) => m.id === amId);
+  if (!am) return '';
+  if (!am.parentArrayId) return am.target;
+  return `${getFullTargetPrefix(am.parentArrayId, allMappings)}[*].${am.target}`;
+}
 
 interface Props {
   /** Map of path → DOM element for source leaves */
@@ -101,10 +118,12 @@ const ConnectionCanvas: React.FC<Props> = ({
 
     // ── Array mapping inner-field connections (violet) ─────────────────────────
     for (const am of arrayMappings) {
+      const fullSrc = getFullSourcePath(am.id, arrayMappings);
+      const fullTgt = getFullTargetPrefix(am.id, arrayMappings);
       for (const m of am.mappings) {
         if (!m.source || !m.target) continue;
-        const srcPath = `${am.source}[*].${m.source}`;
-        const tgtPath = `${am.target}[*].${m.target}`;
+        const srcPath = `${fullSrc}[*].${m.source}`;
+        const tgtPath = `${fullTgt}[*].${m.target}`;
         const srcEl = sourceRefs.get(srcPath);
         const tgtEl = targetRefs.get(tgtPath);
         if (!srcEl || !tgtEl) continue;

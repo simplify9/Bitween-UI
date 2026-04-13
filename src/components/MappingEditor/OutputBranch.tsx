@@ -1,0 +1,318 @@
+import React, { useState } from 'react';
+import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
+import { TreeNode } from 'src/utils/mappingPreview';
+import { ArrayMapping } from './types';
+import {
+  useMappingEditorDispatch,
+  useMappingEditorState,
+  addArrayMapping,
+  openArrayModal,
+  toggleNodeCollapsed,
+  updateArrayMapping,
+} from './MappingEditorContext';
+import { getFullTargetPrefix } from './mappingTreeUtils';
+import { OutputLeaf } from './OutputLeaf';
+import {
+  DraftField,
+  initDraftFieldsFromNode,
+  draftFieldsToRecord,
+  recordToDraftFields,
+  FixedItemFieldRows,
+} from './FixedItemPanel';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface OutputBranchProps {
+  node: TreeNode;
+  depth?: number;
+  sourcePaths: string[];
+  typeMap: Record<string, 'string' | 'number' | 'boolean'>;
+  onLeafRef?: (path: string, el: HTMLElement | null) => void;
+  search?: string;
+}
+
+// ─── OutputBranch ─────────────────────────────────────────────────────────────
+
+export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sourcePaths, typeMap, onLeafRef, search }) => {
+  const dispatch = useMappingEditorDispatch();
+  const { collapsedNodes, arrayMappings, inputJson } = useMappingEditorState();
+  const collapsed = collapsedNodes.includes(`out:${node.path}`);
+  const isOpen = !collapsed;
+
+  // ── Fixed-item inline panel state ────────────────────────────────────────
+  const [fixedPanelOpen, setFixedPanelOpen] = useState(false);
+  const [draftFields, setDraftFields] = useState<DraftField[]>([]);
+  const [editingFixedIdx, setEditingFixedIdx] = useState<number | null>(null);
+  const [editDraftFields, setEditDraftFields] = useState<DraftField[]>([]);
+
+  // Is this node inside another array? (path like "lineOrders[*].lineItems")
+  const isNestedArrayNode = node.type === 'array' && node.path.includes('[*].');
+
+  // Find the parent AM for this node (when nested)
+  const parentContainerPath = isNestedArrayNode
+    ? node.path.substring(0, node.path.lastIndexOf('[*].') + 3) // e.g. "lineOrders[*]"
+    : null;
+  const parentAm = parentContainerPath
+    ? arrayMappings.find((am) => {
+        const fullPrefix = getFullTargetPrefix(am.id, arrayMappings);
+        return `${fullPrefix}[*]` === parentContainerPath;
+      })
+    : null;
+
+  // Relative target name for this node (last segment, no [*])
+  const relativeTarget = isNestedArrayNode
+    ? node.path.split('[*].').pop()?.replace('[*]', '') ?? node.key
+    : node.key;
+
+  // Check if this node corresponds to an array mapping (top-level or nested)
+  const arrayMapping = arrayMappings.find((am) => {
+    const fullPrefix = getFullTargetPrefix(am.id, arrayMappings);
+    // node.path already includes [*] suffix (e.g. "orders[*]" or "orders[*].items[*]")
+    return `${fullPrefix}[*]` === node.path;
+  });
+
+  // Count nesting depth by number of [*] in the path — max 3 levels allowed
+  const nestingDepth = (node.path.match(/\[\*\]/g) ?? []).length;
+  const canConfigureLoop = nestingDepth <= 3;
+
+  // Scalar (non-array) leaf paths from the root input JSON — for source field suggestions
+  const inputScalarProps = React.useMemo(() => {
+    try {
+      const root = JSON.parse(inputJson);
+      const collect = (obj: any, prefix: string): string[] => {
+        if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+          return prefix ? [prefix] : [];
+        }
+        return Object.entries(obj).flatMap(([k, v]) => {
+          const path = prefix ? `${prefix}.${k}` : k;
+          if (Array.isArray(v)) return [];
+          if (v && typeof v === 'object') return collect(v, path);
+          return [path];
+        });
+      };
+      return collect(root, '');
+    } catch {
+      return [];
+    }
+  }, [inputJson]);
+
+  const handleLoopClick = () => {
+    dispatch(
+      openArrayModal({
+        id: arrayMapping?.id ?? '__new__',
+        presetTarget: relativeTarget,
+        parentArrayId: parentAm?.id ?? null,
+      })
+    );
+  };
+
+  const openFixedPanel = () => {
+    setDraftFields(initDraftFieldsFromNode(node));
+    setFixedPanelOpen(true);
+  };
+
+  const handleAddFixedItem = () => {
+    const newItem = draftFieldsToRecord(draftFields);
+    if (Object.keys(newItem).length === 0) return;
+
+    const existing = arrayMapping?.fixedItems ?? [];
+    const updated = [...existing, newItem];
+
+    if (arrayMapping) {
+      dispatch(updateArrayMapping({ id: arrayMapping.id, fixedItems: updated }));
+    } else {
+      dispatch(
+        addArrayMapping({
+          source: '',
+          target: relativeTarget,
+          alias: 'item',
+          mappings: [],
+          fixedItems: updated,
+          parentArrayId: parentAm?.id ?? undefined,
+        })
+      );
+    }
+    setDraftFields(initDraftFieldsFromNode(node));
+  };
+
+  const handleUpdateFixedItem = (idx: number) => {
+    const newItem = draftFieldsToRecord(editDraftFields);
+    if (Object.keys(newItem).length === 0) return;
+    const updated = [...arrayMapping!.fixedItems!];
+    updated[idx] = newItem;
+    dispatch(updateArrayMapping({ id: arrayMapping!.id, fixedItems: updated }));
+    setEditingFixedIdx(null);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 px-2 py-[3px] rounded hover:bg-gray-50 group">
+        <button
+          onClick={() => dispatch(toggleNodeCollapsed(`out:${node.path}`))}
+          className="flex items-center gap-1 flex-1 text-left"
+        >
+          <span className="text-gray-400 text-xs w-3 flex-shrink-0">{isOpen ? '▾' : '▸'}</span>
+          <span className="text-xs font-medium text-gray-700 font-mono truncate">{node.key}</span>
+          {node.type === 'array' && (
+            <span className="text-xs text-blue-500 font-mono ml-0.5">[]</span>
+          )}
+          {node.type === 'array' && (arrayMapping?.fixedItems?.length ?? 0) > 0 && (
+            <span
+              className="ml-1 inline-flex items-center gap-0.5 text-[9px] font-semibold px-1 py-px rounded-full bg-teal-100 text-teal-700 border border-teal-300 leading-none"
+              title={`${arrayMapping!.fixedItems!.length} fixed item${arrayMapping!.fixedItems!.length !== 1 ? 's' : ''}`}
+            >
+              <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+                <path d="M9.5 0a.5.5 0 0 1 .5.5V2h1a2 2 0 0 1 2 2v1.5h.5a.5.5 0 0 1 0 1H13V13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6.5h-.5a.5.5 0 0 1 0-1H3V4a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5h1z"/>
+              </svg>
+              {arrayMapping!.fixedItems!.length}
+            </span>
+          )}
+          {node.type === 'object' && (
+            <span className="text-xs text-gray-400 font-mono ml-0.5">{'{}'}</span>
+          )}
+        </button>
+
+        {node.type === 'array' && canConfigureLoop && (
+          <button
+            className={`opacity-0 group-hover:opacity-100 text-xs border rounded px-1 transition ${
+              isNestedArrayNode && (!parentAm || !parentAm.source)
+                ? 'text-gray-300 border-gray-200 cursor-not-allowed'
+                : 'text-blue-500 hover:text-blue-700 border-blue-200'
+            }`}
+            onClick={isNestedArrayNode && (!parentAm || !parentAm.source) ? undefined : handleLoopClick}
+            disabled={isNestedArrayNode && (!parentAm || !parentAm.source)}
+            title={isNestedArrayNode && (!parentAm || !parentAm.source) ? 'Map the parent array first' : 'Configure array mapping + filter'}
+          >
+            ⚙ map
+          </button>
+        )}
+        {node.type === 'array' && canConfigureLoop && (
+          <button
+            className={`opacity-0 group-hover:opacity-100 text-xs border rounded px-1 transition ${
+              isNestedArrayNode && (!parentAm || !parentAm.source)
+                ? 'text-gray-300 border-gray-200 cursor-not-allowed'
+                : fixedPanelOpen
+                  ? 'text-teal-700 border-teal-400 bg-teal-50'
+                  : 'text-teal-600 hover:text-teal-800 border-teal-200'
+            }`}
+            onClick={isNestedArrayNode && (!parentAm || !parentAm.source) ? undefined : () => fixedPanelOpen ? setFixedPanelOpen(false) : openFixedPanel()}
+            disabled={isNestedArrayNode && (!parentAm || !parentAm.source)}
+            title={isNestedArrayNode && (!parentAm || !parentAm.source) ? 'Map the parent array first' : 'Add fixed item to this array'}
+          >
+            ＋ fixed
+          </button>
+        )}
+      </div>
+
+      {/* ── Inline fixed-item panel ────────────────────────────────────────── */}
+      {node.type === 'array' && fixedPanelOpen && (
+        <div className="mx-2 mb-1 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 space-y-2 text-xs">
+          {/* Existing fixed items */}
+          {(arrayMapping?.fixedItems?.length ?? 0) > 0 && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-semibold text-teal-700 uppercase tracking-wide">Existing fixed items</span>
+              {arrayMapping!.fixedItems!.map((item, idx) => (
+                <div key={idx} className="rounded border border-teal-100 bg-white">
+                  {editingFixedIdx === idx ? (
+                    /* ── Edit form ── */
+                    <div className="px-2 py-1.5 space-y-1.5">
+                      <FixedItemFieldRows
+                        fields={editDraftFields}
+                        onFieldsChange={setEditDraftFields}
+                        parentNode={node}
+                        depth={0}
+                        inputScalarProps={inputScalarProps}
+                        idPrefix={`edit-${node.path}-${idx}`}
+                      />
+                      <div className="flex gap-1 pt-0.5">
+                        <button
+                          className="flex-1 text-[11px] bg-teal-500 hover:bg-teal-600 text-white rounded py-0.5 transition"
+                          onClick={() => handleUpdateFixedItem(idx)}
+                        >Update</button>
+                        <button
+                          className="flex-1 text-[11px] border border-gray-200 hover:bg-gray-50 text-gray-500 rounded py-0.5 transition"
+                          onClick={() => setEditingFixedIdx(null)}
+                        >Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── Compact summary row ── */
+                    <div className="flex items-center justify-between px-2 py-1 font-mono text-[10px] text-gray-600">
+                      <span className="truncate">{JSON.stringify(item)}</span>
+                      <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                        <button
+                          className="text-gray-300 hover:text-blue-500 transition"
+                          onClick={() => { setEditDraftFields(recordToDraftFields(item as Record<string, unknown>, node)); setEditingFixedIdx(idx); }}
+                        >
+                          <HiOutlinePencil size={12} />
+                        </button>
+                        <button
+                          className="text-gray-300 hover:text-rose-500 transition"
+                          onClick={() =>
+                            dispatch(updateArrayMapping({
+                              id: arrayMapping!.id,
+                              fixedItems: arrayMapping!.fixedItems!.filter((_, i) => i !== idx),
+                            }))
+                          }
+                        >
+                          <HiOutlineTrash size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* New item form */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-semibold text-teal-700 uppercase tracking-wide">New fixed item</span>
+            <FixedItemFieldRows
+              fields={draftFields}
+              onFieldsChange={setDraftFields}
+              parentNode={node}
+              depth={0}
+              inputScalarProps={inputScalarProps}
+              idPrefix={`new-${node.path}`}
+            />
+
+            <button
+              className="mt-1 w-full text-[11px] bg-teal-500 hover:bg-teal-600 text-white rounded py-1 transition"
+              onClick={handleAddFixedItem}
+            >
+              Add fixed item
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div className="pl-3 border-l border-gray-100 ml-3">
+          {node.children.map((child) =>
+            child.type === 'leaf' ? (
+              <OutputLeaf
+                key={child.path}
+                node={child}
+                sourcePaths={sourcePaths}
+                typeMap={typeMap}
+                onLeafRef={onLeafRef}
+                isSearchMatch={Boolean(search && child.key.toLowerCase().includes(search.toLowerCase()))}
+              />
+            ) : (
+              <OutputBranch
+                key={child.path}
+                node={child}
+                depth={depth + 1}
+                sourcePaths={sourcePaths}
+                typeMap={typeMap}
+                onLeafRef={onLeafRef}
+                search={search}
+              />
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
