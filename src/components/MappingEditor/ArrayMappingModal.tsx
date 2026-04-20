@@ -11,6 +11,7 @@ import {
 import { ArrayMapping, FilterOperator, LookupDictionary, LookupEntry, genId } from './types';
 import { buildTypeMap } from 'src/utils/scribanGenerator';
 import { getFullSourcePath, getFullTargetBase, getItemArrayPaths, collectArrayPaths, getItemProperties, generateExample } from './arrayMappingHelpers';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,7 +28,9 @@ const OPERATORS: { label: string; value: FilterOperator }[] = [
 
 const ArrayMappingModal: React.FC = () => {
   const dispatch = useMappingEditorDispatch();
-  const { editingArrayId, arrayMappings, fieldMappings, inputJson, outputJson, newArrayPresetTarget, newArrayParentId } = useMappingEditorState();
+  const { editingArrayId, arrayMappings, fieldMappings, inputJson, outputJson, newArrayPresetTarget, newArrayParentId, partnerAdapterProperties, selectedPartnerId } = useMappingEditorState();
+  const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const allGlobalSets = globalSetsData?.result ?? [];
 
   const am = arrayMappings.find((m) => m.id === editingArrayId);
   const parentAm = newArrayParentId ? arrayMappings.find((m) => m.id === newArrayParentId) : undefined;
@@ -65,6 +68,9 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
     transform?: string; fixedValue?: string;
     lookupDictionary?: LookupDictionary;
     isRootSource?: boolean;
+    partnerPropKey?: string;
+    globalSetId?: string;
+    globalKey?: string;
   }>>([]);
   // Which secondary panel is open for each mapping row: 'transform' | 'lookup' | 'fixed' | null
   const [openPanels, setOpenPanels] = useState<Record<string, 'transform' | 'lookup' | 'fixed' | null>>({});
@@ -417,14 +423,14 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                   setOpenPanels((prev) => ({ ...prev, [m.id]: isOpen ? null : 'lookup' }));
                 };
 
-                const rowMode = hasFixed ? 'fixed' : 'source';
+                const rowMode = m.partnerPropKey !== undefined ? 'partner' : m.globalSetId !== undefined ? 'global' : hasFixed ? 'fixed' : 'source';
 
                 return (
                   <div key={m.id} className="rounded border border-gray-100 bg-white px-2 py-1.5 space-y-1">
                     {/* Row: target ← [src|≡|"] source-selector [ƒ] [trash] */}
                     <div className="flex items-center gap-1">
                       {/* mapped indicator dot */}
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${m.source || hasFixed ? 'bg-emerald-400' : 'bg-rose-300'}`} />
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${m.source || hasFixed || m.partnerPropKey || (m.globalSetId && m.globalKey) ? 'bg-emerald-400' : 'bg-rose-300'}`} />
 
                       {/* target field — dropdown if known, otherwise free-text */}
                       {targetItemProps.length > 0 ? (
@@ -449,41 +455,64 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
 
                       <span className="text-gray-300 flex-shrink-0 text-xs select-none">←</span>
 
-                      {/* src/fx toggle button — disabled until a target is chosen */}
-                      <button
-                        disabled={!m.target}
-                        title={!m.target ? 'Select a target field first' : rowMode === 'fixed' ? 'Switch to source binding' : 'Switch to fixed value'}
-                        onClick={() => {
-                          if (rowMode === 'fixed') {
-                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: undefined, lookupDictionary: undefined } : p));
-                            setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
-                          } else {
-                            setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
-                            setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: '', fixedValue: '', lookupDictionary: undefined } : p));
-                          }
-                        }}
-                        className={[
-                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
-                          !m.target ? 'opacity-30 cursor-not-allowed bg-white border-gray-200 text-gray-400'
-                            : rowMode === 'fixed' ? 'bg-amber-50 border-amber-300 text-amber-600'
-                            : 'bg-white border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500',
-                        ].join(' ')}
-                      >{rowMode === 'fixed' ? 'fx' : 'src'}</button>
+                      {/* Source / Fixed / Partner / Global mode toggle */}
+                      <div className={`flex flex-shrink-0 rounded overflow-hidden border text-[10px] font-medium ${!m.target ? 'opacity-30 pointer-events-none border-gray-200' : 'border-gray-200'}`}>
+                        <button
+                          disabled={!m.target}
+                          onClick={() => {
+                            if (rowMode !== 'source') {
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: undefined, partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined } : p));
+                              setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                            }
+                          }}
+                          className={rowMode === 'source' ? 'px-1.5 py-0.5 bg-blue-500 text-white' : 'px-1.5 py-0.5 text-gray-400 hover:bg-gray-50'}
+                        >Source</button>
+                        <button
+                          disabled={!m.target}
+                          onClick={() => {
+                            if (rowMode !== 'fixed') {
+                              setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: '', fixedValue: '', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined } : p));
+                            }
+                          }}
+                          className={rowMode === 'fixed' ? 'px-1.5 py-0.5 bg-amber-500 text-white border-l border-amber-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                        >Fixed</button>
+                          <button
+                            disabled={!m.target}
+                            onClick={() => {
+                              if (rowMode !== 'partner') {
+                                setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                                setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: '', fixedValue: undefined, partnerPropKey: '', globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined, transform: undefined } : p));
+                              }
+                            }}
+                            className={rowMode === 'partner' ? 'px-1.5 py-0.5 bg-emerald-500 text-white border-l border-emerald-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                          >Partner</button>
+                        <button
+                          disabled={!m.target}
+                          onClick={() => {
+                            if (rowMode !== 'global') {
+                              setOpenPanels((prev) => ({ ...prev, [m.id]: null }));
+                              setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, source: '', fixedValue: undefined, partnerPropKey: undefined, globalSetId: '', globalKey: '', lookupDictionary: undefined, transform: undefined } : p));
+                            }
+                          }}
+                          className={rowMode === 'global' ? 'px-1.5 py-0.5 bg-teal-500 text-white border-l border-teal-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                        >Global</button>
+                      </div>
 
-                      {/* ≡ lookup dictionary button — requires source */}
-                      <button
+                      {/* Lookup button — only in source mode */}
+                      {rowMode === 'source' && <button
                         disabled={!m.source}
-                        title={!m.source ? 'Select a source field first' : hasLookup ? `Lookup: ${m.lookupDictionary!.entries.length} entries` : 'Add value lookup dictionary'}
+                        title={!m.source ? 'Select a source field first' : hasLookup ? `Lookup: ${m.lookupDictionary!.entries.length} entries` : 'Map source values to different output values'}
                         onClick={openLookup}
                         className={[
-                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          'flex-shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition leading-none',
                           !m.source ? 'opacity-30 cursor-not-allowed bg-white border-gray-200 text-gray-400'
                             : hasLookup ? 'bg-violet-100 border-violet-300 text-violet-700'
                             : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
                         ].join(' ')}
-                      >≡</button>
+                      >Lookup</button>}
 
-                      {/* source selector or fixed value input */}
+                      {/* source selector, fixed input, partner input, or global pickers */}
                       {rowMode === 'fixed' ? (
                         <input
                           className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs text-amber-600 focus:outline-none placeholder-amber-300"
@@ -491,6 +520,46 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                           value={m.fixedValue ?? ''}
                           onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: e.target.value, source: '' } : p))}
                         />
+                      ) : rowMode === 'partner' ? (
+                        <div className="flex-1 relative min-w-0">
+                          <input
+                            list={`partner-props-am-${m.id}`}
+                            className="w-full border-0 bg-transparent font-mono text-xs focus:outline-none text-emerald-600 placeholder-emerald-300"
+                            placeholder="property key…"
+                            value={m.partnerPropKey ?? ''}
+                            onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, partnerPropKey: e.target.value } : p))}
+                          />
+                          <datalist id={`partner-props-am-${m.id}`}>
+                            {Object.keys(partnerAdapterProperties).map((k) => (
+                              <option key={k} value={k} />
+                            ))}
+                          </datalist>
+                        </div>
+                      ) : rowMode === 'global' ? (
+                        <div className="flex gap-1 flex-1 min-w-0">
+                          <select
+                            className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-600 flex-1 min-w-0"
+                            value={m.globalSetId ?? ''}
+                            onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, globalSetId: e.target.value, globalKey: '' } : p))}
+                          >
+                            <option value="">— pick set —</option>
+                            {allGlobalSets.map((s) => (
+                              <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                          </select>
+                          {m.globalSetId && (
+                            <select
+                              className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-500 flex-1 min-w-0"
+                              value={m.globalKey ?? ''}
+                              onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, globalKey: e.target.value } : p))}
+                            >
+                              <option value="">— pick key —</option>
+                              {Object.keys(allGlobalSets.find((s) => s.id === m.globalSetId)?.values ?? {}).map((k) => (
+                                <option key={k} value={k}>{k}</option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                       ) : (
                         <select
                           disabled={!m.target}
@@ -526,19 +595,19 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                         </select>
                       )}
 
-                      {/* ƒ transform toggle — only when source selected and no lookup active */}
+                      {/* Transform toggle — only in source mode with a source selected and no lookup */}
                       {rowMode === 'source' && Boolean(m.source) && !hasLookup && <button
-                        title={hasTransform ? `Expression: ${m.transform}` : 'Add expression transform'}
+                        title={hasTransform ? `Transform: ${m.transform}` : 'Add a transform expression to modify the value'}
                         onClick={openTransform}
                         className={[
-                          'flex-shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded border transition leading-none',
+                          'flex-shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition leading-none',
                           panel === 'transform'
                             ? 'bg-violet-100 border-violet-300 text-violet-700'
                             : hasTransform
-                            ? 'bg-violet-50 border-violet-200 text-violet-400'
+                            ? 'bg-violet-50 border-violet-200 text-violet-500'
                             : 'bg-white border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
                         ].join(' ')}
-                      >ƒ</button>}
+                      >Transform</button>}
 
                       {/* delete */}
                       <button
@@ -554,12 +623,12 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
 
                     {/* Secondary row — only when panel is open */}
                     {panel === 'transform' && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-violet-400 font-mono flex-shrink-0 w-4 text-center select-none">ƒ</span>
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-medium text-violet-600 select-none">Transform <span className="font-normal text-gray-400">(optional — modify the value before output. Use <code className="font-mono">value</code> to refer to the source field.)</span></span>
                         <input
                           autoFocus
-                          className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
-                          placeholder="e.g. value * 1.1  — 'value' = source field"
+                          className="w-full border border-violet-200 bg-white rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+                          placeholder="e.g.  value * 1.1    or    value + ' USD'"
                           value={m.transform ?? ''}
                           onChange={(e) => {
                             setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, transform: e.target.value || undefined } : p));
@@ -801,7 +870,7 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                 !target ||
                 (hasFilter && !source) ||
                 pendingMappings.some(
-                  (m) => m.target && !m.source && m.fixedValue === undefined && !m.lookupDictionary
+                  (m) => m.target && !m.source && m.fixedValue === undefined && !m.lookupDictionary && !m.partnerPropKey && !(m.globalSetId && m.globalKey)
                 )
               }
               className="text-xs bg-blue-600 text-white rounded px-4 py-1.5 hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"

@@ -8,7 +8,7 @@ import { useValuesSetMap } from 'src/hooks/useValuesSetMap';
 const DEBOUNCE_MS = 600;
 
 const LivePreview: React.FC = () => {
-  const { inputJson, outputJson: targetSchemaJson, fieldMappings, arrayMappings, manualTemplate, mode, validationErrors } = useMappingEditorState();
+  const { inputJson, outputJson: targetSchemaJson, fieldMappings, arrayMappings, manualTemplate, mode, validationErrors, partnerAdapterProperties, selectedPartnerId } = useMappingEditorState();
 
   const valuesSetMap = useValuesSetMap();
   const [previewMapping] = usePreviewMappingMutation();
@@ -21,7 +21,11 @@ const LivePreview: React.FC = () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
-      if (!inputJson.trim()) {
+      const hasPartnerProps = Object.keys(partnerAdapterProperties).length > 0;
+      // If no source JSON but partner props exist, use {} as base so __partner__ can still be injected
+      const effectiveInputJson = !inputJson.trim() && hasPartnerProps ? '{}' : inputJson;
+
+      if (!effectiveInputJson.trim() && !selectedPartnerId) {
         setOutputJson(null);
         setPreviewError(null);
         return;
@@ -31,12 +35,13 @@ const LivePreview: React.FC = () => {
       const template =
         mode === 'manual' && manualTemplate
           ? manualTemplate
-          : generateScriban(fieldMappings, arrayMappings, valuesSetMap, targetSchemaJson || undefined, inputJson || undefined);
+          : generateScriban(fieldMappings, arrayMappings, valuesSetMap, targetSchemaJson || undefined, effectiveInputJson || undefined);
 
       try {
         const result = await previewMapping({
           scribanTemplate: template,
-          inputJson,
+          inputJson: effectiveInputJson || '{}',
+          partnerId: selectedPartnerId,
         }).unwrap();
         setOutputJson(result.outputJson ?? null);
         setPreviewError(result.error ?? null);
@@ -49,7 +54,7 @@ const LivePreview: React.FC = () => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [inputJson, fieldMappings, arrayMappings, manualTemplate, mode, valuesSetMap]);
+  }, [inputJson, fieldMappings, arrayMappings, manualTemplate, mode, valuesSetMap, partnerAdapterProperties, selectedPartnerId]);
 
   const formatted = outputJson !== null ? outputJson : null;
 

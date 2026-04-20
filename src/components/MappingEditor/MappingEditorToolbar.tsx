@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   HiArrowLeft,
@@ -13,7 +13,9 @@ import {
   clearAll,
   redo,
   undo,
+  setSelectedPartner,
 } from './MappingEditorContext';
+import { usePartnersQuery, usePartnerQuery } from 'src/client/apis/partnersApi';
 
 // ─── Mode toggle button ───────────────────────────────────────────────────────
 
@@ -58,7 +60,34 @@ const MappingEditorToolbar: React.FC<MappingEditorToolbarProps> = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useMappingEditorDispatch();
-  const { mode, fieldMappings, arrayMappings, past, future } = useMappingEditorState();
+  const { mode, fieldMappings, arrayMappings, past, future, selectedPartnerId } = useMappingEditorState();
+  const [localPartnerId, setLocalPartnerId] = useState<number | null>(selectedPartnerId);
+
+  // Sync local dropdown state when Redux restores a saved PartnerId on load
+  React.useEffect(() => {
+    if (selectedPartnerId != null && localPartnerId !== selectedPartnerId) {
+      setLocalPartnerId(selectedPartnerId);
+    }
+  }, [selectedPartnerId]);
+  const { data: partners } = usePartnersQuery();
+  const { data: partnerDetail, isFetching: isPartnerFetching } = usePartnerQuery(localPartnerId!, { skip: localPartnerId == null });
+
+  const handlePartnerChange = (idStr: string) => {
+    const pid = idStr ? Number(idStr) : null;
+    setLocalPartnerId(pid);
+    if (pid == null) {
+      dispatch(setSelectedPartner(null, {}));
+    }
+    // partnerDetail effect below handles dispatch when data arrives
+  };
+
+  React.useEffect(() => {
+    if (localPartnerId == null) return;
+    // Wait until RTK Query has finished fetching for the current localPartnerId.
+    // While isFetching is true, `data` may still be the previous partner's cached response.
+    if (isPartnerFetching) return;
+    dispatch(setSelectedPartner(localPartnerId, partnerDetail?.adapterProperties ?? {}));
+  }, [partnerDetail, localPartnerId, isPartnerFetching]);
 
   const assignedFieldCount = useMemo(
     () => fieldMappings.filter((m) => m.target && (Boolean(m.source) || m.fixedValue !== undefined)).length,
@@ -157,6 +186,28 @@ const MappingEditorToolbar: React.FC<MappingEditorToolbarProps> = ({
       >
         Validate
       </button>
+
+      {/* Partner selector — visual mode only — for testing partner-scoped mappings */}
+      {isVisualMode && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide flex-shrink-0">Test partner</span>
+          <select
+            className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-blue-400 bg-white text-gray-700 max-w-[160px]"
+            value={localPartnerId ?? ''}
+            onChange={(e) => handlePartnerChange(e.target.value)}
+          >
+            <option value="">— none —</option>
+            {(partners ?? []).map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          {localPartnerId && (
+            <span className="text-[10px] text-emerald-600 font-medium flex-shrink-0">
+              {Object.keys(partnerDetail?.adapterProperties ?? {}).length} props
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="ml-auto flex items-center gap-2">
         {saveSuccess && (

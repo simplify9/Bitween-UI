@@ -90,6 +90,9 @@ export function loadFromProps(props: KeyValuePair[]): CoreState {
               valuesSetId: m.valuesSetId ?? undefined,
               isRootSource: m.isRootSource ?? undefined,
               lookupDictionary: m.lookupDictionary ?? undefined,
+              partnerPropKey: m.partnerPropKey ?? undefined,
+              globalSetId: m.globalSetId ?? undefined,
+              globalKey: m.globalKey ?? undefined,
             })),
             fixedItems: Array.isArray(am.fixedItems) ? am.fixedItems : undefined,
           });
@@ -126,6 +129,8 @@ export const initialMappingEditorState: MappingEditorState = {
   showPreview: false,
   subscriptionId: null,
   mapperId: null,
+  selectedPartnerId: null,
+  partnerAdapterProperties: {},
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -152,12 +157,16 @@ export function mappingEditorReducer(
           const tjEntry = mapperProperties.find((p) => p.key === 'TargetJson');
           if (sjEntry?.value) draft.inputJson = sjEntry.value;
           if (tjEntry?.value) draft.outputJson = tjEntry.value;
+          const pidEntry = mapperProperties.find((p) => p.key === 'PartnerId');
+          if (pidEntry?.value) draft.selectedPartnerId = Number(pidEntry.value);
         }
         draft.past = [];
         draft.future = [];
         draft.selectedMappingId = null;
         draft.mode = 'visual';
         draft.isManualDirty = false;
+        if (!draft.selectedPartnerId) draft.selectedPartnerId = null;
+        draft.partnerAdapterProperties = {};
         break;
       }
       case 'SET_INPUT_JSON':
@@ -258,6 +267,12 @@ export function mappingEditorReducer(
       case 'TOGGLE_VALIDATION':
         draft.showValidation = !draft.showValidation;
         break;
+      case 'SET_SELECTED_PARTNER': {
+        draft.selectedPartnerId = action.payload.partnerId;
+        draft.partnerAdapterProperties = action.payload.adapterProperties;
+        // Do not clear any partnerPropKey mappings — user manages their own mappings.
+        break;
+      }
       case 'UNDO': {
         if (state.past.length === 0) break;
         const prev = state.past[state.past.length - 1];

@@ -45,6 +45,18 @@ function parseExpr(
 ): Pick<ParsedFieldMapping, 'source' | 'transform' | 'valuesSetId' | 'isRootSource' | 'lookupDictionary'> {
   const expr = stripJsonPipe(raw.trim());
 
+  // Partner adapter property — {{ __partner__.propkey | json }} or {{ __partner__?.propkey | json }}
+  const partnerMatch = expr.match(/^__partner__\??\.(\w+)$/);
+  if (partnerMatch) {
+    return { source: '', partnerPropKey: partnerMatch[1] };
+  }
+
+  // Global adapter values set — {{ __globals__?.SETID["KEY"] | json }} or {{ __globals__?.SETID?["KEY"] | json }}
+  const globalMatch = expr.match(/^__globals__\??\.([\w]+)\??(?:\.(\w+)|\["([^"]+)"\])$/);
+  if (globalMatch) {
+    return { source: '', globalSetId: globalMatch[1], globalKey: globalMatch[2] ?? globalMatch[3] };
+  }
+
   // Dictionary lookup — $__e = { ... }; ...
   if (valuesSetId || expr.startsWith('$__e')) {
     if (!valuesSetId) {
@@ -203,9 +215,21 @@ export function parseScriban(template: string): ParsedMappings {
 
   const lines = template.split('\n');
   let i = 0;
+  // Track nesting depth so we only create fieldMappings for lines directly
+  // inside the root object (depth === 1).  Lines inside fixed-item literals
+  // (e.g. `"lineOrders": [ { "ref": ... } ]`) sit at depth >= 3 and must not
+  // be mistaken for top-level field mappings.
+  let depth = 0;
 
   while (i < lines.length) {
     const line = lines[i].trim();
+
+    // Update depth for this line, ignoring brackets inside {{ }} expressions.
+    const lineForDepth = line.replace(/\{\{[\s\S]*?\}\}/g, '');
+    for (const ch of lineForDepth) {
+      if (ch === '{' || ch === '[') depth++;
+      else if (ch === '}' || ch === ']') depth--;
+    }
 
     const forMatch = line.match(/\{\{-?\s*for\s+(\w+)\s+in\s+([\w.[\]*]+)\s*-?\}\}/);
     if (forMatch) {
@@ -232,8 +256,10 @@ export function parseScriban(template: string): ParsedMappings {
       continue;
     }
 
+    // Only parse as a top-level field mapping when directly inside the root object.
+    // depth === 1 means we've seen exactly one opening `{` (the root) with no unclosed `[`.
     const simpleMatch = line.match(/"([\w.]+)"\s*:\s*(.*),?$/);
-    if (simpleMatch && !line.includes('{{- for') && !line.startsWith('[') && !line.startsWith(']') && !line.startsWith('{')) {
+    if (simpleMatch && depth === 1 && !line.includes('{{- for') && !line.startsWith('[') && !line.startsWith(']') && !line.startsWith('{')) {
       const target = simpleMatch[1];
       const valueRaw = simpleMatch[2].replace(/,$/, '').trim();
 

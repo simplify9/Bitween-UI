@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlinePlusCircle, HiOutlineTrash } from 'react-icons/hi';
 import { TreeNode } from 'src/utils/mappingPreview';
+import { LookupDictionary, LookupEntry } from './types';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
+import { useMappingEditorState } from './MappingEditorContext';
 
 // ─── Fixed-item inline panel types ───────────────────────────────────────────
 
-export type DraftFieldMode = 'source' | 'fixed' | 'array';
+export type DraftFieldMode = 'source' | 'fixed' | 'array' | 'partner' | 'global';
 
 export interface DraftField {
   key: string;
@@ -12,6 +15,13 @@ export interface DraftField {
   value: string;
   transform: string;
   showTransform: boolean;
+  // partner mode:
+  partnerPropKey?: string;
+  // global mode:
+  globalSetId?: string;
+  globalKey?: string;
+  // source lookup dictionary:
+  lookupDictionary?: LookupDictionary;
   // array mode only:
   nestedChildNode?: TreeNode;
   nestedItems?: DraftField[][];
@@ -30,6 +40,14 @@ export function initDraftFieldsFromNode(node: TreeNode | undefined): DraftField[
   return [{ key: '', mode: 'fixed' as DraftFieldMode, value: '', transform: '', showTransform: false }];
 }
 
+function parseLookupEntries(dictStr: string): LookupEntry[] {
+  const entries: LookupEntry[] = [];
+  const re = /"([^"]+)": "([^"]*)"/g;
+  let m;
+  while ((m = re.exec(dictStr)) !== null) entries.push({ from: m[1], to: m[2] });
+  return entries;
+}
+
 export function draftFieldsToRecord(fields: DraftField[]): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const df of fields) {
@@ -37,11 +55,32 @@ export function draftFieldsToRecord(fields: DraftField[]): Record<string, unknow
     if (!k) continue;
     if (df.mode === 'array') {
       result[k] = (df.nestedItems ?? []).map((itemFields) => draftFieldsToRecord(itemFields));
+    } else if (df.mode === 'partner') {
+      if (!df.partnerPropKey?.trim()) continue;
+      result[k] = `{{__partner__?.${df.partnerPropKey.trim()}}}`;
+    } else if (df.mode === 'global') {
+      if (!df.globalSetId?.trim() || !df.globalKey?.trim()) continue;
+      result[k] = `{{__globals__?.${df.globalSetId.trim()}["${df.globalKey.trim()}"]}}` ;
     } else if (df.mode === 'source') {
       if (!df.value.trim()) continue;
+      const src = df.value.trim();
+      const lkp = df.lookupDictionary;
+      if (lkp?.entries?.length) {
+        const valid = lkp.entries.filter(({ from, to }) => from.trim() !== '' && to.trim() !== '');
+        if (valid.length > 0) {
+          const entriesStr = valid.map(({ from, to }) => `"${from}": "${to}"`).join(', ');
+          if (lkp.fallback === 'null') {
+            result[k] = `{{$__e = { ${entriesStr} }; $__e[${src}]}}`;
+          } else {
+            const fb = lkp.fallback === 'custom' ? `"${lkp.fallbackValue ?? ''}"` : src;
+            result[k] = `{{$__e = { ${entriesStr} }; ($__e[${src}] ?? ${fb})}}`;
+          }
+          continue;
+        }
+      }
       const expr = df.transform.trim()
-        ? df.transform.trim().replace(/\bvalue\b/g, df.value.trim())
-        : df.value.trim();
+        ? df.transform.trim().replace(/\bvalue\b/g, src)
+        : src;
       result[k] = `{{${expr}}}`;
     } else {
       if (df.value.trim() === '') continue;
@@ -79,7 +118,31 @@ export function recordToDraftFields(item: Record<string, unknown>, node: TreeNod
     }
     if (typeof v === 'string') {
       const m = v.match(/^\{\{(.+)\}\}$/);
-      if (m) return { key, mode: 'source', value: m[1].trim(), transform: '', showTransform: false };
+      if (m) {
+        const expr = m[1].trim();
+        // Partner: {{__partner__?.propkey}}
+        const partnerMatch = expr.match(/^__partner__\??\.([\w]+)$/);
+        if (partnerMatch) return { key, mode: 'partner', value: '', transform: '', showTransform: false, partnerPropKey: partnerMatch[1] };
+        // Global: {{__globals__?.setid["key"]}}
+        const globalMatch = expr.match(/^__globals__\??\.([\w]+)\["([^"]+)"\]$/);
+        if (globalMatch) return { key, mode: 'global', value: '', transform: '', showTransform: false, globalSetId: globalMatch[1], globalKey: globalMatch[2] };
+        // Lookup (null fallback): $__e = { ... }; $__e[path]
+        const lkpNull = expr.match(/^\$__e = \{ (.+) \}; \$__e\[(.+)\]$/);
+        if (lkpNull) return { key, mode: 'source', value: lkpNull[2], transform: '', showTransform: false, lookupDictionary: { entries: parseLookupEntries(lkpNull[1]), fallback: 'null' } };
+        // Lookup (passthrough/custom): $__e = { ... }; ($__e[path] ?? FB)
+        const lkpFb = expr.match(/^\$__e = \{ (.+) \}; \(\$__e\[(.+)\] \?\? (.+)\)$/);
+        if (lkpFb) {
+          const path = lkpFb[2];
+          const fbStr = lkpFb[3];
+          const isPassthrough = fbStr === path;
+          return { key, mode: 'source', value: path, transform: '', showTransform: false, lookupDictionary: {
+            entries: parseLookupEntries(lkpFb[1]),
+            fallback: isPassthrough ? 'passthrough' : 'custom',
+            fallbackValue: isPassthrough ? undefined : fbStr.replace(/^"(.*)"$/, '$1'),
+          }};
+        }
+        return { key, mode: 'source', value: expr, transform: '', showTransform: false };
+      }
     }
     return { key, mode: 'fixed', value: v !== undefined ? String(v) : '', transform: '', showTransform: false };
   });
@@ -99,6 +162,11 @@ export interface FixedItemFieldRowsProps {
 export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
   fields, onFieldsChange, parentNode, depth, inputScalarProps, idPrefix,
 }) => {
+  const { partnerAdapterProperties, selectedPartnerId } = useMappingEditorState();
+  const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const allGlobalSets = globalSetsData?.result ?? [];
+  const [lookupOpenIdx, setLookupOpenIdx] = useState<number | null>(null);
+
   const hasFreeKey = parentNode.children.filter((c) => c.type === 'leaf').length === 0;
   const childArrayNodes = parentNode.children.filter((c) => c.type === 'array');
   const usedArrayKeys = new Set(fields.filter((f) => f.mode === 'array').map((f) => f.key));
@@ -169,7 +237,10 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                           <div key={fi} className="flex items-center gap-1 text-[9px] font-mono">
                             <span className="text-indigo-700 flex-shrink-0">{f.key}:</span>
                             <span className="text-gray-500 truncate">
-                              {f.mode === 'source' ? (f.transform ? `fx(${f.value})` : f.value) : (f.value || '—')}
+                              {f.mode === 'source' ? (f.transform ? `fx(${f.value})` : f.value)
+                                : f.mode === 'partner' ? `__partner__.${f.partnerPropKey ?? ''}`
+                                : f.mode === 'global' ? `__globals__.${f.globalSetId ?? ''}["${f.globalKey ?? ''}"]`
+                                : (f.value || '—')}
                             </span>
                           </div>
                         ) : (
@@ -214,52 +285,209 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
             </div>
           );
         }
-        // leaf field (source / fixed)
+        // leaf field (fixed / source / partner / global)
+        const hasLookup = (df.lookupDictionary?.entries?.length ?? 0) > 0;
+        const isLookupOpen = lookupOpenIdx === i;
         return (
           <div key={`${df.key}-leaf-${i}`} className="space-y-0.5">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {hasFreeKey ? (
-                <input className="w-20 border border-teal-200 bg-white rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-teal-400"
+                <input
+                  className="w-20 flex-shrink-0 border border-gray-200 bg-transparent rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-blue-400"
                   placeholder="key" value={df.key}
                   onChange={(e) => updateField(i, { key: e.target.value })} />
               ) : (
-                <span className="w-20 flex-shrink-0 font-mono text-teal-800 text-xs truncate">{df.key}</span>
+                <span className="w-20 flex-shrink-0 font-mono text-gray-700 text-xs truncate">{df.key}</span>
               )}
-              <div className="flex rounded overflow-hidden border border-teal-200 flex-shrink-0">
-                {(['fixed', 'source'] as DraftFieldMode[]).map((m) => (
-                  <button key={m}
-                    className={`px-1.5 py-0.5 text-[10px] transition ${df.mode === m ? 'bg-teal-500 text-white' : 'bg-white text-teal-600 hover:bg-teal-50'}`}
-                    onClick={() => updateField(i, { mode: m })}>{m}</button>
-                ))}
+              <span className="text-gray-300 flex-shrink-0">←</span>
+
+              {/* Mode buttons — same style as OutputLeaf */}
+              <div className="flex flex-shrink-0 rounded overflow-hidden border border-gray-200 text-[10px] font-medium">
+                <button
+                  onClick={() => updateField(i, { mode: 'source', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined })}
+                  className={df.mode === 'source' ? 'px-1.5 py-0.5 bg-blue-500 text-white' : 'px-1.5 py-0.5 text-gray-400 hover:bg-gray-50'}
+                >Source</button>
+                <button
+                  onClick={() => { updateField(i, { mode: 'fixed', value: '', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
+                  className={df.mode === 'fixed' ? 'px-1.5 py-0.5 bg-amber-500 text-white' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                >Fixed</button>
+                <button
+                  onClick={() => { updateField(i, { mode: 'partner', value: '', transform: '', globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
+                  className={df.mode === 'partner' ? 'px-1.5 py-0.5 bg-emerald-500 text-white border-l border-emerald-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                >Partner</button>
+                <button
+                  onClick={() => { updateField(i, { mode: 'global', value: '', transform: '', partnerPropKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
+                  className={df.mode === 'global' ? 'px-1.5 py-0.5 bg-teal-500 text-white border-l border-teal-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                >Global</button>
               </div>
-              {df.mode === 'source' ? (
-                <>
-                  <input list={`${idPrefix}-s-${i}`}
-                    className="flex-1 min-w-0 border border-teal-200 bg-white rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-teal-400"
-                    placeholder="source.field" value={df.value}
-                    onChange={(e) => updateField(i, { value: e.target.value })} />
-                  {inputScalarProps.length > 0 && (
-                    <datalist id={`${idPrefix}-s-${i}`}>
-                      {inputScalarProps.map((p) => <option key={p} value={p} />)}
-                    </datalist>
-                  )}
-                </>
-              ) : (
-                <input className="flex-1 min-w-0 border border-teal-200 bg-white rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-teal-400"
-                  placeholder="literal value" value={df.value}
-                  onChange={(e) => updateField(i, { value: e.target.value })} />
-              )}
+
+              {/* Lookup button — only in source mode, matches OutputLeaf styling */}
               {df.mode === 'source' && (
                 <button
-                  className={`flex-shrink-0 px-1.5 py-0.5 rounded border text-[10px] transition ${df.showTransform ? 'bg-amber-400 text-white border-amber-400' : 'bg-white text-amber-600 border-amber-200 hover:bg-amber-50'}`}
-                  onClick={() => updateField(i, { showTransform: !df.showTransform })}
-                  title="Apply formula (use 'value' to refer to the source field)">fx</button>
+                  onClick={() => {
+                    if (isLookupOpen && !hasLookup) {
+                      updateField(i, { lookupDictionary: undefined });
+                    }
+                    setLookupOpenIdx(isLookupOpen ? null : i);
+                  }}
+                  title={hasLookup ? `Lookup: ${df.lookupDictionary!.entries.length} entries` : 'Map source values to different output values'}
+                  className={[
+                    'flex-shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition',
+                    hasLookup || isLookupOpen
+                      ? 'border-violet-400 bg-violet-50 text-violet-600'
+                      : 'border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
+                  ].join(' ')}
+                >Lookup</button>
+              )}
+
+              {/* Value area */}
+              {df.mode === 'source' && (
+                <select
+                  className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
+                  value={df.value}
+                  onChange={(e) => updateField(i, { value: e.target.value })}>
+                  <option value="">— unassigned —</option>
+                  {inputScalarProps.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              )}
+              {df.mode === 'fixed' && (
+                <input
+                  className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
+                  placeholder="fixed value…"
+                  value={df.value}
+                  onChange={(e) => updateField(i, { value: e.target.value })} />
+              )}
+              {df.mode === 'partner' && (
+                <>
+                  <input
+                    list={`${idPrefix}-partner-${i}`}
+                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-emerald-600 min-w-0 placeholder-emerald-300"
+                    placeholder="property key…"
+                    value={df.partnerPropKey ?? ''}
+                    onChange={(e) => updateField(i, { partnerPropKey: e.target.value })} />
+                  <datalist id={`${idPrefix}-partner-${i}`}>
+                    {Object.keys(partnerAdapterProperties).map((p) => <option key={p} value={p} />)}
+                  </datalist>
+                </>
+              )}
+              {df.mode === 'global' && (
+                <div className="flex gap-1 flex-1 min-w-0">
+                  <select
+                    className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-600 flex-1 min-w-0"
+                    value={df.globalSetId ?? ''}
+                    onChange={(e) => updateField(i, { globalSetId: e.target.value, globalKey: undefined })}>
+                    <option value="">— pick set —</option>
+                    {allGlobalSets.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                  {df.globalSetId && (
+                    <select
+                      className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-500 flex-1 min-w-0"
+                      value={df.globalKey ?? ''}
+                      onChange={(e) => updateField(i, { globalKey: e.target.value })}>
+                      <option value="">— pick key —</option>
+                      {Object.keys(allGlobalSets.find((s) => s.id === df.globalSetId)?.values ?? {}).map((vk) =>
+                        <option key={vk} value={vk}>{vk}</option>
+                      )}
+                    </select>
+                  )}
+                </div>
+              )}
+
+              {/* Delete row — only for free-key fields */}
+              {hasFreeKey && (
+                <button
+                  className="flex-shrink-0 text-gray-300 hover:text-rose-500 transition"
+                  onClick={() => { onFieldsChange(fields.filter((_, j) => j !== i)); if (lookupOpenIdx === i) setLookupOpenIdx(null); }}>
+                  <HiOutlineTrash size={12} />
+                </button>
               )}
             </div>
-            {df.mode === 'source' && df.showTransform && (
-              <input className="w-full border border-amber-200 bg-white rounded px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:border-amber-400"
-                placeholder="e.g. value * 1.2" value={df.transform}
-                onChange={(e) => updateField(i, { transform: e.target.value })} />
+
+            {/* Lookup dictionary panel — matches OutputLeaf exactly */}
+            {df.mode === 'source' && isLookupOpen && (
+              <div className="px-2 pb-2 pt-0.5">
+                <div className="rounded-lg border border-violet-200 bg-violet-50 p-2 space-y-1.5">
+                  {/* Entry rows */}
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                    {(df.lookupDictionary?.entries ?? []).length === 0 && (
+                      <p className="text-[10px] text-violet-400 italic px-1">No entries yet.</p>
+                    )}
+                    {(df.lookupDictionary?.entries ?? []).map((entry: LookupEntry, idx: number) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <input
+                          autoFocus={idx === 0}
+                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
+                          placeholder="source value"
+                          value={entry.from}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const lkp = df.lookupDictionary!;
+                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.map((ee, ei) => ei === idx ? { ...ee, from: val } : ee) } });
+                          }}
+                        />
+                        <span className="text-gray-300 text-[10px] flex-shrink-0 select-none">→</span>
+                        <input
+                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
+                          placeholder="output value"
+                          value={entry.to}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const lkp = df.lookupDictionary!;
+                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.map((ee, ei) => ei === idx ? { ...ee, to: val } : ee) } });
+                          }}
+                        />
+                        <button
+                          className="flex-shrink-0 text-gray-300 hover:text-rose-400 transition"
+                          onClick={() => {
+                            const lkp = df.lookupDictionary!;
+                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.filter((_, ei) => ei !== idx) } });
+                          }}
+                        >
+                          <HiOutlineTrash size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Add entry */}
+                  <button
+                    className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-700 transition font-medium"
+                    onClick={() => {
+                      const existing = df.lookupDictionary ?? { entries: [], fallback: 'passthrough' as const };
+                      updateField(i, { lookupDictionary: { ...existing, entries: [...existing.entries, { from: '', to: '' }] } });
+                    }}
+                  >
+                    <HiOutlinePlusCircle size={11} /> Add entry
+                  </button>
+                  {/* Fallback — only when at least one entry */}
+                  {(df.lookupDictionary?.entries?.length ?? 0) > 0 && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-violet-200">
+                      <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
+                      <select
+                        className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
+                        value={df.lookupDictionary?.fallback ?? 'passthrough'}
+                        onChange={(e) => updateField(i, { lookupDictionary: { ...df.lookupDictionary!, fallback: e.target.value as LookupDictionary['fallback'] } })}
+                      >
+                        <option value="passthrough">keep original value</option>
+                        <option value="null">output null</option>
+                        <option value="custom">use custom fallback</option>
+                      </select>
+                      {df.lookupDictionary?.fallback === 'custom' && (
+                        <input
+                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+                          placeholder="fallback value"
+                          value={df.lookupDictionary.fallbackValue ?? ''}
+                          onChange={(e) => updateField(i, { lookupDictionary: { ...df.lookupDictionary!, fallbackValue: e.target.value } })}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {/* Remove lookup */}
+                  <button
+                    className="text-[10px] text-rose-400 hover:text-rose-600 transition"
+                    onClick={() => { updateField(i, { lookupDictionary: undefined }); setLookupOpenIdx(null); }}
+                  >Remove lookup</button>
+                </div>
+              </div>
             )}
           </div>
         );
