@@ -42,7 +42,7 @@ function parseExpr(
   raw: string,
   valuesSetId: string | undefined,
   alias?: string,
-): Pick<ParsedFieldMapping, 'source' | 'transform' | 'valuesSetId' | 'isRootSource' | 'lookupDictionary'> {
+): Pick<ParsedFieldMapping, 'source' | 'transform' | 'valuesSetId' | 'isRootSource' | 'lookupDictionary' | 'partnerPropKey' | 'globalSetId' | 'globalKey'> {
   const expr = stripJsonPipe(raw.trim());
 
   // Partner adapter property — {{ __partner__.propkey | json }} or {{ __partner__?.propkey | json }}

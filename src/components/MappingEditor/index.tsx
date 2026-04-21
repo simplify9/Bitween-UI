@@ -216,7 +216,12 @@ const MappingEditorInner: React.FC = () => {
   const assignedFieldCount = useMemo(
     () =>
       fieldMappings.filter(
-        (m) => m.target && (Boolean(m.source) || m.fixedValue !== undefined || Boolean(m.partnerPropKey))
+        (m) =>
+          m.target &&
+          (Boolean(m.source) ||
+            m.fixedValue !== undefined ||
+            Boolean(m.partnerPropKey) ||
+            Boolean(m.globalSetId && m.globalKey))
       ).length,
     [fieldMappings]
   );
