@@ -29,6 +29,8 @@ export interface MappingEditorState extends CoreState {
   showPreview: boolean;
   subscriptionId: number | null;
   mapperId: string | null;
+  selectedPartnerId: number | null;
+  partnerAdapterProperties: Record<string, string>;
 }
 
 // ─── Action type union ────────────────────────────────────────────────────────
@@ -62,7 +64,8 @@ export type MappingEditorAction =
   | { type: 'REDO' }
   | { type: 'CLEAR_ALL' }
   | { type: 'AUTO_MATCH' }
-  | { type: 'GENERATE_FROM_TARGET_JSON' };
+  | { type: 'GENERATE_FROM_TARGET_JSON' }
+  | { type: 'SET_SELECTED_PARTNER'; payload: { partnerId: number | null; adapterProperties: Record<string, string> } };
 
 // ─── Action creators ──────────────────────────────────────────────────────────
 
@@ -78,6 +81,7 @@ export const removeFieldMapping = (p: string): MappingEditorAction => ({ type: '
 export const updateFieldMapping = (p: Partial<FieldMapping> & { id: string }): MappingEditorAction => ({ type: 'UPDATE_FIELD_MAPPING', payload: p });
 export const setFieldMappings = (p: FieldMapping[]): MappingEditorAction => ({ type: 'SET_FIELD_MAPPINGS', payload: p });
 export const setArrayMappings = (p: ArrayMapping[]): MappingEditorAction => ({ type: 'SET_ARRAY_MAPPINGS', payload: p });
+export const setSelectedPartner = (partnerId: number | null, adapterProperties: Record<string, string>): MappingEditorAction => ({ type: 'SET_SELECTED_PARTNER', payload: { partnerId, adapterProperties } });
 export const addArrayMapping = (p: Omit<ArrayMapping, 'id'>): MappingEditorAction => ({ type: 'ADD_ARRAY_MAPPING', payload: p });
 export const removeArrayMapping = (p: string): MappingEditorAction => ({ type: 'REMOVE_ARRAY_MAPPING', payload: p });
 export const updateArrayMapping = (p: Partial<ArrayMapping> & { id: string }): MappingEditorAction => ({ type: 'UPDATE_ARRAY_MAPPING', payload: p });

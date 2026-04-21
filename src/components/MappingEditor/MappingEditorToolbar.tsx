@@ -13,7 +13,9 @@ import {
   clearAll,
   redo,
   undo,
+  setSelectedPartner,
 } from './MappingEditorContext';
+import { usePartnersQuery, usePartnerQuery } from 'src/client/apis/partnersApi';
 
 // ─── Mode toggle button ───────────────────────────────────────────────────────
 
@@ -58,7 +60,27 @@ const MappingEditorToolbar: React.FC<MappingEditorToolbarProps> = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useMappingEditorDispatch();
-  const { mode, fieldMappings, arrayMappings, past, future } = useMappingEditorState();
+  const { mode, fieldMappings, arrayMappings, past, future, selectedPartnerId } = useMappingEditorState();
+
+  // Sync local dropdown state when Redux selectedPartnerId changes (including reset to null)
+  const { data: partners } = usePartnersQuery();
+  const { data: partnerDetail, isFetching: isPartnerFetching } = usePartnerQuery(selectedPartnerId ?? 0, { skip: selectedPartnerId == null });
+
+  const handlePartnerChange = (idStr: string) => {
+    const pid = idStr ? Number(idStr) : null;
+    if (pid == null) {
+      dispatch(setSelectedPartner(null, {}));
+    } else {
+      dispatch(setSelectedPartner(pid, {}));
+    }
+    // partnerDetail effect below handles dispatch when data arrives
+  };
+
+  React.useEffect(() => {
+    if (selectedPartnerId == null) return;
+    if (isPartnerFetching) return;
+    dispatch(setSelectedPartner(selectedPartnerId, partnerDetail?.adapterProperties ?? {}));
+  }, [partnerDetail, selectedPartnerId, isPartnerFetching]);
 
   const assignedFieldCount = useMemo(
     () => fieldMappings.filter((m) => m.target && (Boolean(m.source) || m.fixedValue !== undefined)).length,
@@ -157,6 +179,28 @@ const MappingEditorToolbar: React.FC<MappingEditorToolbarProps> = ({
       >
         Validate
       </button>
+
+      {/* Partner selector — visual mode only — for testing partner-scoped mappings */}
+      {isVisualMode && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide flex-shrink-0">Test partner</span>
+          <select
+            className="text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-blue-400 bg-white text-gray-700 max-w-[160px]"
+            value={selectedPartnerId ?? ''}
+            onChange={(e) => handlePartnerChange(e.target.value)}
+          >
+            <option value="">— none —</option>
+            {(partners ?? []).map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          {selectedPartnerId && (
+            <span className="text-[10px] text-emerald-600 font-medium flex-shrink-0">
+              {Object.keys(partnerDetail?.adapterProperties ?? {}).length} props
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="ml-auto flex items-center gap-2">
         {saveSuccess && (

@@ -11,6 +11,7 @@ import {
   updateFieldMapping,
 } from './MappingEditorContext';
 import { getFullTargetPrefix } from './mappingTreeUtils';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,8 +41,10 @@ function getValueAtPath(obj: unknown, path: string): string {
 
 export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeMap, onLeafRef, isSearchMatch }) => {
   const dispatch = useMappingEditorDispatch();
-  const { fieldMappings, arrayMappings, selectedMappingId: selectedId, outputJson } = useMappingEditorState();
+  const { fieldMappings, arrayMappings, selectedMappingId: selectedId, outputJson, partnerAdapterProperties } = useMappingEditorState();
   const [lookupOpen, setLookupOpen] = useState(false);
+  const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const allGlobalSets = globalSetsData?.result ?? [];
 
   // Type of this target field, derived from the typeMap passed from the tree root
   const targetFieldType = typeMap[node.path]
@@ -65,13 +68,14 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
   // ── Normal field mapping lookup ───────────────────────────────────────────
   const mapping = !isArrayField ? fieldMappings.find((m) => m.target === node.path) : undefined;
   const isMapped = isArrayField
-    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined)
+    ? Boolean(innerMapping?.source || innerMapping?.fixedValue !== undefined || innerMapping?.partnerPropKey || (innerMapping?.globalSetId && innerMapping?.globalKey))
     : Boolean(mapping?.source || mapping?.fixedValue !== undefined ||
-        (mapping?.lookupDictionary?.entries?.length ?? 0) > 0 || mapping?.valuesSetId);
+        (mapping?.lookupDictionary?.entries?.length ?? 0) > 0 || mapping?.valuesSetId || mapping?.partnerPropKey ||
+        (mapping?.globalSetId && mapping?.globalKey));
   const isSelected = mapping ? selectedId === mapping.id : false;
 
-  // Derived mode: 'fixed' | 'source'
-  const currentMode = mapping?.fixedValue !== undefined ? 'fixed' : 'source';
+  // Derived mode: 'fixed' | 'source' | 'partner' | 'global'
+  const currentMode = mapping?.partnerPropKey !== undefined ? 'partner' : mapping?.globalSetId !== undefined ? 'global' : mapping?.fixedValue !== undefined ? 'fixed' : 'source';
   const hasLookup = (mapping?.lookupDictionary?.entries?.length ?? 0) > 0;
 
   const ref = useCallback(
@@ -98,7 +102,7 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
     }
   };
 
-  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed') => {
+  const switchMode = (e: React.MouseEvent, next: 'source' | 'fixed' | 'partner' | 'global') => {
     if (isArrayField) return;
     e.stopPropagation();
     if (next === 'fixed') {
@@ -110,7 +114,21 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
       if (!mapping) {
         dispatch(addFieldMapping({ source: '', target: node.path, fixedValue: sampleValue }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: sampleValue, valuesSetId: undefined, lookupDictionary: undefined, transform: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: sampleValue, partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, valuesSetId: undefined, lookupDictionary: undefined, transform: undefined }));
+      }
+      setLookupOpen(false);
+    } else if (next === 'partner') {
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path, partnerPropKey: '' }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, partnerPropKey: '', globalSetId: undefined, globalKey: undefined, valuesSetId: undefined, lookupDictionary: undefined, transform: undefined }));
+      }
+      setLookupOpen(false);
+    } else if (next === 'global') {
+      if (!mapping) {
+        dispatch(addFieldMapping({ source: '', target: node.path, globalSetId: '', globalKey: '' }));
+      } else {
+        dispatch(updateFieldMapping({ id: mapping.id, source: '', fixedValue: undefined, partnerPropKey: undefined, globalSetId: '', globalKey: '', valuesSetId: undefined, lookupDictionary: undefined, transform: undefined }));
       }
       setLookupOpen(false);
     } else {
@@ -118,7 +136,7 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
       if (!mapping) {
         dispatch(addFieldMapping({ source: '', target: node.path }));
       } else {
-        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, valuesSetId: undefined }));
+        dispatch(updateFieldMapping({ id: mapping.id, fixedValue: undefined, partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, valuesSetId: undefined }));
       }
     }
   };
@@ -141,6 +159,10 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
       ? innerMapping.source
       : innerMapping?.fixedValue !== undefined
       ? `"${innerMapping.fixedValue}"`
+      : innerMapping?.partnerPropKey
+      ? `__partner__.${innerMapping.partnerPropKey}`
+      : innerMapping?.globalSetId && innerMapping?.globalKey
+      ? `__globals__.${innerMapping.globalSetId}["${innerMapping.globalKey}"]`
       : null;
 
     return (
@@ -197,27 +219,31 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
         <span className="font-mono text-gray-700 truncate">{node.key}</span>
         <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
 
-        {/* Mode buttons: src/fx toggle + ≡ lookup */}
-        <button
-          onClick={(e) => switchMode(e, currentMode === 'source' ? 'fixed' : 'source')}
-          title={currentMode === 'fixed' ? 'Switch to source binding' : 'Switch to fixed value'}
-          className={[
-            'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
-            currentMode === 'fixed'
-              ? 'border-amber-300 bg-amber-50 text-amber-600'
-              : 'border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500',
-          ].join(' ')}
-        >
-          {currentMode === 'fixed' ? 'fx' : 'src'}
-        </button>
-        {/* ≡ lookup button — only in source mode */}
+        {/* Mode buttons: Source / Fixed / Partner / Global */}
+        <div className="flex flex-shrink-0 rounded overflow-hidden border border-gray-200 text-[10px] font-medium">
+          <button
+            onClick={(e) => switchMode(e, 'source')}
+            className={currentMode === 'source' ? 'px-1.5 py-0.5 bg-blue-500 text-white' : 'px-1.5 py-0.5 text-gray-400 hover:bg-gray-50'}
+          >Source</button>
+          <button
+            onClick={(e) => switchMode(e, 'fixed')}
+            className={currentMode === 'fixed' ? 'px-1.5 py-0.5 bg-amber-500 text-white' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+          >Fixed</button>
+          <button
+              onClick={(e) => { e.stopPropagation(); switchMode(e, 'partner'); }}
+              className={currentMode === 'partner' ? 'px-1.5 py-0.5 bg-emerald-500 text-white border-l border-emerald-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+            >Partner</button>
+          <button
+            onClick={(e) => { e.stopPropagation(); switchMode(e, 'global'); }}
+            className={currentMode === 'global' ? 'px-1.5 py-0.5 bg-teal-500 text-white border-l border-teal-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+          >Global</button>
+        </div>
         {currentMode === 'source' && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               setLookupOpen((v) => {
                 if (v && mapping) {
-                  // closing — clear dict if no valid entries (both from and to filled)
                   const entries = mapping.lookupDictionary?.entries ?? [];
                   const hasValid = entries.some(e => e.from.trim() !== '' && e.to.trim() !== '');
                   if (!hasValid) {
@@ -227,14 +253,14 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
                 return !v;
               });
             }}
-            title={hasLookup ? `Lookup: ${mapping!.lookupDictionary!.entries.length} entries` : 'Add value lookup dictionary'}
+            title={hasLookup ? `Lookup: ${mapping!.lookupDictionary!.entries.length} entries` : 'Map source values to different output values'}
             className={[
-              'flex-shrink-0 text-xs font-mono px-1 rounded border transition',
+              'flex-shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition',
               hasLookup || lookupOpen
                 ? 'border-violet-400 bg-violet-50 text-violet-600'
                 : 'border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-500',
             ].join(' ')}
-          >≡</button>
+          >Lookup</button>
         )}
 
         {/* Value / path display based on current mode */}
@@ -246,6 +272,46 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
             onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, fixedValue: e.target.value }))}
             onClick={(e) => e.stopPropagation()}
           />
+        ) : currentMode === 'partner' ? (
+          <div className="flex-1 relative min-w-0" onClick={(e) => e.stopPropagation()}>
+            <input
+              list={`partner-props-${mapping?.id}`}
+              className="w-full border-0 bg-transparent font-mono text-xs focus:outline-none text-emerald-600 placeholder-emerald-300"
+              placeholder="property key…"
+              value={mapping?.partnerPropKey ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, partnerPropKey: e.target.value }))}
+            />
+            <datalist id={`partner-props-${mapping?.id}`}>
+              {Object.keys(partnerAdapterProperties).map((k) => (
+                <option key={k} value={k} />
+              ))}
+            </datalist>
+          </div>
+        ) : currentMode === 'global' ? (
+          <div className="flex gap-1 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+            <select
+              className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-600 flex-1 min-w-0"
+              value={mapping?.globalSetId ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, globalSetId: e.target.value, globalKey: '' }))}
+            >
+              <option value="">— pick set —</option>
+              {allGlobalSets.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+            {mapping?.globalSetId && (
+              <select
+                className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-500 flex-1 min-w-0"
+                value={mapping?.globalKey ?? ''}
+                onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, globalKey: e.target.value }))}
+              >
+                <option value="">— pick key —</option>
+                {Object.keys(allGlobalSets.find((s) => s.id === mapping?.globalSetId)?.values ?? {}).map((k) => (
+                  <option key={k} value={k}>{k}</option>
+                ))}
+              </select>
+            )}
+          </div>
         ) : (
           <select
             className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
@@ -256,6 +322,7 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
                   id: mapping.id,
                   source: e.target.value,
                   fixedValue: undefined,
+                  partnerPropKey: undefined,
                   valuesSetId: undefined,
                   lookupDictionary: undefined,
                 }));
@@ -277,10 +344,10 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
         {/* Transform badge — shown when NOT selected but transform exists */}
         {!isSelected && mapping?.transform && currentMode === 'source' && (
           <span
-            title={`Expression: ${mapping.transform}`}
-            className="flex-shrink-0 text-[10px] font-mono text-violet-600 border border-violet-200 bg-violet-50 rounded px-1 cursor-default"
+            title={`Transform: ${mapping.transform}`}
+            className="flex-shrink-0 text-[10px] font-medium text-violet-600 border border-violet-200 bg-violet-50 rounded px-1 cursor-default"
           >
-            ƒ
+            transform
           </span>
         )}
 
@@ -433,13 +500,13 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
       {/* ── Expression row — only when selected + source mode + source assigned + no lookup active ── */}
       {isSelected && currentMode === 'source' && mapping?.source && !hasLookup && (
         <div
-          className="flex items-center gap-1.5 px-2 pb-1.5"
+          className="px-2 pb-1.5 space-y-0.5"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-[10px] text-violet-500 font-mono flex-shrink-0 w-5 text-center select-none">ƒ</span>
+          <span className="text-[10px] font-medium text-violet-600 select-none">Transform <span className="font-normal text-gray-400">(optional — modify the source value before output)</span></span>
           <input
-            className="flex-1 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
-            placeholder="e.g. value * 1.2  or  value + ' suffix'  — 'value' = source field"
+            className="w-full border border-violet-200 bg-white rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
+            placeholder="e.g.  value * 1.2    or    value + ' USD'    — use 'value' to refer to the source field"
             value={mapping.transform ?? ''}
             onChange={(e) =>
               dispatch(updateFieldMapping({ id: mapping.id, transform: e.target.value || undefined }))

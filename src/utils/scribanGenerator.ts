@@ -82,6 +82,12 @@ function renderFieldValue(
   valuesSetMap?: ValuesSetMap,
   targetType?: 'string' | 'number' | 'boolean'
 ): string {
+  if (mapping.partnerPropKey) {
+    return `{{ __partner__?.${mapping.partnerPropKey} | json }}`;
+  }
+  if (mapping.globalSetId && mapping.globalKey) {
+    return `{{ __globals__?.${mapping.globalSetId}["${mapping.globalKey}"] | json }}`;
+  }
   if (mapping.fixedValue !== undefined) {
     const num = Number(mapping.fixedValue);
     if (!isNaN(num) && mapping.fixedValue.trim() !== '') return String(num);
@@ -179,7 +185,7 @@ export function generateScriban(
 
   // ── Simple field mappings ──────────────────────────────────────────────────
   const validFields = fieldMappings.filter(
-    (m) => m.target.trim() && (m.source.trim() || m.fixedValue !== undefined)
+    (m) => m.target.trim() && (m.source.trim() || m.fixedValue !== undefined || m.partnerPropKey || (m.globalSetId && m.globalKey))
   );
 
   for (const m of validFields) {
@@ -272,7 +278,10 @@ function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPa
     if (m) {
       const expr = m[1].trim();
       const targetType = fieldPath ? typeMap?.[fieldPath] : undefined;
-      return targetType
+      // Lookup dict expressions ($__e = ...) must not be wrapped with castExpr —
+      // the assignment+semicolon syntax is invalid inside a parenthesised cast expression.
+      const isLookup = expr.includes('$__e =');
+      return targetType && !isLookup
         ? [`{{ ${castExpr(expr, targetType)} | json }}`]
         : [`{{ ${expr} | json }}`];
     }

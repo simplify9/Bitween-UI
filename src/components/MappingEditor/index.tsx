@@ -67,6 +67,7 @@ const MappingEditorInner: React.FC = () => {
     isManualDirty,
     searchInput,
     searchOutput,
+    selectedPartnerId,
   } = useMappingEditorState();
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
@@ -215,7 +216,12 @@ const MappingEditorInner: React.FC = () => {
   const assignedFieldCount = useMemo(
     () =>
       fieldMappings.filter(
-        (m) => m.target && (Boolean(m.source) || m.fixedValue !== undefined)
+        (m) =>
+          m.target &&
+          (Boolean(m.source) ||
+            m.fixedValue !== undefined ||
+            Boolean(m.partnerPropKey) ||
+            Boolean(m.globalSetId && m.globalKey))
       ).length,
     [fieldMappings]
   );
@@ -247,10 +253,10 @@ const MappingEditorInner: React.FC = () => {
       if (!m.target.trim()) {
         errors.push({ type: 'error', message: `Mapping has no target field`, path: m.id });
       }
-      if (!m.source && m.fixedValue === undefined) {
+      if (!m.source && m.fixedValue === undefined && !m.partnerPropKey && !(m.globalSetId && m.globalKey)) {
         errors.push({
           type: 'warning',
-          message: `"${m.target}" has no assigned source or fixed value`,
+          message: `"${m.target}" has no assigned source, fixed value, partner property, or global variable`,
           path: m.target,
         });
       }
@@ -289,6 +295,9 @@ const MappingEditorInner: React.FC = () => {
     if (outputJson.trim()) {
       mapperProperties.push({ key: 'TargetJson', value: outputJson });
     }
+    if (selectedPartnerId != null) {
+      mapperProperties.push({ key: 'PartnerId', value: String(selectedPartnerId) });
+    }
 
     const result = await saveMapper({
       id: subscriptionId,
@@ -309,6 +318,7 @@ const MappingEditorInner: React.FC = () => {
     manualTemplate,
     valuesSetMap,
     subscriptionId,
+    selectedPartnerId,
     saveMapper,
   ]);
 

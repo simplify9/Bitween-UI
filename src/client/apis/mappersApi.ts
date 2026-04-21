@@ -4,6 +4,7 @@ import customFetchBase from 'src/client/apis/apiMiddleware';
 export interface MapperPreviewRequest {
   scribanTemplate: string;
   inputJson: string;
+  partnerId?: number | null;
 }
 
 export interface MapperPreviewResponse {
