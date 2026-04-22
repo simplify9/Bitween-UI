@@ -288,6 +288,12 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
         // leaf field (fixed / source / partner / global)
         const hasLookup = (df.lookupDictionary?.entries?.length ?? 0) > 0;
         const isLookupOpen = lookupOpenIdx === i;
+        const fieldNode = parentNode.children.find((c) => c.key === df.key);
+        const rawValue = fieldNode?.value;
+        const fieldTargetType: 'string' | 'number' | 'boolean' | undefined =
+          typeof rawValue === 'number' ? 'number' :
+          typeof rawValue === 'boolean' ? 'boolean' :
+          typeof rawValue === 'string' ? 'string' : undefined;
         return (
           <div key={`${df.key}-leaf-${i}`} className="space-y-0.5">
             <div className="flex items-center gap-1.5">
@@ -351,11 +357,23 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                 </select>
               )}
               {df.mode === 'fixed' && (
-                <input
-                  className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
-                  placeholder="fixed value…"
-                  value={df.value}
-                  onChange={(e) => updateField(i, { value: e.target.value })} />
+                fieldTargetType === 'boolean' ? (
+                  <select
+                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0"
+                    value={df.value}
+                    onChange={(e) => updateField(i, { value: e.target.value })}>
+                    <option value="">— pick —</option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                ) : (
+                  <input
+                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
+                    placeholder={fieldTargetType === 'number' ? '0' : 'fixed value…'}
+                    type={fieldTargetType === 'number' ? 'number' : 'text'}
+                    value={df.value}
+                    onChange={(e) => updateField(i, { value: e.target.value })} />
+                )
               )}
               {df.mode === 'partner' && (
                 <>
@@ -452,7 +470,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                   <button
                     className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-700 transition font-medium"
                     onClick={() => {
-                      const existing = df.lookupDictionary ?? { entries: [], fallback: 'passthrough' as const };
+                      const existing = df.lookupDictionary ?? { entries: [], fallback: 'null' as const };
                       updateField(i, { lookupDictionary: { ...existing, entries: [...existing.entries, { from: '', to: '' }] } });
                     }}
                   >
@@ -464,10 +482,9 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                       <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
                       <select
                         className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
-                        value={df.lookupDictionary?.fallback ?? 'passthrough'}
+                        value={df.lookupDictionary?.fallback ?? 'null'}
                         onChange={(e) => updateField(i, { lookupDictionary: { ...df.lookupDictionary!, fallback: e.target.value as LookupDictionary['fallback'] } })}
                       >
-                        <option value="passthrough">keep original value</option>
                         <option value="null">output null</option>
                         <option value="custom">use custom fallback</option>
                       </select>

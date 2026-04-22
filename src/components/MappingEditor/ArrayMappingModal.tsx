@@ -342,7 +342,7 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                   <label className="block text-xs text-gray-500 mb-1">Field</label>
                   <input
                     className="w-full border border-gray-200 rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-blue-400 bg-white"
-                    placeholder={`${alias}.status`}
+                    placeholder="status"
                     value={filterField}
                     onChange={(e) => setFilterField(e.target.value)}
                   />
@@ -514,12 +514,25 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
 
                       {/* source selector, fixed input, partner input, or global pickers */}
                       {rowMode === 'fixed' ? (
-                        <input
-                          className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs text-amber-600 focus:outline-none placeholder-amber-300"
-                          placeholder="fixed value…"
-                          value={m.fixedValue ?? ''}
-                          onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: e.target.value, source: '' } : p))}
-                        />
+                        targetFieldType === 'boolean' ? (
+                          <select
+                            className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs text-amber-600 focus:outline-none"
+                            value={m.fixedValue ?? ''}
+                            onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: e.target.value, source: '' } : p))}
+                          >
+                            <option value="">— pick —</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                          </select>
+                        ) : (
+                          <input
+                            className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs text-amber-600 focus:outline-none placeholder-amber-300"
+                            placeholder={targetFieldType === 'number' ? '0' : 'fixed value…'}
+                            type={targetFieldType === 'number' ? 'number' : 'text'}
+                            value={m.fixedValue ?? ''}
+                            onChange={(e) => setPendingMappings((prev) => prev.map((p) => p.id === m.id ? { ...p, fixedValue: e.target.value, source: '' } : p))}
+                          />
+                        )
                       ) : rowMode === 'partner' ? (
                         <div className="flex-1 relative min-w-0">
                           <input
@@ -720,7 +733,7 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                           onClick={() => setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
                             ...p,
                             lookupDictionary: {
-                              ...p.lookupDictionary ?? { fallback: 'passthrough' as const },
+                              ...p.lookupDictionary ?? { fallback: 'null' as const },
                               entries: [...(p.lookupDictionary?.entries ?? []), { from: '', to: '' }],
                             },
                           }))}
@@ -733,7 +746,7 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                           <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
                           <select
                             className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
-                            value={m.lookupDictionary?.fallback ?? 'passthrough'}
+                            value={m.lookupDictionary?.fallback ?? 'null'}
                             onChange={(e) => {
                               const val = e.target.value as LookupDictionary['fallback'];
                               setPendingMappings((prev) => prev.map((p) => p.id !== m.id ? p : {
@@ -742,7 +755,6 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
                               }));
                             }}
                           >
-                            <option value="passthrough">keep original value</option>
                             <option value="null">output null</option>
                             <option value="custom">use custom fallback</option>
                           </select>

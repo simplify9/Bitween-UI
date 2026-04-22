@@ -51,11 +51,20 @@ function walkTypeMap(node: any, prefix: string): TypeMap {
  * Return a Scriban-safe inline cast expression when source and target types differ.
  * to_float is registered as a custom function in ScribanJsonHelper.cs.
  */
-function castExpr(path: string, targetType: 'string' | 'number' | 'boolean'): string {
-  if (targetType === 'number') return `(${path} | to_float)`;
-  if (targetType === 'boolean') return `(${path} != null && ${path} != '' && ${path} != 'false' && ${path} != '0')`;
-  // string: concatenate with "" to force coercion of any type (number/bool → string)
-  return `("" + ${path})`;
+function castExpr(path: string, targetType: 'string' | 'number' | 'boolean', sourceType?: 'string' | 'number' | 'boolean'): string {
+  if (targetType === 'number') {
+    if (sourceType === 'boolean') return `(${path} ? 1 : 0)`;
+    return `(${path} | to_float)`;  // string → number
+  }
+  if (targetType === 'boolean') {
+    if (sourceType === 'string') return 'null'; // string → bool: always null
+    if (sourceType === 'number') return `(${path} == 0 ? false : (${path} == 1 ? true : null))`;
+    // generic / unknown source type
+    return `(${path} != null && ${path} != '' && ${path} != 'false' && ${path} != '0')`;
+  }
+  // string target
+  if (sourceType === 'boolean') return `(${path} ? "true" : "false")`;
+  return `("" + ${path})`;  // number → string, generic
 }
 
 // ─── Scriban template generator ───────────────────────────────────────────────
@@ -80,12 +89,15 @@ function renderFieldValue(
   mapping: FieldMapping,
   alias?: string,
   valuesSetMap?: ValuesSetMap,
-  targetType?: 'string' | 'number' | 'boolean'
+  targetType?: 'string' | 'number' | 'boolean',
+  sourceType?: 'string' | 'number' | 'boolean'
 ): string {
   if (mapping.partnerPropKey) {
+    if (targetType === 'number' || targetType === 'boolean') return 'null';
     return `{{ __partner__?.${mapping.partnerPropKey} | json }}`;
   }
   if (mapping.globalSetId && mapping.globalKey) {
+    if (targetType === 'number' || targetType === 'boolean') return 'null';
     return `{{ __globals__?.${mapping.globalSetId}["${mapping.globalKey}"] | json }}`;
   }
   if (mapping.fixedValue !== undefined) {
@@ -146,7 +158,17 @@ function renderFieldValue(
   // transform expression — replace "value" with the actual path
   if (mapping.transform) {
     const path = alias ? `${alias}.${src.split('.').pop()}` : src.replace(/\./g, '.');
-    return `{{ ${mapping.transform.replace(/\bvalue\b/g, path)} | json }}`;
+    const transformedExpr = mapping.transform.replace(/\bvalue\b/g, path);
+    // Guard: if transform result type doesn't match target, emit null
+    if (targetType === 'number') {
+      // string result → null; number/bool result → keep
+      return `{{ $__t = (${transformedExpr}); (($__t | object.typeof) == "string" ? null : $__t) | json }}`;
+    }
+    if (targetType === 'string') {
+      // non-string result → null
+      return `{{ $__t = (${transformedExpr}); (($__t | object.typeof) != "string" ? null : $__t) | json }}`;
+    }
+    return `{{ ${transformedExpr} | json }}`;
   }
 
   // plain path — apply type cast when target type is known
@@ -155,7 +177,9 @@ function renderFieldValue(
     : src.replace(/\[?\*\]?/g, '');
 
   if (targetType) {
-    return `{{ ${castExpr(path, targetType)} | json }}`;
+    // same type — no cast needed
+    if (sourceType === targetType) return `{{ ${path} | json }}`;
+    return `{{ ${castExpr(path, targetType, sourceType)} | json }}`;
   }
   return `{{ ${path} | json }}`;
 }
@@ -181,6 +205,7 @@ export function generateScriban(
   inputJson?: string
 ): string {
   const typeMap: TypeMap = outputJson ? buildTypeMap(outputJson) : {};
+  const sourceTypeMap: TypeMap = inputJson ? buildTypeMap(inputJson) : {};
   const rootLines: string[] = ['{'];
 
   // ── Simple field mappings ──────────────────────────────────────────────────
@@ -190,13 +215,14 @@ export function generateScriban(
 
   for (const m of validFields) {
     const targetType = typeMap[m.target];
-    rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap, targetType)},`);
+    const sourceType = m.source ? sourceTypeMap[m.source] : undefined;
+    rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap, targetType, sourceType)},`);
   }
 
   // ── Array mappings (top-level only; children are rendered recursively inside parent loops) ─
   for (const am of arrayMappings.filter((am) => !am.parentArrayId)) {
     if (!am.target) continue;
-    rootLines.push(...renderArrayMapping(am, arrayMappings, undefined, 0, valuesSetMap, typeMap, inputJson));
+    rootLines.push(...renderArrayMapping(am, arrayMappings, undefined, 0, valuesSetMap, typeMap, inputJson, sourceTypeMap));
   }
 
   rootLines.push('}');
@@ -233,22 +259,24 @@ function hasDynamicDeep(v: unknown): boolean {
 /** Coerce a fixed value to the target type for JSON emission. */
 function coerceFixedValue(v: unknown, targetType: 'string' | 'number' | 'boolean' | undefined): unknown {
   if (targetType === 'number') {
+    if (typeof v === 'boolean') return v ? 1 : 0;  // bool → num: true→1, false→0
     const n = Number(v);
     return isNaN(n) ? v : n;
   }
   if (targetType === 'boolean') {
-    if (v === true || v === 'true') return true;
-    if (v === false || v === 'false') return false;
-    return v;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'number') return v === 0 ? false : v === 1 ? true : null; // num → bool: 0→false, 1→true, else null
+    return null; // string → bool: always null
   }
   if (targetType === 'string') {
+    if (typeof v === 'boolean') return v ? 'true' : 'false'; // bool → string
     return String(v);
   }
   return v; // unknown target type — keep as-is
 }
 
 /** Recursively emit a fixed-item value as Scriban-safe line(s), expanding {{expr}} references. */
-function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPath?: string): string[] {
+function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPath?: string, sourceTypeMap?: TypeMap, sourceItemPrefix?: string): string[] {
   if (Array.isArray(v)) {
     if (!v.some(hasDynamicDeep)) return [JSON.stringify(v)];
     const subPad = pad + '  ';
@@ -259,14 +287,14 @@ function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPa
         const kPad = subPad + '  ';
         for (const [k, sv] of Object.entries(item as Record<string, unknown>)) {
           const childPath = fieldPath ? `${fieldPath}.${k}` : k;
-          const vLines = emitFixedValueLines(sv, kPad, typeMap, childPath);
+          const vLines = emitFixedValueLines(sv, kPad, typeMap, childPath, sourceTypeMap, sourceItemPrefix);
           result.push(`${kPad}"${k}": ${vLines[0]}${vLines.length === 1 ? ',' : ''}`);
           for (let li = 1; li < vLines.length - 1; li++) result.push(vLines[li]);
           if (vLines.length > 1) result.push(`${vLines[vLines.length - 1]},`);
         }
         result.push(`${subPad}},`);
       } else {
-        const vLines = emitFixedValueLines(item, subPad, typeMap, fieldPath);
+        const vLines = emitFixedValueLines(item, subPad, typeMap, fieldPath, sourceTypeMap, sourceItemPrefix);
         result.push(`${subPad}${vLines.join('\n')},`);
       }
     }
@@ -278,11 +306,27 @@ function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPa
     if (m) {
       const expr = m[1].trim();
       const targetType = fieldPath ? typeMap?.[fieldPath] : undefined;
+      // Resolve source type by looking up the full expression as a dot-path first
+      // (fixed-item source values are always root-level paths like "customer.city"),
+      // then fall back to alias-stripped last-segment lookup for item-relative paths.
+      let exprSourceType: 'string' | 'number' | 'boolean' | undefined;
+      if (sourceTypeMap) {
+        // 1. Direct root path lookup — covers "customer.city", "order.status", etc.
+        exprSourceType = sourceTypeMap[expr];
+        // 2. Alias-relative: strip the leading "alias." if present, look up under item prefix
+        if (!exprSourceType && sourceItemPrefix) {
+          const fieldNameMatch = expr.match(/\.(\w+)$/) ?? expr.match(/^(\w+)$/);
+          const fieldName = fieldNameMatch?.[1];
+          if (fieldName) {
+            exprSourceType = sourceTypeMap[`${sourceItemPrefix}.${fieldName}`] ?? sourceTypeMap[fieldName];
+          }
+        }
+      }
       // Lookup dict expressions ($__e = ...) must not be wrapped with castExpr —
       // the assignment+semicolon syntax is invalid inside a parenthesised cast expression.
       const isLookup = expr.includes('$__e =');
       return targetType && !isLookup
-        ? [`{{ ${castExpr(expr, targetType)} | json }}`]
+        ? [`{{ ${castExpr(expr, targetType, exprSourceType)} | json }}`]
         : [`{{ ${expr} | json }}`];
     }
     const targetType = fieldPath ? typeMap?.[fieldPath] : undefined;
@@ -305,7 +349,8 @@ function renderArrayMapping(
   depth: number,
   valuesSetMap?: ValuesSetMap,
   typeMap?: TypeMap,
-  inputJson?: string
+  inputJson?: string,
+  sourceTypeMap?: TypeMap
 ): string[] {
   const pad = ' '.repeat(2 * (depth + 1));
   const fieldPad = ' '.repeat(2 * (depth + 2));
@@ -322,18 +367,23 @@ function renderArrayMapping(
   }
   const itemPrefix = resolvePrefix(am.id);
 
+  // Builds the full dot-path to this AM's source array (e.g. "orders" or "orders.items")
+  const buildFullSrcPath = (id: string): string => {
+    const a = allAMs.find((x) => x.id === id);
+    if (!a) return '';
+    if (!a.parentArrayId) return a.source;
+    return `${buildFullSrcPath(a.parentArrayId)}.${a.source}`;
+  };
+  // Source item prefix for typeMap lookups (e.g. "products[*]" or "orders[*].items[*]")
+  const srcDotPath = buildFullSrcPath(am.id);
+  const sourceArrayItemPrefix = srcDotPath ? srcDotPath.split('.').join('[*].') + '[*]' : '';
+
   // Build a set of ALL dot-paths that exist within an array item — used as fallback
   // for old mappings that predate the isRootSource flag.
   const itemPathSet = new Set<string>();
   if (inputJson && am.source) {
     try {
       const root = JSON.parse(inputJson);
-      const buildFullSrcPath = (id: string): string => {
-        const a = allAMs.find((x) => x.id === id);
-        if (!a) return '';
-        if (!a.parentArrayId) return a.source;
-        return `${buildFullSrcPath(a.parentArrayId)}.${a.source}`;
-      };
       let node: any = root;
       for (const part of buildFullSrcPath(am.id).split('.')) {
         if (node == null) break;
@@ -372,7 +422,7 @@ function renderArrayMapping(
         lines.push(`${pad}{`);
         for (const [k, v] of Object.entries(enriched)) {
           const fieldPath = `${itemPrefix}.${k}`;
-          const vLines = emitFixedValueLines(v, fieldPad, typeMap, fieldPath);
+          const vLines = emitFixedValueLines(v, fieldPad, typeMap, fieldPath, sourceTypeMap, sourceArrayItemPrefix);
           lines.push(`${fieldPad}"${k}": ${vLines[0]}${vLines.length === 1 ? ',' : ''}`);
           for (let li = 1; li < vLines.length - 1; li++) lines.push(vLines[li]);
           if (vLines.length > 1) lines.push(`${vLines[vLines.length - 1]},`);
@@ -399,12 +449,17 @@ function renderArrayMapping(
     // if the source is not a known item path, it must be a root field.
     const isRoot = m.isRootSource === true ||
       (m.isRootSource === undefined && itemPathSet.size > 0 && Boolean(m.source) && !itemPathSet.has(m.source));
-    lines.push(`${fieldPad}"${m.target}": ${renderFieldValue(m, isRoot ? undefined : alias, valuesSetMap, targetType)},`);
+    const sourceType = m.source
+      ? isRoot
+        ? sourceTypeMap?.[m.source]
+        : sourceTypeMap?.[sourceArrayItemPrefix ? `${sourceArrayItemPrefix}.${m.source}` : m.source]
+      : undefined;
+    lines.push(`${fieldPad}"${m.target}": ${renderFieldValue(m, isRoot ? undefined : alias, valuesSetMap, targetType, sourceType)},`);
   }
   // Render child AMs recursively inside this loop body
   const children = allAMs.filter((c) => c.parentArrayId === am.id && c.source && c.target);
   for (const child of children) {
-    lines.push(...renderArrayMapping(child, allAMs, alias, depth + 1, valuesSetMap, typeMap, inputJson));
+    lines.push(...renderArrayMapping(child, allAMs, alias, depth + 1, valuesSetMap, typeMap, inputJson, sourceTypeMap));
   }
   lines.push(`${pad}},`);
   if (am.filter) {

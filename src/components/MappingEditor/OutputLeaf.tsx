@@ -265,13 +265,27 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
 
         {/* Value / path display based on current mode */}
         {currentMode === 'fixed' ? (
-          <input
-            className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
-            placeholder="fixed value…"
-            value={mapping?.fixedValue ?? ''}
-            onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, fixedValue: e.target.value }))}
-            onClick={(e) => e.stopPropagation()}
-          />
+          targetFieldType === 'boolean' ? (
+            <select
+              className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0"
+              value={mapping?.fixedValue ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, fixedValue: e.target.value }))}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="">— pick —</option>
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          ) : (
+            <input
+              className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
+              placeholder={targetFieldType === 'number' ? '0' : 'fixed value…'}
+              type={targetFieldType === 'number' ? 'number' : 'text'}
+              value={mapping?.fixedValue ?? ''}
+              onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, fixedValue: e.target.value }))}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )
         ) : currentMode === 'partner' ? (
           <div className="flex-1 relative min-w-0" onClick={(e) => e.stopPropagation()}>
             <input
@@ -437,7 +451,7 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
             <button
               className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-700 transition font-medium"
               onClick={() => dispatch(updateFieldMapping({ id: mapping!.id, lookupDictionary: {
-                ...(mapping!.lookupDictionary ?? { fallback: 'passthrough' as const }),
+                ...(mapping!.lookupDictionary ?? { fallback: 'null' as const }),
                 entries: [...(mapping!.lookupDictionary?.entries ?? []), { from: '', to: '' }],
               }}))}
             >
@@ -449,13 +463,12 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
               <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
               <select
                 className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
-                value={mapping?.lookupDictionary?.fallback ?? 'passthrough'}
+                value={mapping?.lookupDictionary?.fallback ?? 'null'}
                 onChange={(e) => dispatch(updateFieldMapping({ id: mapping!.id, lookupDictionary: {
                   ...mapping!.lookupDictionary!,
                   fallback: e.target.value as LookupDictionary['fallback'],
                 }}))}
               >
-                <option value="passthrough">keep original value</option>
                 <option value="null">output null</option>
                 <option value="custom">use custom fallback</option>
               </select>
