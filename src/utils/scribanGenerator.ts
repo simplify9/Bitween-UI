@@ -53,7 +53,7 @@ function walkTypeMap(node: any, prefix: string): TypeMap {
  */
 function castExpr(path: string, targetType: 'string' | 'number' | 'boolean', sourceType?: 'string' | 'number' | 'boolean'): string {
   if (targetType === 'number') {
-    if (sourceType === 'boolean') return `(${path} ? 1 : 0)`;
+    if (sourceType === 'boolean') return `(${path} == null ? null : (${path} ? 1 : 0))`;
     return `(${path} | to_float)`;  // string → number
   }
   if (targetType === 'boolean') {
@@ -63,7 +63,7 @@ function castExpr(path: string, targetType: 'string' | 'number' | 'boolean', sou
     return `(${path} != null && ${path} != '' && ${path} != 'false' && ${path} != '0')`;
   }
   // string target
-  if (sourceType === 'boolean') return `(${path} ? "true" : "false")`;
+  if (sourceType === 'boolean') return `(${path} == null ? null : (${path} ? "true" : "false"))`;
   return `("" + ${path})`;  // number → string, generic
 }
 
@@ -159,14 +159,13 @@ function renderFieldValue(
   if (mapping.transform) {
     const path = alias ? `${alias}.${src.split('.').pop()}` : src.replace(/\./g, '.');
     const transformedExpr = mapping.transform.replace(/\bvalue\b/g, path);
-    // Guard: if transform result type doesn't match target, emit null
     if (targetType === 'number') {
-      // string result → null; number/bool result → keep
-      return `{{ $__t = (${transformedExpr}); (($__t | object.typeof) == "string" ? null : $__t) | json }}`;
+      // null → null, bool → 0/1, object/array → null, string/number → to_float
+      return `{{ $__t = (${transformedExpr}); ($__t == null ? null : (($__t | object.typeof) == "boolean" ? ($__t ? 1 : 0) : ((($__t | object.typeof) == "object" || ($__t | object.typeof) == "array") ? null : ($__t | to_float)))) | json }}`;
     }
     if (targetType === 'string') {
-      // non-string result → null
-      return `{{ $__t = (${transformedExpr}); (($__t | object.typeof) != "string" ? null : $__t) | json }}`;
+      // null → null, object/array → null, bool → "true"/"false", number → string
+      return `{{ $__t = (${transformedExpr}); ($__t == null ? null : ((($__t | object.typeof) == "object" || ($__t | object.typeof) == "array") ? null : (($__t | object.typeof) == "boolean" ? ($__t ? "true" : "false") : ("" + $__t)))) | json }}`;
     }
     return `{{ ${transformedExpr} | json }}`;
   }
@@ -374,9 +373,44 @@ function renderArrayMapping(
     if (!a.parentArrayId) return a.source;
     return `${buildFullSrcPath(a.parentArrayId)}.${a.source}`;
   };
-  // Source item prefix for typeMap lookups (e.g. "products[*]" or "orders[*].items[*]")
+  // Source item prefix for sourceTypeMap lookups (e.g. "order.products[*]" or "orders[*].items[*]").
+  // Walk the actual inputJson to only insert [*] at segments that are genuinely arrays,
+  // not blindly after every dot — "order.products" should become "order.products[*]",
+  // not "order[*].products[*]".
   const srcDotPath = buildFullSrcPath(am.id);
-  const sourceArrayItemPrefix = srcDotPath ? srcDotPath.split('.').join('[*].') + '[*]' : '';
+  let sourceArrayItemPrefix = '';
+  if (srcDotPath) {
+    let walked = false;
+    if (inputJson) {
+      try {
+        const root = JSON.parse(inputJson);
+        const segments = srcDotPath.split('.');
+        let node: any = root;
+        const prefixParts: string[] = [];
+        for (const seg of segments) {
+          if (node == null) break;
+          if (Array.isArray(node)) node = node[0]; // step into first item of enclosing array
+          if (typeof node !== 'object' || node == null) break;
+          const val = node[seg];
+          if (Array.isArray(val)) {
+            prefixParts.push(`${seg}[*]`);
+            node = val;
+          } else {
+            prefixParts.push(seg);
+            node = val;
+          }
+        }
+        if (prefixParts.length === segments.length) {
+          sourceArrayItemPrefix = prefixParts.join('.');
+          walked = true;
+        }
+      } catch { /* ignore */ }
+    }
+    // Fallback when inputJson is absent or the walk couldn't complete
+    if (!walked) {
+      sourceArrayItemPrefix = srcDotPath.split('.').join('[*].') + '[*]';
+    }
+  }
 
   // Build a set of ALL dot-paths that exist within an array item — used as fallback
   // for old mappings that predate the isRootSource flag.
