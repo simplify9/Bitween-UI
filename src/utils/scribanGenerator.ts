@@ -212,16 +212,53 @@ export function generateScriban(
     (m) => m.target.trim() && (m.source.trim() || m.fixedValue !== undefined || m.partnerPropKey || (m.globalSetId && m.globalKey))
   );
 
-  for (const m of validFields) {
+  const topLevelArrayMappings = arrayMappings.filter((am) => !am.parentArrayId && am.target);
+
+  // Determine top-level key order from outputJson so fields and arrays are
+  // interleaved in the same order they appear in the output template.
+  const getTopKey = (target: string) => target.split('.')[0];
+  let keyOrder: string[] = [];
+  if (outputJson) {
+    try {
+      const parsed = JSON.parse(outputJson);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        keyOrder = Object.keys(parsed);
+      }
+    } catch { /* ignore */ }
+  }
+
+  const emittedFields = new Set<string>();
+  const emittedArrayIds = new Set<string>();
+
+  const emitField = (m: FieldMapping) => {
     const targetType = typeMap[m.target];
     const sourceType = m.source ? sourceTypeMap[m.source] : undefined;
     rootLines.push(`  "${m.target}": ${renderFieldValue(m, undefined, valuesSetMap, targetType, sourceType)},`);
-  }
+    emittedFields.add(m.target);
+  };
 
-  // ── Array mappings (top-level only; children are rendered recursively inside parent loops) ─
-  for (const am of arrayMappings.filter((am) => !am.parentArrayId)) {
-    if (!am.target) continue;
+  const emitArray = (am: ArrayMapping) => {
     rootLines.push(...renderArrayMapping(am, arrayMappings, undefined, 0, valuesSetMap, typeMap, inputJson, sourceTypeMap));
+    emittedArrayIds.add(am.id);
+  };
+
+  if (keyOrder.length > 0) {
+    // Emit in outputJson key order, grouping by top-level key
+    for (const key of keyOrder) {
+      for (const m of validFields) {
+        if (!emittedFields.has(m.target) && getTopKey(m.target) === key) emitField(m);
+      }
+      for (const am of topLevelArrayMappings) {
+        if (!emittedArrayIds.has(am.id) && getTopKey(am.target) === key) emitArray(am);
+      }
+    }
+    // Emit any remaining items not covered by keyOrder
+    for (const m of validFields) { if (!emittedFields.has(m.target)) emitField(m); }
+    for (const am of topLevelArrayMappings) { if (!emittedArrayIds.has(am.id)) emitArray(am); }
+  } else {
+    // No outputJson available — original order: fields first, then arrays
+    for (const m of validFields) emitField(m);
+    for (const am of topLevelArrayMappings) emitArray(am);
   }
 
   rootLines.push('}');
@@ -441,6 +478,32 @@ function renderArrayMapping(
 
   const lines: string[] = [];
   lines.push(`${pad}"${am.target}": [`);
+
+  // ── Primitive array (each element mapped individually — no loop) ────────────
+  if (am.primitiveItems != null) {
+    for (const item of am.primitiveItems) {
+      if (item.partnerPropKey) {
+        lines.push(`${fieldPad}{{ __partner__?.${item.partnerPropKey} | json }},`);
+      } else if (item.globalSetId && item.globalKey) {
+        lines.push(`${fieldPad}{{ __globals__?.${item.globalSetId}["${item.globalKey}"] | json }},`);
+      } else if (item.source?.trim()) {
+        const path = item.source.trim();
+        if (item.transform?.trim()) {
+          const expr = item.transform.trim().replace(/\bvalue\b/g, path);
+          lines.push(`${fieldPad}{{ ${expr} | json }},`);
+        } else {
+          lines.push(`${fieldPad}{{ ${path} | json }},`);
+        }
+      } else if (item.fixedValue !== undefined) {
+        lines.push(`${fieldPad}${JSON.stringify(item.fixedValue)},`);
+      } else {
+        lines.push(`${fieldPad}null,`);
+      }
+    }
+    lines.push(`${pad}],`);
+    return lines;
+  }
+
   if (am.fixedItems?.length) {
     for (const rawItem of am.fixedItems) {
       const enriched = enrichFixedItem(rawItem as Record<string, unknown>, am, allAMs);

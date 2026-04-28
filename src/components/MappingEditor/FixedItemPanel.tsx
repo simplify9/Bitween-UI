@@ -31,9 +31,32 @@ export interface DraftField {
 
 export const FIXED_ITEM_MAX_DEPTH = 2; // 0-based: depths 0,1,2 → 3 nesting levels
 
+/** Recursively collect leaf keys from tree children, using dot-notation for nested objects. */
+function collectLeafKeysFromChildren(children: TreeNode[], prefix = ''): string[] {
+  return children.flatMap((c) => {
+    const path = prefix ? `${prefix}.${c.key}` : c.key;
+    if (c.type === 'leaf') return [path];
+    if (c.type === 'object') return collectLeafKeysFromChildren(c.children, path);
+    return []; // skip arrays — handled separately
+  });
+}
+
+/** Navigate a dotted path through a TreeNode's descendant tree. */
+function findTreeNodeByPath(node: TreeNode, path: string): TreeNode | undefined {
+  const parts = path.split('.');
+  let children = node.children;
+  let found: TreeNode | undefined;
+  for (const part of parts) {
+    found = children.find((c) => c.key === part);
+    if (!found) return undefined;
+    children = found.children;
+  }
+  return found;
+}
+
 export function initDraftFieldsFromNode(node: TreeNode | undefined): DraftField[] {
   if (!node) return [{ key: '', mode: 'fixed' as DraftFieldMode, value: '', transform: '', showTransform: false }];
-  const leafKeys = node.children.filter((c) => c.type === 'leaf').map((c) => c.key);
+  const leafKeys = collectLeafKeysFromChildren(node.children);
   if (leafKeys.length > 0) {
     return leafKeys.map((key) => ({ key, mode: 'fixed' as DraftFieldMode, value: '', transform: '', showTransform: false }));
   }
@@ -48,19 +71,32 @@ function parseLookupEntries(dictStr: string): LookupEntry[] {
   return entries;
 }
 
+/** Set a value at a dotted path inside a record, creating intermediate objects as needed. */
+function setRecordByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
+  const parts = path.split('.');
+  let cur: Record<string, unknown> = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (typeof cur[parts[i]] !== 'object' || cur[parts[i]] === null || Array.isArray(cur[parts[i]])) {
+      cur[parts[i]] = {};
+    }
+    cur = cur[parts[i]] as Record<string, unknown>;
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
 export function draftFieldsToRecord(fields: DraftField[]): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const df of fields) {
     const k = df.key.trim();
     if (!k) continue;
     if (df.mode === 'array') {
-      result[k] = (df.nestedItems ?? []).map((itemFields) => draftFieldsToRecord(itemFields));
+      setRecordByPath(result, k, (df.nestedItems ?? []).map((itemFields) => draftFieldsToRecord(itemFields)));
     } else if (df.mode === 'partner') {
       if (!df.partnerPropKey?.trim()) continue;
-      result[k] = `{{__partner__?.${df.partnerPropKey.trim()}}}`;
+      setRecordByPath(result, k, `{{__partner__?.${df.partnerPropKey.trim()}}}`);
     } else if (df.mode === 'global') {
       if (!df.globalSetId?.trim() || !df.globalKey?.trim()) continue;
-      result[k] = `{{__globals__?.${df.globalSetId.trim()}["${df.globalKey.trim()}"]}}` ;
+      setRecordByPath(result, k, `{{__globals__?.${df.globalSetId.trim()}["${df.globalKey.trim()}"]}}`);
     } else if (df.mode === 'source') {
       if (!df.value.trim()) continue;
       const src = df.value.trim();
@@ -70,10 +106,10 @@ export function draftFieldsToRecord(fields: DraftField[]): Record<string, unknow
         if (valid.length > 0) {
           const entriesStr = valid.map(({ from, to }) => `"${from}": "${to}"`).join(', ');
           if (lkp.fallback === 'null') {
-            result[k] = `{{$__e = { ${entriesStr} }; $__e[${src}]}}`;
+            setRecordByPath(result, k, `{{$__e = { ${entriesStr} }; $__e[${src}]}}`);
           } else {
             const fb = lkp.fallback === 'custom' ? `"${lkp.fallbackValue ?? ''}"` : src;
-            result[k] = `{{$__e = { ${entriesStr} }; ($__e[${src}] ?? ${fb})}}`;
+            setRecordByPath(result, k, `{{$__e = { ${entriesStr} }; ($__e[${src}] ?? ${fb})}}`);
           }
           continue;
         }
@@ -81,26 +117,42 @@ export function draftFieldsToRecord(fields: DraftField[]): Record<string, unknow
       const expr = df.transform.trim()
         ? df.transform.trim().replace(/\bvalue\b/g, src)
         : src;
-      result[k] = `{{${expr}}}`;
+      setRecordByPath(result, k, `{{${expr}}}`);
     } else {
       if (df.value.trim() === '') continue;
       const raw = df.value.trim();
       const n = Number(raw);
-      if (raw !== '' && !isNaN(n)) result[k] = n;
-      else if (raw === 'true') result[k] = true;
-      else if (raw === 'false') result[k] = false;
-      else result[k] = raw;
+      if (raw !== '' && !isNaN(n)) setRecordByPath(result, k, n);
+      else if (raw === 'true') setRecordByPath(result, k, true);
+      else if (raw === 'false') setRecordByPath(result, k, false);
+      else setRecordByPath(result, k, raw);
     }
   }
   return result;
 }
 
+/** Flatten a nested record to dotted-path keys, keeping arrays as single entries. */
+function flattenRecordKeys(obj: Record<string, unknown>, prefix = ''): string[] {
+  return Object.entries(obj).flatMap(([k, v]) => {
+    const path = prefix ? `${prefix}.${k}` : k;
+    if (Array.isArray(v)) return [path]; // arrays kept as-is
+    if (v && typeof v === 'object') return flattenRecordKeys(v as Record<string, unknown>, path);
+    return [path];
+  });
+}
+
+/** Get a value at a dotted path from a nested record. */
+function getRecordByPath(obj: Record<string, unknown>, path: string): unknown {
+  return path.split('.').reduce((cur: any, k) => (cur != null && typeof cur === 'object' ? cur[k] : undefined), obj);
+}
+
 export function recordToDraftFields(item: Record<string, unknown>, node: TreeNode): DraftField[] {
-  const leafKeys = node.children.filter((c) => c.type === 'leaf').map((c) => c.key);
+  const nodeLeafKeys = collectLeafKeysFromChildren(node.children);
   const arrayChildren = node.children.filter((c) => c.type === 'array');
-  const allKeys = [...new Set([...leafKeys, ...Object.keys(item)])];
+  const itemKeys = flattenRecordKeys(item);
+  const allKeys = [...new Set([...nodeLeafKeys, ...itemKeys])];
   return allKeys.map((key): DraftField => {
-    const v = item[key];
+    const v = getRecordByPath(item, key);
     if (Array.isArray(v)) {
       const childNode = arrayChildren.find((c) => c.key === key);
       return {
@@ -288,7 +340,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
         // leaf field (fixed / source / partner / global)
         const hasLookup = (df.lookupDictionary?.entries?.length ?? 0) > 0;
         const isLookupOpen = lookupOpenIdx === i;
-        const fieldNode = parentNode.children.find((c) => c.key === df.key);
+        const fieldNode = findTreeNodeByPath(parentNode, df.key);
         const rawValue = fieldNode?.value;
         const fieldTargetType: 'string' | 'number' | 'boolean' | undefined =
           typeof rawValue === 'number' ? 'number' :
@@ -303,7 +355,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                   placeholder="key" value={df.key}
                   onChange={(e) => updateField(i, { key: e.target.value })} />
               ) : (
-                <span className="w-20 flex-shrink-0 font-mono text-gray-700 text-xs truncate">{df.key}</span>
+                <span className="max-w-[10rem] flex-shrink-0 font-mono text-gray-700 text-xs truncate" title={df.key}>{df.key}</span>
               )}
               <span className="text-gray-300 flex-shrink-0">←</span>
 
