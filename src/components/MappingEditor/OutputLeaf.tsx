@@ -1,13 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { HiOutlinePlusCircle, HiOutlineTrash } from 'react-icons/hi';
 import { TreeNode } from 'src/utils/mappingPreview';
-import { ArrayMapping, LookupDictionary, LookupEntry } from './types';
+import { ArrayMapping, LookupDictionary, LookupEntry, PrimitiveArrayItem } from './types';
 import {
   useMappingEditorDispatch,
   useMappingEditorState,
+  addArrayMapping,
   addFieldMapping,
+  removeArrayMapping,
   removeFieldMapping,
   selectMapping,
+  updateArrayMapping,
   updateFieldMapping,
 } from './MappingEditorContext';
 import { getFullTargetPrefix } from './mappingTreeUtils';
@@ -43,8 +46,42 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
   const dispatch = useMappingEditorDispatch();
   const { fieldMappings, arrayMappings, selectedMappingId: selectedId, outputJson, partnerAdapterProperties } = useMappingEditorState();
   const [lookupOpen, setLookupOpen] = useState(false);
+  const [primPanelOpen, setPrimPanelOpen] = useState(false);
   const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
   const allGlobalSets = globalSetsData?.result ?? [];
+
+  // ── Primitive array detection ─────────────────────────────────────────────
+  // node.value is not populated by buildMappingTree, so we navigate outputJson directly.
+  const primitiveArrayValues = React.useMemo((): any[] | null => {
+    if (node.path.includes('[*].')) return null;
+    try {
+      const obj = JSON.parse(outputJson);
+      const cur = node.path.split('.').reduce((o: any, k) => (o != null && typeof o === 'object' ? o[k] : undefined), obj);
+      if (Array.isArray(cur) && cur.every((v: any) => v === null || typeof v !== 'object')) {
+        return cur;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [node.path, outputJson]);
+
+  const isPrimitiveArray = primitiveArrayValues !== null;
+
+  const primAm = isPrimitiveArray
+    ? arrayMappings.find((am) => am.target === node.path && !am.parentArrayId && am.primitiveItems)
+    : undefined;
+
+  const savePrimItem = (idx: number, newItem: PrimitiveArrayItem) => {
+    const base: PrimitiveArrayItem[] =
+      primAm?.primitiveItems ?? primitiveArrayValues!.map(() => ({}));
+    const updated = base.map((item, i) => (i === idx ? newItem : item));
+    if (primAm) {
+      dispatch(updateArrayMapping({ id: primAm.id, primitiveItems: updated }));
+    } else {
+      dispatch(addArrayMapping({ source: '', target: node.path, alias: 'item', mappings: [], primitiveItems: updated }));
+    }
+  };
 
   // Type of this target field, derived from the typeMap passed from the tree root
   const targetFieldType = typeMap[node.path]
@@ -186,6 +223,153 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
         <span className="text-[10px] text-purple-400 border border-purple-200 rounded px-1 flex-shrink-0 bg-purple-50">
           loop
         </span>
+      </div>
+    );
+  }
+
+  // ── Primitive array leaf (each element mapped individually) ─────────────
+  if (isPrimitiveArray) {
+    const currentItems: PrimitiveArrayItem[] =
+      primAm?.primitiveItems ?? primitiveArrayValues!.map(() => ({}));
+    const mappedCount = currentItems.filter(
+      (item) => item.source || item.fixedValue !== undefined || item.partnerPropKey || (item.globalSetId && item.globalKey)
+    ).length;
+
+    return (
+      <div
+        ref={ref}
+        className={['rounded border text-xs select-none transition-all', isSearchMatch ? 'bg-yellow-50 ring-1 ring-yellow-300' : 'border-transparent'].join(' ')}
+      >
+        {/* Header row */}
+        <div
+          className="flex items-center gap-1.5 px-2 py-[3px] cursor-pointer hover:bg-gray-50 rounded"
+          onClick={() => setPrimPanelOpen((v) => !v)}
+        >
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${mappedCount > 0 ? 'bg-emerald-400' : 'bg-rose-300'}`} />
+          <span className="font-mono text-gray-700">{node.key}</span>
+          <span className="text-blue-500 font-mono ml-0.5">[]</span>
+          <span className="ml-auto text-[10px] font-medium text-orange-600 border border-orange-200 bg-orange-50 rounded px-1.5 py-px">
+            {mappedCount}/{currentItems.length} mapped
+          </span>
+          <span className="text-gray-400 text-[10px]">{primPanelOpen ? '▾' : '▸'}</span>
+        </div>
+
+        {/* Inline mapping panel */}
+        {primPanelOpen && (
+          <div className="mx-2 mb-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2 py-2 space-y-1">
+            {currentItems.length === 0 && !primAm && (
+              <div className="flex items-center gap-2 py-0.5">
+                <span className="text-[10px] text-gray-400 italic">Empty array — no elements to map.</span>
+                <button
+                  className="ml-auto text-[10px] font-medium text-teal-600 border border-teal-300 bg-white rounded px-2 py-0.5 hover:bg-teal-50 transition"
+                  onClick={() => dispatch(addArrayMapping({ source: '', target: node.path, alias: 'item', mappings: [], primitiveItems: [] }))}
+                >
+                  Map as empty array
+                </button>
+              </div>
+            )}
+            {currentItems.length === 0 && primAm && (
+              <div className="flex items-center gap-2 py-0.5">
+                <span className="text-[10px] text-emerald-600 font-medium">✓ Mapped as empty array</span>
+                <button
+                  className="ml-auto text-[10px] text-rose-400 hover:text-rose-600 transition"
+                  onClick={() => dispatch(removeArrayMapping(primAm.id))}
+                  title="Clear mapping"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+            {currentItems.map((item, idx) => {
+              const mode =
+                item.partnerPropKey !== undefined ? 'partner' :
+                item.globalSetId !== undefined ? 'global' :
+                item.fixedValue !== undefined ? 'fixed' : 'source';
+              return (
+                <div key={idx} className="flex items-center gap-1">
+                  <span className="font-mono text-[10px] text-gray-400 w-5 text-right flex-shrink-0">[{idx}]</span>
+                  <span className="text-gray-300 flex-shrink-0 text-xs">←</span>
+                  {/* Mode toggle */}
+                  <div className="flex flex-shrink-0 rounded overflow-hidden border border-gray-200 text-[10px] font-medium">
+                    <button
+                      onClick={() => mode !== 'source' && savePrimItem(idx, { source: '', fixedValue: undefined, partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined })}
+                      className={mode === 'source' ? 'px-1.5 py-0.5 bg-blue-500 text-white' : 'px-1.5 py-0.5 text-gray-400 hover:bg-gray-50'}
+                    >Source</button>
+                    <button
+                      onClick={() => mode !== 'fixed' && savePrimItem(idx, { source: '', fixedValue: '', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined })}
+                      className={mode === 'fixed' ? 'px-1.5 py-0.5 bg-amber-500 text-white border-l border-amber-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                    >Fixed</button>
+                    <button
+                      onClick={() => mode !== 'partner' && savePrimItem(idx, { source: '', fixedValue: undefined, partnerPropKey: '', globalSetId: undefined, globalKey: undefined })}
+                      className={mode === 'partner' ? 'px-1.5 py-0.5 bg-emerald-500 text-white border-l border-emerald-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                    >Partner</button>
+                    <button
+                      onClick={() => mode !== 'global' && savePrimItem(idx, { source: '', fixedValue: undefined, partnerPropKey: undefined, globalSetId: '', globalKey: '' })}
+                      className={mode === 'global' ? 'px-1.5 py-0.5 bg-teal-500 text-white border-l border-teal-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
+                    >Global</button>
+                  </div>
+                  {/* Value area */}
+                  {mode === 'source' && (
+                    <select
+                      className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500"
+                      value={item.source ?? ''}
+                      onChange={(e) => savePrimItem(idx, { ...item, source: e.target.value })}
+                    >
+                      <option value="">— unassigned —</option>
+                      {sourcePaths.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  )}
+                  {mode === 'fixed' && (
+                    <input
+                      className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 placeholder-amber-300"
+                      placeholder="fixed value…"
+                      value={item.fixedValue ?? ''}
+                      onChange={(e) => savePrimItem(idx, { ...item, fixedValue: e.target.value })}
+                    />
+                  )}
+                  {mode === 'partner' && (
+                    <>
+                      <input
+                        list={`prim-partner-${node.path}-${idx}`}
+                        className="flex-1 min-w-0 border-0 bg-transparent font-mono text-xs focus:outline-none text-emerald-600 placeholder-emerald-300"
+                        placeholder="property key…"
+                        value={item.partnerPropKey ?? ''}
+                        onChange={(e) => savePrimItem(idx, { ...item, partnerPropKey: e.target.value })}
+                      />
+                      <datalist id={`prim-partner-${node.path}-${idx}`}>
+                        {Object.keys(partnerAdapterProperties).map((k) => <option key={k} value={k} />)}
+                      </datalist>
+                    </>
+                  )}
+                  {mode === 'global' && (
+                    <div className="flex gap-1 flex-1 min-w-0">
+                      <select
+                        className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-600 flex-1 min-w-0"
+                        value={item.globalSetId ?? ''}
+                        onChange={(e) => savePrimItem(idx, { ...item, globalSetId: e.target.value, globalKey: '' })}
+                      >
+                        <option value="">— pick set —</option>
+                        {allGlobalSets.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                      {item.globalSetId && (
+                        <select
+                          className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-500 flex-1 min-w-0"
+                          value={item.globalKey ?? ''}
+                          onChange={(e) => savePrimItem(idx, { ...item, globalKey: e.target.value })}
+                        >
+                          <option value="">— pick key —</option>
+                          {Object.keys(allGlobalSets.find((s) => s.id === item.globalSetId)?.values ?? {}).map((k) =>
+                            <option key={k} value={k}>{k}</option>
+                          )}
+                        </select>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }

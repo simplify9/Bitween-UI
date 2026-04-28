@@ -262,9 +262,9 @@ const MappingEditorInner: React.FC = () => {
       }
     }
     for (const am of arrayMappings) {
-      if (!am.source && !am.fixedItems?.length) errors.push({ type: 'error', message: `Array mapping missing source path` });
+      if (!am.source && !am.fixedItems?.length && am.primitiveItems == null) errors.push({ type: 'error', message: `Array mapping missing source path` });
       if (!am.target) errors.push({ type: 'error', message: `Array mapping missing target path` });
-      if (am.mappings.length === 0 && !am.fixedItems?.length) {
+      if (am.mappings.length === 0 && !am.fixedItems?.length && am.primitiveItems == null) {
         errors.push({
           type: 'warning',
           message: `Array mapping "${am.source} → ${am.target}" has no field mappings`,

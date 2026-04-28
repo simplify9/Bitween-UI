@@ -101,7 +101,8 @@ export function getAllLeafPaths(obj: any, prefix = ''): string[] {
   });
 }
 
-/** Recursively flatten object keys using dot notation. Array-valued keys are excluded
+/** Recursively flatten object keys using dot notation. Only leaf (scalar) paths are
+ * returned — intermediate object keys are excluded. Array-valued keys are also excluded
  * to prevent mistakenly mapping an array field to a scalar target field. */
 export function flattenObjectKeys(obj: any, prefix = ''): string[] {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return prefix ? [prefix] : [];
@@ -109,7 +110,7 @@ export function flattenObjectKeys(obj: any, prefix = ''): string[] {
     const path = prefix ? `${prefix}.${k}` : k;
     if (Array.isArray(v)) return []; // exclude array-valued keys
     if (v && typeof v === 'object') {
-      return [path, ...flattenObjectKeys(v, path)];
+      return flattenObjectKeys(v, path); // recurse without emitting the intermediate key
     }
     return [path];
   });

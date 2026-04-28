@@ -41,6 +41,16 @@ export interface FieldMapping {
   globalKey?: string;
 }
 
+/** One element in a primitive array mapping (string/number target array). */
+export interface PrimitiveArrayItem {
+  source?: string;
+  fixedValue?: string;
+  transform?: string;
+  partnerPropKey?: string;
+  globalSetId?: string;
+  globalKey?: string;
+}
+
 export interface ArrayMapping {
   id: string;
   source: string;
@@ -49,6 +59,8 @@ export interface ArrayMapping {
   filter?: FilterCondition;
   mappings: FieldMapping[];
   fixedItems?: Record<string, unknown>[];
+  /** Primitive (string/number) array: each index mapped to a source field or fixed value. */
+  primitiveItems?: PrimitiveArrayItem[];
   /** ID of the parent ArrayMapping. undefined/null means top-level. */
   parentArrayId?: string;
 }

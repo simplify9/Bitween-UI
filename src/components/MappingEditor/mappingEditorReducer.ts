@@ -13,6 +13,7 @@ export function snapshot(state: MappingEditorState): CoreState {
       ...am,
       mappings: am.mappings.map((m) => ({ ...m })),
       fixedItems: am.fixedItems ? am.fixedItems.map((fi) => ({ ...fi })) : undefined,
+      primitiveItems: am.primitiveItems ? am.primitiveItems.map((pi) => ({ ...pi })) : undefined,
     })),
   };
 }
@@ -95,6 +96,7 @@ export function loadFromProps(props: KeyValuePair[]): CoreState {
               globalKey: m.globalKey ?? undefined,
             })),
             fixedItems: Array.isArray(am.fixedItems) ? am.fixedItems : undefined,
+            primitiveItems: Array.isArray(am.primitiveItems) ? am.primitiveItems : undefined,
           });
         });
       }

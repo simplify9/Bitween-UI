@@ -798,7 +798,8 @@ const [pendingMappings, setPendingMappings] = useState<Array<{
               })}
               </div>
               <button
-                className="mt-2 flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition"
+                disabled={!source}
+                className="mt-2 flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                 onClick={() => {
                   setPendingMappings((prev) => [...prev, { id: `pending-${Date.now()}`, source: '', target: '' }]);
                 }}
