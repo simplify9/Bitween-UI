@@ -1,4 +1,4 @@
-import { ArrayMapping, FieldMapping, FilterOperator, LookupDictionary, LookupEntry } from 'src/components/MappingEditor/types';
+import { ArrayMapping, FieldMapping, FilterOperator, LookupDictionary, LookupEntry } from 'src/types/mapping';
 
 /** Map of valuesSetId → (key → value) for enum lookups */
 export type ValuesSetMap = Record<string, Record<string, string>>;
@@ -21,8 +21,15 @@ export function buildTypeMap(json: string): TypeMap {
 function walkTypeMap(node: any, prefix: string): TypeMap {
   if (node === null || node === undefined) return {};
   if (Array.isArray(node)) {
-    if (node.length === 0 || typeof node[0] !== 'object') return {};
-    return walkTypeMap(node[0], prefix); // use first element as representative
+    if (node.length === 0) return {};
+    const first = node[0];
+    if (typeof first !== 'object') {
+      // primitive array — record the element type at this prefix (e.g. "prices[*]" → "number")
+      const t = typeof first;
+      if (prefix && (t === 'string' || t === 'number' || t === 'boolean')) return { [prefix]: t };
+      return {};
+    }
+    return walkTypeMap(first, prefix); // use first element as representative
   }
   if (typeof node === 'object') {
     const result: TypeMap = {};
@@ -482,10 +489,21 @@ function renderArrayMapping(
   // ── Primitive array (each element mapped individually — no loop) ────────────
   if (am.primitiveItems != null) {
     for (const item of am.primitiveItems) {
+      const elemType = typeMap?.[itemPrefix];
       if (item.partnerPropKey) {
-        lines.push(`${fieldPad}{{ __partner__?.${item.partnerPropKey} | json }},`);
+        // Partner values are always strings — incompatible with number/boolean targets
+        if (elemType === 'number' || elemType === 'boolean') {
+          lines.push(`${fieldPad}null,`);
+        } else {
+          lines.push(`${fieldPad}{{ __partner__?.${item.partnerPropKey} | json }},`);
+        }
       } else if (item.globalSetId && item.globalKey) {
-        lines.push(`${fieldPad}{{ __globals__?.${item.globalSetId}["${item.globalKey}"] | json }},`);
+        // Global set values are always strings — incompatible with number/boolean targets
+        if (elemType === 'number' || elemType === 'boolean') {
+          lines.push(`${fieldPad}null,`);
+        } else {
+          lines.push(`${fieldPad}{{ __globals__?.${item.globalSetId}["${item.globalKey}"] | json }},`);
+        }
       } else if (item.source?.trim()) {
         const path = item.source.trim();
         if (item.transform?.trim()) {
@@ -495,7 +513,8 @@ function renderArrayMapping(
           lines.push(`${fieldPad}{{ ${path} | json }},`);
         }
       } else if (item.fixedValue !== undefined) {
-        lines.push(`${fieldPad}${JSON.stringify(item.fixedValue)},`);
+        const coerced = coerceFixedValue(item.fixedValue, elemType);
+        lines.push(`${fieldPad}${JSON.stringify(coerced)},`);
       } else {
         lines.push(`${fieldPad}null,`);
       }

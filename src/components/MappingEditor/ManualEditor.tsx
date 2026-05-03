@@ -7,7 +7,7 @@ import {
   setFieldMappings,
   setManualTemplate,
   syncManualTemplate,
-} from './MappingEditorContext';
+} from './context/MappingEditorContext';
 import { generateScriban, parseScriban } from 'src/utils/scribanGenerator';
 
 const SCRIBAN_HINT = `{{- # Scriban template — edit freely -}}

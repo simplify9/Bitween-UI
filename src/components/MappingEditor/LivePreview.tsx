@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MdOutlineContentCopy } from 'react-icons/md';
-import { useMappingEditorState } from './MappingEditorContext';
+import { useMappingEditorState } from './context/MappingEditorContext';
 import { usePreviewMappingMutation } from 'src/client/apis/mappersApi';
 import { generateScriban } from 'src/utils/scribanGenerator';
 import { useValuesSetMap } from 'src/hooks/useValuesSetMap';

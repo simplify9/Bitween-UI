@@ -1,4 +1,4 @@
-// ─── Shared types for the MappingEditor (no Redux dependency) ─────────────────
+// ─── Mapping domain types ──────────────────────────────────────────────────────
 
 export type FilterOperator = '==' | '!=' | '>' | '>=' | '<' | '<=';
 
@@ -35,7 +35,8 @@ export interface FieldMapping {
   isRootSource?: boolean;
   /** Partner adapter property key — mutually exclusive with source and fixedValue.
    *  Generates {{ __partner__.<key> | json }} in the Scriban template. */
-  partnerPropKey?: string;  /** Global adapter values set reference — mutually exclusive with other modes.
+  partnerPropKey?: string;
+  /** Global adapter values set reference — mutually exclusive with other modes.
    *  Generates {{ __globals__?.SETID?.KEY | json }} in the Scriban template. */
   globalSetId?: string;
   globalKey?: string;
@@ -72,6 +73,9 @@ export type ValidationError = {
 };
 
 export type EditorMode = 'visual' | 'canvas' | 'manual';
+
+/** The active value-source mode for a single field mapping row. */
+export type MappingMode = 'source' | 'fixed' | 'partner' | 'global';
 
 export const NATIVE_JSON_MAPPER_ID = 'NativeJSONMapper';
 

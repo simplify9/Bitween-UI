@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { HiOutlinePencil, HiOutlinePlusCircle, HiOutlineTrash } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
 import { TreeNode } from 'src/utils/mappingPreview';
-import { LookupDictionary, LookupEntry } from './types';
+import { LookupDictionary, LookupEntry } from 'src/types/mapping';
 import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
-import { useMappingEditorState } from './MappingEditorContext';
+import { useMappingEditorState } from '../context/MappingEditorContext';
+import { ModeToggleButtons } from '../ModeToggleButtons';
+import { LeafValueInput } from '../LeafValueInput';
+import { LookupDictionaryPanel } from '../LookupDictionaryPanel';
 
 // ─── Fixed-item inline panel types ───────────────────────────────────────────
 
@@ -39,19 +42,6 @@ function collectLeafKeysFromChildren(children: TreeNode[], prefix = ''): string[
     if (c.type === 'object') return collectLeafKeysFromChildren(c.children, path);
     return []; // skip arrays — handled separately
   });
-}
-
-/** Navigate a dotted path through a TreeNode's descendant tree. */
-function findTreeNodeByPath(node: TreeNode, path: string): TreeNode | undefined {
-  const parts = path.split('.');
-  let children = node.children;
-  let found: TreeNode | undefined;
-  for (const part of parts) {
-    found = children.find((c) => c.key === part);
-    if (!found) return undefined;
-    children = found.children;
-  }
-  return found;
 }
 
 export function initDraftFieldsFromNode(node: TreeNode | undefined): DraftField[] {
@@ -143,7 +133,9 @@ function flattenRecordKeys(obj: Record<string, unknown>, prefix = ''): string[] 
 
 /** Get a value at a dotted path from a nested record. */
 function getRecordByPath(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce((cur: any, k) => (cur != null && typeof cur === 'object' ? cur[k] : undefined), obj);
+  return path.split('.').reduce((cur: Record<string, unknown> | undefined, k) => (
+    cur != null && typeof cur === 'object' ? cur[k] as Record<string, unknown> | undefined : undefined
+  ), obj as Record<string, unknown> | undefined);
 }
 
 export function recordToDraftFields(item: Record<string, unknown>, node: TreeNode): DraftField[] {
@@ -209,12 +201,13 @@ export interface FixedItemFieldRowsProps {
   depth: number;
   inputScalarProps: string[];
   idPrefix: string;
+  typeMap?: Record<string, 'string' | 'number' | 'boolean'>;
 }
 
 export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
-  fields, onFieldsChange, parentNode, depth, inputScalarProps, idPrefix,
+  fields, onFieldsChange, parentNode, depth, inputScalarProps, idPrefix, typeMap,
 }) => {
-  const { partnerAdapterProperties, selectedPartnerId } = useMappingEditorState();
+  const { partnerAdapterProperties } = useMappingEditorState();
   const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
   const allGlobalSets = globalSetsData?.result ?? [];
   const [lookupOpenIdx, setLookupOpenIdx] = useState<number | null>(null);
@@ -258,6 +251,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                         depth={depth + 1}
                         inputScalarProps={inputScalarProps}
                         idPrefix={`${idPrefix}-${df.key}-edit-${itemIdx}`}
+                        typeMap={typeMap}
                       />
                       <div className="flex gap-1 pt-0.5">
                         <button className="flex-1 text-[10px] bg-indigo-500 hover:bg-indigo-600 text-white rounded py-0.5 transition"
@@ -315,6 +309,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
                     depth={depth + 1}
                     inputScalarProps={inputScalarProps}
                     idPrefix={`${idPrefix}-${df.key}`}
+                    typeMap={typeMap}
                   />
                   <div className="flex gap-1 pt-0.5">
                     <button className="flex-1 text-[10px] bg-indigo-500 hover:bg-indigo-600 text-white rounded py-0.5 transition"
@@ -340,12 +335,7 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
         // leaf field (fixed / source / partner / global)
         const hasLookup = (df.lookupDictionary?.entries?.length ?? 0) > 0;
         const isLookupOpen = lookupOpenIdx === i;
-        const fieldNode = findTreeNodeByPath(parentNode, df.key);
-        const rawValue = fieldNode?.value;
-        const fieldTargetType: 'string' | 'number' | 'boolean' | undefined =
-          typeof rawValue === 'number' ? 'number' :
-          typeof rawValue === 'boolean' ? 'boolean' :
-          typeof rawValue === 'string' ? 'string' : undefined;
+        const fieldTargetType = typeMap?.[`${parentNode.path}.${df.key}`];
         return (
           <div key={`${df.key}-leaf-${i}`} className="space-y-0.5">
             <div className="flex items-center gap-1.5">
@@ -359,25 +349,16 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
               )}
               <span className="text-gray-300 flex-shrink-0">←</span>
 
-              {/* Mode buttons — same style as OutputLeaf */}
-              <div className="flex flex-shrink-0 rounded overflow-hidden border border-gray-200 text-[10px] font-medium">
-                <button
-                  onClick={() => updateField(i, { mode: 'source', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined })}
-                  className={df.mode === 'source' ? 'px-1.5 py-0.5 bg-blue-500 text-white' : 'px-1.5 py-0.5 text-gray-400 hover:bg-gray-50'}
-                >Source</button>
-                <button
-                  onClick={() => { updateField(i, { mode: 'fixed', value: '', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
-                  className={df.mode === 'fixed' ? 'px-1.5 py-0.5 bg-amber-500 text-white' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
-                >Fixed</button>
-                <button
-                  onClick={() => { updateField(i, { mode: 'partner', value: '', transform: '', globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
-                  className={df.mode === 'partner' ? 'px-1.5 py-0.5 bg-emerald-500 text-white border-l border-emerald-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
-                >Partner</button>
-                <button
-                  onClick={() => { updateField(i, { mode: 'global', value: '', transform: '', partnerPropKey: undefined, lookupDictionary: undefined }); setLookupOpenIdx(null); }}
-                  className={df.mode === 'global' ? 'px-1.5 py-0.5 bg-teal-500 text-white border-l border-teal-400' : 'px-1.5 py-0.5 text-gray-400 border-l border-gray-200 hover:bg-gray-50'}
-                >Global</button>
-              </div>
+              <ModeToggleButtons
+                current={(df.mode as DraftFieldMode) === 'array' ? 'source' : df.mode}
+                onChange={(next) => {
+                  setLookupOpenIdx(null);
+                  if (next === 'source') updateField(i, { mode: 'source', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined });
+                  else if (next === 'fixed') updateField(i, { mode: 'fixed', value: '', partnerPropKey: undefined, globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined });
+                  else if (next === 'partner') updateField(i, { mode: 'partner', value: '', transform: '', globalSetId: undefined, globalKey: undefined, lookupDictionary: undefined });
+                  else if (next === 'global') updateField(i, { mode: 'global', value: '', transform: '', partnerPropKey: undefined, lookupDictionary: undefined });
+                }}
+              />
 
               {/* Lookup button — only in source mode, matches OutputLeaf styling */}
               {df.mode === 'source' && (
@@ -399,69 +380,24 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
               )}
 
               {/* Value area */}
-              {df.mode === 'source' && (
-                <select
-                  className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
-                  value={df.value}
-                  onChange={(e) => updateField(i, { value: e.target.value })}>
-                  <option value="">— unassigned —</option>
-                  {inputScalarProps.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-              )}
-              {df.mode === 'fixed' && (
-                fieldTargetType === 'boolean' ? (
-                  <select
-                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0"
-                    value={df.value}
-                    onChange={(e) => updateField(i, { value: e.target.value })}>
-                    <option value="">— pick —</option>
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                  </select>
-                ) : (
-                  <input
-                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
-                    placeholder={fieldTargetType === 'number' ? '0' : 'fixed value…'}
-                    type={fieldTargetType === 'number' ? 'number' : 'text'}
-                    value={df.value}
-                    onChange={(e) => updateField(i, { value: e.target.value })} />
-                )
-              )}
-              {df.mode === 'partner' && (
-                <>
-                  <input
-                    list={`${idPrefix}-partner-${i}`}
-                    className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-emerald-600 min-w-0 placeholder-emerald-300"
-                    placeholder="property key…"
-                    value={df.partnerPropKey ?? ''}
-                    onChange={(e) => updateField(i, { partnerPropKey: e.target.value })} />
-                  <datalist id={`${idPrefix}-partner-${i}`}>
-                    {Object.keys(partnerAdapterProperties).map((p) => <option key={p} value={p} />)}
-                  </datalist>
-                </>
-              )}
-              {df.mode === 'global' && (
-                <div className="flex gap-1 flex-1 min-w-0">
-                  <select
-                    className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-600 flex-1 min-w-0"
-                    value={df.globalSetId ?? ''}
-                    onChange={(e) => updateField(i, { globalSetId: e.target.value, globalKey: undefined })}>
-                    <option value="">— pick set —</option>
-                    {allGlobalSets.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                  {df.globalSetId && (
-                    <select
-                      className="border-0 bg-transparent font-mono text-xs focus:outline-none text-teal-500 flex-1 min-w-0"
-                      value={df.globalKey ?? ''}
-                      onChange={(e) => updateField(i, { globalKey: e.target.value })}>
-                      <option value="">— pick key —</option>
-                      {Object.keys(allGlobalSets.find((s) => s.id === df.globalSetId)?.values ?? {}).map((vk) =>
-                        <option key={vk} value={vk}>{vk}</option>
-                      )}
-                    </select>
-                  )}
-                </div>
-              )}
+              <LeafValueInput
+                mode={df.mode as 'source' | 'fixed' | 'partner' | 'global'}
+                sourceValue={df.value}
+                sourcePaths={inputScalarProps}
+                onSourceChange={(v) => updateField(i, { value: v })}
+                fixedValue={df.value}
+                targetFieldType={fieldTargetType}
+                onFixedChange={(v) => updateField(i, { value: v })}
+                partnerPropKey={df.partnerPropKey ?? ''}
+                partnerAdapterProperties={partnerAdapterProperties}
+                datalistId={`${idPrefix}-partner-${i}`}
+                onPartnerChange={(v) => updateField(i, { partnerPropKey: v })}
+                globalSetId={df.globalSetId ?? ''}
+                globalKey={df.globalKey ?? ''}
+                allGlobalSets={allGlobalSets}
+                onGlobalSetChange={(setId) => updateField(i, { globalSetId: setId, globalKey: undefined })}
+                onGlobalKeyChange={(key) => updateField(i, { globalKey: key })}
+              />
 
               {/* Delete row — only for free-key fields */}
               {hasFreeKey && (
@@ -473,89 +409,15 @@ export const FixedItemFieldRows: React.FC<FixedItemFieldRowsProps> = ({
               )}
             </div>
 
-            {/* Lookup dictionary panel — matches OutputLeaf exactly */}
+            {/* Lookup dictionary panel */}
             {df.mode === 'source' && isLookupOpen && (
               <div className="px-2 pb-2 pt-0.5">
-                <div className="rounded-lg border border-violet-200 bg-violet-50 p-2 space-y-1.5">
-                  {/* Entry rows */}
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {(df.lookupDictionary?.entries ?? []).length === 0 && (
-                      <p className="text-[10px] text-violet-400 italic px-1">No entries yet.</p>
-                    )}
-                    {(df.lookupDictionary?.entries ?? []).map((entry: LookupEntry, idx: number) => (
-                      <div key={idx} className="flex items-center gap-1">
-                        <input
-                          autoFocus={idx === 0}
-                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
-                          placeholder="source value"
-                          value={entry.from}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const lkp = df.lookupDictionary!;
-                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.map((ee, ei) => ei === idx ? { ...ee, from: val } : ee) } });
-                          }}
-                        />
-                        <span className="text-gray-300 text-[10px] flex-shrink-0 select-none">→</span>
-                        <input
-                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300"
-                          placeholder="output value"
-                          value={entry.to}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const lkp = df.lookupDictionary!;
-                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.map((ee, ei) => ei === idx ? { ...ee, to: val } : ee) } });
-                          }}
-                        />
-                        <button
-                          className="flex-shrink-0 text-gray-300 hover:text-rose-400 transition"
-                          onClick={() => {
-                            const lkp = df.lookupDictionary!;
-                            updateField(i, { lookupDictionary: { ...lkp, entries: lkp.entries.filter((_, ei) => ei !== idx) } });
-                          }}
-                        >
-                          <HiOutlineTrash size={11} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Add entry */}
-                  <button
-                    className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-700 transition font-medium"
-                    onClick={() => {
-                      const existing = df.lookupDictionary ?? { entries: [], fallback: 'null' as const };
-                      updateField(i, { lookupDictionary: { ...existing, entries: [...existing.entries, { from: '', to: '' }] } });
-                    }}
-                  >
-                    <HiOutlinePlusCircle size={11} /> Add entry
-                  </button>
-                  {/* Fallback — only when at least one entry */}
-                  {(df.lookupDictionary?.entries?.length ?? 0) > 0 && (
-                    <div className="flex items-center gap-2 pt-1 border-t border-violet-200">
-                      <span className="text-[10px] text-gray-500 flex-shrink-0 select-none">If not found:</span>
-                      <select
-                        className="text-xs border border-violet-200 bg-white rounded px-1.5 py-0.5 font-mono focus:outline-none focus:border-violet-400 text-violet-700"
-                        value={df.lookupDictionary?.fallback ?? 'null'}
-                        onChange={(e) => updateField(i, { lookupDictionary: { ...df.lookupDictionary!, fallback: e.target.value as LookupDictionary['fallback'] } })}
-                      >
-                        <option value="null">output null</option>
-                        <option value="custom">use custom fallback</option>
-                      </select>
-                      {df.lookupDictionary?.fallback === 'custom' && (
-                        <input
-                          className="flex-1 min-w-0 border border-violet-200 bg-white rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-violet-400 placeholder-gray-300 text-violet-700"
-                          placeholder="fallback value"
-                          value={df.lookupDictionary.fallbackValue ?? ''}
-                          onChange={(e) => updateField(i, { lookupDictionary: { ...df.lookupDictionary!, fallbackValue: e.target.value } })}
-                        />
-                      )}
-                    </div>
-                  )}
-                  {/* Remove lookup */}
-                  <button
-                    className="text-[10px] text-rose-400 hover:text-rose-600 transition"
-                    onClick={() => { updateField(i, { lookupDictionary: undefined }); setLookupOpenIdx(null); }}
-                  >Remove lookup</button>
-                </div>
+                <LookupDictionaryPanel
+                  dictionary={df.lookupDictionary}
+                  targetFieldType={fieldTargetType}
+                  onChange={(next) => { updateField(i, { lookupDictionary: next }); if (!next) setLookupOpenIdx(null); }}
+                  onClose={() => setLookupOpenIdx(null)}
+                />
               </div>
             )}
           </div>

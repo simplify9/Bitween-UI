@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
 import { TreeNode } from 'src/utils/mappingPreview';
-import { ArrayMapping } from './types';
+import { ArrayMapping } from 'src/types/mapping';
 import {
   useMappingEditorDispatch,
   useMappingEditorState,
@@ -9,8 +9,8 @@ import {
   openArrayModal,
   toggleNodeCollapsed,
   updateArrayMapping,
-} from './MappingEditorContext';
-import { getFullTargetPrefix } from './mappingTreeUtils';
+} from '../context/MappingEditorContext';
+import { getFullTargetPrefix } from 'src/utils/mappingTreeUtils';
 import { OutputLeaf } from './OutputLeaf';
 import {
   DraftField,
@@ -79,18 +79,18 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
   const inputScalarProps = React.useMemo(() => {
     try {
       const root = JSON.parse(inputJson);
-      const collect = (obj: any, prefix: string): string[] => {
+      const collect = (obj: Record<string, unknown>, prefix: string): string[] => {
         if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
           return prefix ? [prefix] : [];
         }
         return Object.entries(obj).flatMap(([k, v]) => {
           const path = prefix ? `${prefix}.${k}` : k;
           if (Array.isArray(v)) return [];
-          if (v && typeof v === 'object') return collect(v, path);
+          if (v && typeof v === 'object') return collect(v as Record<string, unknown>, path);
           return [path];
         });
       };
-      return collect(root, '');
+      return collect(root as Record<string, unknown>, '');
     } catch {
       return [];
     }
@@ -223,6 +223,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
                         depth={0}
                         inputScalarProps={inputScalarProps}
                         idPrefix={`edit-${node.path}-${idx}`}
+                        typeMap={typeMap}
                       />
                       <div className="flex gap-1 pt-0.5">
                         <button
@@ -275,6 +276,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
               depth={0}
               inputScalarProps={inputScalarProps}
               idPrefix={`new-${node.path}`}
+              typeMap={typeMap}
             />
 
             <button

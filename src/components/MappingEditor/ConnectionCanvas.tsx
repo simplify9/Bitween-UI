@@ -4,8 +4,8 @@ import {
   useMappingEditorState,
   removeFieldMapping,
   selectMapping,
-} from './MappingEditorContext';
-import { ArrayMapping } from './types';
+} from './context/MappingEditorContext';
+import { ArrayMapping } from 'src/types/mapping';
 
 // ─── Path helpers (mirrors OutputTree / ArrayMappingModal) ────────────────────
 
