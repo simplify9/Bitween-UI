@@ -2,6 +2,7 @@ import React from 'react';
 import { GlobalAdapterValuesSetModel } from 'src/types/globalAdapterValuesSets';
 import { MappingMode } from 'src/types/mapping';
 import { GlobalSetSelector } from './GlobalSetSelector';
+import { FixedStringInput } from './FixedStringInput';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,14 +69,25 @@ export const LeafValueInput: React.FC<LeafValueInputProps> = ({
       );
     }
 
+    if (targetFieldType === 'number') {
+      return (
+        <input
+          className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
+          placeholder="0"
+          type="number"
+          value={fixedValue}
+          onChange={(e) => onFixedChange(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      );
+    }
+
+    // string (or unknown) target — allow embedding {{ field }} variables
     return (
-      <input
-        className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-amber-600 min-w-0 placeholder-amber-300"
-        placeholder={targetFieldType === 'number' ? '0' : 'fixed value…'}
-        type={targetFieldType === 'number' ? 'number' : 'text'}
+      <FixedStringInput
         value={fixedValue}
-        onChange={(e) => onFixedChange(e.target.value)}
-        onClick={(e) => e.stopPropagation()}
+        sourcePaths={sourcePaths.filter((p) => !p.includes('['))}
+        onChange={onFixedChange}
       />
     );
   }
