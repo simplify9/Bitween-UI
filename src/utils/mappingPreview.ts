@@ -1,4 +1,4 @@
-import { ArrayMapping, FieldMapping, FilterCondition } from 'src/components/MappingEditor/types';
+import { ArrayMapping, FieldMapping, FilterCondition } from 'src/types/mapping';
 import { ValuesSetMap, TypeMap, buildTypeMap } from 'src/utils/scribanGenerator';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

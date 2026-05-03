@@ -1,5 +1,19 @@
-import { ArrayMapping } from './types';
+import { ArrayMapping, FieldMapping } from 'src/types/mapping';
 import { TreeNode } from 'src/utils/mappingPreview';
+
+// ─── Helper: check if a field mapping has any value assigned ────────────────────
+
+export function isFieldMappingPopulated(m: FieldMapping | undefined): boolean {
+  if (!m) return false;
+  return !!(
+    m.source ||
+    m.fixedValue !== undefined ||
+    m.partnerPropKey !== undefined ||
+    (m.globalSetId && m.globalKey) ||
+    (m.lookupDictionary?.entries?.length ?? 0) > 0 ||
+    m.valuesSetId
+  );
+}
 
 // ─── Helper: resolve full target prefix for a nested ArrayMapping ─────────────
 

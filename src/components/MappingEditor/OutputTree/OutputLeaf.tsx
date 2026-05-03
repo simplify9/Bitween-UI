@@ -1,0 +1,101 @@
+import React, { useMemo } from 'react';
+import { TreeNode } from 'src/utils/mappingPreview';
+import { useMappingEditorState } from '../context/MappingEditorContext';
+import { getFullTargetPrefix, isFieldMappingPopulated } from 'src/utils/mappingTreeUtils';
+import { useGlobalAdapterValuesSetsQuery } from 'src/client/apis/globalAdapterValuesSetsApi';
+import { PrimitiveArrayItem } from 'src/types/mapping';
+import { ArrayInnerField } from './ArrayInnerField';
+import { PrimitiveArrayLeaf } from './PrimitiveArrayLeaf';
+import { NormalLeaf } from './NormalLeaf';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface OutputLeafProps {
+  node: TreeNode;
+  sourcePaths: string[];
+  typeMap: Record<string, 'string' | 'number' | 'boolean'>;
+  onLeafRef?: (path: string, el: HTMLElement | null) => void;
+  isSearchMatch?: boolean;
+}
+
+// ─── OutputLeaf ───────────────────────────────────────────────────────────────
+// Thin router: determines which leaf variant to render based on the node type.
+
+export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeMap, onLeafRef, isSearchMatch }) => {
+  const { arrayMappings, outputJson, partnerAdapterProperties } = useMappingEditorState();
+  const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
+  const allGlobalSets = globalSetsData?.result ?? [];
+
+  // ── Array inner field detection (derived — no hooks after this) ───────────
+  const isArrayField = node.path.includes('[*].');
+
+  // ── Primitive array detection — must run unconditionally (hooks rules) ────
+  const primitiveArrayValues = useMemo((): unknown[] | null => {
+    if (isArrayField) return null;
+    try {
+      const obj = JSON.parse(outputJson) as Record<string, unknown>;
+      const cur = node.path.split('.').reduce<unknown>((o, k) => {
+        if (o == null || typeof o !== 'object') return undefined;
+        return (o as Record<string, unknown>)[k];
+      }, obj);
+      if (Array.isArray(cur) && cur.every((v) => v === null || typeof v !== 'object')) {
+        return cur as unknown[];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [isArrayField, node.path, outputJson]);
+
+  // ── Array inner field ─────────────────────────────────────────────────────
+  if (isArrayField) {
+    const lastStarIdx = node.path.lastIndexOf('[*].');
+    const arrayParentTarget = node.path.substring(0, lastStarIdx);
+    const relativeKey = node.path.substring(lastStarIdx + 4);
+    const arrayOwner = arrayMappings.find(
+      (am) => getFullTargetPrefix(am.id, arrayMappings) === arrayParentTarget
+    );
+    const innerMapping = arrayOwner?.mappings.find((m) => m.target === relativeKey);
+
+    return (
+      <ArrayInnerField
+        node={node}
+        innerMapping={innerMapping}
+        isMapped={isFieldMappingPopulated(innerMapping)}
+        onLeafRef={onLeafRef}
+        isSearchMatch={isSearchMatch}
+        onOpenArrayModal={() => {/* managed by parent OutputBranch */}}
+      />
+    );
+  }
+
+  // ── Primitive array ───────────────────────────────────────────────────────
+  if (primitiveArrayValues !== null) {
+    const primAm = arrayMappings.find((am) => am.target === node.path && !am.parentArrayId && am.primitiveItems);
+    const currentItems: PrimitiveArrayItem[] = primAm?.primitiveItems ?? primitiveArrayValues.map(() => ({}));
+    return (
+      <PrimitiveArrayLeaf
+        node={node}
+        sourcePaths={sourcePaths}
+        primitiveArrayValues={primitiveArrayValues}
+        primAmId={primAm?.id}
+        currentItems={currentItems}
+        partnerAdapterProperties={partnerAdapterProperties}
+        allGlobalSets={allGlobalSets}
+        onLeafRef={onLeafRef}
+        isSearchMatch={isSearchMatch}
+      />
+    );
+  }
+
+  // ── Normal field leaf ─────────────────────────────────────────────────────
+  return (
+    <NormalLeaf
+      node={node}
+      sourcePaths={sourcePaths}
+      targetFieldType={typeMap[node.path]}
+      onLeafRef={onLeafRef}
+      isSearchMatch={isSearchMatch}
+    />
+  );
+};

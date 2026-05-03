@@ -1,4 +1,4 @@
-import { ArrayMapping, FieldMapping, FilterOperator, LookupDictionary, LookupEntry } from 'src/components/MappingEditor/types';
+import { ArrayMapping, FieldMapping, FilterOperator, LookupDictionary, LookupEntry } from 'src/types/mapping';
 
 export type ParsedFieldMapping = Omit<FieldMapping, 'id'>;
 export type ParsedArrayMapping = {

@@ -1,4 +1,4 @@
-import { ArrayMapping } from './types';
+import { ArrayMapping } from 'src/types/mapping';
 
 /** Recursively build the absolute source path for an ArrayMapping by traversing parentArrayId links. */
 export function getFullSourcePath(amId: string, allMappings: ArrayMapping[]): string {

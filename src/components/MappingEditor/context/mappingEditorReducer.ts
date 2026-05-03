@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 import { KeyValuePair } from 'src/types/common';
 import { parseScriban, resolveParentArrayIds } from 'src/utils/scribanGenerator';
-import { ArrayMapping, FieldMapping, ValidationError, genId } from './types';
+import { ArrayMapping, FieldMapping, ValidationError, genId } from 'src/types/mapping';
 import { CoreState, MappingEditorAction, MappingEditorState } from './mappingEditorActions';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

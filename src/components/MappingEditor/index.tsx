@@ -1,29 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { HiOutlineSearch } from 'react-icons/hi';
 import {
   MappingEditorProvider,
   useMappingEditorState,
   useMappingEditorDispatch,
-  autoMatch,
-  clearAll,
   generateFromTargetJson,
-  loadEditorContext,
   openArrayModal,
-  redo,
-  setArrayMappings,
-  setFieldMappings,
   setInputJson,
-  setMode,
   setOutputJson,
   setSearchInput,
   setSearchOutput,
-  setValidationErrors,
-  syncManualTemplate,
   togglePreview,
-  undo,
-} from './MappingEditorContext';
-import { ArrayMapping, NATIVE_JSON_MAPPER_ID, ValidationError } from './types';
+} from './context/MappingEditorContext';
 import {
   buildTree,
   flattenLeafPaths,
@@ -31,17 +20,16 @@ import {
   TreeNode,
 } from 'src/utils/mappingPreview';
 import SourceTree from './SourceTree';
-import OutputTree from './OutputTree';
+import OutputTree from './OutputTree/OutputTree';
 import ConnectionCanvas from './ConnectionCanvas';
 import ManualEditor from './ManualEditor';
 import LivePreview from './LivePreview';
-import ArrayMappingModal from './ArrayMappingModal';
-import { useSubscriptionQuery, useSaveMapperMutation } from 'src/client/apis/subscriptionsApi';
-import { KeyValuePair } from 'src/types/common';
-import { generateScriban, parseScriban, resolveParentArrayIds } from 'src/utils/scribanGenerator';
-import { useValuesSetMap } from 'src/hooks/useValuesSetMap';
+import ArrayMappingModal from './ArrayMappingModal/ArrayMappingModal';
 import MappingEditorToolbar from './MappingEditorToolbar';
-import { buildMappingTree, getFullTargetPrefix } from './mappingTreeUtils';
+import { buildMappingTree, getFullTargetPrefix } from 'src/utils/mappingTreeUtils';
+import { useMappingEditorLoader } from './useMappingEditorLoader';
+import { useKeyboardShortcuts } from './useKeyboardShortcuts';
+import { useSave } from './useSave';
 
 // ─── MappingEditorPage (provider wrapper) ────────────────────────────────────
 
@@ -63,105 +51,26 @@ const MappingEditorInner: React.FC = () => {
     outputJson,
     showPreview,
     editingArrayId,
-    manualTemplate,
-    isManualDirty,
     searchInput,
     searchOutput,
-    selectedPartnerId,
   } = useMappingEditorState();
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
 
-  // ── Data loading ────────────────────────────────────────────────────────────
-  const { data: subscriptionData } = useSubscriptionQuery(subscriptionId, { skip: !subscriptionId, refetchOnMountOrArgChange: true });
-  const [saveMapper, { isLoading: isSaving }] = useSaveMapperMutation();
-  const [loadedForId, setLoadedForId] = useState<number | null>(null);
-  const pendingIdRef = useRef<number | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  // ── Hooks ───────────────────────────────────────────────────────────────────
+  useMappingEditorLoader(subscriptionId);
+  const { isSaving, saveSuccess, handleValidate, handleSave, handleModeChange } = useSave(subscriptionId);
+  useKeyboardShortcuts(() => void handleSave());
+
   const [jsonAreaHeight, setJsonAreaHeight] = useState(96); // px — both panels share this
   const srcTextareaRef = useRef<HTMLTextAreaElement>(null);
   const tgtTextareaRef = useRef<HTMLTextAreaElement>(null);
-  // Global adapter values sets — used for enum lookup in live preview + template generation
-  const valuesSetMap = useValuesSetMap();
-  // Sync both textareas to the height of whichever was just resized
+
   const syncHeight = useCallback((from: 'src' | 'tgt') => {
     const el = from === 'src' ? srcTextareaRef.current : tgtTextareaRef.current;
     if (!el) return;
-    const h = el.offsetHeight;
-    setJsonAreaHeight(h);
+    setJsonAreaHeight(el.offsetHeight);
   }, []);
-
-  useEffect(() => {
-    // Whenever subscriptionId changes, clear Redux state immediately and record which ID we're waiting for
-    pendingIdRef.current = subscriptionId || null;
-    dispatch(loadEditorContext({ subscriptionId: subscriptionId || 0, mapperProperties: [] }));
-    setLoadedForId(null);
-  }, [subscriptionId]);
-
-  useEffect(() => {
-    // Only load when the data arriving is for the subscription we are currently on
-    if (!subscriptionData || !pendingIdRef.current) return;
-    if (pendingIdRef.current !== subscriptionId) return;
-    dispatch(
-      loadEditorContext({
-        subscriptionId,
-        mapperId: subscriptionData.mapperId,
-        mapperProperties: subscriptionData.mapperProperties,
-      })
-    );
-    dispatch(autoMatch());
-    setLoadedForId(subscriptionId);
-  }, [subscriptionData]);
-
-  // ── Keyboard shortcuts ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        dispatch(undo());
-      }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-        e.preventDefault();
-        dispatch(redo());
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [fieldMappings, arrayMappings, manualTemplate]);
-
-  // ── Mode change with Manual ↔ Visual/Canvas sync ─────────────────────────────
-  const handleModeChange = useCallback(
-    (newMode: 'visual' | 'manual') => {
-      if (mode === 'manual' && newMode !== 'manual' && isManualDirty && manualTemplate) {
-        // Leaving Manual with dirty edits — parse template back into Redux state
-        const parsed = parseScriban(manualTemplate);
-        dispatch(
-          setFieldMappings(
-            parsed.fieldMappings.map((m, i) => ({ id: `parsed-${i}-${Date.now()}`, ...m }))
-          )
-        );
-        const now = Date.now();
-        const rawAMs = parsed.arrayMappings.map((am, i) => ({
-          id: `parsed-am-${i}-${now}`,
-          ...am,
-          mappings: am.mappings.map((m, j) => ({
-            id: `parsed-am-${i}-${j}-${now}`,
-            ...m,
-          })),
-        }));
-        dispatch(setArrayMappings(resolveParentArrayIds(rawAMs)));
-      } else if (newMode === 'manual') {
-        // Entering Manual — always regenerate template from current Redux state
-        dispatch(syncManualTemplate(generateScriban(fieldMappings, arrayMappings, valuesSetMap, outputJson)));
-      }
-      dispatch(setMode(newMode));
-    },
-    [mode, isManualDirty, manualTemplate, fieldMappings, arrayMappings, valuesSetMap, dispatch]
-  );
 
   // ── Trees ───────────────────────────────────────────────────────────────────
   const inputObj = useMemo(() => tryParseJson(inputJson), [inputJson]);
@@ -245,89 +154,6 @@ const MappingEditorInner: React.FC = () => {
     else targetRefsMap.current.delete(path);
     forceRedraw((n) => n + 1);
   }, []);
-
-  // ── Validation ──────────────────────────────────────────────────────────────
-  const handleValidate = useCallback(() => {
-    const errors: ValidationError[] = [];
-    for (const m of fieldMappings) {
-      if (!m.target.trim()) {
-        errors.push({ type: 'error', message: `Mapping has no target field`, path: m.id });
-      }
-      if (!m.source && m.fixedValue === undefined && !m.partnerPropKey && !(m.globalSetId && m.globalKey)) {
-        errors.push({
-          type: 'warning',
-          message: `"${m.target}" has no assigned source, fixed value, partner property, or global variable`,
-          path: m.target,
-        });
-      }
-    }
-    for (const am of arrayMappings) {
-      if (!am.source && !am.fixedItems?.length && am.primitiveItems == null) errors.push({ type: 'error', message: `Array mapping missing source path` });
-      if (!am.target) errors.push({ type: 'error', message: `Array mapping missing target path` });
-      if (am.mappings.length === 0 && !am.fixedItems?.length && am.primitiveItems == null) {
-        errors.push({
-          type: 'warning',
-          message: `Array mapping "${am.source} → ${am.target}" has no field mappings`,
-        });
-      }
-    }
-    dispatch(setValidationErrors(errors));
-  }, [fieldMappings, arrayMappings, dispatch]);
-
-  // ── Save ─────────────────────────────────────────────────────────────────────
-  const persistSave = useCallback(async () => {
-    // Always generate the Scriban template — use the manual template if in manual mode
-    // and it hasn't been modified since last sync, otherwise regenerate from state
-    const templateToSave =
-      mode === 'manual' && manualTemplate
-        ? manualTemplate
-        : generateScriban(fieldMappings, arrayMappings, valuesSetMap, outputJson, inputJson);
-
-    const mapperProperties: KeyValuePair[] = [
-      { key: 'ScribanTemplate', value: templateToSave },
-    ];
-    if (arrayMappings.length > 0) {
-      mapperProperties.push({ key: 'ArrayRules', value: JSON.stringify(arrayMappings) });
-    }
-    if (inputJson.trim()) {
-      mapperProperties.push({ key: 'SourceJson', value: inputJson });
-    }
-    if (outputJson.trim()) {
-      mapperProperties.push({ key: 'TargetJson', value: outputJson });
-    }
-    if (selectedPartnerId != null) {
-      mapperProperties.push({ key: 'PartnerId', value: String(selectedPartnerId) });
-    }
-
-    const result = await saveMapper({
-      id: subscriptionId,
-      mapperId: NATIVE_JSON_MAPPER_ID,
-      mapperProperties,
-    });
-
-    if ('data' in result) {
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
-    }
-  }, [
-    fieldMappings,
-    arrayMappings,
-    inputJson,
-    outputJson,
-    mode,
-    manualTemplate,
-    valuesSetMap,
-    subscriptionId,
-    selectedPartnerId,
-    saveMapper,
-  ]);
-
-  const handleSave = useCallback(async () => {
-    handleValidate();
-    await persistSave();
-  }, [handleValidate, persistSave]);
-
-  // ─────────────────────────────────────────────────────────────────────────────
 
   const isVisualMode = mode === 'visual';
   const isManualMode = mode === 'manual';

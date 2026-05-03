@@ -14,7 +14,7 @@ import {
   redo,
   undo,
   setSelectedPartner,
-} from './MappingEditorContext';
+} from './context/MappingEditorContext';
 import { usePartnersQuery, usePartnerQuery } from 'src/client/apis/partnersApi';
 
 // ─── Mode toggle button ───────────────────────────────────────────────────────

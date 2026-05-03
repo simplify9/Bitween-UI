@@ -6,8 +6,8 @@ import {
   addFieldMapping,
   setHoveredPath,
   toggleNodeCollapsed,
-} from './MappingEditorContext';
-import { genId } from './types';
+} from './context/MappingEditorContext';
+import { genId } from 'src/types/mapping';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

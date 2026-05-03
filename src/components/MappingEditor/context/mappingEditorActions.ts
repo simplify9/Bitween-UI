@@ -1,5 +1,5 @@
 import { KeyValuePair } from 'src/types/common';
-import { ArrayMapping, EditorMode, FieldMapping, ValidationError } from './types';
+import { ArrayMapping, EditorMode, FieldMapping, ValidationError } from 'src/types/mapping';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
