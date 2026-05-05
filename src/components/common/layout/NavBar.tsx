@@ -7,6 +7,7 @@ import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
 import {MdNotificationAdd, MdDataObject, MdApi} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
+import Tooltip from "src/components/common/Tooltip";
 
 const resolveClosedClassName = ({isActive}: any) => {
 
@@ -30,7 +31,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
     return (
         <div className={"flex h-full pl-2 "}>
             <nav
-                className="flex flex-col bg-white w-full h-full shadow-2xl rounded-xl overflow-hidden h-full">
+                className="flex flex-col bg-white w-full h-full shadow-2xl rounded-xl h-full">
                 <div className="flex flex-col justify-center items-center  text-white pt-5 pb-2 bg bg-white">
                     <NavLink to="/">
                         <div
@@ -48,7 +49,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                 </div>
                 <div className="text-sm h-full flex flex-col  justify-between pt-10 ">
                     <div>
-                        <NavLink to="/dashboard"
+                        <NavLink to="/dashboard" title={isOpen ? undefined : "Dashboard"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <RiDashboardFill
@@ -58,7 +59,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>   Dashboard</span>
 
                         </NavLink>
-                        <NavLink to="/Xchanges"
+                        <NavLink to="/Xchanges" title={isOpen ? undefined : "Xchanges"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <TbExchange
@@ -71,7 +72,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
 
                         </NavLink>
                         <div className={"border border-b mx-2 mt-12 mb-3"}/>
-                        <NavLink to="/subscriptions"
+                        <NavLink to="/subscriptions" title={isOpen ? undefined : "Subscriptions"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <TbArrowsRandom
@@ -81,7 +82,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
 
                             <span className={isOpen ? "block" : "hidden"}>Subscriptions</span>
                         </NavLink>
-                        <NavLink to="/api-gateways"
+                        <NavLink to="/api-gateways" title={isOpen ? undefined : "API Gateways"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <MdApi className={"w-6 h-6"}
@@ -91,7 +92,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>API Gateways</span>
 
                         </NavLink>
-                        <NavLink to="/documents"
+                        <NavLink to="/documents" title={isOpen ? undefined : "Documents"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             {/*<img src={"/Icons/document-white.svg"}/>*/}
                             <div>
@@ -105,7 +106,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
 
                         </NavLink>
 
-                        <NavLink to="/partners"
+                        <NavLink to="/partners" title={isOpen ? undefined : "Partners"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div><BsFillPersonFill
                                 className={"w-6 h-6"}
@@ -114,7 +115,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>Partners</span>
 
                         </NavLink>
-                        <NavLink to="/notifications"
+                        <NavLink to="/notifications" title={isOpen ? undefined : "Notifications"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <TbBellRinging2Filled className={"w-6 h-6"}
@@ -124,7 +125,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>Notifications</span>
 
                         </NavLink>
-                        <NavLink to="/notifiers"
+                        <NavLink to="/notifiers" title={isOpen ? undefined : "Notifiers"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <MdNotificationAdd className={"w-6 h-6"}
@@ -134,7 +135,7 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>Notifiers</span>
 
                         </NavLink>
-                        <NavLink to="/global-adapter-values-sets"
+                        <NavLink to="/global-adapter-values-sets" title={isOpen ? undefined : "Global Values"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
                             <div>
                                 <MdDataObject className={"w-6 h-6"}

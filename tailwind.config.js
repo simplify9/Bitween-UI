@@ -23,7 +23,17 @@ module.exports = {
                 "primary-800": "#9e2416",
                 "primary-900": "#832419",
                 "primary-green":"#48BB78"
-            }
+            },
+            keyframes: {
+                progress: {
+                    '0%':   { width: '0%',   marginLeft: '0%' },
+                    '50%':  { width: '60%',  marginLeft: '20%' },
+                    '100%': { width: '0%',   marginLeft: '100%' },
+                },
+            },
+            animation: {
+                progress: 'progress 1.2s ease-in-out infinite',
+            },
         },
     },
     plugins: [],

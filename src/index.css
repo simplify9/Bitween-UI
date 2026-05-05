@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+#datepicker-portal {
+    position: relative;
+    z-index: 9999;
+}
+
+@keyframes progress {
+    0%   { width: 0%;   margin-left: 0; }
+    50%  { width: 60%;  margin-left: 20%; }
+    100% { width: 0%;   margin-left: 100%; }
+}
+
 section[disabled] {
     pointer-events: none;
     opacity: 0.34;
