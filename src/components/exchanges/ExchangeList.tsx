@@ -7,6 +7,7 @@ import RetryModal from "src/components/exchanges/RetryModal";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import {NavLink} from "react-router-dom";
 import {MdLoop} from "react-icons/md";
+import Tooltip from "src/components/common/Tooltip";
 
 interface Props {
     data: IXchange[];
@@ -60,11 +61,11 @@ export const ExchangeList: React.FC<Props> = ({
                     <th
                         scope="col"
                         className="text-sm font-medium text-gray-500 px-2 py-2  text-left  "
-                    ></th>
+                    >Document / Subscription</th>
                     <th
                         scope="col"
                         className="text-sm font-medium text-gray-500  px-2 py-2 text-left w-[393px] border-r"
-                    ></th>
+                    >Journey</th>
                     <th
                         scope="col"
                         className="text-sm font-medium text-gray-500  px-6 py-2 text-left border-r"
@@ -131,9 +132,7 @@ export const ExchangeList: React.FC<Props> = ({
                                             />
 
                                             <p className="truncate ">
-                                                {i.subscriptionName +
-                                                    i.subscriptionName +
-                                                    i.subscriptionName}
+                                                {i.subscriptionName}
                                             </p>
                                         </div>
                                     </NavLink>
@@ -198,11 +197,13 @@ export const ExchangeList: React.FC<Props> = ({
                         </td>
                         <td className="text-sm text-gray-900 font-light px-2 py-2 whitespace-nowrap z-10">
                             <div className={"flex items-center justify-center"}>
-                                <MdLoop
-                                    className={"text-gray-500"}
-                                    size={24}
-                                    onClick={() => setShowExceptionFor(i.id)}
-                                />
+                                <Tooltip content="View details / retry" placement="left">
+                                    <MdLoop
+                                        className={"text-gray-500 cursor-pointer hover:text-primary-600 transition-colors"}
+                                        size={24}
+                                        onClick={() => setShowExceptionFor(i.id)}
+                                    />
+                                </Tooltip>
                             </div>
                         </td>
                     </tr>

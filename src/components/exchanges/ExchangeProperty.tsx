@@ -1,3 +1,5 @@
+import Tooltip from "src/components/common/Tooltip";
+
 interface Props {
     label: string
     value: string
@@ -7,7 +9,9 @@ interface Props {
 const ExchangeProperty: React.FC<Props> = ({label, value, className}) => {
     if (!value) return <></>;
     return (
-        <div className={"px-1.5 py-1 rounded-lg border " + className}><strong>{label}</strong>: {value}</div>
+        <Tooltip content={`${label}: ${value}`} placement="top" className="block">
+            <div className={"px-1.5 py-1 rounded-lg border max-w-[160px] truncate cursor-default " + className}><strong>{label}</strong>: {value}</div>
+        </Tooltip>
     )
 }
 
