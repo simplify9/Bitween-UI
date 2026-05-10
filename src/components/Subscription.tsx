@@ -182,17 +182,13 @@ const Component = () => {
             <div className={"shadow-lg bg-white rounded-lg mb-6 border  py-2  mt-3 pt-3 px-3"}>
 
 
-                <div
-                    className="flex flex-row  flex-wrap items-end  gap-5 ">
-                    <div className=" ">
-                        <FormField title="Name" className="grow">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                    <FormField title="Name" className="grow">
                             <TextEditor value={updateSubscriptionData?.name}
                                         disabled={mode == "DRAFT"}
                                         onChange={(e) => onChangeSubscriptionData("name", e)}
                             />
                         </FormField>
-                    </div>
-                    <div className=" ">
                         <FormField title="Category" className="grow">
                             <ChoiceEditor
                                 value={updateSubscriptionData?.categoryId?.toString()}
@@ -201,9 +197,7 @@ const Component = () => {
                                 optionValue={(item) => item.id}
                                 options={subscriptionCategories.data?.result ?? []}/>
                         </FormField>
-                    </div>
                     {workGroupsAvailable && !workGroups.isLoading && workGroups.isSuccess && (
-                        <div className=" ">
                             <FormField title="Work Group" className="grow">
                                 <ChoiceEditor
                                     value={updateSubscriptionData?.workGroupId?.toString()}
@@ -214,9 +208,7 @@ const Component = () => {
                                         ? workGroups.data.result.map(wg => ({id: wg.id, name: wg.name})) 
                                         : []}/>
                             </FormField>
-                        </div>
                     )}
-                    <div className=" ">
                         <FormField title="Type" className="grow">
                             <ChoiceEditor
                                 disabled={true}
@@ -226,30 +218,18 @@ const Component = () => {
                                 optionValue={(item: OptionType) => item.id}
                                 options={SubscriptionTypeOptions}/>
                         </FormField>
-                    </div>
-
-
-                    <div className=" ">
                         <FormField title="Document" className="grow">
                             <DocumentSelector disabled={true}
                                               value={updateSubscriptionData?.documentId}
                                               onChange={(e) => onChangeSubscriptionData("documentId", e)}
                             />
                         </FormField>
-                    </div>
-
-                    <div className=" ">
                         <FormField title="Partner" className="grow">
                             <PartnerSelector disabled={true}
                                              value={updateSubscriptionData?.partnerId}
                                              onChange={(e) => onChangeSubscriptionData("partnerId", e)}
-
-
                             />
                         </FormField>
-                    </div>
-
-
                 </div>
                 <div className={"flex flex-row justify-between mt-5"}>
                     <div className={"grid grid-cols-2 flex-row  items-center w-[240px] "}
