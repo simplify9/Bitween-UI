@@ -13,6 +13,35 @@ import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
 import Authorize from "src/components/common/authorize/authorize";
 
+const JSON_PATH_RE = /^(\$[\w$.[\]*?@:,()'"\\-]*|[a-zA-Z_][a-zA-Z0-9_.]*)$/;
+const XML_PATH_RE = /^(\/[\w$.[\]*?@:,()'"\\/-]*|[a-zA-Z_][a-zA-Z0-9_/[\]@.:*-]*)$/;
+
+function validatePromotedProperties(
+    props: KeyValuePair[] | undefined,
+    documentFormat: number | undefined
+): string | null {
+    if (!props || props.length === 0) return null;
+
+    const seen = new Set<string>();
+    for (const pp of props) {
+        if (!pp.key || pp.key.trim() === '')
+            return 'Promoted property key cannot be empty.';
+        if (!pp.value || pp.value.trim() === '')
+            return `Promoted property "${pp.key}" must have a non-empty path value.`;
+
+        const trimmed = pp.value.trim();
+        if (documentFormat === 0 && !JSON_PATH_RE.test(trimmed))
+            return `"${pp.key}": invalid JSON path "${pp.value}". Use JSONPath (e.g. $.field.sub) or dot-notation.`;
+        if (documentFormat === 1 && !XML_PATH_RE.test(trimmed))
+            return `"${pp.key}": invalid XPath "${pp.value}". Use XPath (e.g. /root/element).`;
+
+        const lower = pp.key.toLowerCase();
+        if (seen.has(lower))
+            return `Promoted property key "${pp.key}" is duplicated.`;
+        seen.add(lower);
+    }
+    return null;
+}
 
 const Component = () => {
     let navigate = useNavigate();
@@ -21,6 +50,7 @@ const Component = () => {
     const [updateDocumentData, setUpdateDocumentData] = useState<UpdateDocument>({id: id});
     const [documentTrail, setDocumentTrail] = useState<TrailBaseModel[]>([]);
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL">("NONE");
+
 
     useEffect(() => {
         if (id) {
@@ -61,9 +91,8 @@ const Component = () => {
         if (res.succeeded) setDocumentTrail(res.data.result)
     }
     const addPromotedProperty = (kv: KeyValuePair) => {
-        let pparr = updateDocumentData.promotedProperties;
-        pparr?.push(kv);
-        setUpdateDocumentData({...updateDocumentData, promotedProperties: pparr})
+        const pparr = [...(updateDocumentData.promotedProperties ?? []), kv];
+        setUpdateDocumentData({...updateDocumentData, promotedProperties: pparr});
     }
     const removePromotedProperty = (kv: KeyValuePair) => {
         let pparr: KeyValuePair[] = [];
@@ -150,11 +179,27 @@ const Component = () => {
             </div>
 
             <div className={"shadow-lg  bg-white  rounded-xl p-2 mb-5"}>
-
-                <KeyValueEditor values={updateDocumentData?.promotedProperties} title={'Promoted Properties'}
-                                keyLabel={"Friendly Name"} valueLabel={"Json Path"}
-                                onAdd={addPromotedProperty} onRemove={removePromotedProperty}
-                                addLabel={"Add New Promoted Property"}
+                <KeyValueEditor
+                    values={updateDocumentData?.promotedProperties}
+                    title={'Promoted Properties'}
+                    keyLabel={"Friendly Name"}
+                    valueLabel={
+                        updateDocumentData.documentFormat === 0 ? 'JSON Path'
+                        : updateDocumentData.documentFormat === 1 ? 'XML Path'
+                        : 'Path'
+                    }
+                    valuePlaceholder={
+                        updateDocumentData.documentFormat === 0 ? 'e.g. $.customer.name or customer.name'
+                        : updateDocumentData.documentFormat === 1 ? 'e.g. /root/element or /root/@attr'
+                        : 'Enter path…'
+                    }
+                    onAdd={addPromotedProperty}
+                    onRemove={removePromotedProperty}
+                    addLabel={"Add New Promoted Property"}
+                    validate={(kv) => validatePromotedProperties(
+                        [...(updateDocumentData.promotedProperties ?? []), kv],
+                        updateDocumentData.documentFormat
+                    )}
                 />
 
 
@@ -176,7 +221,6 @@ const Component = () => {
                     Cancel
                 </Button>
             </div>
-
 
         </div>
     );

@@ -21,6 +21,8 @@ type Props = Omit<React.JSX.IntrinsicElements['input'], "onChange"> & {
     onEdit?: (value: KeyValuePair) => void
     hideEmptyLabel?: boolean
     valueRenderer?: (value: string, onChange: (v: string) => void) => React.ReactNode
+    validate?: (value: KeyValuePair) => string | null
+    valuePlaceholder?: string
 }
 
 const Component: React.FC<Props> = ({
@@ -36,10 +38,13 @@ const Component: React.FC<Props> = ({
                                         keyOptions,
                                         hideEmptyLabel,
                                         onEdit,
-                                        valueRenderer
+                                        valueRenderer,
+                                        validate,
+                                        valuePlaceholder
                                     }) => {
 
     const [mode, setMode] = useState<"NONE" | "EDIT" | "ADD">("NONE");
+    const [modalError, setModalError] = useState<string | null>(null);
 
 
     const [newKeyValue, setNewKeyValue] = useState<KeyValuePair>({
@@ -49,6 +54,7 @@ const Component: React.FC<Props> = ({
 
     const onCloseModal = () => {
         setMode("NONE")
+        setModalError(null)
         setNewKeyValue({
             key: '',
             value: ''
@@ -57,6 +63,14 @@ const Component: React.FC<Props> = ({
 
     const onAddSubmit = () => {
         if (newKeyValue) {
+            if (validate) {
+                const error = validate(newKeyValue);
+                if (error) {
+                    setModalError(error);
+                    return;
+                }
+            }
+            setModalError(null);
             onAdd!(newKeyValue)
             setNewKeyValue({key: '', value: ''})
             onCloseModal()
@@ -64,6 +78,14 @@ const Component: React.FC<Props> = ({
     }
     const onEditSubmit = () => {
         if (newKeyValue) {
+            if (validate) {
+                const error = validate(newKeyValue);
+                if (error) {
+                    setModalError(error);
+                    return;
+                }
+            }
+            setModalError(null);
             onEdit?.(newKeyValue)
             setNewKeyValue({key: '', value: ''})
             onCloseModal()
@@ -80,48 +102,54 @@ const Component: React.FC<Props> = ({
             {(['EDIT', 'ADD'].includes(mode)) &&
                 <Modal onClose={onCloseModal} submitLabel={"Save"}
                        onSubmit={() => mode === "EDIT" ? onEditSubmit() : onAddSubmit()}>
-                    <div
-                        className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left grow pr-5">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900"
-                            id="modal-title">{addLabel}</h3>
-                        <div className="mt-4">
-                            <FormField title={keyLabel ?? ""} className="grow">
-                                {(!keyOptions || mode === "EDIT") &&
-                                    <TextEditor
-                                        disabled={mode === "EDIT"}
-                                        placeholder={`Type in the ${keyLabel}...`}
-                                        value={newKeyValue.key}
-                                        onChange={(t) => setNewKeyValue({
-                                            ...newKeyValue,
-                                            key: t
-                                        })}/>
-                                }
-                                {
-                                    (keyOptions && mode !== "EDIT") && <ChoiceEditor options={keyOptions}
-                                                                                     optionValue={(item) => item.id}
-                                                                                     optionTitle={(item) => item.title}
-                                                                                     value={newKeyValue.key}
-                                                                                     autoFocus={true}
-                                                                                     disabled={keyOptions?.length == 0}
-                                                                                     onChange={(t) => setNewKeyValue({
-                                                                                         ...newKeyValue,
-                                                                                         key: t
-                                                                                     })}/>
-                                }
-
-                            </FormField>
+                    <div className="flex flex-col gap-5">
+                        {/* Header */}
+                        <div className="border-b border-gray-100 pb-3">
+                            <h2 className="text-base font-semibold text-gray-800">{addLabel}</h2>
                         </div>
-                        {!valueAutoGeneratedOnAdd && <div className="mt-4">
+
+                        {/* Inline error */}
+                        {modalError && (
+                            <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                                <span className="text-xs text-red-600">{modalError}</span>
+                            </div>
+                        )}
+
+                        {/* Key field */}
+                        <FormField title={keyLabel ?? ""} className="grow">
+                            {(!keyOptions || mode === "EDIT") &&
+                                <TextEditor
+                                    disabled={mode === "EDIT"}
+                                    placeholder={`e.g. Customer Name`}
+                                    value={newKeyValue.key}
+                                    onChange={(t) => setNewKeyValue({...newKeyValue, key: t})}/>
+                            }
+                            {(keyOptions && mode !== "EDIT") &&
+                                <ChoiceEditor
+                                    options={keyOptions}
+                                    optionValue={(item) => item.id}
+                                    optionTitle={(item) => item.title}
+                                    value={newKeyValue.key}
+                                    autoFocus={true}
+                                    disabled={keyOptions?.length === 0}
+                                    onChange={(t) => setNewKeyValue({...newKeyValue, key: t})}/>
+                            }
+                        </FormField>
+
+                        {/* Value field */}
+                        {!valueAutoGeneratedOnAdd && (
                             <FormField title={valueLabel ?? ""} className="grow">
                                 {valueRenderer
                                     ? valueRenderer(newKeyValue.value, (v) => setNewKeyValue({...newKeyValue, value: v}))
-                                    : <textarea className={"w-full border rounded-md shadow p-1"}
-                                                onChange={(t) => setNewKeyValue({
-                                                    ...newKeyValue,
-                                                    value: t.target.value
-                                                })} value={newKeyValue?.value}/>}
+                                    : <textarea
+                                        rows={3}
+                                        placeholder={valuePlaceholder ?? `Enter ${valueLabel ?? 'value'}…`}
+                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y"
+                                        onChange={(t) => setNewKeyValue({...newKeyValue, value: t.target.value})}
+                                        value={newKeyValue?.value}/>
+                                }
                             </FormField>
-                        </div>}
+                        )}
                     </div>
                 </Modal>}
             <table className="appearance-none w-full max-w-100">
