@@ -45,8 +45,14 @@ const SignInWithMsButton = () => {
                 }
             }
         } catch (e: any) {
-            const message = e?.response?.data?.message || e?.response?.data || "Sign-in failed. Please try again."
-            setError(typeof message === "string" ? message : "Sign-in failed. Please try again.")
+            if (e?.errorCode) {
+                if (e.errorCode !== "user_cancelled") {
+                    setError(e.errorMessage || "Microsoft sign-in failed. Please try again.")
+                }
+            } else {
+                const message = e?.response?.data?.message || e?.response?.data
+                setError(typeof message === "string" ? message : "Something went wrong. Please try again.")
+            }
         }
     }
 
