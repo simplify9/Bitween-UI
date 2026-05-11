@@ -7,6 +7,7 @@ import {useCreateWorkGroupMutation} from "src/client/apis/subscriptionsApi";
 
 type Props = {
     onClose: () => void
+    onCreated?: () => void
 }
 const CreateWorkGroupModal: React.FC<Props> = (props) => {
     const [create] = useCreateWorkGroupMutation()
@@ -22,8 +23,10 @@ const CreateWorkGroupModal: React.FC<Props> = (props) => {
     });
     const onSubmit = async () => {
         const res = await create(data)
-        if ('data' in res)
+        if ('data' in res) {
+            props.onCreated?.()
             props.onClose()
+        }
     }
 
     return <Modal onClose={props.onClose} submitLabel={"Create"} onSubmit={onSubmit}

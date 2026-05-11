@@ -1,12 +1,14 @@
-import {useWorkGroupsQuery} from "src/client/apis/subscriptionsApi";
+import {useWorkGroupsQuery, SubscriptionApi} from "src/client/apis/subscriptionsApi";
 import {useState} from "react";
 import {SearchWorkGroupModel} from "src/types/subscriptions";
 import WorkGroupsList from "src/components/Subscriptions/WorkGroups/WorkGroupsList";
 import {DataListViewSettingsEditor} from "src/components/common/DataListViewSettingsEditor";
 import Button from "src/components/common/forms/Button";
 import CreateWorkGroupModal from "src/components/Subscriptions/WorkGroups/CreateWorkGroupModal";
+import {useAppDispatch} from "src/state/ReduxSotre";
 
 const ManageWorkGroups = () => {
+    const dispatch = useAppDispatch()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [findSpecs, setFindSpecs] = useState<SearchWorkGroupModel>({
         limit: 10,
@@ -18,13 +20,15 @@ const ManageWorkGroups = () => {
 
     const handleModalClose = () => {
         setIsAddModalOpen(false);
-        // Refetch is automatic due to cache invalidation, but we can trigger it explicitly if needed
-        workGroups.refetch();
+    };
+
+    const handleWorkGroupCreated = () => {
+        dispatch(SubscriptionApi.util.invalidateTags(['workGroups']));
     };
     
     return <div className={"p-10 max-w-[800px]"}>
         {
-            isAddModalOpen && <CreateWorkGroupModal onClose={handleModalClose}/>
+            isAddModalOpen && <CreateWorkGroupModal onClose={handleModalClose} onCreated={handleWorkGroupCreated}/>
         }
         <div className={"flex flex-row justify-end"}>
             <div className={""}>

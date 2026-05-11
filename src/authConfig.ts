@@ -1,11 +1,11 @@
 import {AuthConfig} from "./client/types";
-import {SessionStorage} from "./client/repos";
+import {LocalStorage} from "./client/repos";
 import {apiClient} from "src/client";
 
 
 const authConfig: AuthConfig = {
-    accessTokenCache: new SessionStorage("access_token"),
-    refreshTokenCache: new SessionStorage("refresh_token"),
+    accessTokenCache: new LocalStorage("access_token"),
+    refreshTokenCache: new LocalStorage("refresh_token"),
     accessTokenGenerator: async (axios, refreshToken) => {
 
         const res = await apiClient.login({refreshToken})
@@ -27,10 +27,9 @@ const authConfig: AuthConfig = {
 
     },
     logOutHandler: () => {
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("refresh_token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         window.location.reload()
-
     },
     refreshTokenExpiry: null
 }
