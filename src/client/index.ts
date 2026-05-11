@@ -8,12 +8,16 @@ import {CreateDocument, DocumentFindQuery, UpdateDocument} from "../types/docume
 import {OptionType} from "../types/common";
 import dayjs from "dayjs";
 
-export const client = axios.create();
+export const client = axios.create({ withCredentials: true });
 
 export const apiClient = {
 
     login: async (req: LoginRequest) => {
         const res: ApiResponse = await client.post("accounts/login", req);
+        return res
+    },
+    logout: async () => {
+        const res: ApiResponse = await client.post("accounts/logout", {});
         return res
     },
     getProfile: async () => {
