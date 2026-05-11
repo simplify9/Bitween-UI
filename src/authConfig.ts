@@ -29,7 +29,7 @@ const authConfig: AuthConfig = {
 
     },
     logOutHandler: async () => {
-        try { await apiClient.logout(); } catch { /* best effort — clears server-side cookie */ }
+        await apiClient.logout(); // throws on failure — caller surfaces the error, cookie stays intact
         localStorage.removeItem("access_token");
         window.location.reload()
 
