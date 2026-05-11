@@ -10,8 +10,9 @@ const SignInWithMsButton = () => {
     const config = useAppConfigQuery()
     const {login} = useAuthApi();
     const [error, setError] = useState("")
+    const [isInitialized, setIsInitialized] = useState(false)
+
     useEffect(() => {
-        
         if (config.data?.msalClientId) {
             const conf = {
                 auth: {
@@ -20,29 +21,31 @@ const SignInWithMsButton = () => {
                 },
             };
             msalInstance = new PublicClientApplication(conf);
-            msalInstance.initialize().then()
+            msalInstance.initialize().then(() => setIsInitialized(true))
         }
-
-
     }, [config.data?.msalClientId]);
 
     const onClickLoginWithMicrosoft = async () => {
-        const msRes = await msalInstance.loginPopup({
-            redirectUri: config.data?.msalRedirectUri,
-            scopes: ["openid"]
-        });
-        if (msRes.idToken) {
-            let res = await apiClient.login({msToken: msRes.idToken});
-            if (res.succeeded) {
-                login({
-                    accessToken: res.data.jwt,
-                    refreshToken: res.data.refreshToken,
-                    accessTokenExpiry: 3
-                })
-            } else {
-                setError("Something went wrong while trying to log you in")
+        if (!msalInstance || !isInitialized) return;
+        try {
+            const msRes = await msalInstance.loginPopup({
+                redirectUri: config.data?.msalRedirectUri,
+                scopes: ["openid"]
+            });
+            if (msRes.idToken) {
+                const res = await apiClient.login({msToken: msRes.idToken});
+                if (res.succeeded) {
+                    login({
+                        accessToken: res.data.jwt,
+                        refreshToken: res.data.refreshToken,
+                        accessTokenExpiry: 3
+                    })
+                } else {
+                    setError("Something went wrong while trying to log you in")
+                }
             }
-
+        } catch {
+            setError("Sign-in failed. Please try again.")
         }
     }
 

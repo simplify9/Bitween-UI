@@ -1,19 +1,21 @@
 import {AuthConfig} from "./client/types";
-import {SessionStorage} from "./client/repos";
+import {LocalStorage, MemoryRepo} from "./client/repos";
 import {apiClient} from "src/client";
 
 
 const authConfig: AuthConfig = {
-    accessTokenCache: new SessionStorage("access_token"),
-    refreshTokenCache: new SessionStorage("refresh_token"),
-    accessTokenGenerator: async (axios, refreshToken) => {
-
-        const res = await apiClient.login({refreshToken})
+    accessTokenCache: new LocalStorage("access_token"),
+    // Sentinel value — keeps the refresh flow alive. The actual refresh token
+    // lives in an HttpOnly cookie; JS never sees it.
+    refreshTokenCache: new MemoryRepo("use-cookie"),
+    accessTokenGenerator: async () => {
+        // No refresh token body needed — the browser sends the HttpOnly cookie automatically.
+        const res = await apiClient.login({})
         if (res.succeeded) {
             return Promise.resolve(
                 {
                     accessToken: res.data.jwt,
-                    refreshToken: res.data.refreshToken,
+                    refreshToken: null,
                     accessTokenExpiry: 3
                 }
             );
@@ -26,9 +28,9 @@ const authConfig: AuthConfig = {
             })
 
     },
-    logOutHandler: () => {
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("refresh_token");
+    logOutHandler: async () => {
+        await apiClient.logout(); // throws on failure — caller surfaces the error, cookie stays intact
+        localStorage.removeItem("access_token");
         window.location.reload()
 
     },

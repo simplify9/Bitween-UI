@@ -26,14 +26,15 @@ export const loginCallback = ({
                                   refreshTokenExpiry
                               }: AuthConfig) => {
     return async (tokens: AccessTokenResponse) => {
-        if (tokens.accessToken && tokens.refreshToken) {
+        if (tokens.accessToken) {
             await accessTokenCache.write(tokens.accessToken, tokens.accessTokenExpiry);
-            if (refreshTokenCache) {
+            // Only write refresh token if it came back in the body (legacy flow).
+            // With HttpOnly cookies the refresh token is not in the response body.
+            if (refreshTokenCache && tokens.refreshToken) {
                 await refreshTokenCache?.write(tokens.refreshToken, refreshTokenExpiry);
             }
         } else {
-            sessionStorage.removeItem("access_token");
-            sessionStorage.removeItem("refresh_token");
+            localStorage.removeItem("access_token");
             window.location.reload()
         }
     }
