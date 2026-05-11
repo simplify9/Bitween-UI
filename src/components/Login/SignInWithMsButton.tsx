@@ -44,8 +44,9 @@ const SignInWithMsButton = () => {
                     setError("Something went wrong while trying to log you in")
                 }
             }
-        } catch {
-            setError("Sign-in failed. Please try again.")
+        } catch (e: any) {
+            const message = e?.response?.data?.message || e?.response?.data || "Sign-in failed. Please try again."
+            setError(typeof message === "string" ? message : "Sign-in failed. Please try again.")
         }
     }
 
