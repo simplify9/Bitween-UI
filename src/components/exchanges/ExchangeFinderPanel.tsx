@@ -101,7 +101,7 @@ export const ExchangeFinderPanel: React.FC<Props> = ({
                             optionTitle={(item: DeliveryStatus) => item.title}
                             optionValue={(item: DeliveryStatus) => item.id}
                             options={[
-                                {id: "0", title: "Running"},
+                                {id: "0", title: "Processing"},
                                 {id: "1", title: "Success"},
                                 {id: "2", title: "Bad response"},
                                 {id: "3", title: "Failed"},
