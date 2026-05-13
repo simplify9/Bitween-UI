@@ -35,7 +35,7 @@ const ExchangeStatus: React.FC<Props> = ({status, responseBad}) => {
                             </Tooltip>
                         : <Tooltip content="Exchange is currently being processed">
                             <div className="text-white bg-primary-500 hover:bg-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-4 py-1.5 text-center mr-2 mb-2  ">
-                                Running
+                                Processing
                             </div>
                         </Tooltip>
             }
