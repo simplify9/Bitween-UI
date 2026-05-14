@@ -124,14 +124,21 @@ export const LeafValueInput: React.FC<LeafValueInputProps> = ({
   }
 
   // source mode
+  const isOrphanSource = sourceValue !== '' && !sourcePaths.includes(sourceValue);
   return (
     <select
-      className="flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none text-gray-500 min-w-0"
+      className={[
+        'flex-1 border-0 bg-transparent font-mono text-xs focus:outline-none min-w-0',
+        isOrphanSource ? 'text-amber-500' : 'text-gray-500',
+      ].join(' ')}
       value={sourceValue}
       onChange={(e) => onSourceChange(e.target.value)}
       onClick={(e) => e.stopPropagation()}
     >
       <option value="">— unassigned —</option>
+      {isOrphanSource && (
+        <option value={sourceValue}>⚠ {sourceValue} (not found in input)</option>
+      )}
       {sourcePaths.map((p) => (
         <option key={p} value={p}>{p}</option>
       ))}

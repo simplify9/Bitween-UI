@@ -52,6 +52,10 @@ export const NormalLeaf: React.FC<NormalLeafProps> = ({
     removeLookup,
   } = useNormalLeaf(node, onLeafRef);
 
+  // ── Derived: source path exists in the known input paths ──────────────────
+  const isInvalidSource =
+    currentMode === 'source' && !!(mapping?.source) && !sourcePaths.includes(mapping.source);
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -71,7 +75,13 @@ export const NormalLeaf: React.FC<NormalLeafProps> = ({
     >
       {/* ── Main row ── */}
       <div className="flex items-center gap-1.5 px-2 py-[3px]">
-        <span className={['w-2 h-2 rounded-full flex-shrink-0', isMapped ? 'bg-emerald-400' : 'bg-rose-300'].join(' ')} />
+        <span
+          className={[
+            'w-2 h-2 rounded-full flex-shrink-0',
+            isInvalidSource ? 'bg-amber-400' : isMapped ? 'bg-emerald-400' : 'bg-rose-300',
+          ].join(' ')}
+          title={isInvalidSource ? `Source path not found in input: "${mapping!.source}"` : undefined}
+        />
         <span className="font-mono text-gray-700 truncate">{node.key}</span>
         <span className="text-gray-300 mx-0.5 flex-shrink-0">←</span>
 
