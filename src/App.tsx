@@ -29,6 +29,7 @@ import ApiGateways from "src/components/ApiGateways";
 import ApiGateway from "src/components/ApiGateway";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
 import MappingEditorPage from "src/components/MappingEditor";
+import AmqpHealth from "src/components/AmqpHealth";
 import {useAppDispatch} from "src/state/ReduxSotre";
 import {setWorkGroupsAvailable} from "src/state/stateSlices/features";
 import {client} from "./client";
@@ -106,8 +107,7 @@ function App() {
                                     <Route path="/api-gateways" element={<ApiGateways/>}/>
                                     <Route path="/api-gateways/:id" element={<ApiGateway/>}/>
                                     <Route path={"/notifications"} element={<Notifications/>}/>
-                                    <Route path={"/team"} element={<Team/>}/>
-                                </Routes>
+                                    <Route path={"/team"} element={<Team/>}/>                                    <Route path={"amqp-health"} element={<AmqpHealth/>}/>                                </Routes>
                             </div>
                         </div>
                     </div>

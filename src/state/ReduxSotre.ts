@@ -9,6 +9,7 @@ import {GlobalAdapterValuesSetsApi} from "src/client/apis/globalAdapterValuesSet
 import {ApiGatewaysApi} from "src/client/apis/apiGatewaysApi";
 import {MappersApi} from "src/client/apis/mappersApi";
 import {PartnersApi} from "src/client/apis/partnersApi";
+import {AmqpHealthApi} from "src/client/apis/amqpHealthApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
 
@@ -23,7 +24,8 @@ const reducers = combineReducers({
     [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer,
     [ApiGatewaysApi.reducerPath]: ApiGatewaysApi.reducer,
     [MappersApi.reducerPath]: MappersApi.reducer,
-    [PartnersApi.reducerPath]: PartnersApi.reducer
+    [PartnersApi.reducerPath]: PartnersApi.reducer,
+    [AmqpHealthApi.reducerPath]: AmqpHealthApi.reducer,
 
 });
 
@@ -39,7 +41,8 @@ export const store = configureStore({
             GlobalAdapterValuesSetsApi.middleware,
             ApiGatewaysApi.middleware,
             MappersApi.middleware,
-            PartnersApi.middleware
+            PartnersApi.middleware,
+            AmqpHealthApi.middleware,
         ])
 });
 
