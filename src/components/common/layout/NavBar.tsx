@@ -2,7 +2,7 @@ import {NavLink} from "react-router-dom";
 import React from "react";
 import {RiDashboardFill} from "react-icons/ri"
 import {BsFillPersonFill} from "react-icons/bs";
-import {TbArrowsRandom, TbBellRinging2Filled, TbExchange} from "react-icons/tb";
+import {TbArrowsRandom, TbBellRinging2Filled, TbExchange, TbActivity} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
 import {MdNotificationAdd, MdDataObject, MdApi} from "react-icons/md";
@@ -70,6 +70,15 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
 
                             <span className={isOpen ? "block" : "hidden"}>   Xchanges</span>
 
+                        </NavLink>
+                        <NavLink to="/amqp-health" title={isOpen ? undefined : "AMQP Health"}
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <TbActivity
+                                    className={"w-6 h-6"}
+                                    size={27}/>
+                            </div>
+                            <span className={isOpen ? "block" : "hidden"}>AMQP Health</span>
                         </NavLink>
                         <div className={"border border-b mx-2 mt-12 mb-3"}/>
                         <NavLink to="/subscriptions" title={isOpen ? undefined : "Subscriptions"}
