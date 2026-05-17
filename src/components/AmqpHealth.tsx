@@ -12,7 +12,7 @@ import ConsumerHealthTable from 'src/components/AmqpHealth/ConsumerHealthTable';
 import RetryAnalysisTable from 'src/components/AmqpHealth/RetryAnalysisTable';
 import DeadLetterTable from 'src/components/AmqpHealth/DeadLetterTable';
 
-const POLL_INTERVAL = 10_000;
+const POLL_INTERVAL = 3_000;
 
 const Skeleton: React.FC<{ className?: string }> = ({ className }) => (
     <div className={`animate-pulse bg-gray-200 rounded-xl ${className ?? 'h-20'}`} />
