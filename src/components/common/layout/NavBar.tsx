@@ -8,6 +8,7 @@ import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
 import {MdNotificationAdd, MdDataObject, MdApi} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
 import Tooltip from "src/components/common/Tooltip";
+import {useAppConfigQuery} from "src/client/apis/generalApi";
 
 const resolveClosedClassName = ({isActive}: any) => {
 
@@ -28,6 +29,8 @@ type Props = {
 }
 const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
     const theme = useTypedSelector(i => i.theme)
+    const config = useAppConfigQuery()
+
     return (
         <div className={"flex h-full pl-2 "}>
             <nav
@@ -71,15 +74,17 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>   Xchanges</span>
 
                         </NavLink>
-                        <NavLink to="/amqp-health" title={isOpen ? undefined : "AMQP Health"}
-                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
-                            <div>
-                                <TbActivity
-                                    className={"w-6 h-6"}
-                                    size={27}/>
-                            </div>
-                            <span className={isOpen ? "block" : "hidden"}>AMQP Health</span>
-                        </NavLink>
+                        {config.data?.isRabbitMqManagementConfigured && (
+                            <NavLink to="/amqp-health" title={isOpen ? undefined : "AMQP Health"}
+                                     className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                                <div>
+                                    <TbActivity
+                                        className={"w-6 h-6"}
+                                        size={27}/>
+                                </div>
+                                <span className={isOpen ? "block" : "hidden"}>AMQP Health</span>
+                            </NavLink>
+                        )}
                         <div className={"border border-b mx-2 mt-12 mb-3"}/>
                         <NavLink to="/subscriptions" title={isOpen ? undefined : "Subscriptions"}
                                  className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
