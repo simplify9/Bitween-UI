@@ -18,5 +18,6 @@ export type Config = {
     theme: Theme,
     msalClientId: string | null,
     msalRedirectUri: string | null,
-    msalTenantId: string | null
+    msalTenantId: string | null,
+    isRabbitMqManagementConfigured: boolean
 }
