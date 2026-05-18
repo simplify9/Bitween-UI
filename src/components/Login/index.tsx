@@ -23,7 +23,9 @@ const Login = () => {
                 accessTokenExpiry: 3
             })
         } else {
-            setError("Something went wrong while trying to log you in")
+            const firstVal = res.error && typeof res.error === "object" ? Object.values(res.error)[0] : null;
+            const message = Array.isArray(firstVal) ? firstVal[0] : firstVal;
+            setError(typeof message === "string" ? message : "Something went wrong while trying to log you in")
         }
     }
     return (
