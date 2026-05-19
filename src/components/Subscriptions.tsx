@@ -4,7 +4,6 @@ import {SubscriptionFinderPanel} from "./Subscriptions/SubscriptionFinder";
 import {SubscriptionList} from "./Subscriptions/SubscriptionList";
 import {
     ICreateSubscription,
-    IDuplicateSubscription,
     ISubscription,
     SubscriptionFindQuery,
 } from "../types/subscriptions";
@@ -110,14 +109,13 @@ const Component = () => {
         []
     );
 
-    const onDuplicateSubscription = async (data: IDuplicateSubscription) => {
+    const onDuplicateSubscription = async (data: ICreateSubscription) => {
         const copiedFrom = await getSubscription(dataToDuplicate.id);
         const newSubscription = await createSubscription(data);
         if ('data' in newSubscription && copiedFrom.data) {
             const template = structuredClone(copiedFrom)
             template.data.inactive = true
             template.data.name = data.name
-            template.data.id = data.id
             template.data.id = newSubscription.data
             const res = await updateSubscription(template.data);
             if ('data' in res) {

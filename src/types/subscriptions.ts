@@ -53,7 +53,7 @@ export interface ISubscription {
     documentId?: string;
     partnerId?: string;
     aggregationForId?: string;
-    type?: string
+    type?: string | number
     documentName?: string;
     isRunning?: boolean;
     handlerId?: string;
@@ -98,7 +98,7 @@ export interface ICreateSubscription {
 }
 
 export interface IDuplicateSubscription {
-    type: string;
+    type: string | number;
     documentId: string;
     id?: number
     name: string
@@ -159,6 +159,20 @@ export const SubscriptionTypeOptions: OptionType[] = [
     {id: String(SubscriptionType.Aggregation), title: "Aggregation"},
     {id: String(SubscriptionType.GatewayApiCall), title: "GatewayApiCall"},
 ]
+
+export const normalizeSubscriptionType = (type?: string | number | null): string => {
+    if (type === undefined || type === null || type === "") return "";
+
+    const value = String(type);
+    if (SubscriptionTypeOptions.some(option => option.id === value)) return value;
+
+    return String(SubscriptionType[value as keyof typeof SubscriptionType] ?? value);
+}
+
+export const getSubscriptionTypeTitle = (type?: string | number | null): string => {
+    const normalizedType = normalizeSubscriptionType(type);
+    return SubscriptionTypeOptions.find(option => option.id === normalizedType)?.title ?? "";
+}
 
 export interface AdapterFindQuery {
     prefix: string;
@@ -234,4 +248,3 @@ export type SearchWorkGroupModel = {
 export type UpdateWorkGroupModel = { id: number } & CreateWorkGroupModel;
 
 export type DeleteWorkGroupModel = { id: number };
-
