@@ -2,7 +2,13 @@ import TextEditor from "../common/forms/TextEditor";
 import FormField from "../common/forms/FormField";
 import React, {useState} from "react";
 import Modal from "../common/Modal";
-import {ICreateSubscription, IDuplicateSubscription, SubscriptionType, SubscriptionTypeOptions} from "../../types/subscriptions";
+import {
+    ICreateSubscription,
+    IDuplicateSubscription,
+    normalizeSubscriptionType,
+    SubscriptionType,
+    SubscriptionTypeOptions
+} from "../../types/subscriptions";
 import {ChoiceEditor} from "../common/forms/ChoiceEditor";
 import {OptionType} from "../../types/common";
 import DocumentSelector from "../Documents/DocumentSelector";
@@ -20,7 +26,7 @@ interface Props {
 const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
 
     const [newSubscription, setNewSubscription] = useState<ICreateSubscription>({
-        type: initialState?.type,
+        type: normalizeSubscriptionType(initialState?.type),
         documentId: initialState?.documentId,
         name: initialState?.name
     });

@@ -5,7 +5,13 @@ import TextEditor from "./common/forms/TextEditor";
 import React, {useCallback, useEffect, useState} from "react";
 import {apiClient} from "../client";
 import {OptionType} from "../types/common";
-import {ISubscription, ScheduleView, SubscriptionType, SubscriptionTypeOptions} from "../types/subscriptions";
+import {
+    ISubscription,
+    normalizeSubscriptionType,
+    ScheduleView,
+    SubscriptionType,
+    SubscriptionTypeOptions
+} from "../types/subscriptions";
 import {ChoiceEditor} from "./common/forms/ChoiceEditor";
 import DocumentSelector from "./Documents/DocumentSelector";
 import PartnerSelector from "./Partners/PartnerSelector";
@@ -134,6 +140,7 @@ const Component = () => {
     console.log("updateSubscriptionData", updateSubscriptionData)
     
     if (!updateSubscriptionData) return <></>
+    const subscriptionType = normalizeSubscriptionType(updateSubscriptionData?.type);
 
     return (
         <div className="flex flex-col w-full  ">
@@ -212,7 +219,7 @@ const Component = () => {
                         <FormField title="Type" className="grow">
                             <ChoiceEditor
                                 disabled={true}
-                                value={updateSubscriptionData?.type?.toString()}
+                                value={subscriptionType}
                                 onChange={(e) => onChangeSubscriptionData("type", e)}
                                 optionTitle={(item: OptionType) => item.title}
                                 optionValue={(item: OptionType) => item.id}
@@ -258,14 +265,14 @@ const Component = () => {
             <div className="flex flex-col gap-6 rounded-lg mb-6 ">
 
                 {
-                    updateSubscriptionData?.type == "1" &&
+                    subscriptionType == String(SubscriptionType.Internal) &&
                     <MatchExpressionEditor
                         onChange={(e) => onChangeSubscriptionData("matchExpression", e)}
                         documentId={updateSubscriptionData.documentId}
                         expression={updateSubscriptionData.matchExpression}
                     />
                 }
-                {(!updateSubscriptionData.matchExpression && updateSubscriptionData?.type == "1") &&
+                {(!updateSubscriptionData.matchExpression && subscriptionType == String(SubscriptionType.Internal)) &&
                     <div
                         className="bg-white  border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <FormField title="Filters" className="grow">
@@ -275,7 +282,7 @@ const Component = () => {
                                 documentFilter={updateSubscriptionData?.documentFilter}/>
                         </FormField>
                     </div>}
-                {updateSubscriptionData?.type == "8" &&
+                {subscriptionType == String(SubscriptionType.Aggregation) &&
                     <div
                         className="bg-white border shadow-lg px-2 py-2 rounded-lg md:w-1/2">
 
@@ -298,7 +305,7 @@ const Component = () => {
 
 
                     </div>}
-                {(updateSubscriptionData?.type == String(SubscriptionType.ApiCall) || updateSubscriptionData?.type == String(SubscriptionType.GatewayApiCall)) &&
+                {(subscriptionType == String(SubscriptionType.ApiCall) || subscriptionType == String(SubscriptionType.GatewayApiCall)) &&
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor
@@ -317,7 +324,7 @@ const Component = () => {
 
                     </div>}
 
-                {updateSubscriptionData?.type == "4" &&
+                {subscriptionType == String(SubscriptionType.Receiving) &&
                     <div
                         className=" bg-white md:w-1/2 border shadow-lg rounded-lg px-2 py-2">
                         <AdapterEditor title={"Receiver"} type={"receivers"}
@@ -415,7 +422,7 @@ const Component = () => {
                 </div>
                 <div className={"flex flex-col md:flex-row"}>
                     {
-                        updateSubscriptionData.type == '8' && <Authorize roles={["Admin", "Member"]}>
+                        subscriptionType == String(SubscriptionType.Aggregation) && <Authorize roles={["Admin", "Member"]}>
 
 
                             <Button className={"mx-8"} variant={"secondary"} onClick={onClickAggregateNow}
@@ -425,7 +432,7 @@ const Component = () => {
                         </Authorize>
                     }
                     {
-                        updateSubscriptionData.type == '4' && <Authorize roles={["Admin", "Member"]}>
+                        subscriptionType == String(SubscriptionType.Receiving) && <Authorize roles={["Admin", "Member"]}>
                             <Button variant={"secondary"} onClick={onClickReceiveNow} className={"mx-8"}>
                                 Receive Now
                             </Button>

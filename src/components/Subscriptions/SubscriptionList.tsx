@@ -1,4 +1,4 @@
-import {ISubscription, SubscriptionTypeOptions} from "../../types/subscriptions";
+import {getSubscriptionTypeTitle, ISubscription} from "../../types/subscriptions";
 import {useNavigate} from "react-router-dom";
 import {BsFillEyeFill} from "react-icons/bs";
 import Button from "src/components/common/forms/Button";
@@ -51,7 +51,7 @@ export const SubscriptionList: React.FC<Props> = ({data, handelDuplicate}) => {
                             </p>
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-2 whitespace-nowrap">
-                            {SubscriptionTypeOptions.find(s => s.id == i.type)?.title}
+                            {getSubscriptionTypeTitle(i.type)}
                         </td>
                         <td className="text-sm text-gray-900 font-light px-6 py-2 whitespace-nowrap">
                             {i.isRunning ? "Running" : "Idle"}
