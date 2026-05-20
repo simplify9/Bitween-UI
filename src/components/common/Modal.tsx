@@ -5,7 +5,7 @@ import React from "react";
 
 type Props = React.JSX.IntrinsicElements['div'] & {
     onClose: () => void
-    onSubmit?: () => void
+    onSubmit?: () => void | Promise<void>
     submitLabel?: string
     submitDisabled?: boolean
     extraFooterComponents?: React.ReactElement

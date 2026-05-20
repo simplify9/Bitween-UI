@@ -16,23 +16,20 @@ type Props = {
 
 }
 const recurrenceOptions: OptionType[] = [
-    {
-        id: "0",
-        title: "Hourly"
-    },
-    {
-        id: "1",
-        title: "Daily"
-    },
-    {
-        id: "2",
-        title: "Weekly"
-    },
-    {
-        id: "3",
-        title: "Monthly"
-    },
+    {id: "Hourly", title: "Hourly"},
+    {id: "Daily", title: "Daily"},
+    {id: "Weekly", title: "Weekly"},
+    {id: "Monthly", title: "Monthly"},
 ]
+
+const legacyRecurrenceMap: Record<number, string> = {0: "Hourly", 1: "Daily", 2: "Weekly", 3: "Monthly"}
+
+const normalizeRecurrence = (r: string | number | undefined): string | undefined => {
+    if (r === undefined || r === null || r === "") return undefined
+    const asNum = Number(r)
+    if (!isNaN(asNum) && legacyRecurrenceMap[asNum]) return legacyRecurrenceMap[asNum]
+    return String(r)
+}
 const AddEditScheduleModal: React.FC<Props> = ({
                                                    visible,
                                                    onClose,
@@ -52,7 +49,7 @@ const AddEditScheduleModal: React.FC<Props> = ({
         <div>
             <FormField title="Type" className="grow">
                 <ChoiceEditor
-                    value={scheduleFrom.recurrence?.toString()}
+                    value={normalizeRecurrence(scheduleFrom.recurrence)}
                     onChange={onChangeScheduleFrom.bind(this, "recurrence")}
                     optionTitle={(item: OptionType) => item.title}
                     optionValue={(item: OptionType) => item.id}

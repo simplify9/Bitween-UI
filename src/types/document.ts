@@ -9,7 +9,7 @@ export interface IDocument {
     duplicateInterval?: any
     promotedProperties?: any
     disregardsUnfilteredMessages?: boolean
-    documentFormat?: number
+    documentFormat?: string
 }
 
 export type DocumentFindQuery = CommonFindQuery & {
@@ -19,8 +19,8 @@ export type DocumentFindQuery = CommonFindQuery & {
 
 
 export const DocumentFormat: OptionType[] = [
-    {id: "0", title: "Json"},
-    {id: "1", title: "Xml"},
+    {id: "Json", title: "Json"},
+    {id: "Xml", title: "Xml"},
 ]
 export type UpdateDocument = {
     id?: string
@@ -30,7 +30,7 @@ export type UpdateDocument = {
     duplicateInterval?: string;
     promotedProperties?: KeyValuePair[]
     disregardsUnfilteredMessages?: boolean
-    documentFormat?: number
+    documentFormat?: string
 }
 export type CreateDocument = {
     id?: string;

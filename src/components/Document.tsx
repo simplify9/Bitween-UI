@@ -18,7 +18,7 @@ const XML_PATH_RE = /^(\/[\w$.[\]*?@:,()'"\\/-]*|[a-zA-Z_][a-zA-Z0-9_/[\]@.:*-]*
 
 function validatePromotedProperties(
     props: KeyValuePair[] | undefined,
-    documentFormat: number | undefined
+    documentFormat: string | undefined
 ): string | null {
     if (!props || props.length === 0) return null;
 
@@ -30,9 +30,9 @@ function validatePromotedProperties(
             return `Promoted property "${pp.key}" must have a non-empty path value.`;
 
         const trimmed = pp.value.trim();
-        if (documentFormat === 0 && !JSON_PATH_RE.test(trimmed))
+        if (documentFormat === "Json" && !JSON_PATH_RE.test(trimmed))
             return `"${pp.key}": invalid JSON path "${pp.value}". Use JSONPath (e.g. $.field.sub) or dot-notation.`;
-        if (documentFormat === 1 && !XML_PATH_RE.test(trimmed))
+        if (documentFormat === "Xml" && !XML_PATH_RE.test(trimmed))
             return `"${pp.key}": invalid XPath "${pp.value}". Use XPath (e.g. /root/element).`;
 
         const lower = pp.key.toLowerCase();
@@ -146,10 +146,10 @@ const Component = () => {
             <div className={"shadow-lg  bg-white  rounded-xl p-2 mb-5"}>
                 <FormField title="Document Format" className={''}>
                     <ChoiceEditor
-                        value={updateDocumentData?.documentFormat?.toString()}
+                        value={updateDocumentData?.documentFormat}
                         onChange={val => setUpdateDocumentData({
                             ...updateDocumentData,
-                            documentFormat: Number(val)
+                            documentFormat: val
                         })}
                         optionTitle={(item: OptionType) => item.title}
                         optionValue={(item: OptionType) => item.id}
@@ -184,13 +184,13 @@ const Component = () => {
                     title={'Promoted Properties'}
                     keyLabel={"Friendly Name"}
                     valueLabel={
-                        updateDocumentData.documentFormat === 0 ? 'JSON Path'
-                        : updateDocumentData.documentFormat === 1 ? 'XML Path'
+                        updateDocumentData.documentFormat === "Json" ? 'JSON Path'
+                        : updateDocumentData.documentFormat === "Xml" ? 'XML Path'
                         : 'Path'
                     }
                     valuePlaceholder={
-                        updateDocumentData.documentFormat === 0 ? 'e.g. $.customer.name or customer.name'
-                        : updateDocumentData.documentFormat === 1 ? 'e.g. /root/element or /root/@attr'
+                        updateDocumentData.documentFormat === "Json" ? 'e.g. $.customer.name or customer.name'
+                        : updateDocumentData.documentFormat === "Xml" ? 'e.g. /root/element or /root/@attr'
                         : 'Enter path…'
                     }
                     onAdd={addPromotedProperty}

@@ -81,7 +81,7 @@ export interface ISubscription {
 }
 
 export interface ScheduleView {
-    recurrence: number;
+    recurrence: string | number;
     days: number;
     hours: number;
     minutes: number;
