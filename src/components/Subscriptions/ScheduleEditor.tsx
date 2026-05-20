@@ -52,17 +52,11 @@ const ScheduleEditor: React.FC<Props> = ({
     }
 
 
-    const resolveRecurrence = (r: number) => {
-        switch (Number(r)) {
-            case 0:
-                return "Hourly"
-            case 1:
-                return "Daily"
-            case 2:
-                return "Weekly"
-            case 3:
-                return "Monthly"
-        }
+    const resolveRecurrence = (r: string | number) => {
+        const legacyMap: Record<number, string> = {0: "Hourly", 1: "Daily", 2: "Weekly", 3: "Monthly"}
+        const asNum = Number(r)
+        if (!isNaN(asNum) && legacyMap[asNum]) return legacyMap[asNum]
+        return String(r)
     }
     
     return (
