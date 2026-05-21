@@ -56,10 +56,10 @@ export interface ISubscription {
     type?: string | number
     documentName?: string;
     isRunning?: boolean;
-    handlerId?: string;
-    mapperId?: string;
-    receiverId?: string;
-    validatorId?: string;
+    handlerId?: string | null;
+    mapperId?: string | null;
+    receiverId?: string | null;
+    validatorId?: string | null;
     temporary?: boolean;
     handlerProperties?: KeyValuePair[];
     validatorProperties?: KeyValuePair[];

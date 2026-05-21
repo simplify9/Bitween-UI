@@ -4,8 +4,8 @@ import React, {useCallback, useMemo, useState} from "react";
 
 
 interface Props {
-    value?: string
-    onChange: (value: string) => void
+    value?: string | null
+    onChange: (value: string | null) => void
     type: 'mappers' | 'receivers' | 'handlers' | 'notifiers' | 'validators'
 }
 
@@ -91,7 +91,7 @@ const AdapterVersionSelector: React.FC<Props> = ({value, onChange, type}) => {
                         Cancel
                     </button>
                     <button
-                        onClick={() => { onChange(undefined); setShowClearConfirm(false); }}
+                        onClick={() => { onChange(null); setShowClearConfirm(false); }}
                         className="px-2 py-0.5 text-xs rounded border border-red-400 bg-red-500 hover:bg-red-600 text-white transition"
                     >
                         Remove
