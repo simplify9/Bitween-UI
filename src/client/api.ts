@@ -140,12 +140,13 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
             };
         },
         async (error: AxiosError) => {
-            if (error.response.status === 401) {
+            const originalRequest = error.config as any;
+            if (error.response.status === 401 && !originalRequest._retry) {
+                originalRequest._retry = true;
                 return getAccessToken(accessToken)
                     .then(newValue => {
                         accessToken = newValue;
-                        // @ts-ignore
-                        return axiosInstance(error.config);
+                        return axiosInstance(originalRequest);
                     });
             }
             if (error.response?.data) {
