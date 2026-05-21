@@ -506,7 +506,30 @@ function renderArrayMapping(
         }
       } else if (item.source?.trim()) {
         const path = item.source.trim();
-        if (item.transform?.trim()) {
+        // If the source path resolves to an array in the input JSON, unroll it with a for-loop
+        // instead of embedding {{ path | json }} directly (which would produce [[...]])
+        const sourceIsArray = (() => {
+          if (!inputJson) return false;
+          try {
+            let node: unknown = JSON.parse(inputJson);
+            for (const part of path.split('.')) {
+              if (node == null || typeof node !== 'object') return false;
+              node = (node as Record<string, unknown>)[part];
+            }
+            return Array.isArray(node);
+          } catch { return false; }
+        })();
+        if (sourceIsArray) {
+          const loopAlias = am.alias || 'item';
+          lines.push(`${pad}{{- for ${loopAlias} in ${path} -}}`);
+          if (item.transform?.trim()) {
+            const expr = item.transform.trim().replace(/\bvalue\b/g, loopAlias);
+            lines.push(`${fieldPad}{{ ${expr} | json }},`);
+          } else {
+            lines.push(`${fieldPad}{{ ${loopAlias} | json }},`);
+          }
+          lines.push(`${pad}{{- end -}}`);
+        } else if (item.transform?.trim()) {
           const expr = item.transform.trim().replace(/\bvalue\b/g, path);
           lines.push(`${fieldPad}{{ ${expr} | json }},`);
         } else {

@@ -201,9 +201,11 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
       setFilterOp(am.filter?.operator ?? '!=');
       setFilterValue(String(am.filter?.value ?? ''));
       const scalarSet = new Set(inputScalarProps);
+      const fullSrcPath = parentFullSource ? `${parentFullSource}.${am.source}` : am.source;
+      const itemPropsSet = new Set(getItemProperties(inputJson, fullSrcPath));
       setPendingMappings(am.mappings.map((m) => ({
         ...m,
-        isRootSource: m.isRootSource ?? ((Boolean(m.source) && scalarSet.has(m.source)) || undefined),
+        isRootSource: m.isRootSource ?? ((Boolean(m.source) && scalarSet.has(m.source) && !itemPropsSet.has(m.source)) || undefined),
       })));
     } else {
       setSource('');

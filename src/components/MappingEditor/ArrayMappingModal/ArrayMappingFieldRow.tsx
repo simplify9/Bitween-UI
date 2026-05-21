@@ -183,7 +183,7 @@ export const ArrayMappingFieldRow: React.FC<ArrayMappingFieldRowProps> = ({
             value={m.source}
             onChange={(e) => {
               const val = e.target.value;
-              const isRoot = inputScalarProps.includes(val);
+              const isRoot = inputScalarProps.includes(val) && !sourceItemProps.includes(val);
               onPatch({ source: val, fixedValue: undefined, lookupDictionary: undefined, isRootSource: isRoot || undefined });
             }}
           >

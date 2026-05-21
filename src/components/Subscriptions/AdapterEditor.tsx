@@ -207,7 +207,10 @@ const AdapterEditor: React.FC<Props> = ({
                     }
                 </div>
                 <FormField title={""} className="grow ">
-                    <AdapterVersionSelector type={type} value={value} onChange={onChange}/>
+                    <AdapterVersionSelector type={type} value={value} onChange={(v) => {
+                        onChange(v);
+                        if (!v) onPropsChange?.([]);
+                    }}/>
                 </FormField>
                 <div className={"mb-1"}/>
                 {!suppressProps && <KeyValueEditor values={props} title={'Properties'}
