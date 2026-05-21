@@ -1,6 +1,6 @@
 import {ChoiceEditor} from "../common/forms/ChoiceEditor";
-import {useAdaptersLookupQuery, useVersionedAdaptersQuery} from "src/client/apis/generalApi";
-import React, {useCallback, useMemo} from "react";
+import {useVersionedAdaptersQuery} from "src/client/apis/generalApi";
+import React, {useCallback, useMemo, useState} from "react";
 
 
 interface Props {
@@ -24,6 +24,7 @@ const removeVersion = (key: string) => {
 const AdapterVersionSelector: React.FC<Props> = ({value, onChange, type}) => {
 
     const queryState = useVersionedAdaptersQuery({prefix: type});
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
     const options = useMemo(() => {
         if (!Array.isArray(queryState.data))
             return []
@@ -50,7 +51,13 @@ const AdapterVersionSelector: React.FC<Props> = ({value, onChange, type}) => {
 
 
     const onChangeAdapter = useCallback((e: string) => {
+        if (!e) {
+            setShowClearConfirm(true);
+            return;
+        }
+        setShowClearConfirm(false);
         const adapter = queryState.data.find(i => i.key == removeVersion(e))
+        if (!adapter) return;
         if (adapter.versions.length === 0) {
             onChange(e)
         } else {
@@ -65,16 +72,32 @@ const AdapterVersionSelector: React.FC<Props> = ({value, onChange, type}) => {
         return null
     return (
         <div className={"flex flex-col gap-2"}>
-            <div>
-                <ChoiceEditor
-                    placeholder="Select Adapter"
-                    value={mainValue}
-                    onChange={onChangeAdapter}
-                    options={options}
-                    optionValue={i => i.key}
-                    optionTitle={i => i.title}
-                />
-            </div>
+            <ChoiceEditor
+                placeholder="Select Adapter"
+                value={mainValue}
+                onChange={onChangeAdapter}
+                options={options}
+                optionValue={i => i.key}
+                optionTitle={i => i.title}
+                isClearable={!showClearConfirm}
+            />
+            {showClearConfirm && (
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded text-sm">
+                    <span className="text-red-600 text-xs font-medium flex-1">Remove this adapter?</span>
+                    <button
+                        onClick={() => setShowClearConfirm(false)}
+                        className="px-2 py-0.5 text-xs rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-600 transition"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => { onChange(undefined); setShowClearConfirm(false); }}
+                        className="px-2 py-0.5 text-xs rounded border border-red-400 bg-red-500 hover:bg-red-600 text-white transition"
+                    >
+                        Remove
+                    </button>
+                </div>
+            )}
             <div className={"flex flex-row flex-wrap w-full gap-2"}>
                 {
                     versions.length > 0 &&
