@@ -140,9 +140,9 @@ const ValueEditor: React.FC<ValueEditorProps> = ({value: val, onChange: onValCha
 };
 
 interface Props {
-    value?: string
+    value?: string | null
     modifiedOn?: string
-    onChange: (value: string) => void
+    onChange: (value: string | null) => void
     type: 'mappers' | 'receivers' | 'handlers' | 'notifiers' | 'validators'
     props?: KeyValuePair[],
     onPropsChange?: (p: KeyValuePair[]) => void
@@ -208,7 +208,7 @@ const AdapterEditor: React.FC<Props> = ({
                 </div>
                 <FormField title={""} className="grow ">
                     <AdapterVersionSelector type={type} value={value} onChange={(v) => {
-                        onChange(v ?? "");
+                        onChange(v);
                         if (!v) onPropsChange?.([]);
                     }}/>
                 </FormField>
