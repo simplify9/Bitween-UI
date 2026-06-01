@@ -173,16 +173,13 @@ export function recordToDraftFields(item: Record<string, unknown>, node: TreeNod
         // Lookup (null fallback): $__e = { ... }; $__e[path]
         const lkpNull = expr.match(/^\$__e = \{ (.+) \}; \$__e\[(.+)\]$/);
         if (lkpNull) return { key, mode: 'source', value: lkpNull[2], transform: '', showTransform: false, lookupDictionary: { entries: parseLookupEntries(lkpNull[1]), fallback: 'null' } };
-        // Lookup (passthrough/custom): $__e = { ... }; ($__e[path] ?? FB)
+        // Lookup (custom fallback): $__e = { ... }; ($__e[path] ?? FB)
         const lkpFb = expr.match(/^\$__e = \{ (.+) \}; \(\$__e\[(.+)\] \?\? (.+)\)$/);
         if (lkpFb) {
-          const path = lkpFb[2];
-          const fbStr = lkpFb[3];
-          const isPassthrough = fbStr === path;
-          return { key, mode: 'source', value: path, transform: '', showTransform: false, lookupDictionary: {
+          return { key, mode: 'source', value: lkpFb[2], transform: '', showTransform: false, lookupDictionary: {
             entries: parseLookupEntries(lkpFb[1]),
-            fallback: isPassthrough ? 'passthrough' : 'custom',
-            fallbackValue: isPassthrough ? undefined : fbStr.replace(/^"(.*)"$/, '$1'),
+            fallback: 'custom',
+            fallbackValue: lkpFb[3].replace(/^"(.*)"$/, '$1'),
           }};
         }
         return { key, mode: 'source', value: expr, transform: '', showTransform: false };

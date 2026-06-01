@@ -2,11 +2,15 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import {posix} from "path";
 import mkcert from 'vite-plugin-mkcert'
-
+import type {} from 'vitest/config'
 const plugins = true ? [react(), mkcert()] : [react()]
 
 const config = defineConfig({
     plugins,
+    test: {
+        globals: true,
+        environment: 'node',
+    },
     build: {
         outDir: "build",
         rollupOptions: {
