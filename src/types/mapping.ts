@@ -16,8 +16,8 @@ export interface LookupEntry {
 export interface LookupDictionary {
   entries: LookupEntry[];
   /** What to output when the source value isn't in the dictionary.
-   *  passthrough = keep original value | null = output null | custom = use fallbackValue */
-  fallback: 'passthrough' | 'null' | 'custom';
+   *  null = output null | custom = use fallbackValue */
+  fallback: 'null' | 'custom';
   fallbackValue?: string;
 }
 

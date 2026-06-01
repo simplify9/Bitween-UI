@@ -7,7 +7,6 @@
     "types": ["vite/client"],
     "module": "esnext",
     "target": "ES6",
-    "baseUrl": "./",
     "paths": {
       "@/src/*": [
         "./src/*"
@@ -23,7 +22,7 @@
     "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,

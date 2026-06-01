@@ -141,9 +141,7 @@ function renderFieldValue(
     if (lkp.fallback === 'null') {
       return `{{ $__e = { ${entries} }; $__e[${path}] | json }}`;
     }
-    const fb = lkp.fallback === 'custom'
-      ? fmtVal(lkp.fallbackValue ?? '')
-      : path; // passthrough — keep original value
+    const fb = fmtVal(lkp.fallbackValue ?? '');
     return `{{ $__e = { ${entries} }; ($__e[${path}] ?? ${fb}) | json }}`;
   }
 

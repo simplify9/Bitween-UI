@@ -81,9 +81,7 @@ function parseExpr(
         let fallbackValue: string | undefined;
         if (fallbackMatch) {
           const fb = fallbackMatch[1].trim();
-          if (fb === rawPath) {
-            fallback = 'passthrough';
-          } else if (/^["'].*["']$/.test(fb)) {
+          if (/^["'].*["']$/.test(fb)) {
             fallback = 'custom';
             fallbackValue = fb.slice(1, -1);
           }
@@ -177,7 +175,7 @@ function parseForBody(
       }
     }
 
-    const ifMatch = line.match(/\{\{-?\s*if\s+(\w+)\.([\w.]+)\s*([!=<>]+)\s*([^}]+)-?\}\}/);
+    const ifMatch = line.match(/\{\{-?\s*if\s+(\w+)\.([\w.]+)\s*([!=<>]+)\s*(.+?)\s*-?\}\}/);
     if (ifMatch) {
       filter = {
         field: ifMatch[2],
