@@ -2,7 +2,7 @@ import {useNavigate, useParams, Link} from "react-router-dom";
 import Button from "./common/forms/Button";
 import FormField from "./common/forms/FormField";
 import TextEditor from "./common/forms/TextEditor";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {apiClient} from "../client";
 import {OptionType} from "../types/common";
 import {
@@ -54,6 +54,7 @@ const Component = () => {
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
+    const savedDataRef = useRef<string>('{}');
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
     const workGroups = useWorkGroupsQuery({limit: 1000, offset: 0}, {skip: !workGroupsAvailable})
@@ -75,18 +76,23 @@ const Component = () => {
 
     useEffect(() => {
         if (subscriptionData) {
-            setUpdateSubscriptionData(structuredClone({
+            const normalized = structuredClone({
                 id,
                 ...subscriptionData,
                 schedules: subscriptionData.schedules.map((s: ScheduleView, index: number) => ({
                     ...s,
                     id: index
                 }))
-            }));
+            });
+            setUpdateSubscriptionData(normalized);
+            savedDataRef.current = JSON.stringify(normalized);
         } else {
             setUpdateSubscriptionData({});
+            savedDataRef.current = '{}';
         }
     }, [subscriptionData, id]);
+
+    const hasUnsavedChanges = JSON.stringify(updateSubscriptionData) !== savedDataRef.current;
     const onClickAggregateNow = () => {
         aggregateNow((id))
     }
@@ -96,6 +102,7 @@ const Component = () => {
 
     const onClickUpdateSubscription = async () => {
         await updateSubscription({...updateSubscriptionData, id});
+        savedDataRef.current = JSON.stringify(updateSubscriptionData);
         await getTrails();
     }
     const onCreateDraft = async () => {
@@ -462,9 +469,9 @@ const Component = () => {
                         </Authorize>
                     }
 
-                    {
-                        mode === "PUBLISHED" && <Authorize roles={["Admin"]}>
+                    {mode === "PUBLISHED" && <Authorize roles={["Admin"]}>
                             <Button
+                                disabled={!hasUnsavedChanges}
                                 onClick={onClickUpdateSubscription}>
                                 Save
                             </Button>

@@ -36,7 +36,7 @@ const Button: React.FC<Props> = ({
             event.preventDefault()
             onClick(event)
         }}
-                className={classes("cursor-pointer flex text-center flex items-center justify-center ", className ?? "", getVariant(variant))}>
+                className={classes("cursor-pointer flex text-center flex items-center justify-center ", className ?? "", getVariant(variant), disabled ? "opacity-40 cursor-not-allowed pointer-events-none" : "")}>
             {children}
         </button>
     )

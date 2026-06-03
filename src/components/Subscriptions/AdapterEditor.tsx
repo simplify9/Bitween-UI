@@ -8,6 +8,7 @@ import {toLocalDateTimeString} from "src/utils/DateUtils";
 import AdapterVersionSelector from "src/components/Subscriptions/AdapterVersionSelector";
 import {useGlobalAdapterValuesSetsQuery} from "src/client/apis/globalAdapterValuesSetsApi";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
+import {useAdapterStartupValuesQuery} from "src/client/apis/generalApi";
 
 type ValueMode = "static" | "global" | "partner";
 
@@ -148,6 +149,7 @@ interface Props {
     onPropsChange?: (p: KeyValuePair[]) => void
     title: string;
     suppressProps?: boolean;
+    privateKeys?: Set<string>;
 }
 
 const AdapterEditor: React.FC<Props> = ({
@@ -162,6 +164,16 @@ const AdapterEditor: React.FC<Props> = ({
                                         }) => {
 
     const [adapterPropsOptions, setAdapterPropsOptions] = useState<OptionType[]>();
+    const startupValuesQuery = useAdapterStartupValuesQuery(value!, {skip: !value});
+
+    const privateKeys: Set<string> = React.useMemo(() => {
+        if (!startupValuesQuery.data) return new Set();
+        return new Set(
+            Object.entries(startupValuesQuery.data)
+                .filter(([, sv]) => sv.private)
+                .map(([k]) => k)
+        );
+    }, [startupValuesQuery.data]);
 
     useEffect(() => {
         if (value) {
@@ -213,14 +225,35 @@ const AdapterEditor: React.FC<Props> = ({
                     }}/>
                 </FormField>
                 <div className={"mb-1"}/>
-                {!suppressProps && <KeyValueEditor values={props} title={'Properties'}
-                                keyLabel={"Name"} valueLabel={"Value"}
-                                onAdd={onAdd} onRemove={onRemove}
-                                addLabel={"Add or edit"}
-                                onEdit={onEdit}
-                                keyOptions={availableOptions()}
-                                valueRenderer={(v, onVChange) => <ValueEditor value={v} onChange={onVChange}/>}
-                />}
+                {!suppressProps && (() => {
+                    if (value && (startupValuesQuery.isLoading || startupValuesQuery.isUninitialized))
+                        return (
+                            <div className="flex items-center gap-2 px-2 py-3 text-xs text-gray-400">
+                                <svg className="animate-spin h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                </svg>
+                                Loading properties…
+                            </div>
+                        );
+                    if (value && startupValuesQuery.isError)
+                        return (
+                            <div className="px-2 py-2 text-xs text-red-500 border border-red-200 rounded-md bg-red-50">
+                                Could not load adapter metadata. Properties are hidden to protect sensitive values.
+                            </div>
+                        );
+                    return (
+                        <KeyValueEditor values={props} title={'Properties'}
+                                        keyLabel={"Name"} valueLabel={"Value"}
+                                        onAdd={onAdd} onRemove={onRemove}
+                                        addLabel={"Add or edit"}
+                                        onEdit={onEdit}
+                                        keyOptions={availableOptions()}
+                                        privateKeys={privateKeys}
+                                        valueRenderer={(v, onVChange) => <ValueEditor value={v} onChange={onVChange}/>}
+                        />
+                    );
+                })()}
             </div>
         </div>
     );
