@@ -27,3 +27,10 @@ export type CommonFindQuery = {
     limit: number
     orderBy?: OrderBy
 }
+
+export type StartupValue = {
+    optional: boolean;
+    default?: string;
+    type: string;
+    private: boolean;
+}

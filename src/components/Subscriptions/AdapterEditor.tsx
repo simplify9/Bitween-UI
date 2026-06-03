@@ -8,6 +8,7 @@ import {toLocalDateTimeString} from "src/utils/DateUtils";
 import AdapterVersionSelector from "src/components/Subscriptions/AdapterVersionSelector";
 import {useGlobalAdapterValuesSetsQuery} from "src/client/apis/globalAdapterValuesSetsApi";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
+import {useAdapterStartupValuesQuery} from "src/client/apis/generalApi";
 
 type ValueMode = "static" | "global" | "partner";
 
@@ -148,6 +149,7 @@ interface Props {
     onPropsChange?: (p: KeyValuePair[]) => void
     title: string;
     suppressProps?: boolean;
+    privateKeys?: Set<string>;
 }
 
 const AdapterEditor: React.FC<Props> = ({
@@ -162,6 +164,16 @@ const AdapterEditor: React.FC<Props> = ({
                                         }) => {
 
     const [adapterPropsOptions, setAdapterPropsOptions] = useState<OptionType[]>();
+    const startupValuesQuery = useAdapterStartupValuesQuery(value!, {skip: !value});
+
+    const privateKeys: Set<string> = React.useMemo(() => {
+        if (!startupValuesQuery.data) return new Set();
+        return new Set(
+            Object.entries(startupValuesQuery.data)
+                .filter(([, sv]) => sv.private)
+                .map(([k]) => k)
+        );
+    }, [startupValuesQuery.data]);
 
     useEffect(() => {
         if (value) {
@@ -219,6 +231,7 @@ const AdapterEditor: React.FC<Props> = ({
                                 addLabel={"Add or edit"}
                                 onEdit={onEdit}
                                 keyOptions={availableOptions()}
+                                privateKeys={privateKeys}
                                 valueRenderer={(v, onVChange) => <ValueEditor value={v} onChange={onVChange}/>}
                 />}
             </div>

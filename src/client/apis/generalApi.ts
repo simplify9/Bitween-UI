@@ -3,7 +3,7 @@ import customFetchBase from "src/client/apis/apiMiddleware";
 import {Adapter, AdapterFindQuery} from "src/types/subscriptions";
 import {AccountModel, ChangePasswordModel, CreateAccountModel, EditModal} from "src/types/accounts";
 import {formulateQueryString} from "src/client";
-import {ApiPagedResponse} from "src/types/common";
+import {ApiPagedResponse, StartupValue} from "src/types/common";
 import {ChartPointsResponse, MainInfoResponse, XchangeMainInfo} from "src/types/dashboard";
 import {Config} from "src/types/config";
 
@@ -33,6 +33,12 @@ export const GeneralApi = createApi({
         adapterMetadata: builder.query<{ timestamp?: string }, string>({
             query: (m) => ({
                 url: `Adapters/${m}/metadata`,
+                method: "GET",
+            })
+        }),
+        adapterStartupValues: builder.query<Record<string, StartupValue>, string>({
+            query: (id) => ({
+                url: `Adapters/${encodeURIComponent(id)}/GetStartupValues`,
                 method: "GET",
             })
         }),
@@ -120,6 +126,7 @@ export const GeneralApi = createApi({
 export const {
     useVersionedAdaptersQuery,
     useAdapterMetadataQuery,
+    useAdapterStartupValuesQuery,
     useAppConfigQuery,
     useChartsDataPointsQuery,
     useDashboardXchangesInfoQuery,
