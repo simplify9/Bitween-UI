@@ -35,7 +35,6 @@ export function useMappingEditorLoader(subscriptionId: number): void {
         mapperProperties: subscriptionData.mapperProperties,
       })
     );
-    dispatch(autoMatch());
     setLoadedForId(subscriptionId);
   }, [subscriptionData]);
 }
