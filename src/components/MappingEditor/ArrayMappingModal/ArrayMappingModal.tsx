@@ -25,6 +25,7 @@ const ArrayMappingModal: React.FC = () => {
   const {
     isCreating,
     isNested,
+    isRootOutput,
     parentAmTarget,
     source,
     target,
@@ -90,13 +91,20 @@ const ArrayMappingModal: React.FC = () => {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1">Target Array Path</label>
-              <input
-                className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono bg-gray-50 text-gray-500 cursor-not-allowed"
-                value={target}
-                readOnly
-                disabled
-                title="Target is determined by the array you clicked in the output tree"
-              />
+              {isRootOutput ? (
+                <div className="w-full border border-blue-200 rounded px-2 py-1.5 text-xs font-mono bg-blue-50 text-blue-600 flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold bg-blue-100 border border-blue-300 text-blue-700 rounded px-1">root</span>
+                  <span className="text-blue-500 italic">output is a root array</span>
+                </div>
+              ) : (
+                <input
+                  className="w-full border border-gray-200 rounded px-2 py-1.5 text-xs font-mono bg-gray-50 text-gray-500 cursor-not-allowed"
+                  value={target}
+                  readOnly
+                  disabled
+                  title="Target is determined by the array you clicked in the output tree"
+                />
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1">Source Array Path</label>
@@ -295,7 +303,7 @@ const ArrayMappingModal: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={
-                !target ||
+                (!target && !isRootOutput) ||
                 (hasFilter && !source) ||
                 pendingMappings.some(
                   (m) => m.target && !m.source && m.fixedValue === undefined && !m.lookupDictionary && !m.partnerPropKey && !(m.globalSetId && m.globalKey)

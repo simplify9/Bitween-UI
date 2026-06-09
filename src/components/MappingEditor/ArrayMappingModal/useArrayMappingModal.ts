@@ -40,6 +40,7 @@ export interface UseArrayMappingModalResult {
   // Derived state
   isCreating: boolean;
   isNested: boolean;
+  isRootOutput: boolean;
   parentAmTarget: string;
   // Form fields
   source: string;
@@ -92,6 +93,7 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
     outputJson,
     newArrayPresetTarget,
     newArrayParentId,
+    newArrayIsRootOutput,
     partnerAdapterProperties,
   } = useMappingEditorState();
   const { data: globalSetsData } = useGlobalAdapterValuesSetsQuery({ offset: 0, limit: 1000 });
@@ -119,14 +121,29 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
 
   const sourceArrayPaths = React.useMemo(() => {
     try {
-      const obj = JSON.parse(inputJson) as Record<string, unknown>;
+      const parsed = JSON.parse(inputJson);
+      if (Array.isArray(parsed)) {
+        if (!parentAm) return ['items'];
+        // Nested inside a root-array AM: find array-valued keys inside the first item
+        if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null) {
+          return Object.entries(parsed[0] as Record<string, unknown>)
+            .filter(([, v]) => Array.isArray(v))
+            .map(([k]) => k);
+        }
+        return [];
+      }
+      const obj = parsed as Record<string, unknown>;
       return parentAm ? getItemArrayPaths(obj, parentFullSource) : collectArrayPaths(obj);
     } catch { return []; }
   }, [inputJson, parentAm, parentFullSource]);
 
   const inputScalarProps = React.useMemo(() => {
     try {
-      const root = JSON.parse(inputJson) as Record<string, unknown>;
+      const parsed = JSON.parse(inputJson);
+      // Root array — expose scalar props from the first element, prefixed with 'item.'
+      const root: Record<string, unknown> = Array.isArray(parsed)
+        ? (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null ? parsed[0] as Record<string, unknown> : {})
+        : parsed as Record<string, unknown>;
       const collect = (obj: Record<string, unknown>, prefix: string): string[] => {
         if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) return prefix ? [prefix] : [];
         return Object.entries(obj).flatMap(([k, v]) => {
@@ -142,8 +159,13 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
 
   const fullSourcePath = React.useMemo(() => {
     if (!source) return '';
+    // 'items' is a virtual C# alias for root-array input — not a real JSON key.
+    // When nested inside a root-array AM, use source directly so path navigation works.
+    if (parentFullSource === 'items') {
+      try { if (Array.isArray(JSON.parse(inputJson))) return source; } catch { /* ignore */ }
+    }
     return parentFullSource ? `${parentFullSource}.${source}` : source;
-  }, [source, parentFullSource]);
+  }, [source, parentFullSource, inputJson]);
 
   const sourceItemProps = React.useMemo(
     () => getItemProperties(inputJson, fullSourcePath),
@@ -152,16 +174,32 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
 
   const fullTargetBase = React.useMemo(() => {
     const t = am?.target ?? newArrayPresetTarget ?? '';
-    if (!t) return '';
+    // isRootOutput AMs have an empty target — keep as '' (sentinel for root array)
+    if (!t) return newArrayIsRootOutput || am?.isRootOutput ? '__root__' : '';
     if (!newArrayParentId) return t;
     const parentBase = getFullTargetBase(newArrayParentId, arrayMappings);
     return parentBase ? `${parentBase}.${t}` : t;
-  }, [am, newArrayPresetTarget, newArrayParentId, arrayMappings]);
+  }, [am, newArrayPresetTarget, newArrayParentId, newArrayIsRootOutput, arrayMappings]);
 
   const targetItemProps = React.useMemo(() => {
     if (!fullTargetBase) return [];
-    const results: string[] = [...getItemProperties(outputJson, fullTargetBase)];
-    const arrayPrefix = `${fullTargetBase}[*].`;
+    const results: string[] = [];
+    if (fullTargetBase === '__root__') {
+      // Root array output: get scalar/object item properties from the first element,
+      // excluding array-valued keys (those are handled as nested array mappings).
+      try {
+        const parsed = JSON.parse(outputJson);
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null) {
+          const first = parsed[0] as Record<string, unknown>;
+          Object.entries(first)
+            .filter(([, v]) => !Array.isArray(v))
+            .forEach(([k]) => results.push(k));
+        }
+      } catch { /* ignore */ }
+    } else {
+      results.push(...getItemProperties(outputJson, fullTargetBase));
+    }
+    const arrayPrefix = fullTargetBase === '__root__' ? '[*].' : `${fullTargetBase}[*].`;
     fieldMappings
       .map((fm) => fm.target)
       .filter((t) => t.startsWith(arrayPrefix))
@@ -217,7 +255,7 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
       setPendingMappings([]);
     }
     setOpenPanels({});
-  }, [am, inputScalarProps]);
+  }, [am, inputScalarProps, editingArrayId]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -262,6 +300,7 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
         filter,
         mappings: cleanMappings(pendingMappings),
         parentArrayId: newArrayParentId ?? undefined,
+        isRootOutput: newArrayIsRootOutput || undefined,
       }));
     } else {
       dispatch(updateArrayMapping({
@@ -271,6 +310,7 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
         alias: alias || 'item',
         filter,
         mappings: cleanMappings(pendingMappings),
+        isRootOutput: am?.isRootOutput || newArrayIsRootOutput || undefined,
       }));
     }
     dispatch(openArrayModal({ id: null }));
@@ -286,6 +326,7 @@ export function useArrayMappingModal(): UseArrayMappingModalResult {
   return {
     isCreating,
     isNested,
+    isRootOutput: am?.isRootOutput ?? newArrayIsRootOutput,
     parentAmTarget: parentAm?.target ?? '',
     source,
     target: currentTarget,

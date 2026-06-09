@@ -85,7 +85,12 @@ const MappingEditorInner: React.FC = () => {
     // Use target JSON as the base structure when available, then merge in any
     // manually-added fields from fieldMappings that aren't already in the JSON.
     const basePaths: string[] = outputObj
-      ? buildTree(outputObj).flatMap(flattenLeafPaths)
+      ? (Array.isArray(outputObj)
+          // Root-array output schema: always include the '[*]' container node.
+          // buildTree returns no children for primitive arrays (e.g. [1,2,3]),
+          // so the tree shows just `root []` with the + fixed button.
+          ? ['[*]', ...buildTree(outputObj).flatMap(flattenLeafPaths).map((p) => `[*].${p}`)]
+          : buildTree(outputObj).flatMap(flattenLeafPaths))
       : fieldMappings.map((m) => m.target).filter(Boolean);
 
     // Merge manually-added mapping targets that aren't already in the base set
@@ -101,6 +106,14 @@ const MappingEditorInner: React.FC = () => {
 
     const paths = basePaths;
     for (const am of arrayMappings) {
+      if (am.isRootOutput) {
+        // Root-output AM has no named target — its container path is '[*]'
+        if (!paths.includes('[*]')) paths.push('[*]');
+        for (const m of am.mappings) {
+          if (m.target) paths.push(`[*].${m.target}`);
+        }
+        continue;
+      }
       if (!am.target) continue;
       const fullPrefix = getFullTargetPrefix(am.id, arrayMappings);
       const containerPath = `${fullPrefix}[*]`;

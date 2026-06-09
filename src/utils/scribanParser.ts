@@ -7,6 +7,8 @@ export type ParsedArrayMapping = {
   alias: string;
   filter?: ArrayMapping['filter'];
   mappings: ParsedFieldMapping[];
+  /** When true, this AM owns the root `[...]` output — no wrapping object. */
+  isRootOutput?: boolean;
   /** Target of the parent AM — used to resolve parentArrayId after IDs are assigned. */
   parentTarget?: string;
 };
@@ -213,6 +215,40 @@ export function parseScriban(template: string): ParsedMappings {
 
   const lines = template.split('\n');
   let i = 0;
+
+  // ── Root-array template detection ────────────────────────────────────────
+  // A root-array template starts with `[` (ignoring whitespace) and contains
+  // a single top-level `for` loop whose body produces array items.
+  // We detect this upfront and parse it as a single AM with isRootOutput=true.
+  const firstContentLine = lines.find((l) => l.trim() !== '');
+  if (firstContentLine?.trim() === '[') {
+    // Find the for-loop line
+    const forLineIdx = lines.findIndex((l) => /\{\{-?\s*for\s+/.test(l));
+    if (forLineIdx !== -1) {
+      const forMatch = lines[forLineIdx].trim().match(/\{\{-?\s*for\s+(\w+)\s+in\s+([\w.[\]*]+)\s*-?\}\}/);
+      if (forMatch) {
+        const alias = forMatch[1];
+        const source = forMatch[2];
+        const { result, endI } = parseForBody(lines, forLineIdx + 1, alias, '', arrayMappings);
+        // Consume any filter line that may appear before the body
+        arrayMappings.push({
+          source,
+          target: '',
+          alias,
+          isRootOutput: true,
+          filter: result.filter,
+          mappings: result.mappings,
+        });
+        // Any lines after {{- end -}} ] are ignored (should be just `]`)
+        void endI;
+        return { fieldMappings, arrayMappings, warnings };
+      }
+    }
+    // If no for loop found, return empty (fixed-only root array — not yet supported in visual editor)
+    warnings.push('Root-array template has no for-loop — cannot parse back to visual mappings');
+    return { fieldMappings, arrayMappings, warnings };
+  }
+
   // Track nesting depth so we only create fieldMappings for lines directly
   // inside the root object (depth === 1).  Lines inside fixed-item literals
   // (e.g. `"lineOrders": [ { "ref": ... } ]`) sit at depth >= 3 and must not

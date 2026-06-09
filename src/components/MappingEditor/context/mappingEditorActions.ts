@@ -22,6 +22,7 @@ export interface MappingEditorState extends CoreState {
   editingArrayId: string | null;
   newArrayPresetTarget: string;
   newArrayParentId: string | null;
+  newArrayIsRootOutput: boolean;
   past: CoreState[];
   future: CoreState[];
   validationErrors: ValidationError[];
@@ -56,7 +57,7 @@ export type MappingEditorAction =
   | { type: 'SET_SEARCH_INPUT'; payload: string }
   | { type: 'SET_SEARCH_OUTPUT'; payload: string }
   | { type: 'TOGGLE_NODE_COLLAPSED'; payload: string }
-  | { type: 'OPEN_ARRAY_MODAL'; payload: { id: string | null; presetTarget?: string; parentArrayId?: string | null } }
+  | { type: 'OPEN_ARRAY_MODAL'; payload: { id: string | null; presetTarget?: string; parentArrayId?: string | null; isRootOutput?: boolean } }
   | { type: 'TOGGLE_PREVIEW' }
   | { type: 'SET_VALIDATION_ERRORS'; payload: ValidationError[] }
   | { type: 'TOGGLE_VALIDATION' }
@@ -90,7 +91,7 @@ export const setHoveredPath = (p: string | null): MappingEditorAction => ({ type
 export const setSearchInput = (p: string): MappingEditorAction => ({ type: 'SET_SEARCH_INPUT', payload: p });
 export const setSearchOutput = (p: string): MappingEditorAction => ({ type: 'SET_SEARCH_OUTPUT', payload: p });
 export const toggleNodeCollapsed = (p: string): MappingEditorAction => ({ type: 'TOGGLE_NODE_COLLAPSED', payload: p });
-export const openArrayModal = (p: { id: string | null; presetTarget?: string; parentArrayId?: string | null }): MappingEditorAction => ({ type: 'OPEN_ARRAY_MODAL', payload: p });
+export const openArrayModal = (p: { id: string | null; presetTarget?: string; parentArrayId?: string | null; isRootOutput?: boolean }): MappingEditorAction => ({ type: 'OPEN_ARRAY_MODAL', payload: p });
 export const togglePreview = (): MappingEditorAction => ({ type: 'TOGGLE_PREVIEW' });
 export const setValidationErrors = (p: ValidationError[]): MappingEditorAction => ({ type: 'SET_VALIDATION_ERRORS', payload: p });
 export const toggleValidation = (): MappingEditorAction => ({ type: 'TOGGLE_VALIDATION' });

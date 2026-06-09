@@ -33,7 +33,15 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
   const primitiveArrayValues = useMemo((): unknown[] | null => {
     if (isArrayField) return null;
     try {
-      const obj = JSON.parse(outputJson) as Record<string, unknown>;
+      const parsed = JSON.parse(outputJson);
+      // Root primitive array: node.path is '[*]' sentinel (no named key)
+      if (Array.isArray(parsed)) {
+        if (node.path === '[*]' && parsed.every((v) => v === null || typeof v !== 'object')) {
+          return parsed as unknown[];
+        }
+        return null;
+      }
+      const obj = parsed as Record<string, unknown>;
       const cur = node.path.split('.').reduce<unknown>((o, k) => {
         if (o == null || typeof o !== 'object') return undefined;
         return (o as Record<string, unknown>)[k];
@@ -71,7 +79,9 @@ export const OutputLeaf: React.FC<OutputLeafProps> = ({ node, sourcePaths, typeM
 
   // ── Primitive array ───────────────────────────────────────────────────────
   if (primitiveArrayValues !== null) {
-    const primAm = arrayMappings.find((am) => am.target === node.path && !am.parentArrayId && am.primitiveItems);
+    const primAm = node.path === '[*]'
+      ? arrayMappings.find((am) => am.isRootOutput && !am.parentArrayId && am.primitiveItems)
+      : arrayMappings.find((am) => am.target === node.path && !am.parentArrayId && am.primitiveItems);
     const currentItems: PrimitiveArrayItem[] = primAm?.primitiveItems ?? primitiveArrayValues.map(() => ({}));
     return (
       <PrimitiveArrayLeaf

@@ -64,6 +64,12 @@ export interface ArrayMapping {
   primitiveItems?: PrimitiveArrayItem[];
   /** ID of the parent ArrayMapping. undefined/null means top-level. */
   parentArrayId?: string;
+  /**
+   * When true this ArrayMapping owns the root `[...]` output instead of a
+   * named field.  Only valid on top-level AMs (no parentArrayId).
+   * Generator emits `[ for … ]` instead of `"target": [ for … ]`.
+   */
+  isRootOutput?: boolean;
 }
 
 export type ValidationError = {
