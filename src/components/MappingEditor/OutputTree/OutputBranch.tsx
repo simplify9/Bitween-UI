@@ -137,6 +137,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
           mappings: [],
           fixedItems: updated,
           parentArrayId: parentAm?.id ?? undefined,
+          isRootOutput: isRootArrayNode || undefined,
         })
       );
     }
