@@ -46,7 +46,9 @@ export function insertNode(
   if (parts.length === 0) return;
   const rawPart = parts[0];
   const isArray = rawPart.includes('[*]') || rawPart.includes('[]');
-  const key = rawPart.replace(/\[\*\]|\[\]/g, '');
+  // When rawPart is purely '[*]' (root array), key would be empty — use 'root' to match
+  // the synthetic node created by buildTree() so isRootArrayNode detection works correctly.
+  const key = rawPart.replace(/\[\*\]|\[\]/g, '') || 'root';
   const currentPath = parentPath ? `${parentPath}.${rawPart}` : rawPart;
 
   let existing = nodes.find((n) => n.key === key);
@@ -60,6 +62,9 @@ export function insertNode(
   if (!existing) {
     existing = { key, path: currentPath, type: isArray ? 'array' : 'object', children: [] };
     nodes.push(existing);
+  } else if (existing.type === 'leaf') {
+    // Upgrade leaf to container when it gains children
+    existing.type = isArray ? 'array' : 'object';
   }
   insertNode(existing.children, parts.slice(1), depth + 1, currentPath);
 }

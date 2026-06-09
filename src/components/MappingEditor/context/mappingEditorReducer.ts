@@ -82,6 +82,7 @@ export function loadFromProps(props: KeyValuePair[]): CoreState {
             alias: am.alias ?? 'item',
             filter: am.filter,
             parentArrayId: am.parentArrayId ?? undefined,
+            isRootOutput: am.isRootOutput ?? undefined,
             mappings: (am.mappings ?? []).map((m: any, j: number) => ({
               id: `arr-loaded-${i}-${j}`,
               source: m.source ?? '',
@@ -124,6 +125,7 @@ export const initialMappingEditorState: MappingEditorState = {
   editingArrayId: null,
   newArrayPresetTarget: '',
   newArrayParentId: null,
+  newArrayIsRootOutput: false,
   past: [],
   future: [],
   validationErrors: [],
@@ -258,6 +260,7 @@ export function mappingEditorReducer(
         draft.editingArrayId = action.payload.id;
         draft.newArrayPresetTarget = action.payload.presetTarget ?? '';
         draft.newArrayParentId = action.payload.parentArrayId ?? null;
+        draft.newArrayIsRootOutput = action.payload.isRootOutput ?? false;
         break;
       case 'TOGGLE_PREVIEW':
         draft.showPreview = !draft.showPreview;

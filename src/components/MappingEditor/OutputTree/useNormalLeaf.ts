@@ -120,7 +120,10 @@ export function useNormalLeaf(
 
     if (next === 'fixed') {
       try {
-        fields.fixedValue = getValueAtPath(JSON.parse(outputJson), node.path);
+        const parsedOutput = JSON.parse(outputJson);
+        if (!Array.isArray(parsedOutput)) {
+          fields.fixedValue = getValueAtPath(parsedOutput, node.path);
+        }
       } catch { /* ignore parse errors */ }
     }
 

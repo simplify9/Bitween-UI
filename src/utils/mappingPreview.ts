@@ -19,12 +19,19 @@ export function buildTree(obj: any, keyName = '', prefix = ''): TreeNode[] {
     if (obj.length === 0 || typeof obj[0] !== 'object' || obj[0] === null) {
       return keyName ? [{ key: keyName, path: prefix, type: 'leaf', value: obj, children: [] }] : [];
     }
+    const itemPrefix = prefix ? `${prefix}[*]` : '[*]';
     const children = Object.entries(obj[0] as object).flatMap(([k, v]) =>
-      buildTree(v, k, prefix ? `${prefix}[*].${k}` : k)
+      // When the array is the root (no parent prefix), children are directly
+      // accessible via hoisting — use plain `k` so source paths are e.g. "OrderId"
+      // instead of "[*].OrderId" (which produces invalid Scriban "{{ .OrderId }}").
+      buildTree(v, k, prefix ? `${itemPrefix}.${k}` : k)
     );
-    return keyName
-      ? [{ key: keyName, path: prefix, type: 'array', itemCount: obj.length, children }]
-      : children;
+    if (keyName) {
+      return [{ key: keyName, path: prefix, type: 'array', itemCount: obj.length, children }];
+    }
+    // Root-level array (no keyName): return a synthetic root array node so the
+    // output tree can show a "Configure Loop" button at the root.
+    return [{ key: 'root', path: '[*]', type: 'array', itemCount: obj.length, children }];
   }
   if (typeof obj === 'object') {
     const entries = Object.entries(obj as object).flatMap(([k, v]) =>

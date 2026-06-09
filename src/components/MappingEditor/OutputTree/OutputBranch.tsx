@@ -48,6 +48,9 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
   // Is this node inside another array? (path like "lineOrders[*].lineItems")
   const isNestedArrayNode = node.type === 'array' && node.path.includes('[*].');
 
+  // Is this the synthetic root-array node (output schema is [...])?
+  const isRootArrayNode = node.key === 'root' && node.path === '[*]';
+
   // Find the parent AM for this node (when nested)
   const parentContainerPath = isNestedArrayNode
     ? node.path.substring(0, node.path.lastIndexOf('[*].') + 3) // e.g. "lineOrders[*]"
@@ -62,7 +65,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
   // Relative target name for this node (last segment, no [*])
   const relativeTarget = isNestedArrayNode
     ? node.path.split('[*].').pop()?.replace('[*]', '') ?? node.key
-    : node.key;
+    : isRootArrayNode ? '' : node.key;
 
   // Check if this node corresponds to an array mapping (top-level or nested)
   const arrayMapping = arrayMappings.find((am) => {
@@ -78,7 +81,11 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
   // Scalar (non-array) leaf paths from the root input JSON — for source field suggestions
   const inputScalarProps = React.useMemo(() => {
     try {
-      const root = JSON.parse(inputJson);
+      const parsed = JSON.parse(inputJson);
+      // For root arrays, expose scalar props from the first element
+      const root: Record<string, unknown> = Array.isArray(parsed)
+        ? (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null ? parsed[0] as Record<string, unknown> : {})
+        : parsed as Record<string, unknown>;
       const collect = (obj: Record<string, unknown>, prefix: string): string[] => {
         if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
           return prefix ? [prefix] : [];
@@ -90,7 +97,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
           return [path];
         });
       };
-      return collect(root as Record<string, unknown>, '');
+      return collect(root, '');
     } catch {
       return [];
     }
@@ -102,6 +109,7 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
         id: arrayMapping?.id ?? '__new__',
         presetTarget: relativeTarget,
         parentArrayId: parentAm?.id ?? null,
+        isRootOutput: isRootArrayNode,
       })
     );
   };
@@ -152,7 +160,9 @@ export const OutputBranch: React.FC<OutputBranchProps> = ({ node, depth = 0, sou
           className="flex items-center gap-1 flex-1 text-left"
         >
           <span className="text-gray-400 text-xs w-3 flex-shrink-0">{isOpen ? '▾' : '▸'}</span>
-          <span className="text-xs font-medium text-gray-700 font-mono truncate">{node.key}</span>
+          <span className="text-xs font-medium text-gray-700 font-mono truncate">
+            {isRootArrayNode ? <span className="text-blue-500 italic">root array</span> : node.key}
+          </span>
           {node.type === 'array' && (
             <span className="text-xs text-blue-500 font-mono ml-0.5">[]</span>
           )}

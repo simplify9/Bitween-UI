@@ -24,9 +24,15 @@ function walkTypeMap(node: any, prefix: string): TypeMap {
     if (node.length === 0) return {};
     const first = node[0];
     if (typeof first !== 'object') {
-      // primitive array — record the element type at this prefix (e.g. "prices[*]" → "number")
+      // primitive array — record the element type at this prefix.
+      // Named arrays are called with prefix already containing "[*]" (e.g. "prices[*]").
+      // Root primitive arrays are called with prefix="" → use "[*]" as key so the
+      // generator's `itemPrefix` ("[*]") resolves the type correctly.
       const t = typeof first;
-      if (prefix && (t === 'string' || t === 'number' || t === 'boolean')) return { [prefix]: t };
+      if (t === 'string' || t === 'number' || t === 'boolean') {
+        const key = prefix || '[*]';
+        return { [key]: t };
+      }
       return {};
     }
     return walkTypeMap(first, prefix); // use first element as representative
@@ -178,7 +184,7 @@ function renderFieldValue(
   // plain path — apply type cast when target type is known
   const path = alias
     ? `${alias}.${src}`
-    : src.replace(/\[?\*\]?/g, '');
+    : src.replace(/\[?\*\]?/g, '').replace(/^\.+/, ''); // strip [*] and any leading dot
 
   if (targetType) {
     // same type — no cast needed
@@ -210,6 +216,15 @@ export function generateScriban(
 ): string {
   const typeMap: TypeMap = outputJson ? buildTypeMap(outputJson) : {};
   const sourceTypeMap: TypeMap = inputJson ? buildTypeMap(inputJson) : {};
+
+  // ── Root-array output: single top-level AM with isRootOutput=true ──────────
+  // When present, the whole template is just `[ ... ]` with no wrapping object.
+  // Field mappings are ignored in this mode (root output is an array, not an object).
+  const rootOutputAm = arrayMappings.find((am) => am.isRootOutput && !am.parentArrayId);
+  if (rootOutputAm) {
+    return renderRootArrayMapping(rootOutputAm, arrayMappings, valuesSetMap, typeMap, inputJson, sourceTypeMap);
+  }
+
   const rootLines: string[] = ['{'];
 
   // ── Simple field mappings ──────────────────────────────────────────────────
@@ -377,6 +392,111 @@ function emitFixedValueLines(v: unknown, pad: string, typeMap?: TypeMap, fieldPa
   const primitiveTargetType = fieldPath ? typeMap?.[fieldPath] : undefined;
   if (primitiveTargetType !== undefined) return [JSON.stringify(coerceFixedValue(v, primitiveTargetType))];
   return [JSON.stringify(v)];
+}
+
+/**
+ * Renders a root-array template: the entire output is `[ ... ]` with no wrapping object.
+ * Used when ArrayMapping.isRootOutput = true.
+ * The loop body and field rendering are identical to renderArrayMapping; only the outer
+ * container changes from `"target": [ ... ]` to just `[ ... ]`.
+ */
+function renderRootArrayMapping(
+  am: ArrayMapping,
+  allAMs: ArrayMapping[],
+  valuesSetMap?: ValuesSetMap,
+  typeMap?: TypeMap,
+  inputJson?: string,
+  sourceTypeMap?: TypeMap
+): string {
+  const alias = am.alias || 'item';
+  const source = am.source;
+
+  // Build the item type-map prefix — for root output we use the source path directly
+  // (e.g. "items[*]" when source is "items", or just "[*]" when input is a root array)
+  const itemPrefix = source ? `${source}[*]` : '[*]';
+
+  const filterExpr = am.filter
+    ? `${alias}.${am.filter.field} ${OPERATOR_MAP[am.filter.operator] ?? am.filter.operator} ${
+        typeof am.filter.value === 'number' ? am.filter.value : `"${am.filter.value}"`
+      }`
+    : '';
+
+  const lines: string[] = ['['];
+
+  // ── Primitive root array (no loop variable needed in the item body) ────────
+  if (am.primitiveItems != null) {
+    for (const item of am.primitiveItems) {
+      const elemType = typeMap?.[itemPrefix];
+      if (item.partnerPropKey) {
+        lines.push(elemType === 'number' || elemType === 'boolean'
+          ? '  null,'
+          : `  {{ __partner__?.${item.partnerPropKey} | json }},`);
+      } else if (item.globalSetId && item.globalKey) {
+        lines.push(elemType === 'number' || elemType === 'boolean'
+          ? '  null,'
+          : `  {{ __globals__?.${item.globalSetId}["${item.globalKey}"] | json }},`);
+      } else if (item.source?.trim()) {
+        const path = item.source.trim();
+        if (item.transform?.trim()) {
+          const expr = item.transform.trim().replace(/\bvalue\b/g, path);
+          lines.push(`  {{ ${expr} | json }},`);
+        } else {
+          lines.push(`  {{ ${path} | json }},`);
+        }
+      } else if (item.fixedValue !== undefined) {
+        lines.push(`  ${JSON.stringify(coerceFixedValue(item.fixedValue, typeMap?.[itemPrefix]))},`);
+      } else {
+        lines.push('  null,');
+      }
+    }
+    lines.push(']');
+    return lines.join('\n');
+  }
+
+  // ── Fixed items before the dynamic loop ───────────────────────────────────
+  if (am.fixedItems?.length) {
+    for (const rawItem of am.fixedItems) {
+      const enriched = enrichFixedItem(rawItem as Record<string, unknown>, am, allAMs);
+      if (!hasDynamicDeep(enriched)) {
+        lines.push(`  ${JSON.stringify(enriched)},`);
+      } else {
+        lines.push('  {');
+        for (const [k, v] of Object.entries(enriched)) {
+          const fp = `${itemPrefix}.${k}`;
+          const vLines = emitFixedValueLines(v, '    ', typeMap, fp, sourceTypeMap, source ? `${source}[*]` : '');
+          lines.push(`    "${k}": ${vLines[0]}${vLines.length === 1 ? ',' : ''}`);
+          for (let li = 1; li < vLines.length - 1; li++) lines.push(vLines[li]);
+          if (vLines.length > 1) lines.push(`${vLines[vLines.length - 1]},`);
+        }
+        lines.push('  },');
+      }
+    }
+  }
+
+  if (!source) {
+    lines.push(']');
+    return lines.join('\n');
+  }
+
+  lines.push(`{{- for ${alias} in ${source} -}}`);
+  if (am.filter) lines.push(`{{- if ${filterExpr} -}}`);
+  lines.push('{');
+  for (const m of am.mappings) {
+    if (!m.target.trim()) continue;
+    const targetType = typeMap?.[`${itemPrefix}.${m.target}`];
+    const sourceType = m.source ? sourceTypeMap?.[`${itemPrefix}.${m.source}`] : undefined;
+    lines.push(`  "${m.target}": ${renderFieldValue(m, alias, valuesSetMap, targetType, sourceType)},`);
+  }
+  // Render child AMs recursively inside this loop body
+  const children = allAMs.filter((c) => c.parentArrayId === am.id && c.source && c.target);
+  for (const child of children) {
+    lines.push(...renderArrayMapping(child, allAMs, alias, 1, valuesSetMap, typeMap, inputJson, sourceTypeMap));
+  }
+  lines.push('},');
+  if (am.filter) lines.push('{{- end -}}');
+  lines.push('{{- end -}}');
+  lines.push(']');
+  return lines.join('\n');
 }
 
 /**

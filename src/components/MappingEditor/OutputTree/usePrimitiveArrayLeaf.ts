@@ -40,17 +40,19 @@ export function usePrimitiveArrayLeaf(
     (item) => item.source || item.fixedValue !== undefined || item.partnerPropKey || (item.globalSetId && item.globalKey),
   ).length;
 
+  const isRootPrimArray = node.path === '[*]';
+
   const saveItem = (idx: number, newItem: PrimitiveArrayItem) => {
     const updated = currentItems.map((item, i) => (i === idx ? newItem : item));
     if (primAmId) {
       dispatch(updateArrayMapping({ id: primAmId, primitiveItems: updated }));
     } else {
-      dispatch(addArrayMapping({ source: '', target: node.path, alias: 'item', mappings: [], primitiveItems: updated }));
+      dispatch(addArrayMapping({ source: '', target: isRootPrimArray ? '' : node.path, alias: 'item', mappings: [], primitiveItems: updated, isRootOutput: isRootPrimArray || undefined }));
     }
   };
 
   const onMapEmptyArray = () => {
-    dispatch(addArrayMapping({ source: '', target: node.path, alias: 'item', mappings: [], primitiveItems: [] }));
+    dispatch(addArrayMapping({ source: '', target: isRootPrimArray ? '' : node.path, alias: 'item', mappings: [], primitiveItems: [], isRootOutput: isRootPrimArray || undefined }));
   };
 
   const onClearEmptyArray = () => {
