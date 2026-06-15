@@ -1,0 +1,64 @@
+name: Bitween UI CI/CD Gateway
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy-staging:
+    if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || github.event_name == 'workflow_dispatch' }}
+    uses: simplify9/.github/.github/workflows/generic-gateway-helm-template.yml@main
+    with:
+      app-name: bitween-stg-ui
+      major-version: '8'
+      minor-version: '1'
+
+      dockerfile-path: ./Dockerfile
+      docker-context: .
+      docker-platforms: linux/amd64
+      container-registry: docker.io
+
+      namespace: playground
+      environment: Development
+      service-port: '80'
+      service-target-port: '80'
+
+      helm-set-values: image.repo=docker.io/simplify9
+
+      chart-name: s9genericchart-v2
+      chart-repo: https://charts.sf9.io
+      helm-timeout-minutes: '10'
+
+      routing-mode: gateway
+      gateway-hostnames: app-dev.bitween.io
+      gateway-paths: |
+        /
+      gateway-path-type: PathPrefix
+      gateway-backend-port: '80'
+
+      gateway-auto-onboarding: true
+      gateway-parent-name: public-gateway
+      gateway-parent-namespace: s9-dev-edge
+      gateway-class-name: cilium
+      gateway-cert-issuer-name: letsencrypt-production-gateway
+      gateway-cert-issuer-kind: ClusterIssuer
+      gateway-cert-wait: true
+      gateway-cert-wait-timeout-seconds: '600'
+
+      configmap-enabled: false
+
+    secrets:
+      registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+      kubeconfig: ${{ secrets.S9DEV_KUBECONFIG_V2 }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
