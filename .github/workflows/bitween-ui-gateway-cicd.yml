@@ -19,7 +19,7 @@ jobs:
     if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || github.event_name == 'workflow_dispatch' }}
     uses: simplify9/.github/.github/workflows/generic-gateway-helm-template.yml@main
     with:
-      app-name: bitween-stg-ui
+      app-name: bitween-dev-ui
       major-version: '8'
       minor-version: '1'
 
