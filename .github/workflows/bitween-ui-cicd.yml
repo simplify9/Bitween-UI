@@ -7,6 +7,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: cicd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 # contents: write → tag job. packages: write is kept for safety but is not
 # required for this Docker Hub + ChartMuseum setup (only needed if you publish
 # the image or chart to GHCR).
