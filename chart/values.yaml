@@ -7,6 +7,9 @@ probes:
   enabled: false
 
 service:
+  # type is consumed by templates/NOTES.txt (contains "…" .Values.service.type);
+  # templates/service.yaml is always ClusterIP, so keep these aligned.
+  type: ClusterIP
   port: 80
 
 # North-south routing. The chart defaults to ingress-nginx (below). Set
