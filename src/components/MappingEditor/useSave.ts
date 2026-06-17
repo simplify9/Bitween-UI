@@ -61,12 +61,13 @@ export function useSave(subscriptionId: number): UseSaveResult {
     for (const am of arrayMappings) {
       if (!am.source && !am.fixedItems?.length && am.primitiveItems == null)
         errors.push({ type: 'error', message: `Array mapping missing source path` });
-      if (!am.target)
+      if (!am.target && !am.isRootOutput)
         errors.push({ type: 'error', message: `Array mapping missing target path` });
       if (am.mappings.length === 0 && !am.fixedItems?.length && am.primitiveItems == null) {
+        const label = am.isRootOutput ? `root array (${am.source})` : `${am.source} → ${am.target}`;
         errors.push({
           type: 'warning',
-          message: `Array mapping "${am.source} → ${am.target}" has no field mappings`,
+          message: `Array mapping "${label}" has no field mappings`,
         });
       }
     }
