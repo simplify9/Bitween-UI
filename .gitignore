@@ -25,3 +25,10 @@ yarn-debug.log*
 yarn-error.log*
 .npmrc
 .npmrcTemp
+.github/instructions/
+
+# local package manager files (project uses yarn)
+package-lock.json
+pnpm-lock.yaml
+.pnpm-store/
+.env
