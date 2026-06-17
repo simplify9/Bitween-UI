@@ -1,0 +1,67 @@
+name: Bitween UI CI/CD (Gateway · GHCR OCI)
+run-name: Run-${{ github.ref_name }}-${{ github.run_number }}
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cicd-gateway-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+# contents: write -> tag job. packages: write -> publish AND pull the Helm chart
+# via GHCR OCI (github-oci). The Docker image is still pushed to Docker Hub.
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-publish-deploy:
+    if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || github.event_name == 'workflow_dispatch' }}
+    uses: simplify9/.github/.github/workflows/reusable-service-cicd.yml@main
+    with:
+      major-version: '8'
+      minor-version: '1'
+      dockerfile-path: './Dockerfile'
+      docker-context: '.'
+      docker-platforms: 'linux/amd64'
+
+      chart-name: 'bitweenui'                # must match Chart.yaml name:
+      chart-path: './chart'
+
+      # 1) Publish the Helm chart to BOTH GHCR OCI and ChartMuseum
+      chart-publish-method: 'both'
+      chart-repo-url: 'https://charts.sf9.io'   # ChartMuseum target (required for 'both')
+
+      # Docker image is still published to Docker Hub
+      container-registry: 'docker.io'
+      image-name: 'simplify9/bitweenui'
+
+      # 2) Deploy to the cluster using Gateway API
+      deploy: true
+      # 3) Pull the chart from GHCR OCI (the default source for 'both')
+      deploy-chart-source: 'github-oci'
+      deploy-namespace: 'playground'
+      routing-mode: 'gateway-api'
+      gateway-hostnames: 'app-dev.bitween.io'
+      gateway-paths: '/'
+      # app-dev.bitween.io is not *.sf9.io, so the deploy auto-onboards a
+      # dedicated listener + cert-manager Certificate on the parent gateway.
+      # Parent gateway / class / issuer use the standard defaults
+      # (public-gateway · s9-dev-edge · cilium · letsencrypt-production-gateway).
+    secrets:
+      # Docker image push credentials (Docker Hub)
+      registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # GHCR chart push + pull and git tagging use the built-in token
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ChartMuseum credentials (required because chart-publish-method is 'both')
+      chartmuseum-username: ${{ secrets.CM_USER }}
+      chartmuseum-password: ${{ secrets.CM_PASSWORD }}
+
+      # Gateway-API cluster kubeconfig (V2)
+      kubeconfig-gateway: ${{ secrets.S9DEV_KUBECONFIG_V2 }}
