@@ -4,7 +4,7 @@
       "ESNext",
       "dom"
     ],
-    "types": ["vite/client"],
+    "types": ["vitest/globals"],
     "module": "esnext",
     "target": "ES6",
     "paths": {

@@ -8,7 +8,6 @@
  *  E) Filter support
  *  F) Nested arrays inside root-array items
  */
-import { describe, it, expect } from 'vitest';
 import { generateScriban } from '../scribanGenerator';
 import { parseScriban, resolveParentArrayIds } from '../scribanParser';
 import { FieldMapping, ArrayMapping } from 'src/types/mapping';
@@ -329,5 +328,69 @@ describe('parser: root-array template round-trip', () => {
     // Both should contain the same field reference
     expect(t1).toContain('item.X');
     expect(t2).toContain('item.X');
+  });
+});
+
+// ─── G. Type casting with root-array output ──────────────────────────────────
+
+describe('type casting: root-array output', () => {
+  it('string source → number target applies to_float', () => {
+    const inputJson = JSON.stringify({ items: [{ price: '19.99' }] });
+    const outputJson = JSON.stringify([{ total: 0.0 }]);
+
+    const t = generateScriban([], [am({
+      source: 'items', alias: 'item',
+      mappings: [field({ target: 'total', source: 'price' })],
+    })], undefined, outputJson, inputJson);
+
+    expect(t).toContain('to_float');
+  });
+
+  it('number source → string target applies "" + cast', () => {
+    const inputJson = JSON.stringify({ items: [{ qty: 5 }] });
+    const outputJson = JSON.stringify([{ qty: '' }]);
+
+    const t = generateScriban([], [am({
+      source: 'items', alias: 'item',
+      mappings: [field({ target: 'qty', source: 'qty' })],
+    })], undefined, outputJson, inputJson);
+
+    expect(t).toMatch(/"qty":.*"" \+/);
+  });
+
+  it('same type (number → number) emits no cast', () => {
+    const inputJson = JSON.stringify({ items: [{ id: 1 }] });
+    const outputJson = JSON.stringify([{ id: 0 }]);
+
+    const t = generateScriban([], [am({
+      source: 'items', alias: 'item',
+      mappings: [field({ target: 'id', source: 'id' })],
+    })], undefined, outputJson, inputJson);
+
+    expect(t).toContain('"id": {{ item.id | json }}');
+    expect(t).not.toContain('to_float');
+  });
+
+  it('nested array: number source → string target applies "" + cast', () => {
+    const inputJson = JSON.stringify([{ OrderId: 1, LineItems: [{ SKU: 'ABC', Qty: 2 }] }]);
+    const outputJson = JSON.stringify([{ orderId: 0, lines: [{ sku: '', qty: '0' }] }]);
+
+    const rootAm: ArrayMapping = {
+      id: 'root', isRootOutput: true, source: 'items', alias: 'item', target: '',
+      mappings: [field({ target: 'orderId', source: 'OrderId' })],
+    };
+    const linesAm: ArrayMapping = {
+      id: 'lines', parentArrayId: 'root', source: 'LineItems', alias: 'line', target: 'lines',
+      mappings: [
+        field({ target: 'sku', source: 'SKU' }),
+        field({ target: 'qty', source: 'Qty' }),
+      ],
+    };
+
+    const t = generateScriban([], [rootAm, linesAm], undefined, outputJson, inputJson);
+
+    // qty target is string, Qty source is number → must cast
+    // qty target is string, Qty source is number → must cast with "" +
+    expect(t).toMatch(/"qty":[\s\S]*"" \+[\s\S]*Qty/);
   });
 });
