@@ -149,12 +149,13 @@ export const addAxiosInterceptors = (axiosInstance: AxiosInstance, config: AuthC
                         return axiosInstance(originalRequest);
                     });
             }
-            if (error.response?.data) {
-                toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
-            } else {
-                if (!error.request.responseURL.endsWith("login"))
+            const isLoginRequest = error.request?.responseURL?.endsWith("login");
+            if (!isLoginRequest) {
+                if (error.response?.data) {
+                    toast(JSON.stringify(error.response?.data, null, 4), {type: "error"})
+                } else {
                     toast("Something went wrong", {type: "error"})
-
+                }
             }
 
 
