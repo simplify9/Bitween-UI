@@ -483,7 +483,9 @@ function renderRootArrayMapping(
   lines.push('{');
   for (const m of am.mappings) {
     if (!m.target.trim()) continue;
-    const targetType = typeMap?.[`${itemPrefix}.${m.target}`];
+    // typeMap is built from the root-array output JSON, whose keys are bare field
+    // names (no prefix), so look up by m.target directly.
+    const targetType = typeMap?.[m.target];
     const sourceType = m.source ? sourceTypeMap?.[`${itemPrefix}.${m.source}`] : undefined;
     lines.push(`  "${m.target}": ${renderFieldValue(m, alias, valuesSetMap, targetType, sourceType)},`);
   }
@@ -519,12 +521,15 @@ function renderArrayMapping(
   const source = outerAlias ? `${outerAlias}.${am.source}` : am.source;
   const filterExpr = renderFilter(alias, am.filter ?? undefined);
 
-  // Build the full item prefix for typeMap lookups, e.g. "labels[*]" or "orders[*].items[*]"
+  // Build the full item prefix for typeMap lookups, e.g. "labels[*]" or "orders[*].items[*]".
+  // Root-output AMs have target='' and no parent — they contribute no prefix segment so that
+  // their children resolve to "lines[*]" rather than "[*].lines[*]".
   function resolvePrefix(id: string): string {
     const m = allAMs.find((a) => a.id === id);
     if (!m) return '';
-    if (!m.parentArrayId) return `${m.target}[*]`;
-    return `${resolvePrefix(m.parentArrayId)}.${m.target}[*]`;
+    if (!m.parentArrayId) return m.target ? `${m.target}[*]` : '';
+    const parentPrefix = resolvePrefix(m.parentArrayId);
+    return parentPrefix ? `${parentPrefix}.${m.target}[*]` : `${m.target}[*]`;
   }
   const itemPrefix = resolvePrefix(am.id);
 
