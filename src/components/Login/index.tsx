@@ -4,6 +4,7 @@ import {apiClient} from "src/client";
 import Button from "src/components/common/forms/Button";
 import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
 import {ToastContainer} from "react-toastify";
+import {BsFillEyeFill, BsFillEyeSlashFill} from "react-icons/bs";
 import {useTypedSelector} from "src/state/ReduxSotre";
 
 
@@ -13,19 +14,33 @@ const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const onSubmit = async () => {
-
-        let res = await apiClient.login({username, password});
-        if (res.succeeded) {
-            login({
-                accessToken: res.data.jwt,
-                refreshToken: res.data.refreshToken,
-                accessTokenExpiry: 3
-            })
-        } else {
-            const firstVal = res.error && typeof res.error === "object" ? Object.values(res.error)[0] : null;
-            const message = Array.isArray(firstVal) ? firstVal[0] : firstVal;
-            setError(typeof message === "string" ? message : "Something went wrong while trying to log you in")
+        if (loading) return;
+        setError("");
+        setLoading(true);
+        try {
+            let res = await apiClient.login({username, password});
+            if (res.succeeded) {
+                login({
+                    accessToken: res.data.jwt,
+                    refreshToken: res.data.refreshToken,
+                    accessTokenExpiry: 3
+                })
+            } else {
+                const errData = res.error;
+                let message: string | null = null;
+                if (typeof errData === "string") {
+                    message = errData;
+                } else if (errData && typeof errData === "object") {
+                    const firstVal = Object.values(errData)[0];
+                    message = Array.isArray(firstVal) ? firstVal[0] : typeof firstVal === "string" ? firstVal : null;
+                }
+                setError(message || "Something went wrong while trying to log you in");
+            }
+        } finally {
+            setLoading(false);
         }
     }
     return (
@@ -80,15 +95,26 @@ const Login = () => {
 
                                     </div>
 
-                                    <input value={password} onChange={(e) => setPassword(e.target.value)}
-                                           type="password" name="password" id="password" placeholder="Your Password"
-                                           className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
+                                    <div className="relative">
+                                        <input value={password} onChange={(e) => setPassword(e.target.value)}
+                                               type={showPassword ? "text" : "password"} name="password" id="password"
+                                               placeholder="Your Password"
+                                               className="block w-full px-4 py-2 pr-10 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
+                                        <button type="button" tabIndex={-1}
+                                                onClick={() => setShowPassword(s => !s)}
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                                className="absolute inset-y-0 right-0 flex items-center pr-3 mt-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                            {showPassword ? <BsFillEyeSlashFill size={18}/> : <BsFillEyeFill size={18}/>}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="mt-6 w-full">
 
-                                    <Button onClick={onSubmit} className={"w-full py-2"}>
-                                        Sign in
+                                    <Button onClick={onSubmit} disabled={loading} className={"w-full py-2"}>
+                                        {loading && <span
+                                            className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"/>}
+                                        {loading ? "Signing in..." : "Sign in"}
                                     </Button>
 
                                 </div>
