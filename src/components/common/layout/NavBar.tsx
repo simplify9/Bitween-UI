@@ -5,7 +5,7 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange, TbActivity} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
-import {MdNotificationAdd, MdDataObject, MdApi} from "react-icons/md";
+import {MdNotificationAdd, MdDataObject, MdApi, MdHub} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
 import Tooltip from "src/components/common/Tooltip";
 import {useAppConfigQuery} from "src/client/apis/generalApi";
@@ -104,6 +104,16 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             </div>
 
                             <span className={isOpen ? "block" : "hidden"}>API Gateways</span>
+
+                        </NavLink>
+                        <NavLink to="/bus-gateways" title={isOpen ? undefined : "Bus Gateways"}
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdHub className={"w-6 h-6"}
+                                       size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Bus Gateways</span>
 
                         </NavLink>
                         <NavLink to="/documents" title={isOpen ? undefined : "Documents"}

@@ -43,7 +43,11 @@ const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
                             disabled={Boolean(initialState?.type)}
                             placeholder="Select Subscription Type"
                             value={newSubscription.type}
-                            onChange={val => setNewSubscription({...newSubscription, type: val.toString(), partnerId: val.toString() === String(SubscriptionType.GatewayApiCall) ? undefined : newSubscription.partnerId})}
+                            onChange={val => {
+                                const t = val.toString();
+                                const noPartner = t === String(SubscriptionType.GatewayApiCall) || t === String(SubscriptionType.BusGateway);
+                                setNewSubscription({...newSubscription, type: t, partnerId: noPartner ? undefined : newSubscription.partnerId});
+                            }}
                             optionTitle={(item: OptionType) => item.title}
                             optionValue={(item: OptionType) => item.id}
                             options={SubscriptionTypeOptions}/>
@@ -56,7 +60,7 @@ const Component: React.FC<Props> = ({onClose, onAdd, initialState}) => {
                                           onChange={val => setNewSubscription({...newSubscription, documentId: val})}/>
                     </FormField>
                 </div>}
-                {newSubscription.type != String(SubscriptionType.Receiving) && newSubscription.type != String(SubscriptionType.GatewayApiCall) && <div className="mt-4">
+                {newSubscription.type != String(SubscriptionType.Receiving) && newSubscription.type != String(SubscriptionType.GatewayApiCall) && newSubscription.type != String(SubscriptionType.BusGateway) && <div className="mt-4">
                     <FormField title="Partner" className="grow">
                         <PartnerSelector value={newSubscription.partnerId}
                                          onChange={val => setNewSubscription({...newSubscription, partnerId: val})}/>

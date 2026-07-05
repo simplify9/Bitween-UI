@@ -27,6 +27,8 @@ import GlobalAdapterValuesSets from "src/components/GlobalAdapterValuesSets";
 import GlobalAdapterValuesSet from "src/components/GlobalAdapterValuesSet";
 import ApiGateways from "src/components/ApiGateways";
 import ApiGateway from "src/components/ApiGateway";
+import BusGateways from "src/components/BusGateways";
+import BusGateway from "src/components/BusGateway";
 import DynamicIconAndTitle from "src/components/DynamicIconAndTitle";
 import MappingEditorPage from "src/components/MappingEditor";
 import AmqpHealth from "src/components/AmqpHealth";
@@ -106,6 +108,8 @@ function App() {
                                     <Route path="/global-adapter-values-sets/:id" element={<GlobalAdapterValuesSet/>}/>
                                     <Route path="/api-gateways" element={<ApiGateways/>}/>
                                     <Route path="/api-gateways/:id" element={<ApiGateway/>}/>
+                                    <Route path="/bus-gateways" element={<BusGateways/>}/>
+                                    <Route path="/bus-gateways/:id" element={<BusGateway/>}/>
                                     <Route path={"/notifications"} element={<Notifications/>}/>
                                     <Route path={"/team"} element={<Team/>}/>                                    <Route path={"amqp-health"} element={<AmqpHealth/>}/>                                </Routes>
                             </div>
