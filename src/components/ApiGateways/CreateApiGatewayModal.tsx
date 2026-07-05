@@ -27,7 +27,7 @@ const CreateApiGatewayModal: React.FC<Props> = ({onClose}) => {
     return (
         <Modal onClose={onClose} submitLabel="Create" onSubmit={onCreate}>
             <FormField title="Name" className="grow">
-                <TextEditor value={name} onChange={setName}/>
+                <TextEditor value={name} onChange={setName} placeholder="e.g. orders-api"/>
             </FormField>
             <FormField title="URL Name" className="grow">
                 <TextEditor value={urlName} onChange={setUrlName} placeholder="e.g. my-gateway"/>

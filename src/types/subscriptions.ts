@@ -7,6 +7,7 @@ export enum SubscriptionType {
     Receiving = 4,
     Aggregation = 8,
     GatewayApiCall = 16,
+    BusGateway = 32,
 }
 
 export const SubscriptionTypes = [
@@ -15,6 +16,7 @@ export const SubscriptionTypes = [
     {label: 'Receiving', value: SubscriptionType.Receiving},
     {label: 'Aggregation', value: SubscriptionType.Aggregation},
     {label: 'GatewayApiCall', value: SubscriptionType.GatewayApiCall},
+    {label: 'BusGateway', value: SubscriptionType.BusGateway},
 ]
 
 
@@ -158,6 +160,7 @@ export const SubscriptionTypeOptions: OptionType[] = [
     {id: String(SubscriptionType.Receiving), title: "Receiving"},
     {id: String(SubscriptionType.Aggregation), title: "Aggregation"},
     {id: String(SubscriptionType.GatewayApiCall), title: "GatewayApiCall"},
+    {id: String(SubscriptionType.BusGateway), title: "BusGateway"},
 ]
 
 export const normalizeSubscriptionType = (type?: string | number | null): string => {

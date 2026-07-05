@@ -1,20 +1,20 @@
 import {useNavigate} from "react-router-dom";
 import React, {useState} from "react";
-import {ApiGatewayModel} from "src/types/apiGateways";
+import {BusGatewayModel} from "src/types/busGateways";
 import {BsFillEyeFill} from "react-icons/bs";
 import {MdDelete} from "react-icons/md";
 import Button from "src/components/common/forms/Button";
-import {useDeleteApiGatewayMutation} from "src/client/apis/apiGatewaysApi";
+import {useDeleteBusGatewayMutation} from "src/client/apis/busGatewaysApi";
 import Dialog from "src/components/common/dialog";
 import Authorize from "src/components/common/authorize/authorize";
 
 interface Props {
-    data: ApiGatewayModel[];
+    data: BusGatewayModel[];
 }
 
-export const ApiGatewaysList: React.FC<Props> = ({data}) => {
+export const BusGatewaysList: React.FC<Props> = ({data}) => {
     const navigate = useNavigate();
-    const [deleteGateway] = useDeleteApiGatewayMutation();
+    const [deleteGateway] = useDeleteBusGatewayMutation();
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
     const onConfirmDelete = async () => {
@@ -38,8 +38,8 @@ export const ApiGatewaysList: React.FC<Props> = ({data}) => {
                 <tr>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">ID</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Name</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">URL Name</th>
-                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Partners</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Document</th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Routes</th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Actions</th>
                 </tr>
                 </thead>
@@ -47,7 +47,7 @@ export const ApiGatewaysList: React.FC<Props> = ({data}) => {
                 {data?.length === 0 && (
                     <tr>
                         <td colSpan={5} className="text-sm text-gray-400 px-6 py-8 text-center">
-                            No API gateways yet. Click <span className="font-medium text-gray-500">Add</span> to create one.
+                            No bus gateways yet. Click <span className="font-medium text-gray-500">Add</span> to create one.
                         </td>
                     </tr>
                 )}
@@ -56,11 +56,13 @@ export const ApiGatewaysList: React.FC<Props> = ({data}) => {
                         <td className="text-sm text-gray-400 font-light px-6 py-2 whitespace-nowrap">{i.id}</td>
                         <td className="text-sm text-gray-900 font-medium px-6 py-2 whitespace-nowrap">{i.name}</td>
                         <td className="px-6 py-2 whitespace-nowrap">
-                            <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">{i.urlName}</code>
+                            <span className="inline-flex items-center text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                {i.documentName}
+                            </span>
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap">
-                            <span className={`inline-flex items-center justify-center min-w-[1.5rem] text-xs font-semibold px-2 py-0.5 rounded-full ${(i.partnersCount ?? 0) > 0 ? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-400'}`}>
-                                {i.partnersCount ?? 0}
+                            <span className={`inline-flex items-center justify-center min-w-[1.5rem] text-xs font-semibold px-2 py-0.5 rounded-full ${(i.routesCount ?? 0) > 0 ? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-400'}`}>
+                                {i.routesCount ?? 0}
                             </span>
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap">

@@ -312,7 +312,7 @@ const Component = () => {
 
 
                     </div>}
-                {(subscriptionType == String(SubscriptionType.ApiCall) || subscriptionType == String(SubscriptionType.GatewayApiCall)) &&
+                {(subscriptionType == String(SubscriptionType.ApiCall) || subscriptionType == String(SubscriptionType.GatewayApiCall) || subscriptionType == String(SubscriptionType.BusGateway)) &&
                     <div
                         className="bg-white border shadow-lg rounded-lg px-2 py-2 md:w-1/2">
                         <AdapterEditor

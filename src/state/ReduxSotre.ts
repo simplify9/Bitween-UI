@@ -7,6 +7,7 @@ import {XchangeApi} from "src/client/apis/xchangeApi";
 import {GeneralApi} from "src/client/apis/generalApi";
 import {GlobalAdapterValuesSetsApi} from "src/client/apis/globalAdapterValuesSetsApi";
 import {ApiGatewaysApi} from "src/client/apis/apiGatewaysApi";
+import {BusGatewaysApi} from "src/client/apis/busGatewaysApi";
 import {MappersApi} from "src/client/apis/mappersApi";
 import {PartnersApi} from "src/client/apis/partnersApi";
 import {AmqpHealthApi} from "src/client/apis/amqpHealthApi";
@@ -23,6 +24,7 @@ const reducers = combineReducers({
     [GeneralApi.reducerPath]:GeneralApi.reducer,
     [GlobalAdapterValuesSetsApi.reducerPath]: GlobalAdapterValuesSetsApi.reducer,
     [ApiGatewaysApi.reducerPath]: ApiGatewaysApi.reducer,
+    [BusGatewaysApi.reducerPath]: BusGatewaysApi.reducer,
     [MappersApi.reducerPath]: MappersApi.reducer,
     [PartnersApi.reducerPath]: PartnersApi.reducer,
     [AmqpHealthApi.reducerPath]: AmqpHealthApi.reducer,
@@ -40,6 +42,7 @@ export const store = configureStore({
             GeneralApi.middleware,
             GlobalAdapterValuesSetsApi.middleware,
             ApiGatewaysApi.middleware,
+            BusGatewaysApi.middleware,
             MappersApi.middleware,
             PartnersApi.middleware,
             AmqpHealthApi.middleware,
