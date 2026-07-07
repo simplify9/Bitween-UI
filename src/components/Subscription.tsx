@@ -19,6 +19,8 @@ import AdapterEditor from "./Subscriptions/AdapterEditor";
 import { NATIVE_JSON_MAPPER_ID } from "src/types/mapping";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
+import RetryPolicySelector from "src/components/RetryPolicies/RetryPolicySelector";
+import RetryGroupsEditor from "src/components/RetryPolicies/RetryGroupsEditor";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
@@ -54,6 +56,7 @@ const Component = () => {
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
+    const [retryPolicyMode, setRetryPolicyMode] = useState<"NONE" | "NAMED" | "CUSTOM">("NONE");
     const savedDataRef = useRef<string>('{}');
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
@@ -86,9 +89,11 @@ const Component = () => {
             });
             setUpdateSubscriptionData(normalized);
             savedDataRef.current = JSON.stringify(normalized);
+            setRetryPolicyMode(normalized.customRetryPolicy ? "CUSTOM" : normalized.retryPolicyId ? "NAMED" : "NONE");
         } else {
             setUpdateSubscriptionData({});
             savedDataRef.current = '{}';
+            setRetryPolicyMode("NONE");
         }
     }, [subscriptionData, id]);
 
@@ -148,6 +153,18 @@ const Component = () => {
     
     if (!updateSubscriptionData) return <></>
     const subscriptionType = normalizeSubscriptionType(updateSubscriptionData?.type);
+    const onChangeRetryPolicyMode = (mode: string) => {
+        setRetryPolicyMode(mode as typeof retryPolicyMode)
+        if (mode === "NAMED") {
+            onChangeSubscriptionData("customRetryPolicy", null)
+        } else if (mode === "CUSTOM") {
+            onChangeSubscriptionData("retryPolicyId", null)
+            onChangeSubscriptionData("customRetryPolicy", updateSubscriptionData.customRetryPolicy ?? {groups: []})
+        } else {
+            onChangeSubscriptionData("retryPolicyId", null)
+            onChangeSubscriptionData("customRetryPolicy", null)
+        }
+    }
 
     return (
         <div className="flex flex-col w-full  ">
@@ -412,6 +429,37 @@ const Component = () => {
                             </FormField>
                         </div>
                     </div>
+                </div>
+
+                <div className="bg-white border shadow-lg rounded-lg px-2 py-2">
+                    <FormField title="Retry Policy" className="grow w-64">
+                        <ChoiceEditor
+                            value={retryPolicyMode}
+                            onChange={onChangeRetryPolicyMode}
+                            optionTitle={(item: OptionType) => item.title}
+                            optionValue={(item: OptionType) => item.id}
+                            isClearable={false}
+                            options={[
+                                {id: "NONE", title: "None"},
+                                {id: "NAMED", title: "Named Policy"},
+                                {id: "CUSTOM", title: "Custom"},
+                            ]}/>
+                    </FormField>
+
+                    {retryPolicyMode === "NAMED" &&
+                        <div className={"mt-3 w-64"}>
+                            <RetryPolicySelector
+                                value={updateSubscriptionData.retryPolicyId?.toString()}
+                                onChange={(v) => onChangeSubscriptionData("retryPolicyId", v ? Number(v) : null)}/>
+                        </div>
+                    }
+
+                    {retryPolicyMode === "CUSTOM" &&
+                        <RetryGroupsEditor
+                            title={"Groups"}
+                            groups={updateSubscriptionData.customRetryPolicy?.groups ?? []}
+                            onChange={(g) => onChangeSubscriptionData("customRetryPolicy", {groups: g})}/>
+                    }
                 </div>
             </div>
 
