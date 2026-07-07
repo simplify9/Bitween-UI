@@ -188,6 +188,9 @@ interface QueryParams {
     categoryId?: number | null
     workGroupId?: number | null
     documentId?: number | null
+    exception?: string;
+    scheduledFrom?: string;
+    scheduledTo?: string;
 }
 
 export const formulateQueryString = (req: QueryParams) => {
@@ -221,6 +224,9 @@ export const formulateQueryString = (req: QueryParams) => {
     if ('promotedProperties' in req && req.promotedProperties && req.promotedProperties != '') query += `&filter=PromotedPropertiesRaw:1:${req.promotedProperties}`;
     if ('creationDateFrom' in req && req.creationDateFrom && req.creationDateFrom != '') query += `&filter=StartedOn:6:${dayjs(req.creationDateFrom).set('h', 0).set('m', 0).toISOString()}`;
     if ('creationDateTo' in req && req.creationDateTo && req.creationDateTo != '') query += `&filter=StartedOn:8:${dayjs(req.creationDateTo).set('h', 23).set('m', 59).toISOString()}`;
+    if ('exception' in req && req.exception && req.exception != '') query += `&filter=Exception:4:${encodeURIComponent(req.exception)}`;
+    if ('scheduledFrom' in req && req.scheduledFrom && req.scheduledFrom != '') query += `&filter=On:6:${dayjs(req.scheduledFrom).set('h', 0).set('m', 0).toISOString()}`;
+    if ('scheduledTo' in req && req.scheduledTo && req.scheduledTo != '') query += `&filter=On:8:${dayjs(req.scheduledTo).set('h', 23).set('m', 59).toISOString()}`;
     if ('test' in req && req.test) query += `&test=${req.test}`;
     if ('orderBy' in req && req.orderBy?.field) query += `&sort=${req.orderBy?.field}:${req.orderBy?.descending ? 2 : 1}`;
     return query;
