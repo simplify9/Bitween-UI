@@ -74,6 +74,16 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             <span className={isOpen ? "block" : "hidden"}>   Xchanges</span>
 
                         </NavLink>
+                        <NavLink to="/scheduled-retries" title={isOpen ? undefined : "Scheduled Retries"}
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdSchedule className={"w-6 h-6"}
+                                            size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Scheduled Retries</span>
+
+                        </NavLink>
                         {config.data?.isRabbitMqManagementConfigured && (
                             <NavLink to="/amqp-health" title={isOpen ? undefined : "AMQP Health"}
                                      className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
@@ -177,16 +187,6 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             </div>
 
                             <span className={isOpen ? "block" : "hidden"}>Retry Policies</span>
-
-                        </NavLink>
-                        <NavLink to="/scheduled-retries" title={isOpen ? undefined : "Scheduled Retries"}
-                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
-                            <div>
-                                <MdSchedule className={"w-6 h-6"}
-                                            size={27}/>
-                            </div>
-
-                            <span className={isOpen ? "block" : "hidden"}>Scheduled Retries</span>
 
                         </NavLink>
                     </div>
