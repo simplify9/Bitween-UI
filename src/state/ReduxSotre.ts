@@ -11,6 +11,8 @@ import {BusGatewaysApi} from "src/client/apis/busGatewaysApi";
 import {MappersApi} from "src/client/apis/mappersApi";
 import {PartnersApi} from "src/client/apis/partnersApi";
 import {AmqpHealthApi} from "src/client/apis/amqpHealthApi";
+import {RetryPoliciesApi} from "src/client/apis/retryPoliciesApi";
+import {DelayedRetriesApi} from "src/client/apis/delayedRetriesApi";
 import {themeSlice} from "src/state/stateSlices/theme";
 import {featuresSlice} from "src/state/stateSlices/features";
 
@@ -28,6 +30,8 @@ const reducers = combineReducers({
     [MappersApi.reducerPath]: MappersApi.reducer,
     [PartnersApi.reducerPath]: PartnersApi.reducer,
     [AmqpHealthApi.reducerPath]: AmqpHealthApi.reducer,
+    [RetryPoliciesApi.reducerPath]: RetryPoliciesApi.reducer,
+    [DelayedRetriesApi.reducerPath]: DelayedRetriesApi.reducer,
 
 });
 
@@ -46,6 +50,8 @@ export const store = configureStore({
             MappersApi.middleware,
             PartnersApi.middleware,
             AmqpHealthApi.middleware,
+            RetryPoliciesApi.middleware,
+            DelayedRetriesApi.middleware,
         ])
 });
 

@@ -25,6 +25,9 @@ import ManageCategories from "src/components/ManageCategories";
 import ManageWorkGroups from "src/components/ManageWorkGroups";
 import GlobalAdapterValuesSets from "src/components/GlobalAdapterValuesSets";
 import GlobalAdapterValuesSet from "src/components/GlobalAdapterValuesSet";
+import RetryPolicies from "src/components/RetryPolicies";
+import RetryPolicy from "src/components/RetryPolicy";
+import ScheduledRetries from "src/components/ScheduledRetries";
 import ApiGateways from "src/components/ApiGateways";
 import ApiGateway from "src/components/ApiGateway";
 import BusGateways from "src/components/BusGateways";
@@ -106,12 +109,17 @@ function App() {
                                     <Route path="/notifiers/:id" element={<Notifier/>}/>
                                     <Route path="/global-adapter-values-sets" element={<GlobalAdapterValuesSets/>}/>
                                     <Route path="/global-adapter-values-sets/:id" element={<GlobalAdapterValuesSet/>}/>
+                                    <Route path="/retry-policies" element={<RetryPolicies/>}/>
+                                    <Route path="/retry-policies/:id" element={<RetryPolicy/>}/>
+                                    <Route path="/scheduled-retries" element={<ScheduledRetries/>}/>
                                     <Route path="/api-gateways" element={<ApiGateways/>}/>
                                     <Route path="/api-gateways/:id" element={<ApiGateway/>}/>
                                     <Route path="/bus-gateways" element={<BusGateways/>}/>
                                     <Route path="/bus-gateways/:id" element={<BusGateway/>}/>
                                     <Route path={"/notifications"} element={<Notifications/>}/>
-                                    <Route path={"/team"} element={<Team/>}/>                                    <Route path={"amqp-health"} element={<AmqpHealth/>}/>                                </Routes>
+                                    <Route path={"/team"} element={<Team/>}/>
+                                    <Route path={"/amqp-health"} element={<AmqpHealth/>}/>
+                                </Routes>
                             </div>
                         </div>
                     </div>

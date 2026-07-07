@@ -8,6 +8,7 @@ import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import {NavLink} from "react-router-dom";
 import {MdLoop} from "react-icons/md";
 import Tooltip from "src/components/common/Tooltip";
+import dayjs from "dayjs";
 
 interface Props {
     data: IXchange[];
@@ -176,6 +177,13 @@ export const ExchangeList: React.FC<Props> = ({
                                         value={i.retryFor}
                                     />
                                 )}
+                                {i.scheduledRetryOn && (
+                                    <ExchangeProperty
+                                        className={"text-xs bg-blue-100 font-thin"}
+                                        label={"Auto-retry"}
+                                        value={dayjs(i.scheduledRetryOn).format("YYYY-MM-DD HH:mm:ss")}
+                                    />
+                                )}
 
                                 {i.promotedProperties &&
                                     Object.keys(i.promotedProperties)?.map((k: string) => (
@@ -215,7 +223,9 @@ export const ExchangeList: React.FC<Props> = ({
                 <RetryModal
                     xid={showExceptionFor}
                     exception={data.find((i) => i.id == showExceptionFor)?.exception}
+                    scheduledRetryOn={data.find((i) => i.id == showExceptionFor)?.scheduledRetryOn}
                     onClose={() => setShowExceptionFor(null)}
+                    onRefresh={refresh}
                 />
             )}
         </>

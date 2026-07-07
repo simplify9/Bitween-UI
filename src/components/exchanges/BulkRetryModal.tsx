@@ -44,6 +44,9 @@ const RetryModal: React.FC<Props> = ({onClose, xids, onRefresh}) => {
                                 label={"Reset Configuration"}
                                 checked={resetForRetry}/>
             </div>
+            <p className={"text-xs text-gray-500 mt-2"}>
+                Exchanges with an auto-retry already scheduled will be skipped.
+            </p>
         </Modal>)
 }
 

@@ -5,7 +5,7 @@ import {BsFillPersonFill} from "react-icons/bs";
 import {TbArrowsRandom, TbBellRinging2Filled, TbExchange, TbActivity} from "react-icons/tb";
 import {HiDocument} from "react-icons/hi";
 import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
-import {MdNotificationAdd, MdDataObject, MdApi, MdHub} from "react-icons/md";
+import {MdNotificationAdd, MdDataObject, MdApi, MdHub, MdReplay, MdSchedule} from "react-icons/md";
 import {useTypedSelector} from "src/state/ReduxSotre";
 import Tooltip from "src/components/common/Tooltip";
 import {useAppConfigQuery} from "src/client/apis/generalApi";
@@ -167,6 +167,26 @@ const NavBar: React.FC<Props> = ({isOpen, setIsOpen}) => {
                             </div>
 
                             <span className={isOpen ? "block" : "hidden"}>Global Values</span>
+
+                        </NavLink>
+                        <NavLink to="/retry-policies" title={isOpen ? undefined : "Retry Policies"}
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdReplay className={"w-6 h-6"}
+                                          size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Retry Policies</span>
+
+                        </NavLink>
+                        <NavLink to="/scheduled-retries" title={isOpen ? undefined : "Scheduled Retries"}
+                                 className={(isOpen ? resolveOpenClassName : resolveClosedClassName)}>
+                            <div>
+                                <MdSchedule className={"w-6 h-6"}
+                                            size={27}/>
+                            </div>
+
+                            <span className={isOpen ? "block" : "hidden"}>Scheduled Retries</span>
 
                         </NavLink>
                     </div>

@@ -1,4 +1,5 @@
 import {CommonFindQuery, KeyValuePair, OptionType} from "./common";
+import {CustomRetryPolicy} from "./retryPolicies";
 
 export enum SubscriptionType {
     Unknown = 0,
@@ -80,6 +81,8 @@ export interface ISubscription {
     documentFilter?: Array<KeyValuePair>
     matchExpressionAsString?: string
     matchExpression?: MatchExpression
+    retryPolicyId?: number | null;
+    customRetryPolicy?: CustomRetryPolicy | null;
 }
 
 export interface ScheduleView {

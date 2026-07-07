@@ -38,6 +38,7 @@ export interface IXchange {
     responseBad: boolean | null;
     correlationId: string;
     partnerId: number | null;
+    scheduledRetryOn?: string | null;
 }
 
 
