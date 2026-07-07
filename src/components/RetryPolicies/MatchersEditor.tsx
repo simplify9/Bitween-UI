@@ -26,6 +26,31 @@ const defaultDraftFor = (type: string): Matcher => {
     }
 }
 
+const jsonPathOpTooltip = (op: JsonPathOp): string => {
+    switch (op) {
+        case JsonPathOp.Eq:
+            return 'Matches when the value at the path exactly equals the given value (case-insensitive).\n\n' +
+                'Example: path $.status, value FAILED matches {"status":"FAILED"} (and "failed", "Failed", …).';
+        case JsonPathOp.Neq:
+            return 'Matches when the value at the path does not equal the given value (case-insensitive).\n\n' +
+                'Example: path $.status, value OK matches {"status":"FAILED"} but not {"status":"OK"}.';
+        case JsonPathOp.Contains:
+            return 'Matches when the value at the path contains the given text as a substring (case-insensitive).\n\n' +
+                'Example: path $.message, value timeout matches {"message":"Request timeout after 30s"}.';
+        case JsonPathOp.Regex:
+            return 'Matches when the value at the path satisfies the given regular expression.\n\n' +
+                'Example: path $.code, value ^5\\d{2}$ matches {"code":"503"} but not {"code":"404"}.';
+        case JsonPathOp.Exists:
+            return 'Matches when the path resolves to any value, including null — the Value field is ignored.\n\n' +
+                'Example: path $.errors matches {"errors":[]} but not {"status":"OK"}.';
+        case JsonPathOp.NotExists:
+            return 'Matches when the path does not resolve to any value — the Value field is ignored.\n\n' +
+                'Example: path $.errors matches {"status":"OK"} but not {"errors":[]}.';
+        default:
+            return '';
+    }
+}
+
 export const summarizeMatcher = (m: Matcher): string => {
     switch (m.type) {
         case "contains":
@@ -139,6 +164,10 @@ const MatchersEditor: React.FC<Props> = ({matchers, onChange}) => {
                                         onChange={(v) => onChangeDraftField("path", v)}/>
                         </div>
                         <div className={"w-40"}>
+                            <div className={"flex flex-row items-center mb-1"}>
+                                <span className={"text-xs text-gray-500"}>Operator</span>
+                                <FieldTooltip content={jsonPathOpTooltip(draft.op as JsonPathOp)}/>
+                            </div>
                             <ChoiceEditor
                                 value={draft.op}
                                 onChange={(v) => onChangeDraftField("op", v)}

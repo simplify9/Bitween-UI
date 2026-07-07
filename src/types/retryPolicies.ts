@@ -106,6 +106,25 @@ export interface CustomRetryPolicy {
     groups: RetryGroup[]
 }
 
+export interface TestRetryPolicyRequest {
+    groups: RetryGroup[]
+    resultType: XchangeResultType.Error | XchangeResultType.BadResult
+    content: string
+    attemptsToSimulate: number
+}
+
+export interface TestRetryAttemptResult {
+    attemptNumber: number
+    matchedGroupName?: string | null
+    shouldRetry: boolean
+    delaySeconds?: number | null
+    reason: string
+}
+
+export interface TestRetryPolicyResponse {
+    attempts: TestRetryAttemptResult[]
+}
+
 export const matcherTypeOptions: OptionType[] = [
     {id: "contains", title: "Contains"},
     {id: "regex", title: "Regex"},

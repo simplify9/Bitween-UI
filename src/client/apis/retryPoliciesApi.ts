@@ -3,7 +3,9 @@ import customFetchBase from "src/client/apis/apiMiddleware";
 import {
     RetryPoliciesSearchModel,
     RetryPolicyModel,
-    RetryPolicyRow
+    RetryPolicyRow,
+    TestRetryPolicyRequest,
+    TestRetryPolicyResponse
 } from "src/types/retryPolicies";
 import {ApiPagedResponse} from "src/types/common";
 
@@ -59,6 +61,13 @@ export const RetryPoliciesApi = createApi({
                 method: "GET",
                 params: {lookup: true}
             })
+        }),
+        testRetryPolicy: builder.mutation<TestRetryPolicyResponse, TestRetryPolicyRequest>({
+            query: body => ({
+                url: 'RetryPolicies/test',
+                method: "POST",
+                body
+            })
         })
     })
 });
@@ -71,4 +80,5 @@ export const {
     useUpdateRetryPolicyMutation,
     useDeleteRetryPolicyMutation,
     useRetryPoliciesLookupQuery,
+    useTestRetryPolicyMutation,
 } = RetryPoliciesApi;
