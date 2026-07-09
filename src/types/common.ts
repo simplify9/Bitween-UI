@@ -33,4 +33,5 @@ export type StartupValue = {
     default?: string;
     type: string;
     private: boolean;
+    description?: string;
 }
