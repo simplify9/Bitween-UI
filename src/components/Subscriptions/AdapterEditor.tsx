@@ -250,6 +250,7 @@ const AdapterEditor: React.FC<Props> = ({
                                         onEdit={onEdit}
                                         keyOptions={availableOptions()}
                                         privateKeys={privateKeys}
+                                        startupValueMeta={startupValuesQuery.data}
                                         valueRenderer={(v, onVChange) => <ValueEditor value={v} onChange={onVChange}/>}
                         />
                     );
