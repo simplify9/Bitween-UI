@@ -19,7 +19,8 @@ permissions:
 
 jobs:
   build-publish-deploy:
-    if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || github.event_name == 'workflow_dispatch' }}
+    if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || 
+      github.event_name == 'workflow_dispatch' }}
     uses: simplify9/.github/.github/workflows/reusable-service-cicd.yml@main
     with:
       major-version: '8'
@@ -65,3 +66,4 @@ jobs:
 
       # Gateway-API cluster kubeconfig (V2)
       kubeconfig-gateway: ${{ secrets.S9DEV_KUBECONFIG_V2 }}
+      dependabot-alerts-token: ${{ secrets.DEPENDABOT_ALERTS_TOKEN }}}}
