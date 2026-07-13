@@ -14,6 +14,7 @@ concurrency:
 # contents: write -> tag job. packages: write -> publish AND pull the Helm chart
 # via GHCR OCI (github-oci). The Docker image is still pushed to Docker Hub.
 permissions:
+  security-events: read
   contents: write
   packages: write
 
