@@ -66,4 +66,4 @@ jobs:
 
       # Gateway-API cluster kubeconfig (V2)
       kubeconfig-gateway: ${{ secrets.S9DEV_KUBECONFIG_V2 }}
-      dependabot-alerts-token: ${{ secrets.DEPENDABOT_ALERTS_TOKEN }}}}
+      dependabot-alerts-token: ${{ secrets.DEPENDABOT_ALERTS_TOKEN }}
