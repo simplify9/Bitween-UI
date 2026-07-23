@@ -5,6 +5,7 @@ import FormField from "src/components/common/forms/FormField";
 import TextEditor from "src/components/common/forms/TextEditor";
 import {apiClient} from "src/client";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
+import {useAppConfigQuery} from "src/client/apis/generalApi";
 
 function isValidEmail(email: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,6 +17,8 @@ type Props = {
 }
 const AddMemberModal: React.FC<Props> = ({onClose}) => {
 
+    const config = useAppConfigQuery()
+    const disablePassword = Boolean(config.data?.disableEmailPasswordLogin)
     const [state, setState] = useState<CreateAccountModel>({name: "", email: "", password: "", role: 10});
     const [errors, setErrors] = useState<string[]>([]);
     const onSubmit = async () => {
@@ -27,7 +30,7 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
         if (state.name?.length < 3) {
             errors.push("Name must be longer than 3 characters")
         }
-        if (state.password?.length < 7) {
+        if (!disablePassword && state.password?.length < 7) {
             errors.push("Password must be longer than 8 characters")
         }
         if (errors.length > 0) {
@@ -36,7 +39,7 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
         }
 
 
-        const res = await apiClient.createMember(state)
+        const res = await apiClient.createMember(disablePassword ? {...state, password: ""} : state)
         if (res.succeeded) {
             onClose()
         }
@@ -57,13 +60,13 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
 
         </div>
 
-        <div className="  w-full mb-6 ">
+        {!disablePassword && <div className="  w-full mb-6 ">
 
             <FormField title="Password" className="grow">
                 <TextEditor type={"password"} value={state.password}
                             onChange={(e) => setState((s) => ({...s, password: e}))}/>
             </FormField>
-        </div>
+        </div>}
         <div className="  w-full mb-6 ">
             <FormField title="Role" className="grow">
                 <ChoiceEditor optionTitle={(e) => e.title} optionValue={(e) => e.id} options={RolesSelection}
