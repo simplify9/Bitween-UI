@@ -6,10 +6,12 @@ import SignInWithMsButton from "src/components/Login/SignInWithMsButton";
 import {ToastContainer} from "react-toastify";
 import {BsFillEyeFill, BsFillEyeSlashFill} from "react-icons/bs";
 import {useTypedSelector} from "src/state/ReduxSotre";
+import {useAppConfigQuery} from "src/client/apis/generalApi";
 
 
 const Login = () => {
     const theme = useTypedSelector(i => i.theme)
+    const config = useAppConfigQuery()
     const {login} = useAuthApi();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -79,6 +81,7 @@ const Login = () => {
 
                         <div className="mt-8">
                             <form>
+                                {!config.data?.disableEmailPasswordLogin && <>
                                 <div>
                                     <label htmlFor="email"
                                            className="block mb-2 text-sm text-gray-600 dark:text-gray-200">Email
@@ -118,6 +121,7 @@ const Login = () => {
                                     </Button>
 
                                 </div>
+                                </>}
                                 <SignInWithMsButton/>
                                 {
                                     error && <div className={"text-center mt-3 text-red-500"}>

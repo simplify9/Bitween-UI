@@ -19,5 +19,6 @@ export type Config = {
     msalClientId: string | null,
     msalRedirectUri: string | null,
     msalTenantId: string | null,
+    disableEmailPasswordLogin: boolean,
     isRabbitMqManagementConfigured: boolean
 }
