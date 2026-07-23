@@ -2,6 +2,9 @@
   "name": "infolink",
   "version": "0.1.0",
   "private": true,
+  "resolutions": {
+    "form-data": "^4.0.4"
+  },
   "dependencies": {
     "@azure/msal-browser": "^4.0.1",
     "@azure/msal-react": "^3.0.1",
