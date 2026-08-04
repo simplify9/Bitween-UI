@@ -132,6 +132,22 @@ export const matcherTypeOptions: OptionType[] = [
     {id: "jsonPath", title: "JSON path"},
 ]
 
+// Which failure content each matcher type can be evaluated against — mirrors Matcher.Supports()
+// on the backend. A matcher that supports none of the group's "applies to" types can never
+// fire, and the backend rejects the group on save.
+export const matcherTypeSupport: Record<Matcher["type"], XchangeResultType[]> = {
+    contains: [XchangeResultType.Error, XchangeResultType.BadResult],
+    regex: [XchangeResultType.Error, XchangeResultType.BadResult],
+    exceptionType: [XchangeResultType.Error],
+    jsonPath: [XchangeResultType.BadResult],
+}
+
+export const matcherTypeOptionsFor = (appliesTo: XchangeResultType[]): OptionType[] => {
+    const resultTypes = appliesTo?.length ? appliesTo : [XchangeResultType.Error, XchangeResultType.BadResult];
+    return matcherTypeOptions.filter(o =>
+        matcherTypeSupport[o.id as Matcher["type"]].some(t => resultTypes.includes(t)));
+}
+
 export const delayStrategyTypeOptions: OptionType[] = [
     {id: "fixed", title: "Fixed"},
     {id: "linear", title: "Linear"},

@@ -1,15 +1,16 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
 import TextEditor from "src/components/common/forms/TextEditor";
 import CheckBoxEditor from "src/components/common/forms/CheckBoxEditor";
 import Button from "src/components/common/forms/Button";
 import FieldTooltip from "src/components/common/forms/FieldTooltip";
 import {MdOutlineRemoveCircle} from "react-icons/md";
-import {JsonPathOp, Matcher, jsonPathOpOptions, matcherTypeOptions} from "src/types/retryPolicies";
+import {JsonPathOp, Matcher, XchangeResultType, jsonPathOpOptions, matcherTypeOptionsFor} from "src/types/retryPolicies";
 import {OptionType} from "src/types/common";
 
 interface Props {
     matchers: Matcher[]
+    appliesTo: XchangeResultType[]
     onChange: (matchers: Matcher[]) => void
 }
 
@@ -66,9 +67,18 @@ export const summarizeMatcher = (m: Matcher): string => {
     }
 }
 
-const MatchersEditor: React.FC<Props> = ({matchers, onChange}) => {
+const MatchersEditor: React.FC<Props> = ({matchers, appliesTo, onChange}) => {
 
     const [draft, setDraft] = useState<Matcher>(defaultDraftFor("contains"));
+
+    const typeOptions = matcherTypeOptionsFor(appliesTo);
+
+    // Changing "Applies to" can strip the draft's type from the list (e.g. Exception type
+    // after unticking Error) — fall back to the first type that is still valid.
+    useEffect(() => {
+        if (!typeOptions.some(o => o.id === draft.type))
+            setDraft(defaultDraftFor(typeOptions[0]?.id ?? "contains"));
+    }, [appliesTo]);
 
     const onChangeDraftType = (type: string) => {
         setDraft(defaultDraftFor(type));
@@ -107,7 +117,7 @@ const MatchersEditor: React.FC<Props> = ({matchers, onChange}) => {
                     <ChoiceEditor
                         value={draft.type}
                         onChange={onChangeDraftType}
-                        options={matcherTypeOptions}
+                        options={typeOptions}
                         optionTitle={(o: OptionType) => o.title}
                         optionValue={(o: OptionType) => o.id}
                         isClearable={false}
