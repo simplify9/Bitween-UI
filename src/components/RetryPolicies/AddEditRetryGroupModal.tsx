@@ -157,7 +157,8 @@ const AddEditRetryGroupModal: React.FC<Props> = ({visible, onClose, onAdd, initi
         </FormField>
 
         <FormField title="Matchers" tooltip="Conditions checked against the failure content (exception text for Error, response body for Bad result). The group fires as soon as any one matcher matches (OR logic)." className="grow mt-3">
-            <MatchersEditor matchers={group.matchers} onChange={(m) => onChangeField("matchers", m)}/>
+            <MatchersEditor matchers={group.matchers} appliesTo={group.appliesTo}
+                            onChange={(m) => onChangeField("matchers", m)}/>
         </FormField>
 
         {group.action === RetryAction.Allow && (
