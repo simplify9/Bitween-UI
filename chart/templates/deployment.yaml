@@ -26,9 +26,12 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repo }}/{{ .Chart.Name }}:{{ .Chart.Version }}"
           imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           {{- if .Values.probes.enabled }}
           livenessProbe:
