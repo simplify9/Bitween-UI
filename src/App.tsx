@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Exchanges from './components/Exchanges';
 import Subscriptions from './components/Subscriptions';
 import {useAuthApi} from "./client/components";
+import {useIdleLogout} from "./hooks/useIdleLogout";
 import Login from "./components/Login";
 import Documents from "./components/Documents";
 import Partners from "./components/Partners";
@@ -44,6 +45,8 @@ function App() {
     const dispatch = useAppDispatch();
 
     const {isLoggedIn} = useAuthApi();
+
+    useIdleLogout(!!isLoggedIn);
 
     useEffect(() => {
         // Check if WorkGroups API is available
