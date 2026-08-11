@@ -169,7 +169,7 @@ const AddEditRetryGroupModal: React.FC<Props> = ({visible, onClose, onAdd, initi
                         <TextEditor type={"number"} value={group.budget?.maxAttemptsPerError}
                                     onChange={(v) => onChangeBudgetField("maxAttemptsPerError", Number(v))}/>
                     </FormField>
-                    <FormField title="Max attempts total" tooltip="Hard ceiling on total retries across all messages hitting this group, so a burst of failures can't overwhelm the downstream system." className="grow">
+                    <FormField title="Max attempts total" tooltip="Lifetime ceiling on retries across all messages hitting this group, counted separately for each integration. Once reached the group stops retrying for that integration until its counter is cleared." className="grow">
                         <TextEditor type={"number"} value={group.budget?.maxAttemptsTotal}
                                     onChange={(v) => onChangeBudgetField("maxAttemptsTotal", Number(v))}/>
                     </FormField>
