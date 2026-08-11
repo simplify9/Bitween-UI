@@ -5,6 +5,7 @@ import FormField from "src/components/common/forms/FormField";
 import TextEditor from "src/components/common/forms/TextEditor";
 import {apiClient} from "src/client";
 import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
+import {validatePassword} from "src/utils/passwordPolicy";
 
 function isValidEmail(email: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,9 +28,7 @@ const AddMemberModal: React.FC<Props> = ({onClose}) => {
         if (state.name?.length < 3) {
             errors.push("Name must be longer than 3 characters")
         }
-        if (state.password?.length < 7) {
-            errors.push("Password must be longer than 8 characters")
-        }
+        errors.push(...validatePassword(state.password))
         if (errors.length > 0) {
             setErrors(errors)
             return;

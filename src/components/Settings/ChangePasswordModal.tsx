@@ -4,6 +4,7 @@ import {apiClient} from "src/client";
 import Modal from "src/components/common/Modal";
 import FormField from "src/components/common/forms/FormField";
 import TextEditor from "src/components/common/forms/TextEditor";
+import {validatePassword} from "src/utils/passwordPolicy";
 
 type Props = {
     onClose: () => void
@@ -25,9 +26,7 @@ const ChangePasswordModal: React.FC<Props> = ({onClose}) => {
             errors.push("Passwords dont match")
         }
 
-        if (state.newPassword?.length < 7) {
-            errors.push("Password must be longer than 8 characters")
-        }
+        errors.push(...validatePassword(state.newPassword))
 
         if (errors.length > 0) {
             setErrors(errors)
