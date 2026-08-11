@@ -4,6 +4,8 @@ import {
     RetryPoliciesSearchModel,
     RetryPolicyModel,
     RetryPolicyRow,
+    RetryGroupUsageRow,
+    RetryPolicyResetUsage,
     TestRetryPolicyRequest,
     TestRetryPolicyResponse
 } from "src/types/retryPolicies";
@@ -12,7 +14,7 @@ import {ApiPagedResponse} from "src/types/common";
 export const RetryPoliciesApi = createApi({
     baseQuery: customFetchBase,
     reducerPath: "RetryPoliciesApi",
-    tagTypes: ["retryPolicies"],
+    tagTypes: ["retryPolicies", "retryPolicyUsage"],
     endpoints: (builder) => ({
         retryPolicies: builder.query<ApiPagedResponse<RetryPolicyRow>, RetryPoliciesSearchModel>({
             providesTags: ['retryPolicies'],
@@ -68,6 +70,22 @@ export const RetryPoliciesApi = createApi({
                 method: "POST",
                 body
             })
+        }),
+        retryPolicyUsage: builder.query<RetryGroupUsageRow[], number>({
+            providesTags: ['retryPolicyUsage'],
+            query: id => ({
+                url: `RetryPolicies/${id}/usage`,
+                method: "POST",
+                body: {}
+            })
+        }),
+        resetRetryPolicyUsage: builder.mutation<{}, { id: number } & RetryPolicyResetUsage>({
+            invalidatesTags: ['retryPolicyUsage'],
+            query: ({id, ...body}) => ({
+                url: `RetryPolicies/${id}/resetusage`,
+                method: "POST",
+                body
+            })
         })
     })
 });
@@ -81,4 +99,6 @@ export const {
     useDeleteRetryPolicyMutation,
     useRetryPoliciesLookupQuery,
     useTestRetryPolicyMutation,
+    useRetryPolicyUsageQuery,
+    useResetRetryPolicyUsageMutation,
 } = RetryPoliciesApi;

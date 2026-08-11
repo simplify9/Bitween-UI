@@ -39,6 +39,8 @@ export interface IXchange {
     correlationId: string;
     partnerId: number | null;
     scheduledRetryOn?: string | null;
+    // Why the retry policy declined another attempt, when it declined.
+    retryBlockedReason?: string | null;
 }
 
 

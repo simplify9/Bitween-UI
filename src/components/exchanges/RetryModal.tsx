@@ -11,9 +11,10 @@ type Props = {
     onClose: () => void
     xid?: string
     scheduledRetryOn?: string | null
+    retryBlockedReason?: string | null
     onRefresh?: () => void
 }
-const RetryModal: React.FC<Props> = ({exception, onClose, xid, scheduledRetryOn, onRefresh}) => {
+const RetryModal: React.FC<Props> = ({exception, onClose, xid, scheduledRetryOn, retryBlockedReason, onRefresh}) => {
 
     const [resetForRetry, setResetForRetry] = useState<boolean>(false);
     const [runNow] = useRunDelayedRetryNowMutation();
@@ -69,6 +70,12 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid, scheduledRetryOn,
             <div className="flex gap-2 flex-col py-2 border border-blue-200 bg-blue-50 px-2 align-center rounded shadow-sm mb-2">
                 An auto-retry is already scheduled for {dayjs(scheduledRetryOn).format("YYYY-MM-DD HH:mm:ss")}.
                 Use "Run Now" to execute it immediately, or wait for it to run automatically.
+            </div>
+        }
+        {
+            !hasScheduledRetry && retryBlockedReason &&
+            <div className="flex gap-2 flex-col py-2 border border-amber-200 bg-amber-50 px-2 align-center rounded shadow-sm mb-2">
+                Not retried automatically — {retryBlockedReason}. Use "Retry" to run it manually.
             </div>
         }
         {

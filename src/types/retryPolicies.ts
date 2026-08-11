@@ -97,6 +97,24 @@ export interface RetryPolicyRow {
     groupCount: number
 }
 
+// "Max attempts total" is counted per integration, so a policy shared by several
+// integrations reports one row for each that has spent any of its budget.
+export interface RetryGroupUsageRow {
+    subscriptionId: number
+    subscriptionName: string
+    groupId: string
+    groupName: string
+    attemptsUsed: number
+    maxAttemptsTotal: number
+    exhausted: boolean
+    lastAttemptOn: string
+}
+
+export interface RetryPolicyResetUsage {
+    subscriptionId?: number
+    groupId?: string
+}
+
 export interface RetryPoliciesSearchModel {
     limit?: number
     offset?: number

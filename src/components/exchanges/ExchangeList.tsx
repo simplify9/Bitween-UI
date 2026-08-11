@@ -224,6 +224,7 @@ export const ExchangeList: React.FC<Props> = ({
                     xid={showExceptionFor}
                     exception={data.find((i) => i.id == showExceptionFor)?.exception}
                     scheduledRetryOn={data.find((i) => i.id == showExceptionFor)?.scheduledRetryOn}
+                    retryBlockedReason={data.find((i) => i.id == showExceptionFor)?.retryBlockedReason}
                     onClose={() => setShowExceptionFor(null)}
                     onRefresh={refresh}
                 />
