@@ -75,7 +75,7 @@ const RetryModal: React.FC<Props> = ({exception, onClose, xid, scheduledRetryOn,
         {
             !hasScheduledRetry && retryBlockedReason &&
             <div className="flex gap-2 flex-col py-2 border border-amber-200 bg-amber-50 px-2 align-center rounded shadow-sm mb-2">
-                Not retried automatically — {retryBlockedReason}. Use "Retry" to run it manually.
+                Not retried automatically — {retryBlockedReason}. Use &quot;Retry&quot; to run it manually.
             </div>
         }
         {

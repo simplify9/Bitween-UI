@@ -13,7 +13,7 @@ interface Props {
 // being retried until someone clears the counter here. Without this panel that state is invisible.
 const RetryBudgetUsage: React.FC<Props> = ({policyId}) => {
 
-    const {data, isLoading} = useRetryPolicyUsageQuery(policyId)
+    const {data, isLoading, isError, refetch} = useRetryPolicyUsageQuery(policyId)
     const [reset] = useResetRetryPolicyUsageMutation()
 
     const rows = data ?? []
@@ -29,12 +29,20 @@ const RetryBudgetUsage: React.FC<Props> = ({policyId}) => {
 
             {isLoading && <p className={"text-sm text-gray-400 italic px-2 py-3"}>Loading…</p>}
 
-            {!isLoading && rows.length === 0 &&
+            {/* Never fall through to the empty state on failure: "no budget spent" would claim
+                every group is untouched when the truth is that we could not find out. */}
+            {isError &&
+                <div className={"flex flex-row items-center justify-between gap-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2"}>
+                    <span>Could not load budget usage.</span>
+                    <Button variant={"secondary"} onClick={() => refetch()}>Try again</Button>
+                </div>}
+
+            {!isLoading && !isError && rows.length === 0 &&
                 <p className={"text-sm text-gray-400 italic px-2 py-3"}>
                     No budget spent — every group has its full allowance.
                 </p>}
 
-            {rows.length > 0 && <div className={"flex flex-col gap-2"}>
+            {!isError && rows.length > 0 && <div className={"flex flex-col gap-2"}>
                 {exhaustedCount > 0 &&
                     <p className={"text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2"}>
                         {exhaustedCount === 1

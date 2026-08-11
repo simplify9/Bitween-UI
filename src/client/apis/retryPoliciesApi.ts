@@ -42,7 +42,8 @@ export const RetryPoliciesApi = createApi({
             })
         }),
         updateRetryPolicy: builder.mutation<{}, { id: number } & RetryPolicyModel>({
-            invalidatesTags: ['retryPolicies'],
+            // Saving drops the counters of any removed group, so the usage panel must refetch.
+            invalidatesTags: ['retryPolicies', 'retryPolicyUsage'],
             query: body => ({
                 url: `RetryPolicies/${body.id}`,
                 method: "POST",
