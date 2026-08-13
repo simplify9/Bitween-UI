@@ -84,7 +84,7 @@ const Login = () => {
                                            className="block mb-2 text-sm text-gray-600 dark:text-gray-200">Email
                                         Address</label>
                                     <input value={username} onChange={(e) => setUsername(e.target.value)} type="email"
-                                           name="email" id="email" placeholder="example@example.com"
+                                           name="email" id="email" placeholder="example@example.com" autoComplete="off"
                                            className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
                                 </div>
 
@@ -98,7 +98,7 @@ const Login = () => {
                                     <div className="relative">
                                         <input value={password} onChange={(e) => setPassword(e.target.value)}
                                                type={showPassword ? "text" : "password"} name="password" id="password"
-                                               placeholder="Your Password"
+                                               placeholder="Your Password" autoComplete="off"
                                                className="block w-full px-4 py-2 pr-10 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"/>
                                         <button type="button" tabIndex={-1}
                                                 onClick={() => setShowPassword(s => !s)}

@@ -21,7 +21,15 @@ const config = defineConfig({
     },
     server: {
         port: 3000,
-
+        strictPort: true,
+        // Mirror the production nginx security headers so they can be tested in dev.
+        headers: {
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "X-Permitted-Cross-Domain-Policies": "none",
+            "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+        },
     },
   
     resolve: {

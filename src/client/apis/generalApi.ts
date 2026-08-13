@@ -57,6 +57,14 @@ export const GeneralApi = createApi({
                 body: body
             })
         }),
+        unlockMember: builder.mutation<{}, { id: number }>({
+            invalidatesTags: ['account'],
+            query: (body) => ({
+                url: `Accounts/${body.id}/unlock`,
+                method: 'POST',
+                body: {}
+            })
+        }),
         findMembers: builder.query<ApiPagedResponse<AccountModel>, {
             lookup?: boolean,
             limit: number,
@@ -135,5 +143,6 @@ export const {
     useProfileQuery,
     useUpdateMemberMutation,
     useFindMembersQuery,
-    useRemoveMemberMutation
+    useRemoveMemberMutation,
+    useUnlockMemberMutation
 } = GeneralApi

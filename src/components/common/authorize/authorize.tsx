@@ -10,6 +10,6 @@ const Authorize: React.FC<Props> = ({roles, children}) => {
     const role = useTypedSelector(i => i.user.userInfo?.role)
 
     // @ts-ignore
-    return roles.includes(role) ? children : <section disabled>{children}</section>
+    return roles.includes(role) ? children : null
 }
 export default Authorize
