@@ -40,6 +40,7 @@ export interface AccountModel {
     createdOn: string
     id: number
     role: Role
+    lockoutEnd?: string | null
 }
 
 export interface EditModal {

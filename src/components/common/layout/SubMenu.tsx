@@ -6,6 +6,7 @@ import {FaSignOutAlt} from "react-icons/fa"
 import {RiTeamFill} from "react-icons/ri";
 import {BiHelpCircle} from "react-icons/bi"
 import AuthConfig from "src/authConfig";
+import Authorize from "src/components/common/authorize/authorize";
 
 type Props = {
     children: React.ReactNode
@@ -36,13 +37,15 @@ const SubMenu: React.FC<Props> = ({children}) => {
 
                 <hr className="border-gray-200 dark:border-gray-700 "/>
 
-                <NavLink to="team"
-                         className="flex items-center p-3 text-sm text-gray-600 capitalize transition-colors duration-300 transform  hover:bg-gray-100 ">
-                    <RiTeamFill size={21}
-                                className={"mr-1"}/>
+                <Authorize roles={["Admin"]}>
+                    <NavLink to="team"
+                             className="flex items-center p-3 text-sm text-gray-600 capitalize transition-colors duration-300 transform  hover:bg-gray-100 ">
+                        <RiTeamFill size={21}
+                                    className={"mr-1"}/>
 
-                    <span className="mx-1">Team</span>
-                </NavLink>
+                        <span className="mx-1">Team</span>
+                    </NavLink>
+                </Authorize>
 
 
                 <hr className="border-gray-200 dark:border-gray-700 "/>

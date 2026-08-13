@@ -7,7 +7,7 @@ import {MdOutlineRemoveCircle,MdModeEditOutline} from "react-icons/md";
 import Authorize from "src/components/common/authorize/authorize";
 import Button from "src/components/common/forms/Button";
 import EditMemberModal from "src/components/Settings/EditMemberModal";
-import {useFindMembersQuery, useRemoveMemberMutation} from "src/client/apis/generalApi";
+import {useFindMembersQuery, useRemoveMemberMutation, useUnlockMemberMutation} from "src/client/apis/generalApi";
 
 
 const defaultQuery = {
@@ -18,6 +18,7 @@ const defaultQuery = {
 const MembersInfo: React.FC = () => {
 const {data}=useFindMembersQuery(defaultQuery)
  const [removeMember]=useRemoveMemberMutation()
+ const [unlockMember]=useUnlockMemberMutation()
     const [openModal, setOpenModal] = useState<"NONE" | "ADD" | "EDIT">("NONE");
     const [memberToEdit, setMemberToEdit] = useState<EditModal | null>(null);
 
@@ -33,6 +34,12 @@ const getRole=(role)=>{
 }
     const onRemoveMember = async (id: number) => {
         await removeMember({id:id})
+    }
+
+    const isLocked = (m: AccountModel) => !!m.lockoutEnd && new Date(m.lockoutEnd) > new Date()
+
+    const onUnlockMember = async (id: number) => {
+        await unlockMember({id:id})
     }
 
     return <div className={"bg-white p-3 shadow-lg rounded-lg "}>
@@ -63,7 +70,7 @@ const getRole=(role)=>{
 
 
         </div>
-        <div className="pt-3 w">
+        <div className="pt-3 overflow-x-auto">
             <table className="appearance-none min-w-full">
                 <thead className="border-y bg-gray-50">
                 <tr>
@@ -78,6 +85,9 @@ const getRole=(role)=>{
                     </th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
                         Created On
+                    </th>
+                    <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
+                        Status
                     </th>
                     <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">
 
@@ -100,6 +110,13 @@ const getRole=(role)=>{
                             <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                 {toLocalDateTimeString(i.createdOn)}
                             </td>
+                            <td className="text-sm font-light px-6 py-4 whitespace-nowrap">
+                                {isLocked(i)
+                                    ? <span className="text-red-600" title={`Unlocks at ${toLocalDateTimeString(i.lockoutEnd!)}`}>
+                                        Locked until {toLocalDateTimeString(i.lockoutEnd!)}
+                                      </span>
+                                    : <span className="text-green-600">Active</span>}
+                            </td>
                             <td className="text-sm  font-light px-6 py-4 whitespace-nowrap">
                                 <Authorize roles={["Admin"]}>
                                     <div className={'flex flex-row-reverse items-center gap-x-2'}>
@@ -109,6 +126,11 @@ const getRole=(role)=>{
                                              setMemberToEdit({id:i.id,name:i.name,role:getRole(i.role)})
                                              setOpenModal("EDIT")
                                          }} />
+                                        {isLocked(i) &&
+                                            <Button variant="none" onClick={() => onUnlockMember(i.id)}
+                                                    className="text-xs text-white bg-primary-600 hover:bg-primary-500 rounded px-2 py-1 whitespace-nowrap">
+                                                Unlock
+                                            </Button>}
 
                                     </div>
 
