@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import Editor from '@monaco-editor/react';
+import React, { useEffect } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { EditorView } from '@codemirror/view';
+import { scribanLanguage } from './scribanLanguage';
 import {
   useMappingEditorDispatch,
   useMappingEditorState,
@@ -14,10 +16,15 @@ const SCRIBAN_HINT = `{{- # Scriban template — edit freely -}}
 {{- # Use {{ variable.path }} for values, for/end for loops, if/end for filters -}}
 `;
 
+const editorTheme = EditorView.theme({
+  '&': { height: '100%', backgroundColor: '#ffffff' },
+  '.cm-scroller': { fontFamily: '"Fira Code", "JetBrains Mono", monospace', overflow: 'auto' },
+  '&.cm-focused': { outline: 'none' },
+});
+
 const ManualEditor: React.FC = () => {
   const dispatch = useMappingEditorDispatch();
   const { fieldMappings, arrayMappings, manualTemplate, isManualDirty } = useMappingEditorState();
-  const editorRef = useRef<any>(null);
   const [parseWarnings, setParseWarnings] = React.useState<string[]>([]);
   const [parseSuccess, setParseSuccess] = React.useState(false);
 
@@ -32,14 +39,15 @@ const ManualEditor: React.FC = () => {
     }
   }, []); // Only on mount — ongoing sync is handled by handleModeChange
 
-  const handleEditorChange = (value: string | undefined) => {
-    dispatch(setManualTemplate(value ?? ''));
+  const handleEditorChange = (value: string) => {
+    dispatch(setManualTemplate(value));
   };
 
   const handleRegenerateFromVisual = () => {
     const generated = generateScriban(fieldMappings, arrayMappings, undefined, undefined);
+    // syncManualTemplate updates manualTemplate, which flows into the editor's
+    // controlled `value` below — no imperative setValue needed.
     dispatch(syncManualTemplate(generated));
-    editorRef.current?.setValue(generated);
     setParseWarnings([]);
     setParseSuccess(false);
   };
@@ -123,28 +131,20 @@ const ManualEditor: React.FC = () => {
         </div>
       )}
 
-      {/* Monaco Editor */}
+      {/* CodeMirror editor */}
       <div className="flex-1 min-h-0">
-        <Editor
-          language="handlebars"
-          theme="vs"
+        <CodeMirror
           value={templateToShow}
           onChange={handleEditorChange}
-          onMount={(ed) => {
-            editorRef.current = ed;
+          extensions={[scribanLanguage, EditorView.lineWrapping, editorTheme]}
+          height="100%"
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: false,
+            autocompletion: false,
+            highlightActiveLine: true,
           }}
-          options={{
-            minimap: { enabled: true },
-            fontSize: 13,
-            lineNumbers: 'on',
-            wordWrap: 'on',
-            scrollBeyondLastLine: false,
-            fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-            automaticLayout: true,
-            formatOnPaste: true,
-            tabSize: 2,
-            suggest: { snippetsPreventQuickSuggestions: false },
-          }}
+          className="h-full text-[13px]"
         />
       </div>
 

@@ -1,7 +1,8 @@
 import Modal from "src/components/common/Modal";
 import React, {useEffect, useState} from "react";
 import {apiClient} from "src/client";
-import ReactJson from "react-json-view";
+import {JsonView, allExpanded} from "react-json-view-lite";
+import {jsonViewStyles} from "src/components/common/jsonViewStyles";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {xcode} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
@@ -107,7 +108,9 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
                     data.type === "text" && <>{data.data}</>
                 }
                 {
-                    data.type === "json" && <ReactJson src={data.data as unknown as object}/>
+                    data.type === "json" &&
+                    <JsonView data={data.data as unknown as object} style={jsonViewStyles}
+                              shouldExpandNode={allExpanded}/>
 
                 }
             </p>

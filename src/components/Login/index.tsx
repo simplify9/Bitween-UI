@@ -53,7 +53,7 @@ const Login = () => {
             <div className="flex justify-center h-screen">
                 <div className="hidden bg-cover lg:block lg:w-2/3"
                      style={{
-                         backgroundImage: "url(https://www.ship-technology.com/wp-content/uploads/sites/8/2022/02/GettyImages-968819844-scaled.jpg)"
+                         backgroundImage: "url(/login-bg.jpg)"
                      }}
                 >
                     <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
