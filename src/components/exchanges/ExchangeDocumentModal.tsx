@@ -1,7 +1,8 @@
 import Modal from "src/components/common/Modal";
 import React, {useEffect, useState} from "react";
 import {apiClient} from "src/client";
-import ReactJson from "react-json-view";
+import {JsonView, collapseAllNested} from "react-json-view-lite";
+import {jsonViewStyles} from "src/components/common/jsonViewStyles";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {xcode} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
@@ -107,7 +108,11 @@ const ExchangeDocumentModal: React.FC<Props> = ({onClose, name, downloadUrl}) =>
                     data.type === "text" && <>{data.data}</>
                 }
                 {
-                    data.type === "json" && <ReactJson src={data.data as unknown as object}/>
+                    data.type === "json" &&
+                    // Expand only the top level; exchange payloads can be large/deep,
+                    // and allExpanded would force every node into the DOM at once.
+                    <JsonView data={data.data as unknown as object} style={jsonViewStyles}
+                              shouldExpandNode={collapseAllNested}/>
 
                 }
             </p>

@@ -31,7 +31,29 @@ const config = defineConfig({
             "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
         },
     },
-  
+    // `vite preview` serves the production build, so CSP can be tested here as it will
+    // behave in prod (the dev server injects inline scripts/eval for HMR). This mirrors
+    // the enforcing nginx policy; connect-src additionally includes the local API host.
+    preview: {
+        port: 3000,
+        strictPort: true,
+        headers: {
+            "Content-Security-Policy": [
+                "default-src 'self'",
+                "script-src 'self'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data:",
+                "connect-src 'self' https://localhost:7155 https://login.microsoftonline.com",
+                "frame-src https://login.microsoftonline.com",
+                "font-src 'self' data:",
+                "form-action 'self' https://login.microsoftonline.com",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "object-src 'none'",
+            ].join("; "),
+        },
+    },
+
     resolve: {
         alias: [
             {find: "@/src", replacement: posix.resolve("/", "src")},

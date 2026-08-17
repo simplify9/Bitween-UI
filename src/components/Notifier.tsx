@@ -11,7 +11,8 @@ import AdapterEditor from "src/components/Subscriptions/AdapterEditor";
 import SubscriptionSelector from "src/components/Subscriptions/SubscriptionSelector";
 import {useSubscriptionsQuery} from "src/client/apis/subscriptionsApi";
 import {ISubscription} from "src/types/subscriptions";
-import ReactJson from "react-json-view";
+import {JsonView, allExpanded} from "react-json-view-lite";
+import {jsonViewStyles} from "src/components/common/jsonViewStyles";
 
 const Notifier = () => {
 
@@ -115,7 +116,7 @@ const Notifier = () => {
                 <h3 className={"mb-3"}>
                     Notifier adapter payload:
                 </h3>
-                <ReactJson src={{
+                <JsonView data={{
                     "Id": "example-id",
                     "Exception": "example-exception",
                     "Success": true,
@@ -129,6 +130,8 @@ const Notifier = () => {
                     "DocumentId": 42,
                     "CorrelationId": "example-correlation-id"
                 }}
+                    style={jsonViewStyles}
+                    shouldExpandNode={allExpanded}
                 />
             </div>
         </div>
