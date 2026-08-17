@@ -2,13 +2,14 @@
 // Highlights `{{ ... }}` regions (delimiters, keywords, comments, values) without
 // pulling in a full grammar. Colors mirror the cheat-sheet under the editor:
 // blue for values/braces, purple for control keywords, gray for comments.
-import { StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { StreamLanguage, StreamParser, HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { Prec } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 
 const KEYWORDS = /^(for|end|if|else|in|while|func|ret|break|continue|capture|case|when|do|with|wrap|tablerow)\b/;
 
-const scribanParser = StreamLanguage.define<{ inTag: boolean }>({
+// Exported for unit testing (see __tests__/scribanLanguage.test.ts).
+export const scribanStreamParser: StreamParser<{ inTag: boolean }> = {
   startState: () => ({ inTag: false }),
   token(stream, state) {
     if (!state.inTag) {
@@ -47,7 +48,9 @@ const scribanParser = StreamLanguage.define<{ inTag: boolean }>({
     variable: t.variableName,
     operator: t.operator,
   },
-});
+};
+
+const scribanParser = StreamLanguage.define(scribanStreamParser);
 
 const scribanHighlight = HighlightStyle.define([
   { tag: t.brace, color: '#2563eb', fontWeight: 'bold' }, // {{ }}

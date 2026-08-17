@@ -78,11 +78,15 @@ const ManualEditor: React.FC = () => {
     }
   };
 
-  const templateToShow =
-    manualTemplate ||
-    (fieldMappings.length > 0 || arrayMappings.length > 0
-      ? generateScriban(fieldMappings, arrayMappings, undefined, undefined)
-      : SCRIBAN_HINT);
+  // Once the user has edited the template (isManualDirty), show it verbatim so an
+  // intentional empty template stays empty. Only before any edit do we fall back to
+  // the generated template / hint.
+  const templateToShow = isManualDirty
+    ? manualTemplate
+    : manualTemplate ||
+      (fieldMappings.length > 0 || arrayMappings.length > 0
+        ? generateScriban(fieldMappings, arrayMappings, undefined, undefined)
+        : SCRIBAN_HINT);
 
   return (
     <div className="flex flex-col h-full">
