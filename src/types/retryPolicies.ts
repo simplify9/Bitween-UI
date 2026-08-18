@@ -154,6 +154,34 @@ export interface RetryGroupUsageRow {
     silencedAt?: RetryAlertLevel | null
 }
 
+// What a row's spent budget was actually spent on. Fetched a pair at a time, only when a row is
+// opened: a policy with fifty subscriptions would otherwise load fifty of these to answer a
+// question about one of them.
+export interface RetryGroupAttempts {
+    // Every failure this group has caught for this subscription, of which `attempts` carries the
+    // latest few. Not the budget counter, which is reset while the failures stay.
+    total: number
+    attempts: RetryGroupAttemptRow[]
+}
+
+export interface RetryGroupAttemptRow {
+    xchangeId: string
+    // How deep the retry chain was, 0 being the first delivery. Null on failures recorded before
+    // the number was stored.
+    attemptNumber?: number | null
+    failedOn: string
+    exception?: string | null
+    // The only field here that is not history: true while another attempt is still scheduled.
+    retryPending: boolean
+    // Why the policy refused another attempt, when it refused.
+    retryBlockedReason?: string | null
+}
+
+export interface RetryGroupAttemptsRequest {
+    subscriptionId: number
+    groupId: string
+}
+
 export interface RetryPolicyResetUsage {
     subscriptionId?: number
     groupId?: string

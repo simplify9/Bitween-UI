@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import dayjs from "dayjs";
+import {MdExpandMore, MdChevronRight} from "react-icons/md";
 import {
     useResetRetryPolicyUsageMutation,
     useRetryPolicyUsageQuery,
@@ -14,6 +15,7 @@ import {DataListViewSettingsEditor} from "src/components/common/DataListViewSett
 import Modal from "src/components/common/Modal";
 import Authorize from "src/components/common/authorize/authorize";
 import RetryAlertEditor, {RetryAlertValue} from "src/components/RetryPolicies/RetryAlertEditor";
+import RetryGroupAttempts from "src/components/RetryPolicies/RetryGroupAttempts";
 import {
     RetryAlertLevel,
     RetryAlertMode,
@@ -83,6 +85,8 @@ const silenceLabels: Record<RetryAlertLevel, string> = {
 // Shared by the header and body cells so columns stay aligned as padding is tuned.
 const cell = "px-3 py-1.5 whitespace-nowrap"
 
+const keyOf = (row: RetryGroupUsageRow) => `${row.subscriptionId}-${row.groupId}`
+
 const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
 
     const {data, isLoading, isError, refetch} = useRetryPolicyUsageQuery(policyId)
@@ -92,6 +96,9 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
     const [filterId, setFilterId] = useState("attention")
     const [search, setSearch] = useState("")
     const [view, setView] = useState({offset: 0, limit: 10})
+    // One open at a time: the panel adds rows below whichever row it belongs to, and several open
+    // at once would push the rest of the table around unpredictably as each one loads.
+    const [openKey, setOpenKey] = useState<string>()
     const [editing, setEditing] = useState<RetryGroupUsageRow | undefined>()
     const [draft, setDraft] = useState<RetryAlertValue | undefined>()
 
@@ -219,6 +226,7 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
                         <table className="appearance-none min-w-full">
                             <thead className={"bg-gray-50 border-y"}>
                             <tr className={"text-xs font-medium text-gray-900 text-left"}>
+                                <th scope="col" className={"w-[26px] pl-2 py-1.5"}></th>
                                 <th scope="col" className={cell}>Subscription</th>
                                 <th scope="col" className={cell}>Group</th>
                                 <th scope="col" className={cell}>Used</th>
@@ -230,8 +238,23 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
                             </tr>
                             </thead>
                             <tbody className={"text-xs"}>
-                            {visible.map((r) => (
-                                <tr key={`${r.subscriptionId}-${r.groupId}`} className="bg-white border-b">
+                            {visible.map((r) => {
+                                const rowKey = keyOf(r)
+                                const open = openKey === rowKey
+                                return <React.Fragment key={rowKey}>
+                                <tr className="bg-white border-b">
+                                    {/* What the spent budget went on, one row at a time. Shown on
+                                        every row, including ones with nothing spent: a reset drops
+                                        the counter but not the failures, so "nothing spent" is no
+                                        promise that there is nothing to see. */}
+                                    <td className={"pl-2 py-1.5 align-top"}>
+                                        <button type="button" aria-expanded={open}
+                                                title={open ? "Hide failures" : "Show failures"}
+                                                className={"text-gray-500 hover:text-gray-900 align-middle"}
+                                                onClick={() => setOpenKey(open ? undefined : rowKey)}>
+                                            {open ? <MdExpandMore size={16}/> : <MdChevronRight size={16}/>}
+                                        </button>
+                                    </td>
                                     <td className={`${cell} text-gray-900 font-semibold`}>
                                         {r.subscriptionName}
                                     </td>
@@ -304,7 +327,16 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
                                         </Authorize>
                                     </td>
                                 </tr>
-                            ))}
+                                {open &&
+                                    <tr className={"bg-gray-50 border-b"}>
+                                        <td colSpan={9} className={"px-3 py-2 text-xs"}>
+                                            <RetryGroupAttempts policyId={policyId}
+                                                                subscriptionId={r.subscriptionId}
+                                                                groupId={r.groupId}/>
+                                        </td>
+                                    </tr>}
+                                </React.Fragment>
+                            })}
                             </tbody>
                         </table>
                     </div>}

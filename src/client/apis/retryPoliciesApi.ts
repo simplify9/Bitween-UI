@@ -5,6 +5,8 @@ import {
     RetryPolicyModel,
     RetryPolicyRow,
     RetryGroupUsageRow,
+    RetryGroupAttempts,
+    RetryGroupAttemptsRequest,
     RetryPolicyResetUsage,
     TestRetryPolicyRequest,
     TestRetryPolicyResponse,
@@ -82,6 +84,16 @@ export const RetryPoliciesApi = createApi({
                 body: {}
             })
         }),
+        // Cached per pair and left alone by resets and override saves: neither changes which
+        // failures happened. Only a retry actually running would, and polling every open row for
+        // that costs more than it tells anyone.
+        retryPolicyAttempts: builder.query<RetryGroupAttempts, { id: number } & RetryGroupAttemptsRequest>({
+            query: ({id, ...body}) => ({
+                url: `RetryPolicies/${id}/attempts`,
+                method: "POST",
+                body
+            })
+        }),
         resetRetryPolicyUsage: builder.mutation<{}, { id: number } & RetryPolicyResetUsage>({
             invalidatesTags: ['retryPolicyUsage'],
             query: ({id, ...body}) => ({
@@ -112,6 +124,7 @@ export const {
     useRetryPoliciesLookupQuery,
     useTestRetryPolicyMutation,
     useRetryPolicyUsageQuery,
+    useRetryPolicyAttemptsQuery,
     useResetRetryPolicyUsageMutation,
     useSaveRetryAlertOverrideMutation,
 } = RetryPoliciesApi;
