@@ -6,6 +6,7 @@ import TextEditor from "src/components/common/forms/TextEditor";
 import Authorize from "src/components/common/authorize/authorize";
 import React, {useEffect, useState} from "react";
 import {RetryPolicyModel, pairsFromRecord, recordFromPairs} from "src/types/retryPolicies";
+import {apiErrorMessage} from "src/client/apis/apiError";
 import RetryGroupsEditor from "src/components/RetryPolicies/RetryGroupsEditor";
 import RetryPolicySubscriptions from "src/components/RetryPolicies/RetryPolicySubscriptions";
 import TestRetryPolicyModal from "src/components/RetryPolicies/TestRetryPolicyModal";
@@ -17,6 +18,7 @@ const RetryPolicy = () => {
     const nav = useNavigate()
     const [data, setData] = useState<RetryPolicyModel>()
     const [saved, setSaved] = useState<RetryPolicyModel>()
+    const [saveError, setSaveError] = useState<string>()
     const [testModalVisible, setTestModalVisible] = useState(false)
     const {id} = useParams() as { id: string }
     const [fetch] = useLazyRetryPolicyQuery()
@@ -30,10 +32,17 @@ const RetryPolicy = () => {
         }
     }
 
+    // A mutation trigger resolves with an error rather than throwing, so without unwrap a refused
+    // save would still clear the unsaved-changes bar and read as stored.
     const onUpdate = async () => {
         if (!data) return
-        await update({...data, id: Number(id)})
-        setSaved(data)
+        try {
+            await update({...data, id: Number(id)}).unwrap()
+            setSaved(data)
+            setSaveError(undefined)
+        } catch (e) {
+            setSaveError(apiErrorMessage(e, "Could not save this policy."))
+        }
     }
 
     const onDiscard = () => setData(saved)
@@ -112,7 +121,9 @@ const RetryPolicy = () => {
             alert overrides are not here: those apply the moment they are clicked. */}
         {changed &&
             <div className={"sticky bottom-0 z-20 flex flex-row items-center justify-between gap-3 mt-3 -mx-1 px-4 py-3 bg-white border-t shadow-[0_-2px_8px_rgba(0,0,0,0.08)] rounded-b-lg"}>
-                <span className={"text-sm text-gray-700"}>Unsaved changes to this policy.</span>
+                <span className={saveError ? "text-sm text-red-700" : "text-sm text-gray-700"}>
+                    {saveError ?? "Unsaved changes to this policy."}
+                </span>
                 <div className={"flex flex-row items-center gap-2"}>
                     <Button variant={"none"} className={"text-sm text-gray-600 hover:underline px-2"}
                             onClick={onDiscard}>

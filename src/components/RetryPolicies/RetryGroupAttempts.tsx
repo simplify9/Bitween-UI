@@ -39,7 +39,7 @@ const Attempt: React.FC<{ attempt: RetryGroupAttemptRow }> = ({attempt}) => (
                   title={attempt.retryBlockedReason}>
                 {attempt.retryBlockedReason}
             </span>}
-        <NavLink to={`/Xchanges?id=${attempt.xchangeId}`}
+        <NavLink to={`/Xchanges?id=${encodeURIComponent(attempt.xchangeId)}`}
                  className={"text-primary-600 hover:underline shrink-0"}>
             Open
         </NavLink>

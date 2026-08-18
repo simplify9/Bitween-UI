@@ -7,7 +7,7 @@ import {ChoiceEditor} from "src/components/common/forms/ChoiceEditor";
 import FieldTooltip from "src/components/common/forms/FieldTooltip";
 import MatchersEditor from "src/components/RetryPolicies/MatchersEditor";
 import {OptionType} from "src/types/common";
-import RetryAlertEditor from "src/components/RetryPolicies/RetryAlertEditor";
+import RetryAlertEditor, {alertIsIncomplete} from "src/components/RetryPolicies/RetryAlertEditor";
 import {
     DelayStrategy,
     RetryAction,
@@ -124,6 +124,20 @@ const AddEditRetryGroupModal: React.FC<Props> = ({
         }));
     }
 
+    // A blocking group has no budget to exhaust, so it can never alert. Clearing the alert as the
+    // action changes stops a group from carrying settings its own action puts out of reach — the
+    // usage report leaves such groups out entirely, so nothing would ever show them again.
+    const onChangeAction = (action: RetryAction) => {
+        setGroup((g) => action === RetryAction.Block
+            ? {
+                ...g, action,
+                alertMode: RetryAlertMode.Inherit,
+                alertHandlerId: null,
+                alertHandlerProperties: null
+            }
+            : {...g, action});
+    }
+
     const onSubmit = () => {
         onAdd(group);
         onClose();
@@ -131,7 +145,8 @@ const AddEditRetryGroupModal: React.FC<Props> = ({
 
     if (!visible) return null;
 
-    return <Modal onClose={onClose} submitLabel={initial ? "Save" : "Add"} onSubmit={onSubmit}>
+    return <Modal onClose={onClose} submitLabel={initial ? "Save" : "Add"} onSubmit={onSubmit}
+                  submitDisabled={alertIsIncomplete(group)}>
         <div className={"flex flex-row gap-5"}>
             <FormField title="Name" tooltip="A label for this rule, shown in the groups list and in retry decision logs." className="grow">
                 <TextEditor value={group.name} onChange={(v) => onChangeField("name", v)}/>
@@ -160,7 +175,7 @@ const AddEditRetryGroupModal: React.FC<Props> = ({
         <FormField title="Action" tooltip="Allow schedules a retry according to the budget below. Block hard-stops retries for this failure, even if a budget would otherwise allow one." className="grow mt-3 w-48">
             <ChoiceEditor
                 value={group.action}
-                onChange={(v) => onChangeField("action", v)}
+                onChange={(v) => onChangeAction(v as RetryAction)}
                 options={retryActionOptions}
                 optionTitle={(o: OptionType) => o.title}
                 optionValue={(o: OptionType) => o.id}
@@ -237,7 +252,9 @@ const AddEditRetryGroupModal: React.FC<Props> = ({
             </div>
         )}
 
-        <div className={"mt-5 border-t pt-3"}>
+        {/* Only a group that allows retries can spend a budget, so only it can exhaust one and
+            alert. Offering the section for a blocking group would promise an alert that cannot fire. */}
+        {group.action === RetryAction.Allow && <div className={"mt-5 border-t pt-3"}>
             <RetryAlertEditor
                 value={{
                     alertMode: group.alertMode ?? RetryAlertMode.Inherit,
@@ -248,7 +265,7 @@ const AddEditRetryGroupModal: React.FC<Props> = ({
                 inheritedFrom={"the policy default"}
                 inheritedHandlerId={policyAlertHandlerId}
                 inheritedProperties={policyAlertHandlerProperties}/>
-        </div>
+        </div>}
 
         <FormField title="Notes" tooltip="Optional free-text notes visible to other admins managing this policy." className="grow mt-3">
             <TextEditor value={group.notes ?? ""} onChange={(v) => onChangeField("notes", v)}/>

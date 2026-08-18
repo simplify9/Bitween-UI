@@ -23,6 +23,17 @@ interface Props {
     title?: string
 }
 
+/**
+ * True when this level claims to send but names nothing to send with. Both callers check it before
+ * saving: the API refuses this too, so without the check the save fails for a reason the form never
+ * got to explain.
+ */
+export const alertIsIncomplete = (
+    // Widened rather than taking RetryAlertValue: a group carries the same two fields with alertMode
+    // optional, and both levels ask this same question.
+    value: { alertMode?: RetryAlertMode, alertHandlerId?: string | null }) =>
+    (value.alertMode ?? RetryAlertMode.Inherit) === RetryAlertMode.Send && !value.alertHandlerId;
+
 const modes: { mode: RetryAlertMode, label: string }[] = [
     {mode: RetryAlertMode.Inherit, label: "Inherit"},
     {mode: RetryAlertMode.Send, label: "Send via…"},
@@ -97,6 +108,10 @@ const RetryAlertEditor: React.FC<Props> = ({
                             Copy from {inheritedFrom}
                         </button>}
                 </div>
+                {!value.alertHandlerId &&
+                    <p className="text-xs text-amber-700">
+                        Choose a handler — until then this level sends nothing, and saving is blocked.
+                    </p>}
                 <AdapterEditor title="Alert handler" type="handlers"
                                value={value.alertHandlerId}
                                onChange={(v) => onChange({...value, alertHandlerId: v})}

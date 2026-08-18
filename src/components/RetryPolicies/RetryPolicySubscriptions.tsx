@@ -14,7 +14,9 @@ import TabNavigator from "src/components/common/forms/TabNavigator";
 import {DataListViewSettingsEditor} from "src/components/common/DataListViewSettingsEditor";
 import Modal from "src/components/common/Modal";
 import Authorize from "src/components/common/authorize/authorize";
-import RetryAlertEditor, {RetryAlertValue} from "src/components/RetryPolicies/RetryAlertEditor";
+import RetryAlertEditor, {RetryAlertValue, alertIsIncomplete} from "src/components/RetryPolicies/RetryAlertEditor";
+import Dialog from "src/components/common/dialog";
+import {apiErrorMessage} from "src/client/apis/apiError";
 import RetryGroupAttempts from "src/components/RetryPolicies/RetryGroupAttempts";
 import {
     RetryAlertLevel,
@@ -101,6 +103,8 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
     const [openKey, setOpenKey] = useState<string>()
     const [editing, setEditing] = useState<RetryGroupUsageRow | undefined>()
     const [draft, setDraft] = useState<RetryAlertValue | undefined>()
+    const [error, setError] = useState<string>()
+    const [confirmResetAll, setConfirmResetAll] = useState(false)
 
     const rows = data ?? []
     const filter = filters.find(f => f.id === filterId) ?? filters[0]
@@ -129,16 +133,34 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
         })
     }
 
+    // Unwrapped, because a mutation trigger reports failure in its result rather than by throwing:
+    // closing the dialog on a refused save would throw away what was typed and read as stored.
     const onSubmit = async () => {
         if (!editing || !draft) return
-        await save({
-            id: policyId,
-            subscriptionId: editing.subscriptionId,
-            groupId: editing.groupId,
-            ...draft
-        })
-        setEditing(undefined)
-        setDraft(undefined)
+        try {
+            await save({
+                id: policyId,
+                subscriptionId: editing.subscriptionId,
+                groupId: editing.groupId,
+                ...draft
+            }).unwrap()
+            setEditing(undefined)
+            setDraft(undefined)
+            setError(undefined)
+        } catch (e) {
+            setError(apiErrorMessage(e, "Could not save this override."))
+        }
+    }
+
+    // Clearing a counter cannot be undone, so a refusal has to be visible rather than looking like
+    // a reset that simply had nothing to clear.
+    const onReset = async (subscriptionId?: number, groupId?: string) => {
+        try {
+            await reset({id: policyId, subscriptionId, groupId}).unwrap()
+            setError(undefined)
+        } catch (e) {
+            setError(apiErrorMessage(e, "Could not reset the spent budget."))
+        }
     }
 
     // What this pair would fall back to if its own override were removed — the group's setting when
@@ -155,8 +177,23 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
         <FormField title="Subscriptions"
                    tooltip="Every subscription and group using this policy: how much of the group's 'max attempts total' that subscription has spent, and where its budget-exhausted alert goes. Most specific wins for alerts — this subscription, then the group, then the policy. Groups that block retries are left out; they can never exhaust a budget.">
 
+            {confirmResetAll &&
+                <Dialog title={"Clear the spent budget for every subscription and group in this policy? " +
+                    "Each one starts retrying again from zero, and the counts cannot be recovered."}
+                        onCancel={() => setConfirmResetAll(false)}
+                        onConfirm={async () => {
+                            setConfirmResetAll(false)
+                            await onReset()
+                        }}/>}
+
+            {error &&
+                <p className={"text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2 mb-2"}>
+                    {error}
+                </p>}
+
             {editing && draft &&
-                <Modal onClose={() => setEditing(undefined)} submitLabel={"Save"} onSubmit={onSubmit}>
+                <Modal onClose={() => setEditing(undefined)} submitLabel={"Save"} onSubmit={onSubmit}
+                       submitDisabled={alertIsIncomplete(draft)}>
                     <p className={"text-sm text-gray-700 mb-3"}>
                         <span className={"font-semibold"}>{editing.subscriptionName}</span>
                         {" — "}
@@ -311,11 +348,7 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
                                                 {r.lastAttemptOn &&
                                                     <Button variant={"none"}
                                                             className={"text-primary-600 hover:underline"}
-                                                            onClick={() => reset({
-                                                                id: policyId,
-                                                                subscriptionId: r.subscriptionId,
-                                                                groupId: r.groupId
-                                                            })}>
+                                                            onClick={() => onReset(r.subscriptionId, r.groupId)}>
                                                         Reset
                                                     </Button>}
                                                 <Button variant={"none"}
@@ -347,7 +380,7 @@ const RetryPolicySubscriptions: React.FC<Props> = ({policyId}) => {
                                                 offset={view.offset} limit={view.limit}
                                                 onChange={(e) => setView({offset: e.offset, limit: e.limit})}/>
                     <Authorize roles={["Admin", "Member"]}>
-                        <Button variant={"secondary"} onClick={() => reset({id: policyId})}>
+                        <Button variant={"secondary"} onClick={() => setConfirmResetAll(true)}>
                             Reset all
                         </Button>
                     </Authorize>
