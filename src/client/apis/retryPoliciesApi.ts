@@ -7,7 +7,8 @@ import {
     RetryGroupUsageRow,
     RetryPolicyResetUsage,
     TestRetryPolicyRequest,
-    TestRetryPolicyResponse
+    TestRetryPolicyResponse,
+    RetryAlertOverrideSave
 } from "src/types/retryPolicies";
 import {ApiPagedResponse} from "src/types/common";
 
@@ -42,7 +43,8 @@ export const RetryPoliciesApi = createApi({
             })
         }),
         updateRetryPolicy: builder.mutation<{}, { id: number } & RetryPolicyModel>({
-            // Saving drops the counters of any removed group, so the usage panel must refetch.
+            // Saving drops the counters of any removed group and can change a group's own alert,
+            // which is where inheriting rows resolve to, so the subscriptions panel must refetch.
             invalidatesTags: ['retryPolicies', 'retryPolicyUsage'],
             query: body => ({
                 url: `RetryPolicies/${body.id}`,
@@ -87,6 +89,15 @@ export const RetryPoliciesApi = createApi({
                 method: "POST",
                 body
             })
+        }),
+        saveRetryAlertOverride: builder.mutation<{}, { id: number } & RetryAlertOverrideSave>({
+            // Saving an override changes where other rows resolve to as well, so refetch the lot.
+            invalidatesTags: ['retryPolicyUsage'],
+            query: ({id, ...body}) => ({
+                url: `RetryPolicies/${id}/savealertoverride`,
+                method: "POST",
+                body
+            })
         })
     })
 });
@@ -102,4 +113,5 @@ export const {
     useTestRetryPolicyMutation,
     useRetryPolicyUsageQuery,
     useResetRetryPolicyUsageMutation,
+    useSaveRetryAlertOverrideMutation,
 } = RetryPoliciesApi;
