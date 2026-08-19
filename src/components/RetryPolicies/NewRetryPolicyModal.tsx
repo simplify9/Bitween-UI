@@ -25,7 +25,7 @@ const NewRetryPolicyModal: React.FC<Props> = ({suggestedName, onCreated, onClose
     const [name, setName] = useState(suggestedName ?? "")
     const [groups, setGroups] = useState<RetryGroup[]>([])
     const [error, setError] = useState<string>()
-    const [create] = useCreateRetryPolicyMutation()
+    const [create, {isLoading}] = useCreateRetryPolicyMutation()
 
     const onSubmit = async () => {
         try {
@@ -40,7 +40,7 @@ const NewRetryPolicyModal: React.FC<Props> = ({suggestedName, onCreated, onClose
 
     return (
         <Modal onClose={onClose} submitLabel={"Create"} onSubmit={onSubmit}
-               submitDisabled={!name.trim()}>
+               submitDisabled={!name.trim() || isLoading}>
             {error &&
                 <p className={"text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2 mb-3"}>
                     {error}

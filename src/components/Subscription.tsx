@@ -440,7 +440,16 @@ const Component = () => {
                             <div className={"w-64"}>
                                 <RetryPolicySelector
                                     value={updateSubscriptionData.retryPolicyId?.toString()}
-                                    onChange={(v) => onChangeSubscriptionData("retryPolicyId", v ? Number(v) : null)}/>
+                                    onChange={(v) => {
+                                        onChangeSubscriptionData("retryPolicyId", v ? Number(v) : null)
+                                        // A named policy replaces inline rules rather than sitting
+                                        // beside them: the evaluator prefers a stored
+                                        // customRetryPolicy over the named one, so leaving it behind
+                                        // would keep invisible rules in charge of a subscription
+                                        // whose page says they were replaced. Cleared when the
+                                        // selector is emptied too, which is what "no retries" means.
+                                        onChangeSubscriptionData("customRetryPolicy", null)
+                                    }}/>
                             </div>
                             <Authorize roles={["Admin", "Member"]}>
                                 <Button variant={"secondary"} onClick={() => setCreatingPolicy(true)}>
