@@ -38,7 +38,10 @@ export const DataListViewSettingsEditor: React.FC<Props> = ({
         const _pages = []
         for (let i = 0; i < _totalPages; ++i) _pages.push(i);
         return {pages: _pages, pageIndex: _pageIndex, totalPages: _totalPages}
-    }, [offset, limit]);
+        // `total` belongs here: it is read above, and without it the page buttons keep whatever count
+        // they were first built with. Any caller whose result count changes while offset and limit
+        // stay put — a filter, a search — otherwise loses the pages past the first.
+    }, [offset, limit, total]);
 
     const handlePageChange = (newOffset: number) => {
         if (newOffset < 0 || newOffset >= total)

@@ -1,5 +1,5 @@
 import FormField from "src/components/common/forms/FormField";
-import {RetryGroup} from "src/types/retryPolicies";
+import {RetryAlertMode, RetryGroup} from "src/types/retryPolicies";
 import React, {useState} from "react";
 import Button from "src/components/common/forms/Button";
 import AddEditRetryGroupModal from "src/components/RetryPolicies/AddEditRetryGroupModal";
@@ -11,9 +11,18 @@ interface Props {
     groups?: RetryGroup[]
     title: string
     onChange: (val: RetryGroup[]) => void
+    /** The policy default a group inherits, so the modal can describe and copy it. */
+    policyAlertHandlerId?: string | null
+    policyAlertHandlerProperties?: Record<string, string> | null
 }
 
-const RetryGroupsEditor: React.FC<Props> = ({title, groups, onChange}) => {
+const RetryGroupsEditor: React.FC<Props> = ({
+                                                title,
+                                                groups,
+                                                onChange,
+                                                policyAlertHandlerId,
+                                                policyAlertHandlerProperties
+                                            }) => {
 
     const [visibleModal, setVisibleModal] = useState<"NONE" | "ADD_EDIT">("NONE")
     const [editingGroup, setEditingGroup] = useState<RetryGroup | undefined>(undefined)
@@ -48,17 +57,19 @@ const RetryGroupsEditor: React.FC<Props> = ({title, groups, onChange}) => {
                     visible={visibleModal === "ADD_EDIT"}
                     initial={editingGroup}
                     onAdd={onAdd}
+                    policyAlertHandlerId={policyAlertHandlerId}
+                    policyAlertHandlerProperties={policyAlertHandlerProperties}
                     onClose={() => setVisibleModal("NONE")}/>
             }
-            <FormField title={title} className="grow" actionTitle={
+            <FormField title={title} className="grow"
+                       tooltip="Groups are evaluated in priority order (lowest first). The first enabled group whose matchers match the failure wins, and its action and retry budget are applied — remaining groups are skipped. If no group matches, the failure is not retried."
+                       actionTitle={
                 <div className={"text-green-600 rounded"}>
                     <HiPlusCircle size={25}/>
                 </div>
             } onClickAction={onClickAdd}>
                 <p className={"text-xs text-gray-500 mb-2"}>
-                    Groups are evaluated in priority order (lowest first). The first enabled group whose matchers
-                    match the failure wins, and its action and retry budget are applied — remaining groups are
-                    skipped. If no group matches, the failure is not retried.
+                    Lowest priority first, and the first matching group wins. No match means no retry.
                 </p>
                 <div className={"flex flex-col gap-2"}>
                     <table className="appearance-none min-w-full">
@@ -69,6 +80,7 @@ const RetryGroupsEditor: React.FC<Props> = ({title, groups, onChange}) => {
                             <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Applies to</th>
                             <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Matchers</th>
                             <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Action</th>
+                            <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Alert</th>
                             <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left">Enabled</th>
                             <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-2 text-left"></th>
                         </tr>
@@ -100,6 +112,13 @@ const RetryGroupsEditor: React.FC<Props> = ({title, groups, onChange}) => {
                                     </td>
                                     <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                         {g.action}
+                                    </td>
+                                    <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                                        {g.alertMode === RetryAlertMode.Send
+                                            ? <span className={"font-mono text-xs"}>{g.alertHandlerId}</span>
+                                            : g.alertMode === RetryAlertMode.Silent
+                                                ? <span className={"text-gray-500"}>Silent</span>
+                                                : <span className={"text-gray-400 italic"}>Inherit</span>}
                                     </td>
                                     <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                         {g.enabled === false ? "False" : "True"}

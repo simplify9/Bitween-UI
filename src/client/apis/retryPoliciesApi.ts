@@ -5,9 +5,12 @@ import {
     RetryPolicyModel,
     RetryPolicyRow,
     RetryGroupUsageRow,
+    RetryGroupAttempts,
+    RetryGroupAttemptsRequest,
     RetryPolicyResetUsage,
     TestRetryPolicyRequest,
-    TestRetryPolicyResponse
+    TestRetryPolicyResponse,
+    RetryAlertOverrideSave
 } from "src/types/retryPolicies";
 import {ApiPagedResponse} from "src/types/common";
 
@@ -42,7 +45,8 @@ export const RetryPoliciesApi = createApi({
             })
         }),
         updateRetryPolicy: builder.mutation<{}, { id: number } & RetryPolicyModel>({
-            // Saving drops the counters of any removed group, so the usage panel must refetch.
+            // Saving drops the counters of any removed group and can change a group's own alert,
+            // which is where inheriting rows resolve to, so the subscriptions panel must refetch.
             invalidatesTags: ['retryPolicies', 'retryPolicyUsage'],
             query: body => ({
                 url: `RetryPolicies/${body.id}`,
@@ -80,10 +84,29 @@ export const RetryPoliciesApi = createApi({
                 body: {}
             })
         }),
+        // Cached per pair and left alone by resets and override saves: neither changes which
+        // failures happened. Only a retry actually running would, and polling every open row for
+        // that costs more than it tells anyone.
+        retryPolicyAttempts: builder.query<RetryGroupAttempts, { id: number } & RetryGroupAttemptsRequest>({
+            query: ({id, ...body}) => ({
+                url: `RetryPolicies/${id}/attempts`,
+                method: "POST",
+                body
+            })
+        }),
         resetRetryPolicyUsage: builder.mutation<{}, { id: number } & RetryPolicyResetUsage>({
             invalidatesTags: ['retryPolicyUsage'],
             query: ({id, ...body}) => ({
                 url: `RetryPolicies/${id}/resetusage`,
+                method: "POST",
+                body
+            })
+        }),
+        saveRetryAlertOverride: builder.mutation<{}, { id: number } & RetryAlertOverrideSave>({
+            // Saving an override changes where other rows resolve to as well, so refetch the lot.
+            invalidatesTags: ['retryPolicyUsage'],
+            query: ({id, ...body}) => ({
+                url: `RetryPolicies/${id}/savealertoverride`,
                 method: "POST",
                 body
             })
@@ -101,5 +124,7 @@ export const {
     useRetryPoliciesLookupQuery,
     useTestRetryPolicyMutation,
     useRetryPolicyUsageQuery,
+    useRetryPolicyAttemptsQuery,
     useResetRetryPolicyUsageMutation,
+    useSaveRetryAlertOverrideMutation,
 } = RetryPoliciesApi;

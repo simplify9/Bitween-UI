@@ -1,4 +1,4 @@
-import {OptionType} from "./common";
+import {KeyValuePair, OptionType} from "./common";
 
 export enum XchangeResultType {
     Success = "Success",
@@ -73,6 +73,22 @@ export interface RetryBudget {
     delayStrategy: DelayStrategy
 }
 
+// Whether a level of the alert hierarchy defines its own destination for budget-exhausted
+// alerts or defers upward. An overriding level REPLACES the level above it rather than merging,
+// so whichever level wins must carry the handler and all of its properties.
+export enum RetryAlertMode {
+    Inherit = "Inherit",
+    Send = "Send",
+    Silent = "Silent",
+}
+
+// Which level of the hierarchy decided where an alert goes.
+export enum RetryAlertLevel {
+    SubscriptionGroup = "SubscriptionGroup",
+    Group = "Group",
+    Policy = "Policy",
+}
+
 export interface RetryGroup {
     id?: string
     name: string
@@ -83,12 +99,18 @@ export interface RetryGroup {
     action?: RetryAction
     budget?: RetryBudget | null
     notes?: string | null
+    alertMode?: RetryAlertMode
+    alertHandlerId?: string | null
+    alertHandlerProperties?: Record<string, string> | null
 }
 
 export interface RetryPolicyModel {
     id?: number
     name: string
     groups: RetryGroup[]
+    // The policy default, inherited by every group that does not override it.
+    alertHandlerId?: string | null
+    alertHandlerProperties?: Record<string, string> | null
 }
 
 export interface RetryPolicyRow {
@@ -97,8 +119,14 @@ export interface RetryPolicyRow {
     groupCount: number
 }
 
-// "Max attempts total" is counted per integration, so a policy shared by several
-// integrations reports one row for each that has spent any of its budget.
+// The whole state of one subscription-and-group pair under a policy: what it has spent of the
+// group's "max attempts total", and where its budget-exhausted alert goes. Both halves are keyed by
+// the same pair, so they belong on one row — the question asked about an exhausted budget is
+// whether anyone was told, and splitting that leaves the reader matching two tables by eye.
+//
+// Every pair gets a row, including subscriptions that have never failed, because an alert override
+// has to be settable before the first failure. Groups that cannot exhaust a budget (Block, or no
+// budget at all) are left out — they can never alert, so offering to configure one would mislead.
 export interface RetryGroupUsageRow {
     subscriptionId: number
     subscriptionName: string
@@ -107,13 +135,85 @@ export interface RetryGroupUsageRow {
     attemptsUsed: number
     maxAttemptsTotal: number
     exhausted: boolean
-    lastAttemptOn: string
+    // Null when this pair has never failed — which is also how we know it has no counter to reset.
+    lastAttemptOn?: string | null
+    // When the alert was raised. Null while the budget still has room — or when it ran out before
+    // alerts existed. Delivery success is recorded separately, on the exchange's notifications.
+    exhaustedNotifiedOn?: string | null
+    // This pair's own override mode. "Inherit" when no override exists.
+    alertMode: RetryAlertMode
+    overrideHandlerId?: string | null
+    overrideHandlerProperties?: Record<string, string> | null
+    // Where the alert actually goes, and which level decided that. Null when nothing sends.
+    resolvedHandlerId?: string | null
+    // The winning level's own settings, so an override can start from what is currently sent.
+    resolvedHandlerProperties?: Record<string, string> | null
+    resolvedFrom?: RetryAlertLevel | null
+    // Which level switched the alert off, when one did. Nothing resolving and something being
+    // deliberately silenced look identical otherwise, and one is a decision, the other an oversight.
+    silencedAt?: RetryAlertLevel | null
+}
+
+// What a row's spent budget was actually spent on. Fetched a pair at a time, only when a row is
+// opened: a policy with fifty subscriptions would otherwise load fifty of these to answer a
+// question about one of them.
+export interface RetryGroupAttempts {
+    // Every failure this group has caught for this subscription, of which `attempts` carries the
+    // latest few. Not the budget counter, which is reset while the failures stay.
+    total: number
+    attempts: RetryGroupAttemptRow[]
+}
+
+export interface RetryGroupAttemptRow {
+    xchangeId: string
+    // How deep the retry chain was, 0 being the first delivery. Null on failures recorded before
+    // the number was stored.
+    attemptNumber?: number | null
+    failedOn: string
+    exception?: string | null
+    // The only field here that is not history: true while another attempt is still scheduled.
+    retryPending: boolean
+    // Why the policy refused another attempt, when it refused.
+    retryBlockedReason?: string | null
+}
+
+export interface RetryGroupAttemptsRequest {
+    subscriptionId: number
+    groupId: string
 }
 
 export interface RetryPolicyResetUsage {
     subscriptionId?: number
     groupId?: string
 }
+
+export interface RetryAlertOverrideSave {
+    subscriptionId: number
+    groupId: string
+    alertMode: RetryAlertMode
+    alertHandlerId?: string | null
+    alertHandlerProperties?: Record<string, string> | null
+}
+
+export const retryAlertModeOptions: OptionType[] = [
+    {id: RetryAlertMode.Inherit, title: "Inherit"},
+    {id: RetryAlertMode.Send, title: "Send via…"},
+    {id: RetryAlertMode.Silent, title: "Silent"},
+]
+
+export const retryAlertLevelLabels: Record<RetryAlertLevel, string> = {
+    [RetryAlertLevel.SubscriptionGroup]: "This subscription",
+    [RetryAlertLevel.Group]: "Group",
+    [RetryAlertLevel.Policy]: "Policy",
+}
+
+// AdapterEditor works in {key, value} pairs while the API stores a plain object, so convert
+// at that boundary rather than storing pairs and having to explain the shape everywhere else.
+export const pairsFromRecord = (record?: Record<string, string> | null): KeyValuePair[] =>
+    Object.entries(record ?? {}).map(([key, value]) => ({key, value}));
+
+export const recordFromPairs = (pairs?: KeyValuePair[]): Record<string, string> =>
+    Object.fromEntries((pairs ?? []).map(p => [p.key, p.value]));
 
 export interface RetryPoliciesSearchModel {
     limit?: number
