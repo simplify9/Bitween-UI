@@ -20,7 +20,7 @@ import { NATIVE_JSON_MAPPER_ID } from "src/types/mapping";
 import SubscriptionSelector from "./Subscriptions/SubscriptionSelector";
 import ScheduleEditor from "./Subscriptions/ScheduleEditor";
 import RetryPolicySelector from "src/components/RetryPolicies/RetryPolicySelector";
-import RetryGroupsEditor from "src/components/RetryPolicies/RetryGroupsEditor";
+import NewRetryPolicyModal from "src/components/RetryPolicies/NewRetryPolicyModal";
 import SubscriptionFilter from "src/components/Subscriptions/SubscriptionFilter";
 import {TrailBaseModel} from "src/types/trail";
 import TrialsViewModal from "src/components/common/trails/trialsViewModal";
@@ -56,7 +56,6 @@ const Component = () => {
     const [openModal, setOpenModal] = useState<"NONE" | "TRAIL" | "CREATE_DRAFT">("NONE");
     const [subscriptionTrail, setSubscriptionTrail] = useState<TrailBaseModel[]>([]);
     const [updateSubscriptionData, setUpdateSubscriptionData] = useState<ISubscription>({})
-    const [retryPolicyMode, setRetryPolicyMode] = useState<"NONE" | "NAMED" | "CUSTOM">("NONE");
     const savedDataRef = useRef<string>('{}');
     const { workGroupsAvailable } = useTypedSelector(state => state.features);
     const subscriptionCategories = useSubscriptionCategoriesQuery({limit: 1000, offset: 0})
@@ -70,6 +69,7 @@ const Component = () => {
     const [publishDraft] = usePublishDraftSubscriptionMutation()
     const [receiveNow] = useReceiveSubscriptionMutation()
     const [mode, setMode] = useState<EditMode>("PUBLISHED")
+    const [creatingPolicy, setCreatingPolicy] = useState(false)
     const mapperMetadata = useAdapterMetadataQuery(updateSubscriptionData.mapperId, {skip: !updateSubscriptionData.mapperId})
     const handlerMetadata = useAdapterMetadataQuery(updateSubscriptionData.handlerId, {skip: !updateSubscriptionData.handlerId})
     const receiverMetadata = useAdapterMetadataQuery(updateSubscriptionData.receiverId, {skip: !updateSubscriptionData.receiverId})
@@ -89,11 +89,9 @@ const Component = () => {
             });
             setUpdateSubscriptionData(normalized);
             savedDataRef.current = JSON.stringify(normalized);
-            setRetryPolicyMode(normalized.customRetryPolicy ? "CUSTOM" : normalized.retryPolicyId ? "NAMED" : "NONE");
         } else {
             setUpdateSubscriptionData({});
             savedDataRef.current = '{}';
-            setRetryPolicyMode("NONE");
         }
     }, [subscriptionData, id]);
 
@@ -153,21 +151,21 @@ const Component = () => {
     
     if (!updateSubscriptionData) return <></>
     const subscriptionType = normalizeSubscriptionType(updateSubscriptionData?.type);
-    const onChangeRetryPolicyMode = (mode: string) => {
-        setRetryPolicyMode(mode as typeof retryPolicyMode)
-        if (mode === "NAMED") {
-            onChangeSubscriptionData("customRetryPolicy", null)
-        } else if (mode === "CUSTOM") {
-            onChangeSubscriptionData("retryPolicyId", null)
-            onChangeSubscriptionData("customRetryPolicy", updateSubscriptionData.customRetryPolicy ?? {groups: []})
-        } else {
-            onChangeSubscriptionData("retryPolicyId", null)
-            onChangeSubscriptionData("customRetryPolicy", null)
-        }
-    }
 
     return (
         <div className="flex flex-col w-full  ">
+            {creatingPolicy &&
+                <NewRetryPolicyModal
+                    suggestedName={updateSubscriptionData.name}
+                    onClose={() => setCreatingPolicy(false)}
+                    onCreated={(policyId) => {
+                        setCreatingPolicy(false)
+                        // Selected straight away, so the reader is left where they were with the thing
+                        // they just made already chosen. Inline rules, if any, give way to it.
+                        onChangeSubscriptionData("retryPolicyId", policyId)
+                        onChangeSubscriptionData("customRetryPolicy", null)
+                    }}/>}
+
             {
                 openModal === "CREATE_DRAFT" &&
                 <Dialog title={"Are you sure that you want to create a draft version for this subscription"}
@@ -432,34 +430,34 @@ const Component = () => {
                 </div>
 
                 <div className="bg-white border shadow-lg rounded-lg px-2 py-2">
-                    <FormField title="Retry Policy" className="grow w-64">
-                        <ChoiceEditor
-                            value={retryPolicyMode}
-                            onChange={onChangeRetryPolicyMode}
-                            optionTitle={(item: OptionType) => item.title}
-                            optionValue={(item: OptionType) => item.id}
-                            isClearable={false}
-                            options={[
-                                {id: "NONE", title: "None"},
-                                {id: "NAMED", title: "Named Policy"},
-                                {id: "CUSTOM", title: "Custom"},
-                            ]}/>
+                    {/* Clearing the selector is what "no retries" means, so there is no separate mode
+                        to choose first. Policies are always named ones: the inline alternative was
+                        listed nowhere and its spent budget could not be reset, so a subscription that
+                        ran out stopped retrying for good. */}
+                    <FormField title="Retry Policy"
+                               tooltip="The rules deciding which failures of this subscription are retried, and how many times. Leave empty for no automatic retries.">
+                        <div className={"flex flex-row items-center gap-2"}>
+                            <div className={"w-64"}>
+                                <RetryPolicySelector
+                                    value={updateSubscriptionData.retryPolicyId?.toString()}
+                                    onChange={(v) => onChangeSubscriptionData("retryPolicyId", v ? Number(v) : null)}/>
+                            </div>
+                            <Authorize roles={["Admin", "Member"]}>
+                                <Button variant={"secondary"} onClick={() => setCreatingPolicy(true)}>
+                                    New policy…
+                                </Button>
+                            </Authorize>
+                        </div>
                     </FormField>
 
-                    {retryPolicyMode === "NAMED" &&
-                        <div className={"mt-3 w-64"}>
-                            <RetryPolicySelector
-                                value={updateSubscriptionData.retryPolicyId?.toString()}
-                                onChange={(v) => onChangeSubscriptionData("retryPolicyId", v ? Number(v) : null)}/>
-                        </div>
-                    }
-
-                    {retryPolicyMode === "CUSTOM" &&
-                        <RetryGroupsEditor
-                            title={"Groups"}
-                            groups={updateSubscriptionData.customRetryPolicy?.groups ?? []}
-                            onChange={(g) => onChangeSubscriptionData("customRetryPolicy", {groups: g})}/>
-                    }
+                    {/* Only reachable for a subscription whose inline policy was set through the API.
+                        Saying so beats a page that shows an empty selector while retries are in fact
+                        governed by rules it does not display. */}
+                    {updateSubscriptionData.customRetryPolicy &&
+                        <p className={"text-xs text-amber-700 mt-2"}>
+                            This subscription carries its own retry rules, set outside this page. They
+                            still apply. Selecting a policy above replaces them.
+                        </p>}
                 </div>
             </div>
 
