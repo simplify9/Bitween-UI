@@ -2,7 +2,6 @@ name: Bitween UI CI/CD (Gateway · GHCR OCI)
 run-name: Run-${{ github.ref_name }}-${{ github.run_number }}
 
 on:
-  push:
   workflow_dispatch:
 
 concurrency:
@@ -17,7 +16,7 @@ permissions:
   packages: write
 
 jobs:
-  build-publish-deploy:
+  Prod:
     if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || 
       github.event_name == 'workflow_dispatch' }}
     uses: simplify9/.github/.github/workflows/reusable-service-cicd.yml@main
