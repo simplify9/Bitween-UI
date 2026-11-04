@@ -1,5 +1,7 @@
 # build environment
 FROM node:18-alpine as build
+# node:26 images no longer include Yarn (node:22/24 do); install the pinned Yarn 1 only when missing.
+RUN command -v yarn >/dev/null || npm install -g yarn@1.22.22
 WORKDIR /app
 
 COPY package.json /app/
